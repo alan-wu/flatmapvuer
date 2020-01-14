@@ -1,18 +1,34 @@
 <template>
   <div id="app">
-    <FlatmapVuer entry="NCBITaxon:10114" ref="flatmap" v-on:resource-selected="FlatmapSelected"/>
+    <el-tabs :tab-position="tabPosition" style="height: 100%;">
+      <el-tab-pane v-for="item in displays" :key="item.ref" :label="item.ref" style="height:100%">
+        <FlatmapVuer :entry="item.entry" :ref="item.ref" v-on:resource-selected="flatmapSelected" style="height:100%"/>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
+import Vue from "vue";
 import FlatmapVuer from './components/FlatmapVuer.vue'
+import { Tabs, TabPane } from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.component(Tabs.name, Tabs);
+Vue.component(TabPane.name, TabPane);
+
 
 export default {
   name: 'app',
   methods: {
-    FlatmapSelected: function(resources) {
-      console.log(resources);
+    flatmapSelected: function(resource) {
+      console.log(resource)
+    }
+  },
+  data: function(){
+    return {
+      tabPosition: 'left',
+      displays:[ {entry:"NCBITaxon:10114", ref:"rat"}, {entry:"NCBITaxon:9606", ref:"human"}]
     }
   },
   components: {
@@ -35,5 +51,9 @@ export default {
 
 body {
   margin: 0px;
+}
+
+.el-tabs__content {
+  height:100%;
 }
 </style>

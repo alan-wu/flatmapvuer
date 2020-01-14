@@ -22,7 +22,8 @@
     "element-ui": "^2.13.0",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.15",
-    "vue": "^2.6.10"
+    "vue": "^2.6.10",
+    "css-element-queries": "^1.2.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
