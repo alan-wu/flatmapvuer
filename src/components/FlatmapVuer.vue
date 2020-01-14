@@ -39,6 +39,7 @@ Vue.use(Row);
 
 const flatmap = require("@dbrnz/flatmap-viewer");
 const { BroadcastChannel } = require('broadcast-channel');
+const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
 const processMessage = function(component) {
   return function(message) {
@@ -54,6 +55,12 @@ const processMessage = function(component) {
     }
   };
 };
+
+const mapResize = map => {
+  return () => {
+    map.resize();
+  }
+}
 
 export default {
   name: "FlatmapVuer",
@@ -99,6 +106,7 @@ export default {
       this.uniqueId = this.mapImp.uniqueId;
       this.$refs.display.querySelector(".mapboxgl-control-container").style.display = "none";
       this.layers = this.mapImp.layers;
+      this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
 		});
   }
 };
