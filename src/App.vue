@@ -2,7 +2,7 @@
   <div id="app">
     <el-tabs :tab-position="tabPosition" style="height: 100%;">
       <el-tab-pane v-for="item in displays" :key="item.ref" :label="item.ref" style="height:100%">
-        <FlatmapVuer :entry="item.entry" :ref="item.ref" v-on:resource-selected="flatmapSelected" style="height:100%"/>
+        <FlatmapVuer :entry="item.entry" :ref="item.ref" v-on:resource-selected="FlatmapSelected" style="height:100%"/>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -21,7 +21,7 @@ Vue.component(TabPane.name, TabPane);
 export default {
   name: 'app',
   methods: {
-    flatmapSelected: function(resource) {
+    FlatmapSelected: function(resource) {
       console.log(resource)
     }
   },

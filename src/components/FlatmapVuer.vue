@@ -46,7 +46,7 @@ const processMessage = function(component) {
     switch(message.action) {
       case "query-data":
         if (message.data['local-sender'] == component.uniqueId) {
-          const data = { describes: message.data.describes, resource: message.resource};
+          const data = { taxonomy: message.data.describes, resource: message.resource};
           component.$emit("resource-selected", data);
         }
         break;
