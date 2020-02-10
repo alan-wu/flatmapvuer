@@ -37,7 +37,6 @@ Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(Row);
 
-const flatmap = require("@dbrnz/flatmap-viewer");
 const { BroadcastChannel } = require('broadcast-channel');
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
@@ -65,7 +64,7 @@ const mapResize = map => {
 export default {
   name: "FlatmapVuer",
   beforeCreate: function() {
-    this.mapManager = new flatmap.MapManager();
+    this.mapManager = undefined;
     this.channel = new BroadcastChannel('sparc-mapcore-channel');
 		this.channel.onmessage = processMessage(this);
     this.mapImp = undefined;
@@ -99,6 +98,8 @@ export default {
     }
   },
   mounted: function() {
+    const flatmap = require("@dbrnz/flatmap-viewer");
+    this.mapManager = new flatmap.MapManager();
     var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
       { fullscreenControl: false, annotatable: false });
 		promise1.then(returnedObject => {
