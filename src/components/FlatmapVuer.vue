@@ -45,7 +45,8 @@ const processMessage = function(component) {
     switch(message.action) {
       case "query-data":
         if (message.data['local-sender'] == component.uniqueId) {
-          const data = { taxonomy: message.data.describes, resource: message.resource};
+          const label = component.mapImp._userInteractions._selectedFeature.properties.label;
+          const data = { taxonomy: message.data.describes, resource: message.resource, "label": label};
           component.$emit("resource-selected", data);
         }
         break;
