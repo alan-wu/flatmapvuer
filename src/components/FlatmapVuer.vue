@@ -105,7 +105,8 @@ export default {
       if (this.mapImp) {
         let annotations = this.mapImp.annotations;
         for (let value of annotations.values()) {
-          labels.push(value.label);
+          if (value.label)
+            labels.push(value.label);
         }
         return Array.from(new Set(labels));
       }
