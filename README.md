@@ -23,7 +23,7 @@ import '@abi-software/flatmapvuer';
 The codes above registers the FlatmapVuer component into the global scope.
 You can now use the FlatmapVuer in your vue template as followed:
 ```html
-<FlatmapVuer entry="NCBITaxon:9606" v-on:resource-selected="FlatmapSelected"  style="height:100%"/>
+<FlatmapVuer entry="NCBITaxon:9606" v-on:resource-selected="FlatmapSelected"  v-on:ready="FlatmapReady" style="height:100%"/>
 ```
 
 entry is the variable/string containing the NCBI Taxonomy term. There are two available at this moment:
@@ -36,6 +36,9 @@ sample callback.
   methods: {
     FlatmapSelected: function(resource) {
      console.log(resource);
+    },
+    FlatmapReady: function(flatmapComponent) {
+      labels = flatmapComponent.getLabels(); //return list of labels
     }
   }
 ```
