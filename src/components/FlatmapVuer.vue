@@ -3,19 +3,26 @@
     <div style="height:100%;width:100%;position:relative">
       <div id="flatmapDisplayArea" style="height:100%;width:100%;" ref="display"></div>
       <div class="check-list">
-        <el-checkbox-group v-if="numberOfSelectableLayers > 1" v-model="checkbox" size="small">
-          <el-row v-for="item in layers" :key="item.id">
-            <div v-if="item.selectable" style= "display: flex;justify-content: space-between;">
-              <el-checkbox
-                style="margin-top:3px;"
-                :label="item.id"
-                @change="visibilityToggle(item.id, $event)"
-                :checked="item.selected"
-                border
-              >{{item.id}}</el-checkbox>
-            </div>
-          </el-row>
-        </el-checkbox-group>
+        <div v-if="numberOfSelectableLayers > 1" class="control-menu" ref="control-menu" @click="toggleControl">
+          <div class="bar1"></div>
+          <div class="bar2"></div>
+          <div class="bar3"></div>
+        </div>
+        <div :style="toggleStyle">
+          <el-checkbox-group v-if="numberOfSelectableLayers > 1" v-model="checkbox" size="small">
+            <el-row v-for="item in layers" :key="item.id">
+              <div v-if="item.selectable" style= "display: flex;justify-content: space-between;">
+                <el-checkbox
+                  style="margin-top:3px;"
+                  :label="item.id"
+                  @change="visibilityToggle(item.id, $event)"
+                  :checked="item.selected"
+                  border
+                >{{item.id}}</el-checkbox>
+              </div>
+            </el-row>
+          </el-checkbox-group>
+        </div>
       </div>
     </div>
   </div>
@@ -29,7 +36,9 @@ import {
   CheckboxGroup,
   Row
 } from "element-ui";
-import "element-ui/lib/theme-chalk/index.css";
+import "../styles/purple/checkbox.css";
+import "../styles/purple/checkbox-group.css";
+import "../styles/purple/row.css";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -72,6 +81,17 @@ export default {
     this.uniqueId = undefined;
   },
   methods: {
+    toggleControl: function() {
+      this.$refs["control-menu"].classList.toggle("change");
+      if (this.toggleStyle.visibility == "hidden") {
+        this.toggleStyle.visibility = "visible";
+        this.toggleStyle.opacity = 1.0;
+      }
+      else {
+        this.toggleStyle.opacity = 0.0;
+        this.toggleStyle.visibility = "hidden";
+      }
+    },
     visibilityToggle: function(id, event) {
       if (this.mapImp._userInteractions) {
         if (event)
@@ -79,17 +99,40 @@ export default {
         else
           this.mapImp._userInteractions.deactivateLayer(this.mapImp.mapLayerId(id));
       }
+    },
+    getLabels: function() {
+      let labels = [];
+      if (this.mapImp) {
+        let annotations = this.mapImp.annotations;
+        for (let value of annotations.values()) {
+          labels.push(value.label);
+        }
+        return Array.from(new Set(labels));
+      }
+    },
+    createFlatmap: function() {
+      var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
+        { fullscreenControl: false, annotatable: false });
+      promise1.then(returnedObject => {
+        this.mapImp = returnedObject;
+        this.uniqueId = this.mapImp.uniqueId;
+        this.$refs.display.querySelector(".mapboxgl-control-container").style.display = "none";
+        this.layers = this.mapImp.layers;
+        this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
+        this.$emit("ready", this);
+      });
     }
   },
   props: { entry: String },
   data: function() {
     return {
       checkbox:[],
-      layers: {}
+      layers: {},
+      toggleStyle: {visibility:"hidden", opacity:0, transition: "visibility  0s, opacity 0.5s"}
     };
   },
   computed: {
-    numberOfSelectableLayers : function() {
+    numberOfSelectableLayers: function() {
       let count = 0;
       for (let i = 0; i < this.layers.length;i++) {
         if (this.layers[i].selectable)
@@ -98,18 +141,15 @@ export default {
       return count;
     }
   },
+  watch: {
+    entry: function(val) {
+      this.createFlatmap(val);
+    }
+  },
   mounted: function() {
     const flatmap = require("@dbrnz/flatmap-viewer");
     this.mapManager = new flatmap.MapManager();
-    var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
-      { fullscreenControl: false, annotatable: false });
-		promise1.then(returnedObject => {
-      this.mapImp = returnedObject;
-      this.uniqueId = this.mapImp.uniqueId;
-      this.$refs.display.querySelector(".mapboxgl-control-container").style.display = "none";
-      this.layers = this.mapImp.layers;
-      this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
-		});
+    this.createFlatmap();
   }
 };
 </script>
@@ -129,4 +169,34 @@ export default {
   text-align: left;
   overflow:auto;
 }
+
+.control-menu {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.bar1,
+.bar2,
+.bar3 {
+  width: 35px;
+  height: 5px;
+  background-color: #333;
+  margin: 6px 0;
+  transition: 0.4s;
+}
+
+.change .bar1 {
+  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+  transform: rotate(-45deg) translate(-9px, 6px);
+}
+
+.change .bar2 {
+  opacity: 0;
+}
+
+.change .bar3 {
+  -webkit-transform: rotate(45deg) translate(-8px, -8px);
+  transform: rotate(45deg) translate(-8px, -8px);
+}
+
 </style>

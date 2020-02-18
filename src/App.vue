@@ -1,10 +1,11 @@
 <template>
   <div id="app">
-    <el-tabs :tab-position="tabPosition" style="height: 100%;">
-      <el-tab-pane v-for="item in displays" :key="item.ref" :label="item.ref" style="height:100%">
-        <FlatmapVuer :entry="item.entry" :ref="item.ref" v-on:resource-selected="FlatmapSelected" style="height:100%"/>
-      </el-tab-pane>
-    </el-tabs>
+    <el-radio-group v-model="species" size="small">
+      <el-radio-button label="Human"></el-radio-button>
+      <el-radio-button label="Rat"></el-radio-button>
+    </el-radio-group>
+    <FlatmapVuer v-show="species=='Human'" entry="NCBITaxon:9606" ref="Human" v-on:resource-selected="FlatmapSelected" @ready="FlatmapReady" style="height:100%" key="Human"/>
+    <FlatmapVuer v-show="species=='Rat'" entry="NCBITaxon:10114" ref="Rat" v-on:resource-selected="FlatmapSelected" @ready="FlatmapReady" style="height:100%" key="Rat"/>
   </div>
 </template>
 
@@ -12,27 +13,47 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import FlatmapVuer from './components/FlatmapVuer.vue'
-import { Tabs, TabPane } from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.component(Tabs.name, Tabs);
-Vue.component(TabPane.name, TabPane);
-
+import {
+  RadioButton,
+  RadioGroup
+} from 'element-ui';
+import "./styles/purple/radio-button.css";
+import "./styles/purple/radio-group.css";
+Vue.use(RadioButton);
+Vue.use(RadioGroup);
 
 export default {
   name: 'app',
   methods: {
     FlatmapSelected: function(resource) {
       console.log(resource)
+    },
+    FlatmapReady: function(component) {
+      console.log(component.getLabels());
     }
   },
   data: function(){
     return {
-      tabPosition: 'left',
-      displays:[ {entry:"NCBITaxon:10114", ref:"rat"}, {entry:"NCBITaxon:9606", ref:"human"}]
+      taxo:"NCBITaxon:9606",
+      species:"Human"
     }
   },
   components: {
     FlatmapVuer
+  },
+  watch: {
+    species: function (val) {
+      switch (val) {
+        case "Human":
+          this.taxo = "NCBITaxon:9606";
+          break;
+        case "Rat":
+          this.taxo = "NCBITaxon:10114";
+          break;
+        default:
+          break;
+      }
+    }
   }
 }
 </script>
