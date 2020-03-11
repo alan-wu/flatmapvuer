@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <MultiFlatmapVuer :availableSpecies="availableSpecies"/>
+    <MultiFlatmapVuer :availableSpecies="availableSpecies" @resource-selected="FlatmapSelected" @ready="FlatmapReady"/>
   </div>
 </template>
 
@@ -14,7 +14,7 @@ import {
 } from 'element-ui';
 import "./styles/purple/radio-button.css";
 import "./styles/purple/radio-group.css";
-import "./icons/species.css";
+import "./icons/mapicon-species-style.css";
 Vue.use(RadioButton);
 Vue.use(RadioGroup);
 
@@ -30,8 +30,8 @@ export default {
   },
   data: function(){
     return {
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-noun_humans_193734"},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-noun_Rat_15130"} }
+      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"} }
     }
   },
   components: {

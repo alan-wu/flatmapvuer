@@ -37,14 +37,13 @@ export default {
   },
   mounted: function() {
     this.activeSpecies = Object.keys(this.availableSpecies)[0];
-      console.log(this.activeSpecies.length)
   },
   methods: {
     FlatmapSelected: function(resource) {
-      console.log(resource)
+      this.$emit("resource-selected", resource);
     },
     FlatmapReady: function(component) {
-      console.log(component.getLabels());
+      this.$emit("ready", component);
     }
   },
   props: {
