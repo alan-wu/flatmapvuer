@@ -11,7 +11,7 @@
         </el-option>
       </el-select>
     </div>
-    <FlatmapVuer v-for="(item, key) in availableSpecies" :key="key" :showLayer="showLayer" v-show="activeSpecies==key" :entry="item.taxo" :ref="key" v-on:resource-selected="FlatmapSelected" @ready="FlatmapReady" style="height:100%"/>
+    <FlatmapVuer v-for="(item, key) in availableSpecies" :key="key" :showLayer="showLayer" v-show="activeSpecies==key" :entry="item.taxo" :ref="key" @resource-selected="FlatmapSelected" @ready="FlatmapReady" style="height:100%"/>
   </div>
 </template>
 
