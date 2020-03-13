@@ -2,7 +2,7 @@
   <div class="flatmap-container">
     <div style="height:100%;width:100%;position:relative">
       <div id="flatmapDisplayArea" style="height:100%;width:100%;" ref="display"></div>
-      <div class="check-list">
+      <div class="check-list" v-if="showLayer">
         <div v-if="numberOfSelectableLayers > 1" class="control-menu" ref="control-menu" @click="toggleControl">
           <div class="bar1"></div>
           <div class="bar2"></div>
@@ -36,9 +36,6 @@ import {
   CheckboxGroup,
   Row
 } from "element-ui";
-import "../styles/purple/checkbox.css";
-import "../styles/purple/checkbox-group.css";
-import "../styles/purple/row.css";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -124,7 +121,12 @@ export default {
       });
     }
   },
-  props: { entry: String },
+  props: { entry: String,
+    showLayer: {
+      type: Boolean,
+      default: false,
+    }
+  },
   data: function() {
     return {
       checkbox:[],
@@ -157,6 +159,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 .flatmap-container {
   height: 100%;
   width: 100%;
@@ -200,4 +203,25 @@ export default {
   transform: rotate(45deg) translate(-8px, -8px);
 }
 
+  .el-dropdown-link {
+    cursor: pointer;
+    color: #409EFF;
+  }
+  .el-icon-arrow-down {
+    font-size: 12px;
+  }
+  .demonstration {
+    display: block;
+    color: #8492a6;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+</style>
+
+<style scoped src="../styles/purple/checkbox.css">
+</style>
+<style scoped src="../styles/purple/checkbox-group.css">
+</style>
+<style scoped src="../styles/purple/row.css">
 </style>

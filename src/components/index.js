@@ -2,10 +2,11 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
-
+import MultiFlatmapVuer from "./MultiFlatmapVuer.vue";
 
 const Components = {
-  FlatmapVuer
+  FlatmapVuer,
+  MultiFlatmapVuer
 };
   
 Object.keys(Components).forEach(name => {
