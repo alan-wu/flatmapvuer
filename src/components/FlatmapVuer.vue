@@ -114,7 +114,6 @@ export default {
       promise1.then(returnedObject => {
         this.mapImp = returnedObject;
         this.uniqueId = this.mapImp.uniqueId;
-        this.$refs.display.querySelector(".mapboxgl-control-container").style.display = "none";
         this.layers = this.mapImp.layers;
         this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
         this.$emit("ready", this);
