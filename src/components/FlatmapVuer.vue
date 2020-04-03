@@ -110,7 +110,17 @@ export default {
     },
     createFlatmap: function() {
       var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
-        { fullscreenControl: false, annotatable: false });
+        (eventType, feature, ...args) => {
+          console.log(eventType, feature, ...args);
+        },
+        {
+          //fullscreenControl: false,
+          //navigationControl: true,
+          //annotatable: false,
+          //debug: true,
+          featureInfo: true,
+          searchable: true
+         });
       promise1.then(returnedObject => {
         this.mapImp = returnedObject;
         this.uniqueId = this.mapImp.uniqueId;
