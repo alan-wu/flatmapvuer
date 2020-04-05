@@ -110,11 +110,20 @@ export default {
     },
     createFlatmap: function() {
       var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
-        { fullscreenControl: false, annotatable: false });
+        (eventType, feature, ...args) => {
+          console.log(eventType, feature, ...args);
+        },
+        {
+          //fullscreenControl: false,
+          //navigationControl: true,
+          //annotatable: false,
+          //debug: true,
+          featureInfo: true,
+          searchable: true
+         });
       promise1.then(returnedObject => {
         this.mapImp = returnedObject;
         this.uniqueId = this.mapImp.uniqueId;
-        this.$refs.display.querySelector(".mapboxgl-control-container").style.display = "none";
         this.layers = this.mapImp.layers;
         this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
         this.$emit("ready", this);
