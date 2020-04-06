@@ -16,7 +16,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@dbrnz/flatmap-viewer": "^0.9.2",
+    "@dbrnz/flatmap-viewer": "^0.9.3",
     "broadcast-channel": "^3.0.3",
     "core-js": "^3.3.2",
     "element-ui": "^2.13.0",
