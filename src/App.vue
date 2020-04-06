@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <MultiFlatmapVuer :availableSpecies="availableSpecies" @resource-selected="FlatmapSelected" @ready="FlatmapReady"/>
+    <MultiFlatmapVuer :availableSpecies="availableSpecies" @resource-selected="FlatmapSelected" 
+    @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" />
   </div>
 </template>
 
@@ -30,6 +31,8 @@ export default {
   },
   data: function(){
     return {
+      featureInfo: true,
+      searchable: true,
       availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"} }
     }
