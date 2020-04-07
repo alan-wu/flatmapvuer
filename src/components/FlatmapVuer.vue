@@ -42,25 +42,7 @@ locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(Row);
-
-const { BroadcastChannel } = require('broadcast-channel');
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
-
-const processMessage = function(component) {
-  return function(message) {
-    switch(message.action) {
-      case "query-data":
-        if (message.data['local-sender'] == component.uniqueId) {
-          const label = component.mapImp._userInteractions._selectedFeature.properties.label;
-          const data = { taxonomy: message.data.describes, resource: message.resource, "label": label};
-          component.$emit("resource-selected", data);
-        }
-        break;
-    default:
-      break;
-    }
-  };
-};
 
 const mapResize = map => {
   return () => {
@@ -72,10 +54,7 @@ export default {
   name: "FlatmapVuer",
   beforeCreate: function() {
     this.mapManager = undefined;
-    this.channel = new BroadcastChannel('sparc-mapcore-channel');
-		this.channel.onmessage = processMessage(this);
     this.mapImp = undefined;
-    this.uniqueId = undefined;
   },
   methods: {
     toggleControl: function() {
@@ -88,6 +67,27 @@ export default {
         this.toggleStyle.opacity = 0.0;
         this.toggleStyle.visibility = "hidden";
       }
+    },
+    eventCallback: function() {
+      return (eventType, feature, ...args) => {
+        if (eventType == "click") {
+          const label = feature.label;
+          const resource = [ feature.models ];
+          const taxonomy = this.entry;
+          const data = { taxonomy: taxonomy, resource: resource, label: label,
+            feature: feature, data: args};
+          this.$emit("resource-selected", data);
+        }
+      }
+    },
+    getCoordinatesOfLastClick: function() {
+      if (this.mapImp) {
+        if (this.mapImp._userInteractions._lastClickedLocation) {
+          return this.mapImp._map.project(
+            this.mapImp._userInteractions._lastClickedLocation);
+        }
+      }
+      return undefined;
     },
     visibilityToggle: function(id, event) {
       if (this.mapImp._userInteractions) {
@@ -110,20 +110,17 @@ export default {
     },
     createFlatmap: function() {
       var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
-        (eventType, feature, ...args) => {
-          console.log(eventType, feature, ...args);
-        },
+        this.eventCallback(),
         {
           //fullscreenControl: false,
           //navigationControl: true,
           //annotatable: false,
           //debug: true,
-          featureInfo: true,
-          searchable: true
+          featureInfo: this.featureInfo,
+          searchable: this.searchable
          });
       promise1.then(returnedObject => {
         this.mapImp = returnedObject;
-        this.uniqueId = this.mapImp.uniqueId;
         this.layers = this.mapImp.layers;
         this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
         this.$emit("ready", this);
@@ -132,6 +129,14 @@ export default {
   },
   props: { entry: String,
     showLayer: {
+      type: Boolean,
+      default: false,
+    },
+    featureInfo: {
+      type: Boolean,
+      default: false,
+    },
+    searchable: {
       type: Boolean,
       default: false,
     }
