@@ -74,10 +74,20 @@ export default {
           const label = feature.label;
           const resource = [ feature.models ];
           const taxonomy = this.entry;
-          const data = { taxonomy: taxonomy, resource: resource, label: label, data: args};
+          const data = { taxonomy: taxonomy, resource: resource, label: label,
+            feature: feature, data: args};
           this.$emit("resource-selected", data);
         }
       }
+    },
+    getCoordinatesOfLastClick: function() {
+      if (this.mapImp) {
+        if (this.mapImp._userInteractions._lastClickedLocation) {
+          return this.mapImp._map.project(
+            this.mapImp._userInteractions._lastClickedLocation);
+        }
+      }
+      return undefined;
     },
     visibilityToggle: function(id, event) {
       if (this.mapImp._userInteractions) {
