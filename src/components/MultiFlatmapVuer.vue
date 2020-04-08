@@ -40,7 +40,11 @@ export default {
     FlatmapVuer
   },
   mounted: function() {
-    this.activeSpecies = Object.keys(this.availableSpecies)[0];
+    if (this.initial && (this.availableSpecies[this.initial] !== undefined)) {
+      this.activeSpecies = this.initial;
+    } else {
+      this.activeSpecies = Object.keys(this.availableSpecies)[0];
+    }
   },
   methods: {
     FlatmapSelected: function(resource) {
@@ -48,6 +52,13 @@ export default {
     },
     FlatmapReady: function(component) {
       this.$emit("ready", component);
+    },
+    getCoordinatesOfLastClick: function() {
+      const flatmap = this.$refs[this.activeSpecies];
+      if (flatmap && flatmap[0]) {
+        return flatmap[0].getCoordinatesOfLastClick();
+      }
+      return undefined;
     }
   },
   props: {
@@ -62,6 +73,10 @@ export default {
     searchable: {
       type: Boolean,
       default: false,
+    },
+    initial: {
+      type: String,
+      default: ""
     },
     availableSpecies: {}
   },

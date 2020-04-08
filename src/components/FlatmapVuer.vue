@@ -75,7 +75,7 @@ export default {
           const resource = [ feature.models ];
           const taxonomy = this.entry;
           const data = { taxonomy: taxonomy, resource: resource, label: label,
-            feature: feature, data: args};
+            feature: feature, userData: args};
           this.$emit("resource-selected", data);
         }
       }
