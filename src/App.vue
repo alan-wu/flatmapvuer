@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <MultiFlatmapVuer :availableSpecies="availableSpecies" @resource-selected="FlatmapSelected" 
-    @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" />
+    <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" @resource-selected="FlatmapSelected" 
+    @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" :initial="initial"/>
   </div>
 </template>
 
@@ -23,6 +23,7 @@ export default {
   name: 'app',
   methods: {
     FlatmapSelected: function(resource) {
+      console.log(this.$refs.multi.getCoordinatesOfLastClick());
       console.log(resource)
     },
     FlatmapReady: function(component) {
@@ -34,7 +35,8 @@ export default {
       featureInfo: true,
       searchable: true,
       availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"} }
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"} },
+      initial: "Rat"
     }
   },
   components: {
