@@ -2,6 +2,11 @@
   <div id="app">
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" @resource-selected="FlatmapSelected" 
     @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" :initial="initial"/>
+
+    <div>
+      <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
+        :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
+    </div>
   </div>
 </template>
 
@@ -9,6 +14,8 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
+import '@abi-software/maptooltip';
+import '@abi-software/maptooltip/dist/maptooltip.css';
 import {
   RadioButton,
   RadioGroup
@@ -23,20 +30,46 @@ export default {
   name: 'app',
   methods: {
     FlatmapSelected: function(resource) {
-      console.log(this.$refs.multi.getCoordinatesOfLastClick());
-      console.log(resource)
+      let tooltip = this.$refs.tooltip;
+      this.$refs.multi.showPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
     },
     FlatmapReady: function(component) {
       console.log(component.getLabels());
+    },
+    onActionClick: function(action) {
+      console.log("onActionClick", action);
     }
   },
   data: function(){
     return {
-      featureInfo: true,
-      searchable: true,
+      featureInfo: false,
+      searchable: false,
       availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"} },
-      initial: "Rat"
+      tContent: {
+        title: "Mapping of ICN Neurons in a 3D Rat Heart",
+        description: "The distribution of neurons in the intrinsic cardiac nervous system (ICN) were mapped and visualized in a 3D reconstruction of a male rat heart.",
+        actions: [
+          {
+            title: "View 3D scaffold",
+            resource: "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json",
+            type: "Scaffold"
+          },
+          {
+            title: "View dataset",
+            resource: "https://sparc.science/datasets/37?type=dataset",
+            type: "URL"
+          }
+        ]
+      },
+      tStyle: {
+        top: "200px",
+        left: "200px",
+        position: "absolute"
+      },
+      displayCloseButton: false,
+      initial: "Rat",
+      visible: false
     }
   },
   components: {

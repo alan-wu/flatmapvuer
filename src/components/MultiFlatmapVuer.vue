@@ -59,6 +59,13 @@ export default {
         return flatmap[0].getCoordinatesOfLastClick();
       }
       return undefined;
+    },
+    getCurrentFlatmap: function() {
+      return this.$refs[this.activeSpecies][0];
+    },
+    showPopup: function(featureId, node, options) {
+      let map = this.getCurrentFlatmap();
+      map.showPopup(featureId, node, options);
     }
   },
   props: {
