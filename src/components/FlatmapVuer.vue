@@ -89,6 +89,11 @@ export default {
       }
       return undefined;
     },
+    showPopup: function(featureId, node, options) {
+      if (this.mapImp) {
+        this.mapImp.showPopup(featureId, node, options);
+      }
+    },
     visibilityToggle: function(id, event) {
       if (this.mapImp._userInteractions) {
         if (event)
