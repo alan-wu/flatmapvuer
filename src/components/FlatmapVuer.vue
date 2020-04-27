@@ -118,7 +118,7 @@ export default {
         this.eventCallback(),
         {
           //fullscreenControl: false,
-          navigationControl: 'top-right',
+          //navigationControl: 'top-right',
           //annotatable: false,
           //debug: true,
           featureInfo: this.featureInfo,
