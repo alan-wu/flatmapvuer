@@ -118,7 +118,7 @@ export default {
         this.eventCallback(),
         {
           //fullscreenControl: false,
-          //navigationControl: true,
+          //navigationControl: 'top-right',
           //annotatable: false,
           //debug: true,
           featureInfo: this.featureInfo,
@@ -236,6 +236,26 @@ export default {
     margin-bottom: 20px;
   }
 
+>>> .mapboxgl-popup-content {
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
+  padding: 3em 1em 3em 1em;
+  pointer-events: auto;
+  width: 25em;
+}
+
+>>> .mapboxgl-popup-close-button {
+  position: absolute;
+  right: 0.5em;
+  top: 0;
+  border: 0;
+  border-radius: 0 3px 0 0;
+  cursor: pointer;
+  background-color: transparent;
+  font-size: 2.5em;
+  color: grey;
+  top: 0.95em;
+}
 </style>
 
 <style scoped src="../styles/purple/checkbox.css">

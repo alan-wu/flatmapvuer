@@ -16,8 +16,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@abi-software/maptooltip": "^0.1.5",
-    "@dbrnz/flatmap-viewer": "^0.9.4",
+    "@abi-software/maptooltip": "^0.1.6",
+    "@dbrnz/flatmap-viewer": "^0.9.6",
     "core-js": "^3.3.2",
     "element-ui": "^2.13.0",
     "file-loader": "^5.0.2",

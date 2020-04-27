@@ -1,7 +1,7 @@
 <template>
-  <div class="container">
+  <div class="multi-container">
     <div style="position:absolute;z-index:1;">
-      <el-select v-model="activeSpecies" placeholder="Select" class="select-box">
+      <el-select v-model="activeSpecies" placeholder="Select" class="select-box" popper-class="flatmap_dropdown">
         <el-option
           v-for="(item, key) in availableSpecies"
           :key="key"
@@ -95,8 +95,13 @@ export default {
 }
 </script>
 
+<style scoped src="../styles/purple/select.css">
+</style>
+<style scoped src="../styles/purple/option.css">
+</style>
+
 <style scoped>
-.container {
+.multi-container {
   height:100%;
   width: 100%;
 }
@@ -114,11 +119,19 @@ export default {
 
 .select-box >>> .el-input__inner {
   color: #8300bf;
+  padding-top: 0.25em;
 }
 
+.flatmap_dropdown .el-select-dropdown__item {
+  white-space: nowrap;
+  font-family: Helvetica;
+}
+
+.flatmap_dropdown .el-select-dropdown__item.selected {
+  color: #8300bf;
+  font-weight: normal;
+  font-family: Helvetica !important;
+}
 </style>
 
-<style scoped src="../styles/purple/select.css">
-</style>
-<style scoped src="../styles/purple/option.css">
-</style>
+
