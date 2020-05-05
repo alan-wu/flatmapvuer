@@ -118,7 +118,7 @@ export default {
         this.eventCallback(),
         {
           //fullscreenControl: false,
-          //navigationControl: 'top-right',
+          navigationControl: 'top-right',
           //annotatable: false,
           //debug: true,
           featureInfo: this.featureInfo,
@@ -242,6 +242,7 @@ export default {
   padding: 3em 1em 3em 1em;
   pointer-events: auto;
   width: 25em;
+  background: #fff;
 }
 
 >>> .mapboxgl-popup-close-button {
@@ -255,6 +256,19 @@ export default {
   font-size: 2.5em;
   color: grey;
   top: 0.95em;
+}
+
+>>> .mapboxgl-ctrl-top-right .mapboxgl-ctrl {
+  margin: 50px 16px 0 0;
+  transform: scale(1.05);
+}
+
+>>> #flatmap-zoom-out.navigation-zoom-out {
+  margin-top:1px;
+}
+
+>>> #flatmap-reset.navigation-reset {
+  margin-top:1px;
 }
 </style>
 
