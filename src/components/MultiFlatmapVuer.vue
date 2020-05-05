@@ -1,21 +1,32 @@
 <template>
   <div class="multi-container">
     <div style="position:absolute;z-index:1;">
-      <el-select v-model="activeSpecies" placeholder="Select" class="select-box" popper-class="flatmap_dropdown">
-        <el-option
-          v-for="(item, key) in availableSpecies"
-          :key="key"
-          :label="key"
-          :value="key">
-            <i :class="item.iconClass" style="padding-right:12px;"></i>{{ key }}
+      <el-select
+        :popper-append-to-body="appendToBody"
+        v-model="activeSpecies"
+        placeholder="Select"
+        class="select-box"
+        popper-class="flatmap_dropdown"
+      >
+        <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
+          <i :class="item.iconClass" style="padding-right:12px;"></i>
+          {{ key }}
         </el-option>
       </el-select>
     </div>
-    <FlatmapVuer v-for="(item, key) in availableSpecies" :key="key" :showLayer="showLayer" 
-      v-show="activeSpecies==key" :entry="item.taxo" :ref="key"
-      @resource-selected="FlatmapSelected" @ready="FlatmapReady" 
-      :featureInfo="featureInfo" :searchable="searchable"
-      style="height:100%"/>
+    <FlatmapVuer
+      v-for="(item, key) in availableSpecies"
+      :key="key"
+      :showLayer="showLayer"
+      v-show="activeSpecies==key"
+      :entry="item.taxo"
+      :ref="key"
+      @resource-selected="FlatmapSelected"
+      @ready="FlatmapReady"
+      :featureInfo="featureInfo"
+      :searchable="searchable"
+      style="height:100%"
+    />
   </div>
 </template>
 
@@ -23,11 +34,8 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import FlatmapVuer from './FlatmapVuer.vue'
-import {
-  Option,
-  Select
-} from "element-ui";
+import FlatmapVuer from "./FlatmapVuer.vue";
+import { Option, Select } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -35,12 +43,12 @@ Vue.use(Option);
 Vue.use(Select);
 
 export default {
-  name: 'MultiFlatmapVuer',
+  name: "MultiFlatmapVuer",
   components: {
     FlatmapVuer
   },
   mounted: function() {
-    if (this.initial && (this.availableSpecies[this.initial] !== undefined)) {
+    if (this.initial && this.availableSpecies[this.initial] !== undefined) {
       this.activeSpecies = this.initial;
     } else {
       this.activeSpecies = Object.keys(this.availableSpecies)[0];
@@ -71,15 +79,15 @@ export default {
   props: {
     showLayer: {
       type: Boolean,
-      default: false,
+      default: false
     },
     featureInfo: {
       type: Boolean,
-      default: false,
+      default: false
     },
     searchable: {
       type: Boolean,
-      default: false,
+      default: false
     },
     initial: {
       type: String,
@@ -87,12 +95,13 @@ export default {
     },
     availableSpecies: {}
   },
-  data: function(){
+  data: function() {
     return {
-      activeSpecies: undefined
-    }
+      activeSpecies: undefined,
+      appendToBody: false
+    };
   }
-}
+};
 </script>
 
 <style scoped src="../styles/purple/select.css">
@@ -102,7 +111,7 @@ export default {
 
 <style scoped>
 .multi-container {
-  height:100%;
+  height: 100%;
   width: 100%;
 }
 
@@ -111,9 +120,9 @@ export default {
   border-radius: 4px;
   border: solid 1px #8300bf;
   background-color: var(--white);
-  font-weight:500;
+  font-weight: 500;
   color: #8300bf;
-  margin-left:19px;
+  margin-left: 19px;
   margin-top: 54px;
 }
 
@@ -125,6 +134,7 @@ export default {
 .flatmap_dropdown .el-select-dropdown__item {
   white-space: nowrap;
   font-family: Helvetica;
+  text-align: left;
 }
 
 .flatmap_dropdown .el-select-dropdown__item.selected {
