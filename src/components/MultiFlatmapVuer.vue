@@ -2,11 +2,13 @@
   <div class="multi-container">
     <div style="position:absolute;z-index:1;">
       <el-select
+        id="flatmap-select"
         :popper-append-to-body="appendToBody"
         v-model="activeSpecies"
         placeholder="Select"
         class="select-box"
         popper-class="flatmap_dropdown"
+        @change="flatmapChanged"
       >
         <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
           <i :class="item.iconClass" style="padding-right:12px;"></i>
@@ -74,6 +76,9 @@ export default {
     showPopup: function(featureId, node, options) {
       let map = this.getCurrentFlatmap();
       map.showPopup(featureId, node, options);
+    },
+    flatmapChanged: function(flatmap){
+      this.$emit('flatmapChanged', flatmap)
     }
   },
   props: {
