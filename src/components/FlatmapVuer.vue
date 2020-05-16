@@ -122,7 +122,8 @@ export default {
           //annotatable: false,
           //debug: true,
           featureInfo: this.featureInfo,
-          searchable: this.searchable
+          searchable: this.searchable,
+          tooltips: true
          });
       promise1.then(returnedObject => {
         this.mapImp = returnedObject;
@@ -144,6 +145,10 @@ export default {
     searchable: {
       type: Boolean,
       default: false,
+    },
+    tooltips: {
+      type: Boolean,
+      default: true,      
     }
   },
   data: function() {
@@ -264,11 +269,11 @@ export default {
 }
 
 >>> #flatmap-zoom-out.navigation-zoom-out {
-  margin-top:1px;
+  margin-top:12px;
 }
 
 >>> #flatmap-reset.navigation-reset {
-  margin-top:1px;
+  margin-top:12px;
 }
 </style>
 

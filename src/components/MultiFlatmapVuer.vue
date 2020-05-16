@@ -56,6 +56,7 @@ export default {
   },
   methods: {
     FlatmapSelected: function(resource) {
+      console.log(resource)
       this.$emit("resource-selected", resource);
     },
     FlatmapReady: function(component) {
