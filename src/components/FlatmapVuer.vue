@@ -90,8 +90,14 @@ export default {
       return undefined;
     },
     showPopup: function(featureId, node, options) {
+      let myOptions = options;
       if (this.mapImp) {
-        this.mapImp.showPopup(featureId, node, options);
+        if (myOptions) {
+          myOptions.className = "flatmapvuer-popover";
+        } else {
+          myOptions = {className: "flatmapvuer-popover"};
+        }
+        this.mapImp.showPopup(featureId, node, myOptions);
       }
     },
     visibilityToggle: function(id, event) {
@@ -122,7 +128,8 @@ export default {
           //annotatable: false,
           //debug: true,
           featureInfo: this.featureInfo,
-          searchable: this.searchable
+          searchable: this.searchable,
+          tooltips: this.tooltips
          });
       promise1.then(returnedObject => {
         this.mapImp = returnedObject;
@@ -144,6 +151,10 @@ export default {
     searchable: {
       type: Boolean,
       default: false,
+    },
+    tooltips: {
+      type: Boolean,
+      default: true,      
     }
   },
   data: function() {
@@ -236,7 +247,7 @@ export default {
     margin-bottom: 20px;
   }
 
->>> .mapboxgl-popup-content {
+>>>.flatmapvuer-popover .mapboxgl-popup-content {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   padding: 3em 1em 3em 1em;
@@ -264,11 +275,11 @@ export default {
 }
 
 >>> #flatmap-zoom-out.navigation-zoom-out {
-  margin-top:1px;
+  margin-top:12px;
 }
 
 >>> #flatmap-reset.navigation-reset {
-  margin-top:1px;
+  margin-top:12px;
 }
 </style>
 
