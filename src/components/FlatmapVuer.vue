@@ -233,19 +233,19 @@ export default {
   transform: rotate(45deg) translate(-8px, -8px);
 }
 
-  .el-dropdown-link {
-    cursor: pointer;
-    color: #409EFF;
-  }
-  .el-icon-arrow-down {
-    font-size: 12px;
-  }
-  .demonstration {
-    display: block;
-    color: #8492a6;
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
+.el-dropdown-link {
+  cursor: pointer;
+  color: #409EFF;
+}
+.el-icon-arrow-down {
+  font-size: 12px;
+}
+.demonstration {
+  display: block;
+  color: #8492a6;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
 
 >>>.flatmapvuer-popover .mapboxgl-popup-content {
   border-radius: 4px;
@@ -256,7 +256,7 @@ export default {
   background: #fff;
 }
 
->>> .mapboxgl-popup-close-button {
+>>>.flatmapvuer-popover .mapboxgl-popup-close-button {
   position: absolute;
   right: 0.5em;
   top: 0;
@@ -280,6 +280,10 @@ export default {
 
 >>> #flatmap-reset.navigation-reset {
   margin-top:12px;
+}
+
+>>>.mapboxgl-ctrl.flatmap-path-control {
+  margin-right:8px;
 }
 </style>
 

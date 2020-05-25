@@ -30,6 +30,7 @@ export default {
   name: 'app',
   methods: {
     FlatmapSelected: function(resource) {
+      console.log(resource)
       let tooltip = this.$refs.tooltip;
       this.$refs.multi.showPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
     },
