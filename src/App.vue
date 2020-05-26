@@ -46,7 +46,8 @@ export default {
       featureInfo: false,
       searchable: false,
       availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"} },
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"},
+        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"icon-mapicon_mouse"}, },
       tContent: {
         title: "Mapping of ICN Neurons in a 3D Rat Heart",
         description: "The distribution of neurons in the intrinsic cardiac nervous system (ICN) were mapped and visualized in a 3D reconstruction of a male rat heart.",
