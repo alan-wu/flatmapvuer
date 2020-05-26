@@ -281,10 +281,6 @@ export default {
 >>> #flatmap-reset.navigation-reset {
   margin-top:12px;
 }
-
->>>.mapboxgl-ctrl.flatmap-path-control {
-  margin-right:8px;
-}
 </style>
 
 <style scoped src="../styles/purple/checkbox.css">
