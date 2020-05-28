@@ -128,6 +128,8 @@ export default {
           //annotatable: false,
           //debug: true,
           featureInfo: this.featureInfo,
+          "min-zoom": this.minZoom,
+          pathControls: this.pathControls,
           searchable: this.searchable,
           tooltips: this.tooltips
          });
@@ -139,7 +141,8 @@ export default {
       });
     }
   },
-  props: { entry: String,
+  props: {
+    entry: String,
     showLayer: {
       type: Boolean,
       default: false,
@@ -147,6 +150,14 @@ export default {
     featureInfo: {
       type: Boolean,
       default: false,
+    },
+    minZoom: {
+      type: Number,
+      default: 4
+    },
+    pathControls: {
+      type: Boolean,
+      default: true
     },
     searchable: {
       type: Boolean,

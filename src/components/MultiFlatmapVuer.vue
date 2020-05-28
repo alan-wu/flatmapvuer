@@ -26,6 +26,8 @@
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
       :featureInfo="featureInfo"
+      :minZoom="minZoom"
+      :pathControls="pathControls"
       :searchable="searchable"
       style="height:100%"
     />
@@ -90,6 +92,10 @@ export default {
       type: Boolean,
       default: false
     },
+    pathControls: {
+      type: Boolean,
+      default: true
+    },
     searchable: {
       type: Boolean,
       default: false
@@ -97,6 +103,10 @@ export default {
     initial: {
       type: String,
       default: ""
+    },
+    minZoom: {
+      type: Number,
+      default: 4
     },
     availableSpecies: {}
   },
