@@ -29,6 +29,7 @@
       :minZoom="minZoom"
       :pathControls="pathControls"
       :searchable="searchable"
+      :renderAtMounted="renderAtMounted"
       style="height:100%"
     />
   </div>
@@ -57,6 +58,7 @@ export default {
     } else {
       this.activeSpecies = Object.keys(this.availableSpecies)[0];
     }
+    this.$refs[this.activeSpecies][0].createFlatmap();
   },
   methods: {
     FlatmapSelected: function(resource) {
@@ -80,7 +82,8 @@ export default {
       map.showPopup(featureId, node, options);
     },
     flatmapChanged: function(flatmap){
-      this.$emit('flatmapChanged', flatmap)
+      this.$refs[this.activeSpecies][0].createFlatmap();
+      this.$emit('flatmapChanged', flatmap);
     }
   },
   props: {
@@ -107,6 +110,10 @@ export default {
     minZoom: {
       type: Number,
       default: 4
+    },
+    renderAtMounted: {
+      type: Boolean,
+      default: false
     },
     availableSpecies: {}
   },
