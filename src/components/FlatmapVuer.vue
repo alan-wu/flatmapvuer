@@ -1,7 +1,7 @@
 <template>
   <div class="flatmap-container">
     <div style="height:100%;width:100%;position:relative">
-      <div id="flatmapDisplayArea" style="height:100%;width:100%;" ref="display"></div>
+      <div style="height:100%;width:100%;" ref="display"></div>
       <div class="check-list" v-if="showLayer">
         <div v-if="numberOfSelectableLayers > 1" class="control-menu" ref="control-menu" @click="toggleControl">
           <div class="bar1"></div>
@@ -46,7 +46,8 @@ const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
 const mapResize = map => {
   return () => {
-    map.resize();
+    if (map)
+      map.resize();
   }
 }
 
@@ -120,25 +121,27 @@ export default {
       }
     },
     createFlatmap: function() {
-      var promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
-        this.eventCallback(),
-        {
-          //fullscreenControl: false,
-          navigationControl: 'top-right',
-          //annotatable: false,
-          //debug: true,
-          featureInfo: this.featureInfo,
-          "min-zoom": this.minZoom,
-          pathControls: this.pathControls,
-          searchable: this.searchable,
-          tooltips: this.tooltips
-         });
-      promise1.then(returnedObject => {
-        this.mapImp = returnedObject;
-        this.layers = this.mapImp.layers;
-        this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
-        this.$emit("ready", this);
-      });
+      if (!this.mapImp) {
+        let promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
+          this.eventCallback(),
+          {
+            //fullscreenControl: false,
+            navigationControl: 'top-right',
+            //annotatable: false,
+            //debug: true,
+            featureInfo: this.featureInfo,
+            "min-zoom": this.minZoom,
+            pathControls: this.pathControls,
+            searchable: this.searchable,
+            tooltips: this.tooltips
+          });
+        promise1.then(returnedObject => {
+          this.mapImp = returnedObject;
+          this.layers = this.mapImp.layers;
+          this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
+          this.$emit("ready", this);
+        });
+      }
     }
   },
   props: {
@@ -166,6 +169,10 @@ export default {
     tooltips: {
       type: Boolean,
       default: true,      
+    },
+    renderAtMounted: {
+      type: Boolean,
+      default: true, 
     }
   },
   data: function() {
@@ -193,7 +200,8 @@ export default {
   mounted: function() {
     const flatmap = require("@dbrnz/flatmap-viewer");
     this.mapManager = new flatmap.MapManager();
-    this.createFlatmap();
+    if (this.renderAtMounted)
+      this.createFlatmap();
   }
 };
 </script>
