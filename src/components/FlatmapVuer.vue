@@ -2,6 +2,26 @@
   <div class="flatmap-container">
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
+      <el-popover content="Zoom In" placement="left" 
+        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+          @click="zoomIn()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Zoom Out" placement="left"
+        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+        @click="zoomOut()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Reset view" placement="left"
+        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+          @click="resetView()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Toggle Pathways" placement="left"
+        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        <el-button icon="el-icon-sort" circle class="togglePaths icon-button"
+          @click="togglePaths()" size="mini" slot="reference"></el-button>
+      </el-popover>
       <div class="check-list" v-if="showLayer">
         <div v-if="numberOfSelectableLayers > 1" class="control-menu" ref="control-menu" @click="toggleControl">
           <div class="bar1"></div>
@@ -58,6 +78,42 @@ export default {
     this.mapImp = undefined;
   },
   methods: {
+    /**
+     * Function to toggle paths to default.
+     * Also called when the associated button is pressed.
+     */
+    resetView: function() {
+      if (this.mapImp) {
+        this.mapImp.resetMap();
+      }
+    },
+    /**
+     * Function to zoom in.
+     * Also called when the associated button is pressed.
+     */
+    zoomIn: function() {
+      if (this.mapImp) {
+        this.mapImp.zoomIn();
+      }
+    },
+    /**
+     * Function to zoom out.
+     * Also called when the associated button is pressed.
+     */
+    zoomOut: function() {
+      if (this.mapImp) {
+        this.mapImp.zoomOut();
+      }
+    },
+    /**
+     * Function to reset the view to default.
+     * Also called when the associated button is pressed.
+     */
+    togglePaths: function() {
+      if (this.mapImp) {
+        this.mapImp.togglePaths();
+      }
+    },
     toggleControl: function() {
       this.$refs["control-menu"].classList.toggle("change");
       if (this.toggleStyle.visibility == "hidden") {
@@ -126,7 +182,6 @@ export default {
           this.eventCallback(),
           {
             //fullscreenControl: false,
-            navigationControl: 'top-right',
             //annotatable: false,
             //debug: true,
             featureInfo: this.featureInfo,
@@ -160,7 +215,7 @@ export default {
     },
     pathControls: {
       type: Boolean,
-      default: true
+      default: false
     },
     searchable: {
       type: Boolean,
@@ -299,6 +354,49 @@ export default {
 
 >>> #flatmap-reset.navigation-reset {
   margin-top:12px;
+}
+
+.zoomIn{
+  top:51px;
+  right:20px;
+  position: absolute;
+}
+
+.zoomOut{
+  top:101px;
+  right:20px;
+  position: absolute;
+}
+
+.resetView {
+  top:151px;
+  right:20px;
+  position: absolute;
+}
+
+.togglePaths {
+  top:201px;
+  right:20px;
+  position: absolute;
+}
+
+
+.backgroundColour {
+  top:201px;
+  right:20px;
+  position: absolute;
+}
+
+.icon-button {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  border: solid 1px #ffffff;
+  background-color: #ffffff;
+}
+
+>>> .flatmap-popper {
+  padding:9px 10px;
+  min-width:150px;
+  font-size:12px;
 }
 </style>
 
