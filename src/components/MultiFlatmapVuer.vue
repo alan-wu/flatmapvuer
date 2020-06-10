@@ -1,6 +1,6 @@
 <template>
   <div class="multi-container">
-    <div style="position:absolute;z-index:1;">
+    <div style="position:absolute;z-index:10;">
       <el-select
         id="flatmap-select"
         :popper-append-to-body="appendToBody"
@@ -81,6 +81,10 @@ export default {
       let map = this.getCurrentFlatmap();
       map.showPopup(featureId, node, options);
     },
+    showMarkerPopup: function(featureId, node, options) {
+      let map = this.getCurrentFlatmap();
+      map.showMarkerPopup(featureId, node, options);
+    },
     flatmapChanged: function(flatmap){
       this.$refs[this.activeSpecies][0].createFlatmap();
       this.$emit('flatmapChanged', flatmap);
@@ -144,7 +148,7 @@ export default {
   background-color: var(--white);
   font-weight: 500;
   color: #8300bf;
-  margin-left: 19px;
+  margin-left: 17px;
   margin-top: 54px;
 }
 
@@ -153,10 +157,12 @@ export default {
   padding-top: 0.25em;
 }
 
+
 .flatmap_dropdown .el-select-dropdown__item {
   white-space: nowrap;
   font-family: Helvetica;
   text-align: left;
+
 }
 
 .flatmap_dropdown .el-select-dropdown__item.selected {

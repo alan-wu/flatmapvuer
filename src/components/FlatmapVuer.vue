@@ -17,32 +17,23 @@
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference"></el-button>
       </el-popover>
-      <el-popover content="Toggle Pathways" placement="left"
-        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
-        <el-button icon="el-icon-sort" circle class="togglePaths icon-button"
-          @click="togglePaths()" size="mini" slot="reference"></el-button>
-      </el-popover>
-      <div class="check-list" v-if="showLayer">
-        <div v-if="numberOfSelectableLayers > 1" class="control-menu" ref="control-menu" @click="toggleControl">
-          <div class="bar1"></div>
-          <div class="bar2"></div>
-          <div class="bar3"></div>
-        </div>
-        <div :style="toggleStyle">
-          <el-checkbox-group v-if="numberOfSelectableLayers > 1" v-model="checkbox" size="small">
-            <el-row v-for="item in layers" :key="item.id">
-              <div v-if="item.selectable" style= "display: flex;justify-content: space-between;">
-                <el-checkbox
-                  style="margin-top:3px;"
-                  :label="item.id"
-                  @change="visibilityToggle(item.id, $event)"
-                  :checked="item.selected"
-                  border
-                >{{item.id}}</el-checkbox>
-              </div>
-            </el-row>
-          </el-checkbox-group>
-        </div>
+      <div class="pathway-container" v-if="pathways.length > 0 && pathControls">
+        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
+        <el-checkbox-group v-model="checkedItems" size="small" 
+          class="checkbox-group" @change="handleCheckedItemsChange">>
+          <el-row v-for="item in pathways" :key="item.type" :label="item.type">
+            <div class="checkbox-container">
+              <el-checkbox
+                class="my-checkbox"
+                style="margin-top:3px;"
+                :label="item.type"
+                @change="visibilityToggle()"
+                :checked="true"
+                border
+              ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
+            </div>
+          </el-row>
+        </el-checkbox-group>
       </div>
     </div>
   </div>
@@ -105,36 +96,31 @@ export default {
         this.mapImp.zoomOut();
       }
     },
-    /**
-     * Function to reset the view to default.
-     * Also called when the associated button is pressed.
-     */
-    togglePaths: function() {
+    visibilityToggle: function() {
       if (this.mapImp) {
-        this.mapImp.togglePaths();
+        this.mapImp.showPaths(this.checkedItems);
       }
     },
-    toggleControl: function() {
-      this.$refs["control-menu"].classList.toggle("change");
-      if (this.toggleStyle.visibility == "hidden") {
-        this.toggleStyle.visibility = "visible";
-        this.toggleStyle.opacity = 1.0;
-      }
-      else {
-        this.toggleStyle.opacity = 0.0;
-        this.toggleStyle.visibility = "hidden";
+    handleCheckedItemsChange: function(value) {
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.pathways.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.pathways.length;
+    },
+    handleCheckAllChange(val) {
+      this.checkedItems = val ? this.pathways.map(a => a.type) : [];
+      this.isIndeterminate = false;
+      if (this.mapImp) {
+        this.mapImp.showPaths(this.checkedItems);
       }
     },
     eventCallback: function() {
       return (eventType, feature, ...args) => {
-        if (eventType == "click") {
-          const label = feature.label;
-          const resource = [ feature.models ];
-          const taxonomy = this.entry;
-          const data = { taxonomy: taxonomy, resource: resource, label: label,
-            feature: feature, userData: args};
-          this.$emit("resource-selected", data);
-        }
+        const label = feature.label;
+        const resource = [ feature.models ];
+        const taxonomy = this.entry;
+        const data = { taxonomy: taxonomy, resource: resource, label: label,
+          feature: feature, userData: args, eventType: eventType};
+        this.$emit("resource-selected", data);
       }
     },
     getCoordinatesOfLastClick: function() {
@@ -157,12 +143,9 @@ export default {
         this.mapImp.showPopup(featureId, node, myOptions);
       }
     },
-    visibilityToggle: function(id, event) {
-      if (this.mapImp._userInteractions) {
-        if (event)
-          this.mapImp._userInteractions.activateLayer(this.mapImp.mapLayerId(id));
-        else
-          this.mapImp._userInteractions.deactivateLayer(this.mapImp.mapLayerId(id));
+    showMarkerPopup: function(featureId, node, options) {
+      if (this.mapImp) {
+        this.mapImp.showMarkerPopup(featureId, node, options);
       }
     },
     getLabels: function() {
@@ -186,14 +169,14 @@ export default {
             //debug: true,
             featureInfo: this.featureInfo,
             "min-zoom": this.minZoom,
-            pathControls: this.pathControls,
+            pathControls: false,
             searchable: this.searchable,
             tooltips: this.tooltips
           });
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
-          this.layers = this.mapImp.layers;
           this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
+          this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
         });
       }
@@ -201,10 +184,6 @@ export default {
   },
   props: {
     entry: String,
-    showLayer: {
-      type: Boolean,
-      default: false,
-    },
     featureInfo: {
       type: Boolean,
       default: false,
@@ -215,7 +194,7 @@ export default {
     },
     pathControls: {
       type: Boolean,
-      default: false
+      default: true
     },
     searchable: {
       type: Boolean,
@@ -232,20 +211,11 @@ export default {
   },
   data: function() {
     return {
-      checkbox:[],
-      layers: {},
-      toggleStyle: {visibility:"hidden", opacity:0, transition: "visibility  0s, opacity 0.5s"}
+      checkedItems: [],
+      pathways: [],
+      isIndeterminate: false,
+      checkAll: true,
     };
-  },
-  computed: {
-    numberOfSelectableLayers: function() {
-      let count = 0;
-      for (let i = 0; i < this.layers.length;i++) {
-        if (this.layers[i].selectable)
-          count++;
-      }
-      return count;
-    }
   },
   watch: {
     entry: function(val) {
@@ -264,47 +234,86 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
+.path-visual {
+  margin: 3px 0;
+  height: 3px;
+  width:25px;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.path-visual.cns {
+  background:#9b1fc1;
+}
+
+.path-visual.lcn {
+  background:#f19e38;
+}
+
+.path-visual.para-pre {
+  background:#3f8f4a;
+}
+
+.path-visual.para-post {
+  background:repeating-linear-gradient(90deg,#3f8f4a,#3f8f4a 6px,transparent 0,transparent 9px);
+}
+
+.path-visual.sensory {
+  background:#2a62f6;
+}
+
+.path-visual.somatic {
+  background:#98561d;
+}
+
+.path-visual.symp-pre {
+  background: #ea3423;
+}
+
+.path-visual.symp-post {
+  background: repeating-linear-gradient(90deg,#ea3423,#ea3423 6px,transparent 0,transparent 9px);
+}
+
 .flatmap-container {
   height: 100%;
   width: 100%;
 }
 
-.check-list {
+.pathway-container {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  height: calc(100% - 20px);
+  top: 134px;
+  left: 17px;
+  max-height: calc(100% - 184px);
   text-align: left;
-  overflow:auto;
+  overflow: auto;
 }
 
-.control-menu {
-  display: inline-block;
+.checkbox-container { 
+  display: flex;
   cursor: pointer;
 }
 
-.bar1,
-.bar2,
-.bar3 {
-  width: 35px;
-  height: 5px;
-  background-color: #333;
-  margin: 6px 0;
-  transition: 0.4s;
+.my-checkbox {
+  background-color: #fff;
 }
 
-.change .bar1 {
-  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
-  transform: rotate(-45deg) translate(-9px, 6px);
+>>> .el-checkbox__label {
+  padding-left:5px;
 }
 
-.change .bar2 {
-  opacity: 0;
+>>> .el-checkbox__input.is-indeterminate .el-checkbox__inner
+{
+  background-color: #8300bf;
+  border-color:  #8300bf;
 }
 
-.change .bar3 {
-  -webkit-transform: rotate(45deg) translate(-8px, -8px);
-  transform: rotate(45deg) translate(-8px, -8px);
+>>> .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #8300bf;
+  border-color:  #8300bf;
+}
+
+>>> .el-checkbox__label {
+  color:  #8300bf !important;
 }
 
 .el-dropdown-link {
@@ -321,7 +330,7 @@ export default {
   margin-bottom: 20px;
 }
 
->>>.flatmapvuer-popover .mapboxgl-popup-content {
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   padding: 3em 1em 3em 1em;
@@ -329,6 +338,7 @@ export default {
   width: 25em;
   background: #fff;
 }
+
 
 >>>.flatmapvuer-popover .mapboxgl-popup-close-button {
   position: absolute;
@@ -341,19 +351,6 @@ export default {
   font-size: 2.5em;
   color: grey;
   top: 0.95em;
-}
-
->>> .mapboxgl-ctrl-top-right .mapboxgl-ctrl {
-  margin: 50px 16px 0 0;
-  transform: scale(1.05);
-}
-
->>> #flatmap-zoom-out.navigation-zoom-out {
-  margin-top:12px;
-}
-
->>> #flatmap-reset.navigation-reset {
-  margin-top:12px;
 }
 
 .zoomIn{
@@ -380,13 +377,6 @@ export default {
   position: absolute;
 }
 
-
-.backgroundColour {
-  top:201px;
-  right:20px;
-  position: absolute;
-}
-
 .icon-button {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: solid 1px #ffffff;
@@ -397,6 +387,10 @@ export default {
   padding:9px 10px;
   min-width:150px;
   font-size:12px;
+}
+
+>>> .flatmap-marker{
+  cursor: pointer;
 }
 </style>
 
