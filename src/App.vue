@@ -4,7 +4,6 @@
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls"/>
-
     <div>
       <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
         :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
@@ -32,12 +31,14 @@ export default {
   name: 'app',
   methods: {
     FlatmapSelected: function(resource) {
-      console.log(resource)
       let tooltip = this.$refs.tooltip;
-      this.$refs.multi.showPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
+      this.$refs.multi.showMarkerPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
     },
     FlatmapReady: function(component) {
-      console.log(component.getLabels());
+      let taxon = component.mapImp.describes;
+      let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
+      
+      console.log(taxon, id);
     },
     onActionClick: function(action) {
       console.log("onActionClick", action);
@@ -47,12 +48,14 @@ export default {
     return {
       featureInfo: false,
       searchable: false,
-      pathControls: true,
+      pathControls: false,
       minZoom: 4,
       availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"icon-mapicon_mouse"},
-        "Kember":{taxo: "ABI:1000001", iconClass:"icon-mapicon_mouse"}, },
+        "Kember":{taxo: "ABI:1000001", iconClass:"icon-mapicon_mouse"},
+        "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig"}, 
+        "Cat":{taxo: "NCBITaxon:9685"},},
       tContent: {
         title: "Mapping of ICN Neurons in a 3D Rat Heart",
         description: "The distribution of neurons in the intrinsic cardiac nervous system (ICN) were mapped and visualized in a 3D reconstruction of a male rat heart.",
