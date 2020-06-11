@@ -295,6 +295,7 @@ export default {
 
 .my-checkbox {
   background-color: #fff;
+  width:100%;
 }
 
 >>> .el-checkbox__label {
