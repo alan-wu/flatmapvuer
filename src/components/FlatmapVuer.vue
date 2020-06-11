@@ -224,7 +224,7 @@ export default {
   },
   mounted: function() {
     const flatmap = require("@dbrnz/flatmap-viewer");
-    this.mapManager = new flatmap.MapManager();
+    this.mapManager = new flatmap.MapManager('https://mapcore-demo.org/flatmaps/');
     if (this.renderAtMounted)
       this.createFlatmap();
   }
@@ -334,9 +334,7 @@ export default {
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
-  padding: 3em 1em 3em 1em;
   pointer-events: auto;
-  width: 25em;
   background: #fff;
 }
 
