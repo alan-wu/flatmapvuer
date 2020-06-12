@@ -11,8 +11,10 @@
         @change="flatmapChanged"
       >
         <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
-          <i :class="item.iconClass" style="padding-right:12px;"></i>
-          {{ key }}
+          <el-row>
+            <el-col :span="8"><i :class="item.iconClass"></i></el-col>
+            <el-col :span="12">{{ key }}</el-col>
+          </el-row>
         </el-option>
       </el-select>
     </div>
@@ -40,12 +42,15 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
-import { Option, Select } from "element-ui";
+import { Col, Option, Select, Row } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
+Vue.use(Col);
+Vue.use(Row);
 Vue.use(Option);
 Vue.use(Select);
+
 
 export default {
   name: "MultiFlatmapVuer",

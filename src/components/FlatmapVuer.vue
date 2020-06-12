@@ -338,6 +338,16 @@ export default {
   background: #fff;
 }
 
+>>> .mapboxgl-popup.flatmap-marker-popup{
+  box-shadow: 1px 1px 2px rgba(0,0,0,.1);
+  pointer-events: auto;
+  background: #fff;
+}
+
+>>> .flatmap-marker-popup .mapboxgl-popup-content {
+  padding: 0px;
+}
+
 
 >>>.flatmapvuer-popover .mapboxgl-popup-close-button {
   position: absolute;
