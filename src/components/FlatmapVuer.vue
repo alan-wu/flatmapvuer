@@ -17,6 +17,11 @@
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference"></el-button>
       </el-popover>
+      <el-popover content="Change background Color" placement="left"
+        trigger="hover" popper-class="flatmap-popper">
+        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
+          @click="backgroundChangeCallback()" size="mini" slot="reference"></el-button>
+      </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls">
         <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
         <el-checkbox-group v-model="checkedItems" size="small" 
@@ -69,6 +74,12 @@ export default {
     this.mapImp = undefined;
   },
   methods: {
+    backgroundChangeCallback: function() {
+      ++this.currentBackground;
+      if (this.currentBackground >= this.availableBackground.length )
+        this.currentBackground = 0;
+      this.mapImp.setBackgroundColour(this.availableBackground[this.currentBackground], 1 );
+    },
     /**
      * Function to toggle paths to default.
      * Also called when the associated button is pressed.
@@ -215,6 +226,8 @@ export default {
       pathways: [],
       isIndeterminate: false,
       checkAll: true,
+      currentBackground: 0,
+      availableBackground: ['white', 'black', 'lightskyblue'],
     };
   },
   watch: {
@@ -380,6 +393,12 @@ export default {
   position: absolute;
 }
 
+.backgroundColour {
+  top:201px;
+  right:20px;
+  position: absolute;
+}
+
 .togglePaths {
   top:201px;
   right:20px;
@@ -408,4 +427,6 @@ export default {
 <style scoped src="../styles/purple/checkbox-group.css">
 </style>
 <style scoped src="../styles/purple/row.css">
+</style>
+<style scoped src="../styles/purple/button.css">
 </style>
