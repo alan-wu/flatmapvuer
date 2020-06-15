@@ -191,6 +191,11 @@ export default {
   padding:9px 10px;
   min-width:150px;
   font-size:12px;
+  color: #ffffff;
+  background-color: #8300bf;
+}
+>>> .flatmap-popper .popper__arrow::after{
+  border-right-color: #8300bf !important;
 }
 </style>
 
