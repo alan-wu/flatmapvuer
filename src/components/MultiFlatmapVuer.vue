@@ -1,22 +1,27 @@
 <template>
   <div class="multi-container">
     <div style="position:absolute;z-index:10;">
-      <el-select
-        id="flatmap-select"
-        :popper-append-to-body="appendToBody"
-        v-model="activeSpecies"
-        placeholder="Select"
-        class="select-box"
-        popper-class="flatmap_dropdown"
-        @change="flatmapChanged"
-      >
-        <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
-          <el-row>
-            <el-col :span="8"><i :class="item.iconClass"></i></el-col>
-            <el-col :span="12">{{ key }}</el-col>
-          </el-row>
-        </el-option>
-      </el-select>
+      <el-popover content="Select a species" placement="right" 
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="helpMode" ref="selectPopover">
+      </el-popover>
+        <el-select
+          id="flatmap-select"
+          :popper-append-to-body="appendToBody"
+          v-model="activeSpecies"
+          placeholder="Select"
+          class="select-box"
+          popper-class="flatmap_dropdown"
+          @change="flatmapChanged"
+          v-popover:selectPopover
+        >
+          <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
+            <el-row>
+              <el-col :span="8"><i :class="item.iconClass"></i></el-col>
+              <el-col :span="12">{{ key }}</el-col>
+            </el-row>
+          </el-option>
+        </el-select>
+      
     </div>
     <FlatmapVuer
       v-for="(item, key) in availableSpecies"
@@ -31,6 +36,7 @@
       :minZoom="minZoom"
       :pathControls="pathControls"
       :searchable="searchable"
+      :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       style="height:100%"
     />
@@ -42,7 +48,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
-import { Col, Option, Select, Row } from "element-ui";
+import { Col, Option, Select, Row, Popover } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -50,6 +56,7 @@ Vue.use(Col);
 Vue.use(Row);
 Vue.use(Option);
 Vue.use(Select);
+Vue.use(Popover)
 
 
 export default {
@@ -124,6 +131,10 @@ export default {
       type: Boolean,
       default: false
     },
+    helpMode: {
+      type: Boolean,
+      default: false
+    },
     availableSpecies: {}
   },
   data: function() {
@@ -174,6 +185,17 @@ export default {
   color: #8300bf;
   font-weight: normal;
   font-family: Helvetica !important;
+}
+
+>>>.flatmap-popper {
+  padding:9px 10px;
+  min-width:150px;
+  font-size:12px;
+  color: #ffffff;
+  background-color: #8300bf;
+}
+>>> .flatmap-popper .popper__arrow::after{
+  border-right-color: #8300bf !important;
 }
 </style>
 
