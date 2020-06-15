@@ -1,9 +1,10 @@
 <template>
   <div id="app">
+    <button @click="helpMode = !helpMode">help mode</button>
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
-      :initial="initial" :pathControls="pathControls"/>
+      :initial="initial" :pathControls="pathControls" :helpMode="helpMode"/>
     <div>
       <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
         :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
@@ -80,7 +81,8 @@ export default {
       },
       displayCloseButton: false,
       initial: "Rat",
-      visible: false
+      visible: false,
+      helpMode: false
     }
   },
   components: {

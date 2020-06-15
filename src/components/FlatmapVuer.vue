@@ -3,21 +3,21 @@
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover content="Zoom In" placement="left" 
-        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini" slot="reference"></el-button>
+          @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
       <el-popover content="Zoom Out" placement="left"
-        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini" slot="reference"></el-button>
+        @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
       </el-popover>
       <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="hover" popper-class="flatmap-popper">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[2].value">
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini" slot="reference"></el-button>
+          @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
-      <div class="pathway-container" v-if="pathways.length > 0 && pathControls">
+      <div class="pathway-container" v-if="pathways.length > 0 && pathControls" >
         <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
         <el-checkbox-group v-model="checkedItems" size="small" 
           class="checkbox-group" @change="handleCheckedItemsChange">>
@@ -148,6 +148,29 @@ export default {
         this.mapImp.showMarkerPopup(featureId, node, options);
       }
     },
+    setHelpMode: function(helpMode){
+      if (helpMode){
+        this.inHelp = true;
+        this.hoverVisabilities.forEach( (item) =>{
+          item.value = true;
+        });
+      } else {
+        this.inHelp = false;
+        this.hoverVisabilities.forEach( (item) =>{
+          item.value = false;
+        });
+      }
+    },
+    showToolitip: function(tooltipNumber){
+      if (!this.inHelp){
+        this.hoverVisabilities[tooltipNumber].value = true;
+      }
+    },
+    hideToolitip: function(tooltipNumber){
+      if (!this.inHelp){
+        this.hoverVisabilities[tooltipNumber].value = false;
+      }
+    },
     getLabels: function() {
       let labels = [];
       if (this.mapImp) {
@@ -204,6 +227,10 @@ export default {
       type: Boolean,
       default: true,      
     },
+    helpMode: {
+      type: Boolean,
+      default: false
+    },
     renderAtMounted: {
       type: Boolean,
       default: true, 
@@ -215,11 +242,17 @@ export default {
       pathways: [],
       isIndeterminate: false,
       checkAll: true,
+      hoverVisabilities: [{value: false}, {value: false}, {value: false}],
+      inHelp: false,
+      check: false
     };
   },
   watch: {
     entry: function(val) {
       this.createFlatmap(val);
+    },
+    helpMode: function(val){
+      this.setHelpMode(val);
     }
   },
   mounted: function() {
