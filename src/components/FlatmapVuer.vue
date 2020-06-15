@@ -17,11 +17,12 @@
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
-      <div class="pathway-container" v-if="pathways.length > 0 && pathControls" >
-        <el-popover content="Change Pathway Visibility" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[3].value">
-        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
+      <el-popover content="Change Pathway Visibility" placement="right"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[3].value" ref="checkBoxPopover">
         </el-popover>
+      <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
+
+        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange" >Display all pathways</el-checkbox>
         <el-checkbox-group v-model="checkedItems" size="small" 
           class="checkbox-group" @change="handleCheckedItemsChange">>
           <el-row v-for="item in pathways" :key="item.type" :label="item.type">
@@ -157,11 +158,13 @@ export default {
         this.hoverVisabilities.forEach( (item) =>{
           item.value = true;
         });
+        this.openFlatmapHelpPopup();
       } else {
         this.inHelp = false;
         this.hoverVisabilities.forEach( (item) =>{
           item.value = false;
         });
+        this.closeFlatmapHelpPopup();
       }
     },
     showToolitip: function(tooltipNumber){
@@ -173,6 +176,16 @@ export default {
       if (!this.inHelp){
         this.hoverVisabilities[tooltipNumber].value = false;
       }
+    },
+    openFlatmapHelpPopup: function(){
+      if (this.mapImp) {
+        let heartId = this.mapImp.featureIdsForModel('UBERON:0000948')[0];
+        const elm = 'Data Available';
+        this.mapImp.showPopup(heartId, elm, {anchor: "top"});
+      }
+    },
+    closeFlatmapHelpPopup: function(){
+      this.$el.querySelectorAll('.mapboxgl-popup-close-button').forEach((item) => {item.click()});
     },
     getLabels: function() {
       let labels = [];
@@ -247,7 +260,6 @@ export default {
       checkAll: true,
       hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}],
       inHelp: false,
-      check: false
     };
   },
   watch: {
