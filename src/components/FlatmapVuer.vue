@@ -18,7 +18,7 @@
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
       <el-popover content="Change background Color" placement="left" v-model="hoverVisabilities[3].value"
-        trigger="manual" popper-class="flatmap-popper">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
           @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
       </el-popover>
@@ -268,7 +268,7 @@ export default {
       pathways: [],
       isIndeterminate: false,
       checkAll: true,
-      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}],
+      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false},{value: false}],
       inHelp: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
