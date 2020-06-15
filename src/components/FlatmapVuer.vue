@@ -18,7 +18,10 @@
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" >
+        <el-popover content="Change Pathway Visibility" placement="left"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[3].value">
         <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
+        </el-popover>
         <el-checkbox-group v-model="checkedItems" size="small" 
           class="checkbox-group" @change="handleCheckedItemsChange">>
           <el-row v-for="item in pathways" :key="item.type" :label="item.type">
@@ -242,7 +245,7 @@ export default {
       pathways: [],
       isIndeterminate: false,
       checkAll: true,
-      hoverVisabilities: [{value: false}, {value: false}, {value: false}],
+      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}],
       inHelp: false,
       check: false
     };
