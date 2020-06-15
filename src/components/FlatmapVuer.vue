@@ -3,26 +3,30 @@
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover content="Zoom In" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper left-pop" v-model="hoverVisabilities[0].value">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
           @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
       <el-popover content="Zoom Out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper left-pop" v-model="hoverVisabilities[1].value">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
       </el-popover>
       <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper left-pop" v-model="hoverVisabilities[2].value">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[2].value">
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
+      <el-popover content="Change background Color" placement="left" v-model="hoverVisabilities[3].value"
+        trigger="manual" popper-class="flatmap-popper">
+        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
+          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
+      </el-popover>
       <el-popover content="Change Pathway Visibility" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper right-pop" v-model="hoverVisabilities[3].value" ref="checkBoxPopover">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[4].value" ref="checkBoxPopover">
         </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
-
-        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange" >Display all pathways</el-checkbox>
+        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
         <el-checkbox-group v-model="checkedItems" size="small" 
           class="checkbox-group" @change="handleCheckedItemsChange">>
           <el-row v-for="item in pathways" :key="item.type" :label="item.type">
@@ -73,6 +77,12 @@ export default {
     this.mapImp = undefined;
   },
   methods: {
+    backgroundChangeCallback: function() {
+      ++this.currentBackground;
+      if (this.currentBackground >= this.availableBackground.length )
+        this.currentBackground = 0;
+      this.mapImp.setBackgroundColour(this.availableBackground[this.currentBackground], 1 );
+    },
     /**
      * Function to toggle paths to default.
      * Also called when the associated button is pressed.
@@ -260,6 +270,8 @@ export default {
       checkAll: true,
       hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}],
       inHelp: false,
+      currentBackground: 0,
+      availableBackground: ['white', 'black', 'lightskyblue'],
     };
   },
   watch: {
@@ -428,6 +440,12 @@ export default {
   position: absolute;
 }
 
+.backgroundColour {
+  top:201px;
+  right:20px;
+  position: absolute;
+}
+
 .togglePaths {
   top:201px;
   right:20px;
@@ -461,4 +479,6 @@ export default {
 <style scoped src="../styles/purple/checkbox-group.css">
 </style>
 <style scoped src="../styles/purple/row.css">
+</style>
+<style scoped src="../styles/purple/button.css">
 </style>
