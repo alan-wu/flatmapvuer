@@ -1,13 +1,17 @@
 <template>
-  <div class="flatmap-container">
+  <div class="flatmap-container"
+      v-loading="loading"
+      element-loading-text="Loading..."
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.3)">
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
-      <el-popover content="Zoom In" placement="left" 
+      <el-popover content="Zoom in" placement="left" 
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
           @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
-      <el-popover content="Zoom Out" placement="left"
+      <el-popover content="Zoom out" placement="left"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
@@ -17,12 +21,12 @@
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
-      <el-popover content="Change background Color" placement="left" v-model="hoverVisabilities[3].value"
+      <el-popover content="Change background color" placement="left" v-model="hoverVisabilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
           @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
       </el-popover>
-      <el-popover content="Change Pathway Visibility" placement="right"
+      <el-popover content="Change pathway visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[4].value" ref="checkBoxPopover">
         </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
@@ -53,6 +57,7 @@ import Vue from "vue";
 import {
   Checkbox,
   CheckboxGroup,
+  Loading,
   Row
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
@@ -60,6 +65,7 @@ import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
+Vue.use(Loading.directive);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
@@ -210,6 +216,7 @@ export default {
     },
     createFlatmap: function() {
       if (!this.mapImp) {
+        this.loading = true;
         let promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
           this.eventCallback(),
           {
@@ -227,6 +234,7 @@ export default {
           this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
+          this.loading = false;
         });
       }
     }
@@ -260,7 +268,7 @@ export default {
     renderAtMounted: {
       type: Boolean,
       default: true, 
-    }
+    },
   },
   data: function() {
     return {
@@ -272,6 +280,7 @@ export default {
       inHelp: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
+      loading: false,
     };
   },
   watch: {
@@ -472,6 +481,13 @@ export default {
 >>> .flatmap-popper .popper__arrow::after{
   border-left-color: #8300bf !important;
 }
+>>>.el-loading-spinner i{
+  color: #8300bf;  
+}
+>>>.el-loading-spinner .el-loading-text {
+  color: #8300bf; 
+}
+
 </style>
 
 <style scoped src="../styles/purple/checkbox.css">
@@ -481,4 +497,6 @@ export default {
 <style scoped src="../styles/purple/row.css">
 </style>
 <style scoped src="../styles/purple/button.css">
+</style>
+<style scoped src="../styles/purple/loading.css">
 </style>
