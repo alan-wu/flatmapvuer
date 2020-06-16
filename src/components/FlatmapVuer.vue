@@ -2,12 +2,12 @@
   <div class="flatmap-container">
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
-      <el-popover content="Zoom In" placement="left" 
+      <el-popover content="Zoom in" placement="left" 
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
           @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
-      <el-popover content="Zoom Out" placement="left"
+      <el-popover content="Zoom out" placement="left"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
@@ -17,12 +17,12 @@
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
-      <el-popover content="Change background Color" placement="left" v-model="hoverVisabilities[3].value"
+      <el-popover content="Change background color" placement="left" v-model="hoverVisabilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
           @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
       </el-popover>
-      <el-popover content="Change Pathway Visibility" placement="right"
+      <el-popover content="Change pathway visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[4].value" ref="checkBoxPopover">
         </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
