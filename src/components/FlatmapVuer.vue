@@ -156,7 +156,8 @@ export default {
       let myOptions = options;
       if (this.mapImp) {
         if (myOptions) {
-          myOptions.className = "flatmapvuer-popover";
+          if (!myOptions.className)
+            myOptions.className = "flatmapvuer-popover";
         } else {
           myOptions = {className: "flatmapvuer-popover"};
         }
@@ -196,8 +197,8 @@ export default {
     openFlatmapHelpPopup: function(){
       if (this.mapImp) {
         let heartId = this.mapImp.featureIdsForModel('UBERON:0000948')[0];
-        const elm = 'Data Available';
-        this.mapImp.showPopup(heartId, elm, {anchor: "top"});
+        const elm = 'Hover for more information';
+        this.mapImp.showPopup(heartId, elm, {anchor: "top", className: "flatmap-popup-popper"});
       }
     },
     closeFlatmapHelpPopup: function(){
@@ -486,6 +487,22 @@ export default {
 }
 >>>.el-loading-spinner .el-loading-text {
   color: #8300bf; 
+}
+
+>>> .flatmap-popup-popper .mapboxgl-popup-content {
+  padding:9px 10px;
+  min-width:150px;
+  font-size:12px;
+  color: #fff;
+  background-color: #8300bf;  
+}
+
+>>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {
+  display: none;
+}
+
+>>> .flatmap-popup-popper .mapboxgl-popup-tip {
+  border-bottom-color: #8300bf;  
 }
 
 </style>
