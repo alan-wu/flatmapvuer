@@ -1,5 +1,9 @@
 <template>
-  <div class="flatmap-container">
+  <div class="flatmap-container"
+      v-loading="loading"
+      element-loading-text="Loading..."
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.3)">
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover content="Zoom in" placement="left" 
@@ -53,6 +57,7 @@ import Vue from "vue";
 import {
   Checkbox,
   CheckboxGroup,
+  Loading,
   Row
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
@@ -60,6 +65,7 @@ import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
+Vue.use(Loading.directive);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
@@ -210,6 +216,7 @@ export default {
     },
     createFlatmap: function() {
       if (!this.mapImp) {
+        this.loading = true;
         let promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
           this.eventCallback(),
           {
@@ -227,6 +234,7 @@ export default {
           this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
+          this.loading = false;
         });
       }
     }
@@ -260,7 +268,7 @@ export default {
     renderAtMounted: {
       type: Boolean,
       default: true, 
-    }
+    },
   },
   data: function() {
     return {
@@ -272,6 +280,7 @@ export default {
       inHelp: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
+      loading: false,
     };
   },
   watch: {
@@ -472,6 +481,13 @@ export default {
 >>> .flatmap-popper .popper__arrow::after{
   border-left-color: #8300bf !important;
 }
+>>>.el-loading-spinner i{
+  color: #8300bf;  
+}
+>>>.el-loading-spinner .el-loading-text {
+  color: #8300bf; 
+}
+
 </style>
 
 <style scoped src="../styles/purple/checkbox.css">
@@ -481,4 +497,6 @@ export default {
 <style scoped src="../styles/purple/row.css">
 </style>
 <style scoped src="../styles/purple/button.css">
+</style>
+<style scoped src="../styles/purple/loading.css">
 </style>
