@@ -46,7 +46,15 @@
             </div>
           </el-row>
         </el-checkbox-group>
+        <el-popover content="Find these markers for data" placement="right"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisabilities[5].value" ref="markerPopover">
+        </el-popover>
+
+        <div v-if="hoverVisabilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
+
+
       </div>
+
     </div>
   </div>
 </template>
@@ -62,6 +70,7 @@ import {
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+import flatmapMarker from "../icons/flatmap-marker"
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
@@ -277,11 +286,12 @@ export default {
       pathways: [],
       isIndeterminate: false,
       checkAll: true,
-      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false},{value: false}],
+      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}, {value: false}, {value:true}],
       inHelp: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
       loading: false,
+      flatmapMarker: flatmapMarker
     };
   },
   watch: {
@@ -366,6 +376,14 @@ export default {
 .my-checkbox {
   background-color: #fff;
   width:100%;
+}
+
+.flatmap-marker-help{
+  display: inline-block;
+}
+
+>>> .popper-bump-right{
+  left: 30px;
 }
 
 >>> .el-checkbox__label {
