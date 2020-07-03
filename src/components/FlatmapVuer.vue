@@ -70,7 +70,7 @@ import {
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
-import flatmapMarker from "../icons/flatmap-marker"
+import flatmapMarker from "../icons/flatmap-marker";
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
@@ -195,13 +195,13 @@ export default {
     },
     showToolitip: function(tooltipNumber){
       if (!this.inHelp){
-        this.tooltipWait = setTimeout( ()=>{this.hoverVisabilities[tooltipNumber].value = true}, 1000);
+        this.tooltipWait = setTimeout( ()=>{this.hoverVisabilities[tooltipNumber].value = true}, 500);
       }
     },
     hideToolitip: function(tooltipNumber){
       if (!this.inHelp){
         this.hoverVisabilities[tooltipNumber].value = false;
-        clearTimeout(this.tooltipWait)
+        clearTimeout(this.tooltipWait);
       }
     },
     openFlatmapHelpPopup: function(){
