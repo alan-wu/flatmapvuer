@@ -29,6 +29,8 @@
       :showLayer="showLayer"
       v-show="activeSpecies==key"
       :entry="item.taxo"
+      :displayWarning="item.displayWarning"
+      :warningMessage="warningMessage"
       :ref="key"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
@@ -135,6 +137,10 @@ export default {
       type: Boolean,
       default: false
     },
+    warningMessage: {
+      type: String,
+      default: "Beta feature - under active development"
+    },
     availableSpecies: {}
   },
   data: function() {
@@ -165,14 +171,14 @@ export default {
   font-weight: 500;
   color: #8300bf;
   margin-left: 17px;
-  margin-top: 54px;
+  top: 54px;
+  position: absolute;
 }
 
 .select-box >>> .el-input__inner {
   color: #8300bf;
   padding-top: 0.25em;
 }
-
 
 .flatmap_dropdown .el-select-dropdown__item {
   white-space: nowrap;
