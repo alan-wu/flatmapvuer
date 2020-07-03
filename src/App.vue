@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <button @click="helpMode = !helpMode">help mode</button>
+    <button style="position:absolute; left:0; top:0; z-index:15;" @click="helpMode = !helpMode">help mode</button>
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
