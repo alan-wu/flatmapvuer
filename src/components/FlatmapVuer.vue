@@ -6,28 +6,33 @@
       element-loading-background="rgba(0, 0, 0, 0.3)">
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
+      <el-popover :content="warningMessage" placement="right"
+        v-if="displayWarning" :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisibilities[6].value"
+        ref="warningPopover">
+      </el-popover>
+      <i class="el-icon-warning warning-icon" v-if="displayWarning" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)" v-popover:warningPopover></i>
       <el-popover content="Zoom in" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[0].value">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
           @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
       <el-popover content="Zoom out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[1].value">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
       </el-popover>
       <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[2].value">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
-      <el-popover content="Change background color" placement="left" v-model="hoverVisabilities[3].value"
+      <el-popover content="Change background color" placement="left" v-model="hoverVisibilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
           @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
       </el-popover>
       <el-popover content="Change pathway visibility" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisabilities[4].value" ref="checkBoxPopover">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover">
         </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
         <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
@@ -47,10 +52,10 @@
           </el-row>
         </el-checkbox-group>
         <el-popover content="Find these markers for data" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisabilities[5].value" ref="markerPopover">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
         </el-popover>
 
-        <div v-show="hoverVisabilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
+        <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
 
 
       </div>
@@ -181,13 +186,13 @@ export default {
     setHelpMode: function(helpMode){
       if (helpMode){
         this.inHelp = true;
-        this.hoverVisabilities.forEach( (item) =>{
+        this.hoverVisibilities.forEach( (item) =>{
           item.value = true;
         });
         this.openFlatmapHelpPopup();
       } else {
         this.inHelp = false;
-        this.hoverVisabilities.forEach( (item) =>{
+        this.hoverVisibilities.forEach( (item) =>{
           item.value = false;
         });
         this.closeFlatmapHelpPopup();
@@ -195,12 +200,12 @@ export default {
     },
     showToolitip: function(tooltipNumber){
       if (!this.inHelp){
-        this.tooltipWait = setTimeout( ()=>{this.hoverVisabilities[tooltipNumber].value = true}, 500);
+        this.tooltipWait = setTimeout( ()=>{this.hoverVisibilities[tooltipNumber].value = true}, 500);
       }
     },
     hideToolitip: function(tooltipNumber){
       if (!this.inHelp){
-        this.hoverVisabilities[tooltipNumber].value = false;
+        this.hoverVisibilities[tooltipNumber].value = false;
         clearTimeout(this.tooltipWait);
       }
     },
@@ -280,6 +285,14 @@ export default {
       type: Boolean,
       default: true, 
     },
+    displayWarning: {
+      type: Boolean,
+      default: true
+    },
+    warningMessage: {
+      type: String,
+      default: "Beta feature - under active development"
+    }
   },
   data: function() {
     return {
@@ -287,7 +300,8 @@ export default {
       pathways: [],
       isIndeterminate: false,
       checkAll: true,
-      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}, {value: false}, {value:false}],
+      hoverVisibilities: [{value: false}, {value: false}, {value: false},
+        {value: false}, {value: false}, {value: false}, {value: false}],
       inHelp: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
@@ -314,6 +328,27 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.warning-icon {
+  position: absolute;
+  top: 15px;
+  left: 37px;
+  text-align: left;
+  font-size: 25px;
+  color: #d70000;
+}
+.warning-icon:hover {
+  cursor: pointer;
+}
+>>> .warning-popper {
+  padding:9px 10px;
+  min-width:150px;
+  font-size:12px;
+  color: #fff;
+  background-color: #d70000;
+}
+>>> .warning-popper.right-popper .popper__arrow::after{
+  border-right-color: #d70000 !important;
+}
 
 .path-visual {
   margin: 3px 0;
