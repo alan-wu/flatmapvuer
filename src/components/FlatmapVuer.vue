@@ -114,6 +114,7 @@ export default {
     resetView: function() {
       if (this.mapImp) {
         this.mapImp.resetMap();
+        this.checkedItems = this.mapImp.pathTypes().map(item => item.type);
       }
     },
     /**
