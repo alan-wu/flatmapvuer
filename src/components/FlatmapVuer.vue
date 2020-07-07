@@ -10,7 +10,11 @@
         v-if="displayWarning" :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisibilities[6].value"
         ref="warningPopover">
       </el-popover>
-      <i class="el-icon-warning warning-icon" v-if="displayWarning" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)" v-popover:warningPopover></i>
+      <i class="el-icon-warning warning-icon" v-if="displayWarning" 
+        @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)"
+        v-popover:warningPopover>
+        <span class="warning-text">Beta</span>
+      </i>
       <el-popover content="Zoom in" placement="left" 
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
@@ -200,7 +204,8 @@ export default {
     },
     showToolitip: function(tooltipNumber){
       if (!this.inHelp){
-        this.tooltipWait = setTimeout( ()=>{this.hoverVisibilities[tooltipNumber].value = true}, 500);
+        this.tooltipWait = setTimeout( ()=>{
+          this.hoverVisibilities[tooltipNumber].value = true}, 500);
       }
     },
     hideToolitip: function(tooltipNumber){
@@ -348,6 +353,11 @@ export default {
 }
 >>> .warning-popper.right-popper .popper__arrow::after{
   border-right-color: #d70000 !important;
+}
+
+.warning-text{
+  font-size: 15px;
+  vertical-align:5px;
 }
 
 .path-visual {
