@@ -115,6 +115,8 @@ export default {
       if (this.mapImp) {
         this.mapImp.resetMap();
         this.checkedItems = this.mapImp.pathTypes().map(item => item.type);
+        this.isIndeterminate = false;
+        this.checkAll = true;
       }
     },
     /**
