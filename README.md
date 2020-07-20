@@ -3,14 +3,11 @@
 This project aims to wrap the flatmap viewer project into a vue component.
 There are currently two components available. FlatmapVuer and MultiFlatmapVuer. FlatmapVuer is used for displaying a single flatmap whereas MultiFlatmapVuer takes in an array of flatmaps and provide a chooser for selecting the flatmap on display.
 
-## Project setup
-```
-npm install
-```
+## Flatmapvuer on NPM
 
-### Compiles and minifies for production
-```
-npm run build-bundle
+Flatmapvuer is available on npm and can be installed into your project with the following command:
+```bash
+npm i @abi-software/flatmapvuer
 ```
 
 ## How to use
@@ -70,6 +67,25 @@ The keys of the codes above provide the labels on the chooser, **taxo** should b
 
 **initial** specifies the start up species when the component is first mounted, it should be one of the keys on the provided available species.
 
-```
+```bash
 npm run serve
+```
+
+## Project setup from Github
+
+The source code is available from Github, it can be found here: https://github.com/ABI-Software/flatmapvuer .
+
+### Clone the respositroy
+```bash
+git clone https://github.com/ABI-Software/flatmapvuer.git
+```
+
+### Setup
+```bash
+npm install
+```
+
+### Compiles and minifies for production
+```bash
+npm run build-bundle
 ```
