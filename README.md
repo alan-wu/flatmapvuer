@@ -1,16 +1,13 @@
 # FlatmapVuer
 
-This project aims to wrap the flatmap viewer project into a vue compoinent.
+This project aims to wrap the flatmap viewer project into a vue component.
+There are currently two components available. FlatmapVuer and MultiFlatmapVuer. FlatmapVuer is used for displaying a single flatmap whereas MultiFlatmapVuer takes in an array of flatmaps and provide a chooser for selecting the flatmap on display.
 
+## Flatmapvuer on NPM
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and minifies for production
-```
-npm run build-bundle
+Flatmapvuer is available on npm and can be installed into your project with the following command:
+```bash
+npm i @abi-software/flatmapvuer
 ```
 
 ## How to use
@@ -20,17 +17,21 @@ Include the package in your script.
 import '@abi-software/flatmapvuer';
 ```
 
-The codes above registers the FlatmapVuer component into the global scope.
+The line above registers both the FlatmapVuer and MultiFlatmapVuer component into the global scope.
 You can now use the FlatmapVuer in your vue template as followed:
 ```html
-<FlatmapVuer entry="NCBITaxon:9606" v-on:resource-selected="FlatmapSelected"  v-on:ready="FlatmapReady" style="height:100%"/>
+<FlatmapVuer entry="NCBITaxon:9606"   v-on:resource-selected="FlatmapSelected"  v-on:ready="FlatmapReady"/>
 ```
 
-entry is the variable/string containing the NCBI Taxonomy term. There are two available at this moment:
-NCBITaxon:9606 and NCBITaxon:10114
-NCBITaxon:9606 and NCBITaxon:10114 represents human and rat respectively.
-resource-selected is the custom event triggered when a part of the flatmap is selected, see below for a
-sample callback.
+**entry** is the variable/string with the NCBI Taxonomy term. There are five available at this moment:
+NCBITaxon:9606 (Human), NCBITaxon:9685 (Cat), NCBITaxon:9823 (Pig), NCBITaxon:10090 (Mouse) and NCBITaxon:10114 (Rat)
+
+**ready** is the custom event when the map has been loaded successfully.
+**resource-selected** is the custom event triggered when a part of the flatmap is selected, the returned argument **resource** provides information of the selected resource. 
+
+Markers must be added to make a label selectable and it can be done through the **addMarker** method on the mapImp member of the FlatmapVuer component.
+
+Please see the following sample codes for details.
 
 ```javascript
   methods: {
@@ -39,14 +40,52 @@ sample callback.
     },
     FlatmapReady: function(flatmapComponent) {
       labels = flatmapComponent.getLabels(); //return list of labels
+      //The following line adds a marker on the map. UBERON:0000948 
+      //is the UBERON id representing the heart.
+      flatmapComponent.mapImp.addMarker("UBERON:0000948", "simulation");
     }
   }
 ```
-The resource argument contains two component: taxonomy and resource.
-taxonomy: The NCBI taxonomy
-Resource: An array containing UBERON id describing the selected part(s).
 
-You can also see the FlatmapVuer in action by running
+You can also use MultiFlatmapVuer to provide a selection of flatmaps.
+```html
+<MultiFlatmapVuer :availableSpecies="availableSpecies" 
+  @resource-selected="FlatmapSelected"
+  @ready="FlatmapReady" :initial="initial"/>
 ```
+**availableSpecies** is the object containing information of available species for the users. See below for an example:
+```javascript
+  availableSpecies : {
+    "Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
+    "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"},
+    "Mouse":{taxo: "NCBITaxon:10090", iconClass:"icon-mapicon_mouse"},
+    "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig"}, 
+    "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat"},
+  }
+```
+The keys of the codes above provide the labels on the chooser, **taxo** should be one of the available taxon id from the list and **iconClass** specifies the user provided icons to use.
+
+**initial** specifies the start up species when the component is first mounted, it should be one of the keys on the provided available species.
+
+```bash
 npm run serve
+```
+
+## Project setup from Github
+
+The source code is available from Github, it can be found here: https://github.com/ABI-Software/flatmapvuer .
+
+### Clone the respositroy
+```bash
+git clone https://github.com/ABI-Software/flatmapvuer.git
+```
+
+### Setup
+```bash
+npm install
+```
+
+### Compiles and minifies for production
+```bash
+npm run build-bundle
 ```
