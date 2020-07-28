@@ -67,9 +67,6 @@ The keys of the codes above provide the labels on the chooser, **taxo** should b
 
 **initial** specifies the start up species when the component is first mounted, it should be one of the keys on the provided available species.
 
-```bash
-npm run serve
-```
 
 ## Project setup from Github
 
@@ -88,4 +85,9 @@ npm install
 ### Compiles and minifies for production
 ```bash
 npm run build-bundle
+```
+
+### Run the sample application
+```bash
+npm run serve
 ```
