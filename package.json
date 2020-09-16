@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
     "dist/*",
@@ -11,19 +11,20 @@
   ],
   "scripts": {
     "serve": "vue-cli-service serve --port 8082",
-    "build": "vue-cli-service build --dest test_html",
+    "build": "vue-cli-service build --dest test_html --mode staging",
     "build-bundle": "vue-cli-service build --target lib --name flatmapvuer ./src/components/index.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@abi-software/maptooltip": "^0.1.10",
-    "@dbrnz/flatmap-viewer": "^0.9.32",
+    "@dbrnz/flatmap-viewer": "^0.9.33",
     "core-js": "^3.3.2",
+    "css-element-queries": "^1.2.2",
+    "current-script-polyfill": "^1.0.0",
     "element-ui": "^2.13.0",
     "file-loader": "^5.0.2",
-    "lodash": "^4.17.15",
-    "vue": "^2.6.10",
-    "css-element-queries": "^1.2.2"
+    "lodash": "^4.17.20",
+    "vue": "^2.6.10"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
@@ -33,7 +34,8 @@
     "babel-plugin-component": "^1.1.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "webpack-node-externals": "^2.5.2"
   },
   "eslintConfig": {
     "root": true,
