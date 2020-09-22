@@ -14,7 +14,19 @@ npm i @abi-software/flatmapvuer
 Install the package "npm i @abi-software/flatmapvuer" to your vue app.
 Include the package in your script.
 ```javascript
-import '@abi-software/flatmapvuer';
+import {FlatmapVuer, MultiFlatmapVuer} from '@abi-software/flatmapvuer';
+import '@abi-software/flatmapvuer/dist/flatmapvuer.css';
+```
+Local registration in vue component:
+```javascript
+export default {
+  ...
+  components: {
+    FlatmapVuer,
+    MultiFlatmapVuer
+  }
+  ...
+}
 ```
 
 The line above registers both the FlatmapVuer and MultiFlatmapVuer component into the global scope.
