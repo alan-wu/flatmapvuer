@@ -16,7 +16,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
-import '@abi-software/maptooltip';
+import { TooltipVuer } from '@abi-software/maptooltip';
 import '@abi-software/maptooltip/dist/maptooltip.css';
 import {
   RadioButton,
@@ -86,7 +86,8 @@ export default {
     }
   },
   components: {
-    MultiFlatmapVuer
+    MultiFlatmapVuer,
+    TooltipVuer
   }
 }
 </script>
