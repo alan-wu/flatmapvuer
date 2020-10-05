@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
     "dist/*",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@abi-software/maptooltip": "^0.1.13",
-    "@dbrnz/flatmap-viewer": "^0.9.33",
+    "@dbrnz/flatmap-viewer": "^0.9.34",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",
