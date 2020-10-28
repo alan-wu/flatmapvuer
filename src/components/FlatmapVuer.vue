@@ -58,12 +58,8 @@
         <el-popover content="Find these markers for data" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
         </el-popover>
-
         <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
-
-
       </div>
-
     </div>
   </div>
 </template>
@@ -238,9 +234,23 @@ export default {
         return Array.from(new Set(labels));
       }
     },
-    createFlatmap: function() {
+    getState: function() {
+      if (this.mapImp) {
+        return this.mapImp.getState();
+      }
+      return undefined;
+    },
+    setState: function(state) {
+      if (state && this.mapImp)
+        this.mapImp.setState(state);
+    },
+    createFlatmap: function(state) {
       if (!this.mapImp) {
         this.loading = true;
+        let minimap = false;
+        if (this.displayMinimap) {
+          minimap = { position: "bottom-right" };
+        }
         let promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
           this.eventCallback(),
           {
@@ -251,7 +261,8 @@ export default {
             "min-zoom": this.minZoom,
             pathControls: false,
             searchable: this.searchable,
-            tooltips: this.tooltips
+            tooltips: this.tooltips,
+            minimap: minimap
           });
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
@@ -259,7 +270,11 @@ export default {
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
+          if (state)
+            this.mapImp.setState(state);
         });
+      } else if (state) {
+        this.mapImp.setState(state);
       }
     }
   },
@@ -297,6 +312,10 @@ export default {
       type: Boolean,
       default: true
     },
+    displayMinimap: {
+      type: Boolean,
+      default: false
+    },
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
@@ -323,7 +342,7 @@ export default {
     },
     helpMode: function(val){
       this.setHelpMode(val);
-    }
+    },
   },
   mounted: function() {
     const flatmap = require("@dbrnz/flatmap-viewer");

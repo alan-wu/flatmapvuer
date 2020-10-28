@@ -40,6 +40,7 @@
       :searchable="searchable"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
+      :displayMinimap="displayMinimap"
       style="height:100%"
     />
   </div>
@@ -99,10 +100,45 @@ export default {
       let map = this.getCurrentFlatmap();
       map.showMarkerPopup(featureId, node, options);
     },
-    flatmapChanged: function(flatmap){
+    flatmapChanged: function(species){
+      if (this.activeSpecies != species) 
+        this.activeSpecies = species;
       this.$refs[this.activeSpecies][0].createFlatmap();
-      this.$emit('flatmapChanged', flatmap);
-    }
+      this.$emit('flatmapChanged', this.activeSpecies);
+    },
+        /**
+     * Function used for getting the current states of the scene. This exported states 
+     * can be imported using the importStates method.
+     * 
+     * @public
+     */
+    getState: function() {
+      let state = {
+        species: this.activeSpecies,
+        state: undefined
+      };
+      let map = this.getCurrentFlatmap();
+      state.state = map.getState();
+      return state;
+    },
+    /**
+     * Function used for importing the states of the scene. This exported states 
+     * can be imported using the read states method.
+     * 
+     * @public
+     */
+    setState: function(state) {
+      if (state.species && state.species !== this.activeSpecies) {
+        this.activeSpecies = state.species;
+        if (state.state) {
+          this.$refs[this.activeSpecies][0].createFlatmap(state.state);
+          this.$emit('flatmapChanged', this.activeSpecies);
+        }
+      } else if (state.state) {
+        let map = this.getCurrentFlatmap();
+        map.setState(state.state);
+      }
+    },
   },
   props: {
     showLayer: {
@@ -134,6 +170,10 @@ export default {
       default: false
     },
     helpMode: {
+      type: Boolean,
+      default: false
+    },
+    displayMinimap: {
       type: Boolean,
       default: false
     },

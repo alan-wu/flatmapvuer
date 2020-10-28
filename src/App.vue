@@ -1,10 +1,27 @@
 <template>
   <div id="app">
-    <button style="position:absolute; left:0; top:0; z-index:15;" @click="helpMode = !helpMode">help mode</button>
+    <el-popover
+      placement="bottom"
+      trigger="click"
+      width=500
+      class="popover"
+      :appendToBody=false
+      >
+      <div class="options-container">
+        <el-row :gutter="20">
+          <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
+          <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
+          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+        </el-row>
+      </div>
+      <el-button icon="el-icon-setting" slot="reference">Options</el-button>
+    </el-popover>
+  
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
-      :initial="initial" :pathControls="pathControls" :helpMode="helpMode"/>
+      :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
+      :displayMinimap=true />
     <div>
       <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
         :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
@@ -19,18 +36,31 @@ import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import { TooltipVuer } from '@abi-software/maptooltip';
 import '@abi-software/maptooltip/dist/maptooltip.css';
 import {
+  Col,
+  Popover,
   RadioButton,
-  RadioGroup
+  RadioGroup,
+  Row,
 } from 'element-ui';
 import "./styles/purple/radio-button.css";
 import "./styles/purple/radio-group.css";
 import "./icons/mapicon-species-style.css";
+Vue.use(Col);
+Vue.use(Popover);
 Vue.use(RadioButton);
 Vue.use(RadioGroup);
+Vue.use(Row);
 
 export default {
   name: 'app',
   methods: {
+    saveSettings: function() {
+      this._mapSettings.push(this.$refs.multi.getState());
+    },
+    restoreSettings: function() {
+      if (this._mapSettings.length > 0)
+        this.$refs.multi.setState(this._mapSettings.pop());
+    },
     FlatmapSelected: function(resource) {
       let tooltip = this.$refs.tooltip;
       this.$refs.multi.showMarkerPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
@@ -38,7 +68,6 @@ export default {
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
-      
       console.log(taxon, id);
     },
     onActionClick: function(action) {
@@ -85,6 +114,9 @@ export default {
       helpMode: false
     }
   },
+  mounted: function() {
+    this._mapSettings = [];
+  },
   components: {
     MultiFlatmapVuer,
     TooltipVuer
@@ -108,7 +140,28 @@ body {
   margin: 0px;
 }
 
+.popover{
+  top:5px;
+  right:10PX;
+  position:absolute;
+  z-index:1000;
+}
+
+.el-row {
+  margin-bottom: 5px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.options-container{
+
+  text-align: center;
+}
+
 .el-tabs__content {
   height:100%;
 }
+</style>
+<style scoped src="./styles/purple/popover.css">
 </style>
