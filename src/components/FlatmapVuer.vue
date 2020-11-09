@@ -236,22 +236,37 @@ export default {
     },
     getState: function() {
       if (this.mapImp) {
-        return this.mapImp.getState();
+        let state = {
+          entry: this.entry,
+          viewport: this.mapImp.getState(),
+        }
+        return state;
       }
       return undefined;
     },
     setState: function(state) {
-      if (state && this.mapImp)
-        this.mapImp.setState(state);
+      if (state) {
+        if (this.mapImp && state.entry) {
+          if (this.entry == state.entry)
+            if (state.viewport) {
+              this.mapImp.setState(state.viewport);
+            }
+        } else {
+          this.createFlatmap(state);
+        }
+      }
     },
     createFlatmap: function(state) {
-      if (!this.mapImp) {
+      if (!this.mapImp && !this.loading) {
         this.loading = true;
         let minimap = false;
         if (this.displayMinimap) {
           minimap = { position: "bottom-right" };
         }
-        let promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
+        let entry = this.entry;
+        if (state && state.entry)
+          entry = state.entry;
+        let promise1 = this.mapManager.loadMap(entry, this.$refs.display,
           this.eventCallback(),
           {
             //fullscreenControl: false,
@@ -270,11 +285,14 @@ export default {
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
-          if (state)
-            this.mapImp.setState(state);
+          if (this._viewportToBeSet)
+            this.mapImp.setState(this._viewportToBeSet);
+          else if (state && state.viewport)
+            this.mapImp.setState(state.viewport);
         });
       } else if (state) {
-        this.mapImp.setState(state);
+        if (this.entry == state.entry)
+          this._viewportToBeSet = state.viewport;
       }
     }
   },
@@ -319,7 +337,14 @@ export default {
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
-    }
+    },
+    /**
+     * State containing state of the flatmap.
+     */
+    state: {
+      type: Object,
+      default: undefined,
+    },
   },
   data: function() {
     return {
@@ -337,12 +362,20 @@ export default {
     };
   },
   watch: {
-    entry: function(val) {
-      this.createFlatmap(val);
+    entry: function() {
+      if (!this.state)
+        this.createFlatmap();
     },
     helpMode: function(val){
       this.setHelpMode(val);
     },
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true,
+    }
   },
   mounted: function() {
     const flatmap = require("@dbrnz/flatmap-viewer");

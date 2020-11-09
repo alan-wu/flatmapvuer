@@ -51,7 +51,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
-import { Col, Option, Select, Row, Popover } from "element-ui";
+import { Col, Option, Select, Row, Popover } from "element-ui";  
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -68,12 +68,14 @@ export default {
     FlatmapVuer
   },
   mounted: function() {
-    if (this.initial && this.availableSpecies[this.initial] !== undefined) {
-      this.activeSpecies = this.initial;
-    } else {
-      this.activeSpecies = Object.keys(this.availableSpecies)[0];
+    if (!this.state) {
+      if (this.initial && this.availableSpecies[this.initial] !== undefined) {
+        this.activeSpecies = this.initial;
+      } else {
+        this.activeSpecies = Object.keys(this.availableSpecies)[0];
+      }
+      this.$refs[this.activeSpecies][0].createFlatmap();
     }
-    this.$refs[this.activeSpecies][0].createFlatmap();
   },
   methods: {
     FlatmapSelected: function(resource) {
@@ -115,7 +117,7 @@ export default {
     getState: function() {
       let state = {
         species: this.activeSpecies,
-        state: undefined
+        state: undefined,
       };
       let map = this.getCurrentFlatmap();
       state.state = map.getState();
@@ -128,15 +130,17 @@ export default {
      * @public
      */
     setState: function(state) {
-      if (state.species && state.species !== this.activeSpecies) {
-        this.activeSpecies = state.species;
-        if (state.state) {
-          this.$refs[this.activeSpecies][0].createFlatmap(state.state);
-          this.$emit('flatmapChanged', this.activeSpecies);
+      if (state) {
+        if (state.species && state.species !== this.activeSpecies) {
+          this.activeSpecies = state.species;
+          if (state.state) {
+            this.$refs[this.activeSpecies][0].createFlatmap(state.state);
+            this.$emit('flatmapChanged', this.activeSpecies);
+          }
+        } else if (state.state) {
+          let map = this.getCurrentFlatmap();
+          map.setState(state.state);
         }
-      } else if (state.state) {
-        let map = this.getCurrentFlatmap();
-        map.setState(state.state);
       }
     },
   },
@@ -157,6 +161,10 @@ export default {
       type: Boolean,
       default: false
     },
+    /**
+     * Initial species for the flatmap.
+     * This value will be ignored if a valid state object is provided.
+     */
     initial: {
       type: String,
       default: ""
@@ -181,13 +189,29 @@ export default {
       type: String,
       default: "Beta feature - under active development"
     },
-    availableSpecies: {}
+    availableSpecies: {},
+    /**
+     * State containing state of the flatmap.
+     */
+    state: {
+      type: Object,
+      default: undefined,
+    },
   },
   data: function() {
     return {
       activeSpecies: undefined,
       appendToBody: false
     };
+  },
+  watch: {
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true,
+    }
   }
 };
 </script>
