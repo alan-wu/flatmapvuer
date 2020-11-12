@@ -134,8 +134,11 @@ export default {
         if (state.species && state.species !== this.activeSpecies) {
           this.activeSpecies = state.species;
           if (state.state) {
-            this.$refs[this.activeSpecies][0].createFlatmap(state.state);
-            this.$emit('flatmapChanged', this.activeSpecies);
+            //Wait for next tick when the refs are ready for rendering
+            this.$nextTick(() => {
+              this.$refs[this.activeSpecies][0].createFlatmap(state.state);
+              this.$emit('flatmapChanged', this.activeSpecies);
+            })
           }
         } else if (state.state) {
           let map = this.getCurrentFlatmap();
