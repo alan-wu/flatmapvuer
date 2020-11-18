@@ -40,6 +40,7 @@
       :searchable="searchable"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
+      :displayMinimap="displayMinimap"
       style="height:100%"
     />
   </div>
@@ -50,7 +51,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
-import { Col, Option, Select, Row, Popover } from "element-ui";
+import { Col, Option, Select, Row, Popover } from "element-ui";  
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -67,12 +68,14 @@ export default {
     FlatmapVuer
   },
   mounted: function() {
-    if (this.initial && this.availableSpecies[this.initial] !== undefined) {
-      this.activeSpecies = this.initial;
-    } else {
-      this.activeSpecies = Object.keys(this.availableSpecies)[0];
+    if (!this.state) {
+      if (this.initial && this.availableSpecies[this.initial] !== undefined) {
+        this.activeSpecies = this.initial;
+      } else {
+        this.activeSpecies = Object.keys(this.availableSpecies)[0];
+      }
+      this.$refs[this.activeSpecies][0].createFlatmap();
     }
-    this.$refs[this.activeSpecies][0].createFlatmap();
   },
   methods: {
     FlatmapSelected: function(resource) {
@@ -99,10 +102,50 @@ export default {
       let map = this.getCurrentFlatmap();
       map.showMarkerPopup(featureId, node, options);
     },
-    flatmapChanged: function(flatmap){
+    flatmapChanged: function(species){
+      if (this.activeSpecies != species) 
+        this.activeSpecies = species;
       this.$refs[this.activeSpecies][0].createFlatmap();
-      this.$emit('flatmapChanged', flatmap);
-    }
+      this.$emit('flatmapChanged', this.activeSpecies);
+    },
+        /**
+     * Function used for getting the current states of the scene. This exported states 
+     * can be imported using the importStates method.
+     * 
+     * @public
+     */
+    getState: function() {
+      let state = {
+        species: this.activeSpecies,
+        state: undefined,
+      };
+      let map = this.getCurrentFlatmap();
+      state.state = map.getState();
+      return state;
+    },
+    /**
+     * Function used for importing the states of the scene. This exported states 
+     * can be imported using the read states method.
+     * 
+     * @public
+     */
+    setState: function(state) {
+      if (state) {
+        if (state.species && state.species !== this.activeSpecies) {
+          this.activeSpecies = state.species;
+          if (state.state) {
+            //Wait for next tick when the refs are ready for rendering
+            this.$nextTick(() => {
+              this.$refs[this.activeSpecies][0].createFlatmap(state.state);
+              this.$emit('flatmapChanged', this.activeSpecies);
+            })
+          }
+        } else if (state.state) {
+          let map = this.getCurrentFlatmap();
+          map.setState(state.state);
+        }
+      }
+    },
   },
   props: {
     showLayer: {
@@ -121,6 +164,10 @@ export default {
       type: Boolean,
       default: false
     },
+    /**
+     * Initial species for the flatmap.
+     * This value will be ignored if a valid state object is provided.
+     */
     initial: {
       type: String,
       default: ""
@@ -137,17 +184,37 @@ export default {
       type: Boolean,
       default: false
     },
+    displayMinimap: {
+      type: Boolean,
+      default: false
+    },
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
     },
-    availableSpecies: {}
+    availableSpecies: {},
+    /**
+     * State containing state of the flatmap.
+     */
+    state: {
+      type: Object,
+      default: undefined,
+    },
   },
   data: function() {
     return {
       activeSpecies: undefined,
       appendToBody: false
     };
+  },
+  watch: {
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true,
+    }
   }
 };
 </script>

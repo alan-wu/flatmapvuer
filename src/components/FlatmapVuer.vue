@@ -58,12 +58,8 @@
         <el-popover content="Find these markers for data" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
         </el-popover>
-
         <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
-
-
       </div>
-
     </div>
   </div>
 </template>
@@ -238,10 +234,39 @@ export default {
         return Array.from(new Set(labels));
       }
     },
-    createFlatmap: function() {
-      if (!this.mapImp) {
+    getState: function() {
+      if (this.mapImp) {
+        let state = {
+          entry: this.entry,
+          viewport: this.mapImp.getState(),
+        }
+        return state;
+      }
+      return undefined;
+    },
+    setState: function(state) {
+      if (state) {
+        if (this.mapImp && state.entry) {
+          if (this.entry == state.entry)
+            if (state.viewport) {
+              this.mapImp.setState(state.viewport);
+            }
+        } else {
+          this.createFlatmap(state);
+        }
+      }
+    },
+    createFlatmap: function(state) {
+      if (!this.mapImp && !this.loading) {
         this.loading = true;
-        let promise1 = this.mapManager.loadMap(this.entry, this.$refs.display,
+        let minimap = false;
+        if (this.displayMinimap) {
+          minimap = { position: "bottom-right" };
+        }
+        let entry = this.entry;
+        if (state && state.entry)
+          entry = state.entry;
+        let promise1 = this.mapManager.loadMap(entry, this.$refs.display,
           this.eventCallback(),
           {
             //fullscreenControl: false,
@@ -251,7 +276,8 @@ export default {
             "min-zoom": this.minZoom,
             pathControls: false,
             searchable: this.searchable,
-            tooltips: this.tooltips
+            tooltips: this.tooltips,
+            minimap: minimap
           });
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
@@ -259,7 +285,14 @@ export default {
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
+          if (this._viewportToBeSet)
+            this.mapImp.setState(this._viewportToBeSet);
+          else if (state && state.viewport)
+            this.mapImp.setState(state.viewport);
         });
+      } else if (state) {
+        if (this.entry == state.entry)
+          this._viewportToBeSet = state.viewport;
       }
     }
   },
@@ -297,10 +330,21 @@ export default {
       type: Boolean,
       default: true
     },
+    displayMinimap: {
+      type: Boolean,
+      default: false
+    },
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
-    }
+    },
+    /**
+     * State containing state of the flatmap.
+     */
+    state: {
+      type: Object,
+      default: undefined,
+    },
   },
   data: function() {
     return {
@@ -318,11 +362,19 @@ export default {
     };
   },
   watch: {
-    entry: function(val) {
-      this.createFlatmap(val);
+    entry: function() {
+      if (!this.state)
+        this.createFlatmap();
     },
     helpMode: function(val){
       this.setHelpMode(val);
+    },
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true,
     }
   },
   mounted: function() {
