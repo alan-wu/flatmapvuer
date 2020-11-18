@@ -21,7 +21,7 @@
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap=true />
+      :displayMinimap=true :flatmapAPI="flatmapAPI"/>
     <div>
       <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
         :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
@@ -111,7 +111,8 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       visible: false,
-      helpMode: false
+      helpMode: false,
+      flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
     }
   },
   mounted: function() {

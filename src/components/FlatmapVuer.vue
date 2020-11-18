@@ -345,6 +345,13 @@ export default {
       type: Object,
       default: undefined,
     },
+    /**
+     * Specify the endpoint of the flatmap server.
+     */
+    flatmapAPI: {
+      type: String,
+      default: undefined
+    },
   },
   data: function() {
     return {
@@ -379,7 +386,10 @@ export default {
   },
   mounted: function() {
     const flatmap = require("@dbrnz/flatmap-viewer");
-    this.mapManager = new flatmap.MapManager('https://mapcore-demo.org/flatmaps/');
+    let endpoint = this.flatmapAPI;
+    if (!endpoint)
+      endpoint = "https://mapcore-demo.org/flatmaps/";
+    this.mapManager = new flatmap.MapManager(endpoint);
     if (this.renderAtMounted)
       this.createFlatmap();
   }
