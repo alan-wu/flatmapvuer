@@ -42,6 +42,7 @@
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
       style="height:100%"
+      :flatmapAPI="flatmapAPI"
     />
   </div>
 </template>
@@ -199,6 +200,13 @@ export default {
     state: {
       type: Object,
       default: undefined,
+    },
+    /**
+     * Specify the endpoint of the flatmap server.
+     */
+    flatmapAPI: {
+      type: String,
+      default: undefined
     },
   },
   data: function() {
