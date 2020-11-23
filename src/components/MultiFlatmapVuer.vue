@@ -1,27 +1,29 @@
 <template>
   <div class="multi-container">
     <div style="position:absolute;z-index:10;">
+      <div class="species-display-text">
+        Species
+      </div>
       <el-popover content="Select a species" placement="right" 
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="helpMode" ref="selectPopover">
       </el-popover>
-        <el-select
-          id="flatmap-select"
-          :popper-append-to-body="appendToBody"
-          v-model="activeSpecies"
-          placeholder="Select"
-          class="select-box"
-          popper-class="flatmap_dropdown"
-          @change="flatmapChanged"
-          v-popover:selectPopover
-        >
-          <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
-            <el-row>
-              <el-col :span="8"><i :class="item.iconClass"></i></el-col>
-              <el-col :span="12">{{ key }}</el-col>
-            </el-row>
-          </el-option>
-        </el-select>
-      
+      <el-select
+        id="flatmap-select"
+        :popper-append-to-body="appendToBody"
+        v-model="activeSpecies"
+        placeholder="Select"
+        class="select-box"
+        popper-class="flatmap_dropdown"
+        @change="flatmapChanged"
+        v-popover:selectPopover
+      >
+        <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
+          <el-row>
+            <el-col :span="8"><i :class="item.iconClass"></i></el-col>
+            <el-col :span="12">{{ key }}</el-col>
+          </el-row>
+        </el-option>
+      </el-select>
     </div>
     <FlatmapVuer
       v-for="(item, key) in availableSpecies"
@@ -238,26 +240,41 @@ export default {
   width: 100%;
 }
 
+.species-display-text {
+  width: 47px;
+  height: 20px;
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  left:24px;
+  top:16px;
+  position: absolute;
+}
+
 .select-box {
-  width: 124px;
+  width: 120px;
   border-radius: 4px;
-  border: solid 1px #8300bf;
+  border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
-  color: #8300bf;
-  margin-left: 17px;
-  top: 54px;
+  color:rgb(48, 49, 51);;
+  left: 16px;
+  top: 44px;
   position: absolute;
 }
 
 .select-box >>> .el-input__inner {
-  color: #8300bf;
+  color: rgb(48, 49, 51);
   padding-top: 0.25em;
+}
+
+.select-box >>> .is-focus .el-input__inner {
+  border: 1px solid #8300bf;
 }
 
 .flatmap_dropdown .el-select-dropdown__item {
   white-space: nowrap;
-  font-family: Helvetica;
   text-align: left;
 
 }
@@ -265,7 +282,6 @@ export default {
 .flatmap_dropdown .el-select-dropdown__item.selected {
   color: #8300bf;
   font-weight: normal;
-  font-family: Helvetica !important;
 }
 
 >>>.flatmap-popper {

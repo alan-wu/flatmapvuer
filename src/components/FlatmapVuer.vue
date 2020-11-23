@@ -39,21 +39,30 @@
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover">
         </el-popover>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
-        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
-        <el-checkbox-group v-model="checkedItems" size="small" 
-          class="checkbox-group" @change="handleCheckedItemsChange">>
-          <el-row v-for="item in pathways" :key="item.type" :label="item.type">
-            <div class="checkbox-container">
-              <el-checkbox
-                class="my-checkbox"
-                style="margin-top:3px;"
-                :label="item.type"
-                @change="visibilityToggle()"
-                :checked="true"
-                border
-              ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
+        <el-row>
+          <el-col :span="12">
+            <div class="pathways-display-text">
+              Pathways
             </div>
-          </el-row>
+          </el-col>
+          <el-col :span="12">
+            <el-checkbox class="all-checkbox" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all</el-checkbox>
+          </el-col>         
+        </el-row>
+        <el-checkbox-group v-model="checkedItems" size="small" 
+          class="checkbox-group" @change="handleCheckedItemsChange">
+          <div class="checkbox-group-inner">
+            <el-row v-for="item in pathways" :key="item.type" :label="item.type">
+              <div class="checkbox-container">
+                <el-checkbox
+                  class="my-checkbox"
+                  :label="item.type"
+                  @change="visibilityToggle()"
+                  :checked="true"
+                ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
+              </div>
+            </el-row>
+          </div>
         </el-checkbox-group>
         <el-popover content="Find these markers for data" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
@@ -70,6 +79,7 @@ import Vue from "vue";
 import {
   Checkbox,
   CheckboxGroup,
+  Col,
   Loading,
   Row
 } from "element-ui";
@@ -79,6 +89,7 @@ import flatmapMarker from "../icons/flatmap-marker";
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
+Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
@@ -472,11 +483,25 @@ export default {
 
 .pathway-container {
   position: absolute;
-  top: 134px;
-  left: 17px;
+  bottom: 16px;
+  left: 16px;
   max-height: calc(100% - 184px);
   text-align: left;
   overflow: auto;
+}
+
+.pathways-display-text {
+  width: 59px;
+  height: 20px;
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  margin-left: 8px;
+}
+
+.all-checkbox {
+  float: right;
 }
 
 .checkbox-container { 
@@ -484,9 +509,21 @@ export default {
   cursor: pointer;
 }
 
+.checkbox-group {
+  width: 260px;
+  border: 1px solid rgb(144, 147, 153);
+  border-radius: 4px;
+  background: #ffffff;
+  margin-top:6px;
+}
+
 .my-checkbox {
   background-color: #fff;
   width:100%;
+}
+
+.checkbox-group-inner {
+  padding:18px;
 }
 
 .flatmap-marker-help{
@@ -499,6 +536,11 @@ export default {
 
 >>> .el-checkbox__label {
   padding-left:5px;
+  color: rgb(131, 0, 191);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0px;
+  line-height: 14px;
 }
 
 >>> .el-checkbox__input.is-indeterminate .el-checkbox__inner
