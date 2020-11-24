@@ -15,29 +15,25 @@
         v-popover:warningPopover>
         <span class="warning-text">Beta</span>
       </i>
-      <el-popover content="Zoom in" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
-        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
-      </el-popover>
-      <el-popover content="Zoom out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[1].value">
-        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
-      </el-popover>
-      <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
-        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
-      </el-popover>
-      <el-popover content="Change background color" placement="left" v-model="hoverVisibilities[3].value"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper">
-        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
-      </el-popover>
-      <el-popover content="Change pathway visibility" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover">
+      <div class="bottom-left-control">
+        <el-popover content="Zoom in" placement="left" 
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
+          <el-button icon="el-icon-zoom-in" circle class="zoomIn icon-button" 
+            @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
         </el-popover>
+        <el-popover content="Zoom out" placement="left"
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[1].value">
+          <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+          @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
+        </el-popover>
+        <el-popover content="Reset view" placement="left"
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
+          <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+            @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
+        </el-popover>
+      </div>
+      <el-popover content="Change pathway visibility" placement="right"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
         <el-row>
           <el-col :span="12">
@@ -69,6 +65,11 @@
         </el-popover>
         <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
       </div>
+      <el-popover content="Change background color" placement="left" v-model="hoverVisibilities[3].value"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper">
+        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
+          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -272,7 +273,7 @@ export default {
         this.loading = true;
         let minimap = false;
         if (this.displayMinimap) {
-          minimap = { position: "bottom-right" };
+          minimap = { position: "top-right" };
         }
         let entry = this.entry;
         if (state && state.entry)
@@ -603,27 +604,17 @@ export default {
   top: 0.95em;
 }
 
-.zoomIn{
-  top:51px;
-  right:20px;
-  position: absolute;
-}
-
 .zoomOut{
-  top:101px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
 .resetView {
-  top:151px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
 .backgroundColour {
-  top:201px;
-  right:20px;
+  bottom: 16px;
+  left:288px;
   position: absolute;
 }
 
@@ -676,7 +667,15 @@ export default {
   border-bottom-color: #8300bf;  
 }
 
+.bottom-left-control {
+  position:absolute;
+  right:16px;
+  bottom:16px;
+}
+
 </style>
+
+
 
 <style scoped src="../styles/purple/checkbox.css">
 </style>
