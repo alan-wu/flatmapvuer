@@ -35,6 +35,10 @@
       <el-popover content="Change pathway visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
       <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
+        <el-popover content="Find these markers for data" placement="right"
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
+        </el-popover>
+        <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
         <el-row>
           <el-col :span="12">
             <div class="pathways-display-text">
@@ -60,12 +64,8 @@
             </el-row>
           </div>
         </el-checkbox-group>
-        <el-popover content="Find these markers for data" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
-        </el-popover>
-        <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
       </div>
-      <el-popover content="Change background color" placement="left" v-model="hoverVisibilities[3].value"
+      <el-popover content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
           @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
@@ -228,7 +228,7 @@ export default {
     openFlatmapHelpPopup: function(){
       if (this.mapImp) {
         let heartId = this.mapImp.featureIdsForModel('UBERON:0000948')[0];
-        const elm = 'Hover for more information';
+        const elm = 'Click for more information';
         this.mapImp.showPopup(heartId, elm, {anchor: "top", className: "flatmap-popup-popper"});
       }
     },
@@ -631,11 +631,13 @@ export default {
 }
 
 >>> .flatmap-popper {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #fff;
-  background-color: #8300bf;  
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset;
 }
 
 >>> .flatmap-marker{
@@ -652,11 +654,17 @@ export default {
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #fff;
-  background-color: #8300bf;  
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset;
+}
+
+>>>.el-popper[x-placement^="right"] .popper__arrow {
+  left: -8px;
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {

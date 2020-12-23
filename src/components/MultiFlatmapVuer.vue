@@ -284,12 +284,18 @@ export default {
   font-weight: normal;
 }
 
+>>>.el-popper[x-placement^="right"] .popper__arrow {
+  left: -8px;
+}
+
 >>>.flatmap-popper {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #ffffff;
-  background-color: #8300bf;
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset;
 }
 >>> .flatmap-popper .popper__arrow::after{
   border-right-color: #8300bf !important;
