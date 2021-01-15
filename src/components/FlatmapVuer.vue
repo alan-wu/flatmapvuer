@@ -15,7 +15,7 @@
         v-popover:warningPopover>
         <span class="warning-text">Beta</span>
       </i>
-      <div class="bottom-left-control">
+      <div class="bottom-right-control">
         <el-popover content="Zoom in" placement="left" 
           :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
           <el-button icon="el-icon-zoom-in" circle class="zoomIn icon-button" 
@@ -675,7 +675,7 @@ export default {
   border-bottom-color: #8300bf;  
 }
 
-.bottom-left-control {
+.bottom-right-control {
   position:absolute;
   right:16px;
   bottom:16px;
