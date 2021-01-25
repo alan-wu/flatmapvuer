@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@abi-software/maptooltip": "^0.1.13",
+    "@abi-software/svg-sprite": "^0.1.5",
     "@dbrnz/flatmap-viewer": "^0.9.34",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",

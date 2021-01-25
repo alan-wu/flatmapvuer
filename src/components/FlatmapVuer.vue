@@ -4,6 +4,7 @@
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
+    <SvgSprite/>
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
@@ -18,18 +19,18 @@
       <div class="bottom-right-control">
         <el-popover content="Zoom in" placement="left" 
           :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
-          <el-button icon="el-icon-zoom-in" circle class="zoomIn icon-button" 
-            @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
+          <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
+            @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
         <el-popover content="Zoom out" placement="left"
           :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[1].value">
-          <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-          @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
+          <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
+            @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
         <el-popover content="Reset view" placement="left"
           :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
-          <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-            @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
+          <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
+            @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
         </el-popover>
       </div>
       <el-popover content="Change pathway visibility" placement="right"
@@ -67,8 +68,8 @@
       </div>
       <el-popover content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
-        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
+        <SvgIcon icon="changeBckgd" class="icon-button background-colour" slot="reference" @click.native="backgroundChangeCallback()"
+          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
     </div>
   </div>
@@ -77,6 +78,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
+import { SvgIcon, SvgSprite} from '@abi-software/svg-sprite'
 import {
   Checkbox,
   CheckboxGroup,
@@ -104,6 +106,10 @@ const mapResize = map => {
 
 export default {
   name: "FlatmapVuer",
+  components: {
+    SvgIcon,
+    SvgSprite
+  },
   beforeCreate: function() {
     this.mapManager = undefined;
     this.mapImp = undefined;
@@ -416,7 +422,7 @@ export default {
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #d70000;
+  color: #ff8400;
 }
 .warning-icon:hover {
   cursor: pointer;
@@ -426,10 +432,10 @@ export default {
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: #d70000;
+  background-color: #ff8400;
 }
 >>> .warning-popper.right-popper .popper__arrow::after{
-  border-right-color: #d70000 !important;
+  border-right-color: #ff8400 !important;
 }
 
 .warning-text{
@@ -612,7 +618,7 @@ export default {
   padding-left: 8px;
 }
 
-.backgroundColour {
+.background-colour {
   bottom: 16px;
   left:288px;
   position: absolute;
@@ -625,9 +631,12 @@ export default {
 }
 
 .icon-button {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  border: solid 1px #ffffff;
-  background-color: #ffffff;
+  height:24px!important;
+  width:24px!important;
+  color: #8300bf;
+}
+.icon-button:hover {
+  cursor:pointer;
 }
 
 >>> .flatmap-popper {
