@@ -35,40 +35,47 @@
       </div>
       <el-popover content="Change pathway visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
-      <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
-        <el-popover content="Find these markers for data" placement="right"
-          :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
-        </el-popover>
-        <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
-        <el-row>
-          <el-col :span="12">
-            <div class="pathways-display-text">
-              Pathways
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <el-checkbox class="all-checkbox" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all</el-checkbox>
-          </el-col>         
-        </el-row>
-        <el-checkbox-group v-model="checkedItems" size="small" 
-          class="checkbox-group" @change="handleCheckedItemsChange">
-          <div class="checkbox-group-inner">
-            <el-row v-for="item in pathways" :key="item.type" :label="item.type">
-              <div class="checkbox-container">
-                <el-checkbox
-                  class="my-checkbox"
-                  :label="item.type"
-                  @change="visibilityToggle()"
-                  :checked="true"
-                ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
+      <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
+        <div class="pathway-container" v-if="pathways.length > 0 && pathControls" 
+           v-popover:checkBoxPopover>
+          <el-popover content="Find these markers for data" placement="right"
+            :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
+          </el-popover>
+          <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
+          <el-row>
+            <el-col :span="12">
+              <div class="pathways-display-text">
+                Pathways
               </div>
-            </el-row>
-          </div>
-        </el-checkbox-group>
+            </el-col>
+            <el-col :span="12">
+              <el-checkbox class="all-checkbox" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all</el-checkbox>
+            </el-col>
+          </el-row>
+          <el-checkbox-group v-model="checkedItems" size="small" 
+            class="checkbox-group" @change="handleCheckedItemsChange">
+            <div class="checkbox-group-inner">
+              <el-row v-for="item in pathways" :key="item.type" :label="item.type">
+                <div class="checkbox-container">
+                  <el-checkbox
+                    class="my-checkbox"
+                    :label="item.type"
+                    @change="visibilityToggle()"
+                    :checked="true"
+                  ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
+                </div>
+              </el-row>
+            </div>
+          </el-checkbox-group>
+        </div>
+        <div @click="toggleDrawer" class="drawer-button" :class="{ open: drawerOpen, close: !drawerOpen }">
+          <i class="el-icon-arrow-left"></i>
+        </div>
       </div>
       <el-popover content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
-        <SvgIcon icon="changeBckgd" class="icon-button background-colour" slot="reference" @click.native="backgroundChangeCallback()"
+        <SvgIcon icon="changeBckgd" class="icon-button background-colour" 
+          :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference" @click.native="backgroundChangeCallback()"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
     </div>
@@ -120,6 +127,9 @@ export default {
       if (this.currentBackground >= this.availableBackground.length )
         this.currentBackground = 0;
       this.mapImp.setBackgroundColour(this.availableBackground[this.currentBackground], 1 );
+    },
+    toggleDrawer: function () {
+      this.drawerOpen = !this.drawerOpen;
     },
     /**
      * Function to toggle paths to default.
@@ -383,7 +393,8 @@ export default {
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
       loading: false,
-      flatmapMarker: flatmapMarker
+      flatmapMarker: flatmapMarker,
+      drawerOpen: true,
     };
   },
   watch: {
@@ -488,13 +499,29 @@ export default {
   width: 100%;
 }
 
-.pathway-container {
+.pathway-location {
   position: absolute;
-  bottom: 16px;
-  left: 16px;
+  bottom: 0px;
+  transition: all 1s ease;
+}
+.pathway-location.open {
+  left: 0px;
+}
+.pathway-location.close {
+  left: -298px;
+}
+
+.pathway-container {
+  float: left;
+  padding-left: 16px;
+  padding-right: 18px;
   max-height: calc(100% - 184px);
   text-align: left;
   overflow: auto;
+  border: 1px solid rgb(220, 223, 230);
+  padding-top:7px;
+  padding-bottom:16px;
+  background:#ffffff;
 }
 
 .pathways-display-text {
@@ -521,7 +548,6 @@ export default {
   border: 1px solid rgb(144, 147, 153);
   border-radius: 4px;
   background: #ffffff;
-  margin-top:6px;
 }
 
 .my-checkbox {
@@ -596,7 +622,6 @@ export default {
   padding: 0px;
 }
 
-
 >>>.flatmapvuer-popover .mapboxgl-popup-close-button {
   position: absolute;
   right: 0.5em;
@@ -620,8 +645,14 @@ export default {
 
 .background-colour {
   bottom: 16px;
-  left:288px;
   position: absolute;
+  transition: all 1s ease;
+}
+.background-colour.open {
+  left: 310px;
+}
+.background-colour.close {
+  left: 12px;
 }
 
 .togglePaths {
@@ -688,6 +719,59 @@ export default {
   position:absolute;
   right:16px;
   bottom:16px;
+}
+
+>>> .my-drawer {
+  background: rgba(0,0,0,0);
+  box-shadow: none;
+}
+
+.drawer >>> .el-drawer:focus{
+  outline:none;
+}
+
+.open-drawer{
+  width: 20px;
+  height: 40px;
+  z-index: 8;
+  position: absolute;
+  left: 0px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+  border: solid 1px #e4e7ed;
+  background-color: #F7FAFF;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.drawer-button {
+  float: left;
+  width: 20px;
+  height: 40px;
+  z-index: 8;
+  margin-top:calc(50% - 36px);
+  border: solid 1px #e4e7ed;
+  border-left: 0;
+  background-color: #FFFFFF;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.drawer-button i{
+  margin-top:12px;
+  color: #8300bf;
+  transition-delay: 0.9s;
+}
+
+.drawer-button.open i{
+  transform: rotate(0deg) scaleY(2.5);
+}
+
+.drawer-button.close i{
+  transform: rotate(180deg) scaleY(2.5);
 }
 
 </style>
