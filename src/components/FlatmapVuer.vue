@@ -414,7 +414,7 @@ export default {
     }
   },
   mounted: function() {
-    const flatmap = require("@dbrnz/flatmap-viewer");
+    const flatmap = require("@abi-software/flatmap-viewer");
     let endpoint = this.flatmapAPI;
     if (!endpoint)
       endpoint = "https://mapcore-demo.org/flatmaps/";
