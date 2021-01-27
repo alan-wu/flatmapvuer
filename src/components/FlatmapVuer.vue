@@ -22,12 +22,12 @@
           <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
             @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
-        <el-popover content="Zoom out" placement="left"
-          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[1].value">
+        <el-popover content="Zoom out" placement="top-end" :offset="50"
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-zoomout" v-model="hoverVisibilities[1].value">
           <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
-        <el-popover content="Reset view" placement="left"
+        <el-popover content="Reset view" placement="top"
           :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
           <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
             @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
@@ -36,7 +36,7 @@
       <el-popover content="Change pathway visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
-        <div class="pathway-container" v-if="pathways.length > 0 && pathControls" 
+        <div class="pathway-container" v-if="pathways.length > 0 && pathControls"
            v-popover:checkBoxPopover>
           <el-popover content="Find these markers for data" placement="right"
             :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
@@ -705,6 +705,21 @@ export default {
 
 >>>.el-popper[x-placement^="right"] .popper__arrow {
   left: -8px;
+}
+
+
+>>>.el-popper[x-placement^="top"] .popper__arrow::after {
+  border-top-color:#8300bf !important;
+  border-left-color:transparent !important;
+  border-right-color:transparent !important;
+}
+
+>>>.popper-zoomout {
+  left:-31px!important;
+}
+
+>>>.popper-zoomout .popper__arrow{
+  left:48px!important;
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {
