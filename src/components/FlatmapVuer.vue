@@ -27,7 +27,7 @@
           <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
-        <el-popover content="Reset view" placement="top"
+        <el-popover content="Reset" placement="top"
           :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
           <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
             @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
@@ -787,6 +787,10 @@ export default {
 
 .drawer-button.close i{
   transform: rotate(180deg) scaleY(2.5);
+}
+
+>>>.mapboxgl-canvas-container canvas {
+  outline:none;
 }
 
 </style>
