@@ -63,7 +63,8 @@ export default {
     },
     FlatmapSelected: function(resource) {
       let tooltip = this.$refs.tooltip;
-      this.$refs.multi.showMarkerPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
+      if (resource.eventType == "mouseenter")
+        this.$refs.multi.showMarkerPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
