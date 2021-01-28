@@ -72,10 +72,26 @@
           <i class="el-icon-arrow-left"></i>
         </div>
       </div>
-      <el-popover content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
+      <el-popover
+        ref="backgroundPopover"
+        placement="top-start"
+        width="128"
+        :appendToBody=false
+        trigger="click"
+        popper-class="background-popper">
+        <el-row class="backgroundText">
+          Change background
+        </el-row>
+        <el-row class="backgroundChooser" >
+          <div v-for="item in availableBackground" :key="item" 
+            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
+            @click="backgroundChangeCallback(item)"/>
+        </el-row>
+      </el-popover>
+      <el-popover  content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
         :appendToBody=false trigger="manual" popper-class="flatmap-popper">
-        <SvgIcon icon="changeBckgd" class="icon-button background-colour" 
-          :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference" @click.native="backgroundChangeCallback()"
+        <SvgIcon v-popover:backgroundPopover icon="changeBckgd" class="icon-button background-colour" 
+          :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
     </div>
@@ -122,11 +138,9 @@ export default {
     this.mapImp = undefined;
   },
   methods: {
-    backgroundChangeCallback: function() {
-      ++this.currentBackground;
-      if (this.currentBackground >= this.availableBackground.length )
-        this.currentBackground = 0;
-      this.mapImp.setBackgroundColour(this.availableBackground[this.currentBackground], 1 );
+    backgroundChangeCallback: function(colour) {
+      this.currentBackground = colour;
+      this.mapImp.setBackgroundColour(this.currentBackground, 1 );
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen;
@@ -390,8 +404,8 @@ export default {
       hoverVisibilities: [{value: false}, {value: false}, {value: false},
         {value: false}, {value: false}, {value: false}, {value: false}],
       inHelp: false,
-      currentBackground: 0,
-      availableBackground: ['white', 'black', 'lightskyblue'],
+      currentBackground: 'white',
+      availableBackground: ['white', 'lightskyblue', 'black' ],
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
@@ -649,10 +663,56 @@ export default {
   transition: all 1s ease;
 }
 .background-colour.open {
-  left: 310px;
+  left: 322px;
 }
 .background-colour.close {
-  left: 12px;
+  left: 24px;
+}
+
+>>> .background-popper {
+  padding: 5px 12px;
+  background-color: #ffffff;
+  border: 1px solid rgb(131, 0, 191);
+  box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+  height: 72px;
+  width: 128px;
+  min-width:128px;
+}
+
+.backgroundText {
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.backgroundChooser {
+  display: flex;
+  margin-top:16px;
+}
+
+.backgroundChoice {
+  width:20px;
+  height:20px;
+  border: 1px solid rgb(144, 147, 153);
+  margin-left:20px;
+}
+.backgroundChoice.active {
+  border:2px solid #8300bf;
+}
+.backgroundChoice:hover {
+  cursor: pointer;
+}
+
+.backgroundChoice.white {
+  background-color: white;
+  margin-left:10px;
+}
+.backgroundChoice.black {
+  background-color: black;
+}
+.backgroundChoice.lightskyblue {
+  background-color: lightskyblue;
 }
 
 .togglePaths {
