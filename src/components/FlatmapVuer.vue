@@ -443,7 +443,7 @@ export default {
 <style scoped>
 .warning-icon {
   position: absolute;
-  top: 15px;
+  top: 90px;
   left: 37px;
   text-align: left;
   font-size: 25px;
