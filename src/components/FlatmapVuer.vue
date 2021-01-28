@@ -22,7 +22,7 @@
           <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
             @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
-        <el-popover content="Zoom out" placement="top-end" :offset="50"
+        <el-popover content="Zoom out" placement="top-end"
           :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-zoomout" v-model="hoverVisibilities[1].value">
           <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
@@ -775,11 +775,11 @@ export default {
 }
 
 >>>.popper-zoomout {
-  left:-31px!important;
+  left:-21px!important;
 }
 
 >>>.popper-zoomout .popper__arrow{
-  left:48px!important;
+  left:53px!important;
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {
