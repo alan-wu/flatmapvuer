@@ -4,7 +4,7 @@
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
-    <SvgSprite/>
+    <SvgSpriteColor/>
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
@@ -101,7 +101,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { SvgIcon, SvgSprite} from '@abi-software/svg-sprite'
+import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
 import {
   Checkbox,
   CheckboxGroup,
@@ -131,7 +131,7 @@ export default {
   name: "FlatmapVuer",
   components: {
     SvgIcon,
-    SvgSprite
+    SvgSpriteColor
   },
   beforeCreate: function() {
     this.mapManager = undefined;
