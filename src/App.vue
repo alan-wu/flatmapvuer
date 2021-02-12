@@ -14,7 +14,7 @@
           <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
         </el-row>
       </div>
-      <el-button icon="el-icon-setting" slot="reference">Options</el-button>
+      <el-button class="options-button" icon="el-icon-setting" slot="reference">Options</el-button>
     </el-popover>
   
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
@@ -128,7 +128,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Asap', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -144,7 +144,7 @@ body {
 
 .popover{
   top:5px;
-  right:10PX;
+  right:calc( 50% - 20px);
   position:absolute;
   z-index:1000;
 }
@@ -164,6 +164,8 @@ body {
 .el-tabs__content {
   height:100%;
 }
+
+
 </style>
 <style scoped src="./styles/purple/popover.css">
 </style>

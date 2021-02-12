@@ -4,6 +4,7 @@
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
+    <SvgSpriteColor/>
     <div style="height:100%;width:100%;position:relative">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
@@ -15,51 +16,84 @@
         v-popover:warningPopover>
         <span class="warning-text">Beta</span>
       </i>
-      <el-popover content="Zoom in" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
-        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
-      </el-popover>
-      <el-popover content="Zoom out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[1].value">
-        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
-      </el-popover>
-      <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
-        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
-      </el-popover>
-      <el-popover content="Change background color" placement="left" v-model="hoverVisibilities[3].value"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper">
-        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
-      </el-popover>
-      <el-popover content="Change pathway visibility" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover">
+      <div class="bottom-right-control">
+        <el-popover content="Zoom in" placement="left" 
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
+          <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
+            @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
-      <div class="pathway-container" v-if="pathways.length > 0 && pathControls" v-popover:checkBoxPopover>
-        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all pathways</el-checkbox>
-        <el-checkbox-group v-model="checkedItems" size="small" 
-          class="checkbox-group" @change="handleCheckedItemsChange">>
-          <el-row v-for="item in pathways" :key="item.type" :label="item.type">
-            <div class="checkbox-container">
-              <el-checkbox
-                class="my-checkbox"
-                style="margin-top:3px;"
-                :label="item.type"
-                @change="visibilityToggle()"
-                :checked="true"
-                border
-              ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
-            </div>
-          </el-row>
-        </el-checkbox-group>
-        <el-popover content="Find these markers for data" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
+        <el-popover content="Zoom out" placement="top-end"
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-zoomout" v-model="hoverVisibilities[1].value">
+          <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
+            @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
-        <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
+        <el-popover content="Reset" placement="top"
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[2].value">
+          <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
+            @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
+        </el-popover>
       </div>
+      <el-popover content="Change pathway visibility" placement="right"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
+      <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
+        <div class="pathway-container" v-if="pathways.length > 0 && pathControls"
+           v-popover:checkBoxPopover>
+          <el-popover content="Find these markers for data" placement="right"
+            :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
+          </el-popover>
+          <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
+          <el-row>
+            <el-col :span="12">
+              <div class="pathways-display-text">
+                Pathways
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <el-checkbox class="all-checkbox" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all</el-checkbox>
+            </el-col>
+          </el-row>
+          <el-checkbox-group v-model="checkedItems" size="small" 
+            class="checkbox-group" @change="handleCheckedItemsChange">
+            <div class="checkbox-group-inner">
+              <el-row v-for="item in pathways" :key="item.type" :label="item.type">
+                <div class="checkbox-container">
+                  <el-checkbox
+                    class="my-checkbox"
+                    :label="item.type"
+                    @change="visibilityToggle()"
+                    :checked="true"
+                  ><div class="path-visual" :class="item.type"></div>{{item.label}}</el-checkbox>
+                </div>
+              </el-row>
+            </div>
+          </el-checkbox-group>
+        </div>
+        <div @click="toggleDrawer" class="drawer-button" :class="{ open: drawerOpen, close: !drawerOpen }">
+          <i class="el-icon-arrow-left"></i>
+        </div>
+      </div>
+      <el-popover
+        ref="backgroundPopover"
+        placement="top-start"
+        width="128"
+        :appendToBody=false
+        trigger="click"
+        popper-class="background-popper">
+        <el-row class="backgroundText">
+          Change background
+        </el-row>
+        <el-row class="backgroundChooser" >
+          <div v-for="item in availableBackground" :key="item" 
+            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
+            @click="backgroundChangeCallback(item)"/>
+        </el-row>
+      </el-popover>
+      <el-popover  content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper">
+        <SvgIcon v-popover:backgroundPopover icon="changeBckgd" class="icon-button background-colour" 
+          :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
+          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -67,9 +101,11 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
+import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
 import {
   Checkbox,
   CheckboxGroup,
+  Col,
   Loading,
   Row
 } from "element-ui";
@@ -79,6 +115,7 @@ import flatmapMarker from "../icons/flatmap-marker";
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
+Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
@@ -92,16 +129,21 @@ const mapResize = map => {
 
 export default {
   name: "FlatmapVuer",
+  components: {
+    SvgIcon,
+    SvgSpriteColor
+  },
   beforeCreate: function() {
     this.mapManager = undefined;
     this.mapImp = undefined;
   },
   methods: {
-    backgroundChangeCallback: function() {
-      ++this.currentBackground;
-      if (this.currentBackground >= this.availableBackground.length )
-        this.currentBackground = 0;
-      this.mapImp.setBackgroundColour(this.availableBackground[this.currentBackground], 1 );
+    backgroundChangeCallback: function(colour) {
+      this.currentBackground = colour;
+      this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+    },
+    toggleDrawer: function () {
+      this.drawerOpen = !this.drawerOpen;
     },
     /**
      * Function to toggle paths to default.
@@ -216,7 +258,7 @@ export default {
     openFlatmapHelpPopup: function(){
       if (this.mapImp) {
         let heartId = this.mapImp.featureIdsForModel('UBERON:0000948')[0];
-        const elm = 'Hover for more information';
+        const elm = 'Click for more information';
         this.mapImp.showPopup(heartId, elm, {anchor: "top", className: "flatmap-popup-popper"});
       }
     },
@@ -261,7 +303,7 @@ export default {
         this.loading = true;
         let minimap = false;
         if (this.displayMinimap) {
-          minimap = { position: "bottom-right" };
+          minimap = { position: "top-right" };
         }
         let entry = this.entry;
         if (state && state.entry)
@@ -362,10 +404,11 @@ export default {
       hoverVisibilities: [{value: false}, {value: false}, {value: false},
         {value: false}, {value: false}, {value: false}, {value: false}],
       inHelp: false,
-      currentBackground: 0,
-      availableBackground: ['white', 'black', 'lightskyblue'],
+      currentBackground: 'white',
+      availableBackground: ['white', 'lightskyblue', 'black' ],
       loading: false,
-      flatmapMarker: flatmapMarker
+      flatmapMarker: flatmapMarker,
+      drawerOpen: true,
     };
   },
   watch: {
@@ -385,7 +428,7 @@ export default {
     }
   },
   mounted: function() {
-    const flatmap = require("@dbrnz/flatmap-viewer");
+    const flatmap = require("@abi-software/flatmap-viewer");
     let endpoint = this.flatmapAPI;
     if (!endpoint)
       endpoint = "https://mapcore-demo.org/flatmaps/";
@@ -400,11 +443,11 @@ export default {
 <style scoped>
 .warning-icon {
   position: absolute;
-  top: 15px;
+  top: 90px;
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #d70000;
+  color: #ff8400;
 }
 .warning-icon:hover {
   cursor: pointer;
@@ -414,10 +457,10 @@ export default {
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: #d70000;
+  background-color: #ff8400;
 }
 >>> .warning-popper.right-popper .popper__arrow::after{
-  border-right-color: #d70000 !important;
+  border-right-color: #ff8400 !important;
 }
 
 .warning-text{
@@ -470,13 +513,43 @@ export default {
   width: 100%;
 }
 
-.pathway-container {
+.pathway-location {
   position: absolute;
-  top: 134px;
-  left: 17px;
+  bottom: 0px;
+  transition: all 1s ease;
+}
+.pathway-location.open {
+  left: 0px;
+}
+.pathway-location.close {
+  left: -298px;
+}
+
+.pathway-container {
+  float: left;
+  padding-left: 16px;
+  padding-right: 18px;
   max-height: calc(100% - 184px);
   text-align: left;
   overflow: auto;
+  border: 1px solid rgb(220, 223, 230);
+  padding-top:7px;
+  padding-bottom:16px;
+  background:#ffffff;
+}
+
+.pathways-display-text {
+  width: 59px;
+  height: 20px;
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  margin-left: 8px;
+}
+
+.all-checkbox {
+  float: right;
 }
 
 .checkbox-container { 
@@ -484,9 +557,20 @@ export default {
   cursor: pointer;
 }
 
+.checkbox-group {
+  width: 260px;
+  border: 1px solid rgb(144, 147, 153);
+  border-radius: 4px;
+  background: #ffffff;
+}
+
 .my-checkbox {
   background-color: #fff;
   width:100%;
+}
+
+.checkbox-group-inner {
+  padding:18px;
 }
 
 .flatmap-marker-help{
@@ -499,6 +583,11 @@ export default {
 
 >>> .el-checkbox__label {
   padding-left:5px;
+  color: rgb(131, 0, 191);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0px;
+  line-height: 14px;
 }
 
 >>> .el-checkbox__input.is-indeterminate .el-checkbox__inner
@@ -547,7 +636,6 @@ export default {
   padding: 0px;
 }
 
-
 >>>.flatmapvuer-popover .mapboxgl-popup-close-button {
   position: absolute;
   right: 0.5em;
@@ -561,28 +649,70 @@ export default {
   top: 0.95em;
 }
 
-.zoomIn{
-  top:51px;
-  right:20px;
-  position: absolute;
-}
-
 .zoomOut{
-  top:101px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
 .resetView {
-  top:151px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
-.backgroundColour {
-  top:201px;
-  right:20px;
+.background-colour {
+  bottom: 16px;
   position: absolute;
+  transition: all 1s ease;
+}
+.background-colour.open {
+  left: 322px;
+}
+.background-colour.close {
+  left: 24px;
+}
+
+>>> .background-popper {
+  padding: 5px 12px;
+  background-color: #ffffff;
+  border: 1px solid rgb(131, 0, 191);
+  box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+  height: 72px;
+  width: 128px;
+  min-width:128px;
+}
+
+.backgroundText {
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.backgroundChooser {
+  display: flex;
+  margin-top:16px;
+}
+
+.backgroundChoice {
+  width:20px;
+  height:20px;
+  border: 1px solid rgb(144, 147, 153);
+  margin-left:20px;
+}
+.backgroundChoice.active {
+  border:2px solid #8300bf;
+}
+.backgroundChoice:hover {
+  cursor: pointer;
+}
+
+.backgroundChoice.white {
+  background-color: white;
+  margin-left:10px;
+}
+.backgroundChoice.black {
+  background-color: black;
+}
+.backgroundChoice.lightskyblue {
+  background-color: lightskyblue;
 }
 
 .togglePaths {
@@ -592,17 +722,22 @@ export default {
 }
 
 .icon-button {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  border: solid 1px #ffffff;
-  background-color: #ffffff;
+  height:24px!important;
+  width:24px!important;
+  color: #8300bf;
+}
+.icon-button:hover {
+  cursor:pointer;
 }
 
 >>> .flatmap-popper {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #fff;
-  background-color: #8300bf;  
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset;
 }
 
 >>> .flatmap-marker{
@@ -619,11 +754,32 @@ export default {
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #fff;
-  background-color: #8300bf;  
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset;
+}
+
+>>>.el-popper[x-placement^="right"] .popper__arrow {
+  left: -8px;
+}
+
+
+>>>.el-popper[x-placement^="top"] .popper__arrow::after {
+  border-top-color:#8300bf !important;
+  border-left-color:transparent !important;
+  border-right-color:transparent !important;
+}
+
+>>>.popper-zoomout {
+  left:-21px!important;
+}
+
+>>>.popper-zoomout .popper__arrow{
+  left:53px!important;
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {
@@ -634,7 +790,72 @@ export default {
   border-bottom-color: #8300bf;  
 }
 
+.bottom-right-control {
+  position:absolute;
+  right:16px;
+  bottom:16px;
+}
+
+>>> .my-drawer {
+  background: rgba(0,0,0,0);
+  box-shadow: none;
+}
+
+.drawer >>> .el-drawer:focus{
+  outline:none;
+}
+
+.open-drawer{
+  width: 20px;
+  height: 40px;
+  z-index: 8;
+  position: absolute;
+  left: 0px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+  border: solid 1px #e4e7ed;
+  background-color: #F7FAFF;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.drawer-button {
+  float: left;
+  width: 20px;
+  height: 40px;
+  z-index: 8;
+  margin-top:calc(50% - 36px);
+  border: solid 1px #e4e7ed;
+  border-left: 0;
+  background-color: #FFFFFF;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.drawer-button i{
+  margin-top:12px;
+  color: #8300bf;
+  transition-delay: 0.9s;
+}
+
+.drawer-button.open i{
+  transform: rotate(0deg) scaleY(2.5);
+}
+
+.drawer-button.close i{
+  transform: rotate(180deg) scaleY(2.5);
+}
+
+>>>.mapboxgl-canvas-container canvas {
+  outline:none;
+}
+
 </style>
+
+
 
 <style scoped src="../styles/purple/checkbox.css">
 </style>
