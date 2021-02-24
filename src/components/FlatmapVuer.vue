@@ -624,12 +624,48 @@ export default {
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   pointer-events: auto;
   background: #fff;
+  border: 1px solid rgb(131, 0, 191);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 >>> .mapboxgl-popup.flatmap-marker-popup{
   box-shadow: 1px 1px 2px rgba(0,0,0,.1);
   pointer-events: auto;
   background: #fff;
+}
+
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content::after,
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 100%;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    flex-shrink: 0;
+}
+
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content::after {
+    margin: 0 auto;
+    border-color: rgb(250, 250, 250) transparent transparent  transparent ;
+    border-width: 11px;
+}
+
+/* this border color controlls the outside, thin border */
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content::before {
+    margin: 0 auto;
+    border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
+    border-width: 12px;
+}
+
+
+
+>>> .flatmap-tooltip-popup .mapboxgl-popup-tip{
+  display: none;
 }
 
 >>> .flatmap-marker-popup .mapboxgl-popup-content {
