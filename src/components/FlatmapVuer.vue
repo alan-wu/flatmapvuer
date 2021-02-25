@@ -199,6 +199,8 @@ export default {
         const taxonomy = this.entry;
         const data = { taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
+        console.log(data.resource, data.feature)
+        window.daaaata = data
         this.$emit("resource-selected", data);
       }
     },
@@ -653,6 +655,11 @@ export default {
     margin: 0 auto;
     border-color: rgb(250, 250, 250) transparent transparent  transparent ;
     border-width: 11px;
+}
+
+/* Fix for chrome bug where under triangle pops up above one on top of it  */
+.selector:not(*:root), >>>.flatmap-tooltip-popup .mapboxgl-popup-content::after{
+  top: 99.9%;
 }
 
 /* this border color controlls the outside, thin border */
