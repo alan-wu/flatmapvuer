@@ -300,6 +300,11 @@ export default {
 >>> .flatmap-popper .popper__arrow::after{
   border-right-color: #8300bf !important;
 }
+
+>>> .flatmap-marker-popup{
+  background-color: #f0f0f000  !important;
+  box-shadow: none !important;
+}
 </style>
 
 

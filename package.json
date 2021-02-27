@@ -16,9 +16,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@abi-software/maptooltip": "^0.1.13",
-    "@abi-software/svg-sprite": "^0.1.11",
     "@abi-software/flatmap-viewer": "^1.0.2",
+    "@abi-software/maptooltip": "^0.1.7-beta-2",
+    "@abi-software/svg-sprite": "^0.1.11",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",

@@ -22,10 +22,7 @@
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
       :displayMinimap=true :flatmapAPI="flatmapAPI"/>
-    <div>
-      <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
-        :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
-    </div>
+    <Tooltip ref="tooltip" :content="tooltipContent"/>
   </div>
 </template>
 
@@ -33,8 +30,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
-import { TooltipVuer } from '@abi-software/maptooltip';
-import '@abi-software/maptooltip/dist/maptooltip.css';
+import Tooltip from './components/Tooltip'
 import {
   Col,
   Popover,
@@ -62,9 +58,8 @@ export default {
         this.$refs.multi.setState(this._mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
-      let tooltip = this.$refs.tooltip;
       if (resource.eventType == "mouseenter")
-        this.$refs.multi.showMarkerPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
+        this.$refs.multi.showMarkerPopup(resource.feature.id, this.$refs.tooltip.$el);
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
@@ -88,7 +83,7 @@ export default {
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat", displayWarning:true},
       },
-      tContent: {
+      tooltipContent: {
         title: "Mapping of ICN Neurons in a 3D Rat Heart",
         description: "The distribution of neurons in the intrinsic cardiac nervous system (ICN) were mapped and visualized in a 3D reconstruction of a male rat heart.",
         actions: [
@@ -111,7 +106,7 @@ export default {
       },
       displayCloseButton: false,
       initial: "Rat",
-      visible: false,
+      visible: true,
       helpMode: false,
       flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
     }
@@ -121,7 +116,7 @@ export default {
   },
   components: {
     MultiFlatmapVuer,
-    TooltipVuer
+    Tooltip
   }
 }
 </script>
@@ -164,6 +159,7 @@ body {
 .el-tabs__content {
   height:100%;
 }
+
 
 
 </style>
