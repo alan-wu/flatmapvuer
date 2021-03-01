@@ -45,6 +45,7 @@
       :displayMinimap="displayMinimap"
       style="height:100%"
       :flatmapAPI="flatmapAPI"
+      @onActionClick="onActionClick"
     />
   </div>
 </template>
@@ -148,6 +149,9 @@ export default {
           map.setState(state.state);
         }
       }
+    },
+    onActionClick: function(action) {
+      this.$emit("onActionClick", action);
     },
   },
   props: {

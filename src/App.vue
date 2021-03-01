@@ -21,8 +21,7 @@
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap=true :flatmapAPI="flatmapAPI"/>
-    <Tooltip ref="tooltip" :content="tooltipContent"/>
+      :displayMinimap=true :flatmapAPI="flatmapAPI" @onActionClick="onActionClick"/>
   </div>
 </template>
 
@@ -30,7 +29,6 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
-import Tooltip from './components/Tooltip'
 import {
   Col,
   Popover,
@@ -57,10 +55,6 @@ export default {
       if (this._mapSettings.length > 0)
         this.$refs.multi.setState(this._mapSettings.pop());
     },
-    FlatmapSelected: function(resource) {
-      if (resource.eventType == "mouseenter")
-        this.$refs.multi.showMarkerPopup(resource.feature.id, this.$refs.tooltip.$el);
-    },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
@@ -83,22 +77,7 @@ export default {
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat", displayWarning:true},
       },
-      tooltipContent: {
-        title: "Mapping of ICN Neurons in a 3D Rat Heart",
-        description: "The distribution of neurons in the intrinsic cardiac nervous system (ICN) were mapped and visualized in a 3D reconstruction of a male rat heart.",
-        actions: [
-          {
-            title: "View 3D scaffold",
-            resource: "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json",
-            type: "Scaffold"
-          },
-          {
-            title: "View dataset",
-            resource: "https://sparc.science/datasets/37?type=dataset",
-            type: "URL"
-          }
-        ]
-      },
+      tooltipContent: undefined,
       tStyle: {
         top: "200px",
         left: "200px",
@@ -116,7 +95,6 @@ export default {
   },
   components: {
     MultiFlatmapVuer,
-    Tooltip
   }
 }
 </script>

@@ -1,8 +1,24 @@
 <template>
   <div class="tooltip-container">
-     <el-main class="main">
+     <el-main v-if="content" class="main">
       <div class="block">
-        <span class="display">{{content.title}}</span>
+        <span class="title">{{content.title}}</span>
+      </div>
+      <div v-if="content.components" class="block">
+        <div class="attribute-title">Components</div>
+        <span class="attribute-content">{{content.components}}</span>
+      </div>
+      <div v-if="content.start" class="block">
+        <div class="attribute-title">Origin</div>
+        <span class="attribute-content">{{content.start}}</span>
+      </div>
+      <div v-if="content.distribution" class="block">
+        <div class="attribute-title">Distribution</div>
+        <span class="attribute-content">{{content.distribution}}</span>
+      </div>
+      <div v-if="content.uberon" class="block">
+        <div class="attribute-title">Uberon</div>
+        <span class="attribute-content">{{content.uberon}}</span>
       </div>
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="onActionClick(action)">
@@ -34,18 +50,13 @@ Vue.use(Main);
 export default {
   name: "Tooltip",
   props: { 
+    visible: {
+      type: Boolean,
+      default: false
+    },
     content: {
       type: Object,
-      default: () => ({ // <= note the parenthesis
-          description : '',
-          actions: [
-            {
-            title: "View dataset",
-            resource: "https://sparc.science/datasets/37?type=dataset",
-            type: "URL"
-            }
-          ]
-      }) // <= here also
+      default: undefined
     }
   },
   data: function() {
@@ -57,6 +68,13 @@ export default {
   mounted: function() {
   },
   methods: {
+    onActionClick: function(action) {
+      this.$emit("onActionClick", action);
+      
+    },
+    onClose: function() {
+      this.$emit("onClose");
+    }
    
   }
 };
@@ -125,6 +143,26 @@ export default {
   font-weight: 400;
   /* outline: thin red solid; */
   padding: 1em !important;
+}
+
+.title{
+  font-size: 18px;
+  font-weight: 500;
+  /* font-weight: bold; */
+  padding-bottom: 8px;
+
+}
+
+.attribute-title{
+  font-size: 16px;
+  font-weight: 600;
+  /* font-weight: bold; */
+  text-transform: uppercase;
+}
+
+.attribute-content{
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .popover-container {

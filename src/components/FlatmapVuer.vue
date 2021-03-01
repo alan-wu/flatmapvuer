@@ -5,7 +5,7 @@
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
     <SvgSpriteColor/>
-    <div style="height:100%;width:100%;position:relative">
+    <div style="height:100%;width:100%;position:relative;overflow-y:none" @click="checkNeuronClicked">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
         v-if="displayWarning" :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisibilities[6].value"
@@ -94,6 +94,7 @@
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
+      <Tooltip ref="tooltip" :content="tooltipContent" @onActionClick="onActionClick"/>
     </div>
   </div>
 </template>
@@ -101,6 +102,8 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
+import Tooltip from './Tooltip'
+import nerveMap from '../nerve-map'
 import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
 import {
   Checkbox,
@@ -131,7 +134,8 @@ export default {
   name: "FlatmapVuer",
   components: {
     SvgIcon,
-    SvgSpriteColor
+    SvgSpriteColor,
+    Tooltip
   },
   beforeCreate: function() {
     this.mapManager = undefined;
@@ -199,10 +203,43 @@ export default {
         const taxonomy = this.entry;
         const data = { taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
-        console.log(data.resource, data.feature)
-        window.daaaata = data
+        this.simulateClickCallback(data.resource[0])
         this.$emit("resource-selected", data);
       }
+    },
+     // simulateClickCallback is a hack function to simulate getting click events from the flatmap
+     //   This is done by temporarily storing the last hovered uberon in this.$data
+    simulateClickCallback: function(uberon){
+      this.lastHover = uberon
+      if (this.setTimeoutId){
+        clearTimeout(this.setTimeoutId)
+      }
+      this.setTimeoutId = setTimeout( ()=>{this.lastHover = undefined}, 1400)
+    },
+    // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
+    checkNeuronClicked: function(){
+      if (this.lastHover){
+        this.neuralData(this.lastHover)
+        this.mapImp.showPopup(this.mapImp.featureIdsForModel(this.lastHover)[0],this.$refs.tooltip.$el)
+        // Below is a hack to remove flatmap tooltips while popup is open
+        document.querySelector('.flatmap-tooltip-popup').style.display = 'none'
+        document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
+          document.querySelector('.flatmap-tooltip-popup').style.display = 'block'  
+        }
+      }
+    },
+    // neuralData (uberon): Sets prop input for neural path pop up
+    neuralData: function(uberon){
+      if (uberon){
+        if (nerveMap[uberon]){
+          this.tooltipVisible = true
+          this.tooltipContent = nerveMap[uberon]
+          this.tooltipContent.uberon = uberon
+        }
+      }
+    },
+    onActionClick: function(action) {
+      this.$emit("onActionClick", action);
     },
     getCoordinatesOfLastClick: function() {
       if (this.mapImp) {
@@ -411,6 +448,8 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
+      lastHover: undefined,
+      tooltipContent: {},
     };
   },
   watch: {
@@ -827,6 +866,10 @@ export default {
 
 >>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {
   display: none;
+}
+
+>>> .mapboxgl-popup-content {
+  padding: 0px;
 }
 
 >>> .flatmap-popup-popper .mapboxgl-popup-tip {

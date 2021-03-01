@@ -53,4 +53,23 @@ export default {
       type: "URL"
     }],
   },
+  'UBERON:0001759': {
+    title: 'Vagus nerve', components: undefined, start: undefined, distribution: undefined, actions: [{
+      title: "View Source",
+      resource: "https://doi.org/10.1002/ca.23296",
+      type: "URL"
+    }, {
+      title: "Explore data",
+      label: "Stimulation",
+      resource: "https://sparc.science/data?type=dataset&q=stimulation",
+      type: "Search",
+      nervePath: true,
+      filter: {
+        facet: 'Vagus Nerve',
+        term: 'genotype'
+      },
+    },
+  ],
+  },
+  
 }
