@@ -5,7 +5,7 @@
         Species
       </div>
       <el-popover content="Select a species" placement="right" 
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="helpMode" ref="selectPopover">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper right-popper" v-model="helpMode" ref="selectPopover">
       </el-popover>
       <el-select
         id="flatmap-select"
@@ -284,10 +284,6 @@ export default {
   font-weight: normal;
 }
 
->>>.el-popper[x-placement^="right"] .popper__arrow {
-  left: -8px;
-}
-
 >>>.flatmap-popper {
   padding: 6px 4px;
   font-size:12px;
@@ -297,8 +293,12 @@ export default {
   white-space: nowrap;
   min-width: unset;
 }
->>> .flatmap-popper .popper__arrow::after{
+>>> .flatmap-popper.right-popper .popper__arrow{
   border-right-color: #8300bf !important;
+}
+
+>>> .flatmap-popper.right-popper .popper__arrow:after{
+  border-right-color: #f3ecf6 !important;
 }
 </style>
 
