@@ -220,7 +220,7 @@ export default {
     checkNeuronClicked: function(){
       if (this.lastHover){
         this.neuralData(this.lastHover)
-        this.mapImp.showPopup(this.mapImp.featureIdsForModel(this.lastHover)[0],this.$refs.tooltip.$el)
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(this.lastHover)[0],this.$refs.tooltip.$el)
         // Below is a hack to remove flatmap tooltips while popup is open
         document.querySelector('.flatmap-tooltip-popup').style.display = 'none'
         document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
@@ -663,7 +663,7 @@ export default {
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
-  pointer-events: auto;
+  pointer-events: none;
   background: #fff;
   border: 1px solid rgb(131, 0, 191);
   display: flex;
@@ -707,8 +707,6 @@ export default {
     border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
     border-width: 12px;
 }
-
-
 
 >>> .flatmap-tooltip-popup .mapboxgl-popup-tip{
   display: none;

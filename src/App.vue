@@ -55,6 +55,10 @@ export default {
       if (this._mapSettings.length > 0)
         this.$refs.multi.setState(this._mapSettings.pop());
     },
+    FlatmapSelected: function(resource) {
+      if (resource.eventType == "click")
+        console.log(resource);
+    },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
@@ -85,9 +89,8 @@ export default {
       },
       displayCloseButton: false,
       initial: "Rat",
-      visible: true,
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
   mounted: function() {
