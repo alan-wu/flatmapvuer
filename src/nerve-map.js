@@ -69,7 +69,21 @@ export default {
         term: 'genotype'
       },
     },
-  ],
+    ],
   },
+  'http://uri.interlex.org/base/ilx_0738443': {
+    title: 'Fascicle of Vagus Nerve', components: undefined, start: undefined, distribution: undefined, actions: [{
+      title: "View Source",
+      resource: "https://doi.org/10.1002/ca.23296",
+      type: "URL"
+    }, {
+      title: "View Dataset",
+      label: "Stimulation",
+      resource: "https://sparc.science/datasets/64?type=dataset",
+      type: "URL",
+      nervePath: false,
+    },
+    ],
+  }
   
 }

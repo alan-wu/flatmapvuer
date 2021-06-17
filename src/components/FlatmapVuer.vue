@@ -5,7 +5,7 @@
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
     <SvgSpriteColor/>
-    <div style="height:100%;width:100%;position:relative;overflow-y:none" @click="checkNeuronClicked">
+    <div style="height:100%;width:100%;position:relative;overflow-y:none">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
         v-if="displayWarning" :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisibilities[6].value"
@@ -197,13 +197,15 @@ export default {
       }
     },
     eventCallback: function() {
+      
       return (eventType, feature, ...args) => {
         const label = feature.label;
         const resource = [ feature.models ];
         const taxonomy = this.entry;
-        const data = { taxonomy: taxonomy, resource: resource, label: label,
+        const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
-        this.simulateClickCallback(data.resource[0])
+        //this.simulateClickCallback(data.resource[0])
+        this.checkPopups(data)
         this.$emit("resource-selected", data);
       }
     },
@@ -217,12 +219,15 @@ export default {
       this.setTimeoutId = setTimeout( ()=>{this.lastHover = undefined}, 1400)
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
-    checkNeuronClicked: function(){
-      if (this.lastHover){
-        this.neuralData(this.lastHover)
-        this.mapImp.showPopup(this.mapImp.modelFeatureIds(this.lastHover)[0],this.$refs.tooltip.$el)
+    checkPopups: function(data){
+      window.mapImp = this.mapImp
+      if (data.resource[0] && data.eventType == 'click'){
+        this.neuralData(data.resource[0])
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
         // Below is a hack to remove flatmap tooltips while popup is open
-        document.querySelector('.flatmap-tooltip-popup').style.display = 'none'
+        let ftooltip = document.querySelector('.flatmap-tooltip-popup')
+        if (ftooltip) ftooltip.style.display = 'none'
+        
         document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
           document.querySelector('.flatmap-tooltip-popup').style.display = 'block'  
         }
@@ -240,15 +245,6 @@ export default {
     },
     onActionClick: function(action) {
       this.$emit("onActionClick", action);
-    },
-    getCoordinatesOfLastClick: function() {
-      if (this.mapImp) {
-        if (this.mapImp._userInteractions._lastClickedLocation) {
-          return this.mapImp._map.project(
-            this.mapImp._userInteractions._lastClickedLocation);
-        }
-      }
-      return undefined;
     },
     showPopup: function(featureId, node, options) {
       let myOptions = options;
