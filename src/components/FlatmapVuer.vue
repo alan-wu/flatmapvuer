@@ -222,42 +222,76 @@ export default {
     checkPopups: function(data){
       window.mapImp = this.mapImp
       if (data.resource[0] && data.eventType == 'click'){
-        this.neuralData(data.resource[0])
-        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
+        this.createPopup(data)
+      }
+    },
+    createPopup: function(data){
+      this.neuralData(data)
+      this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
+      this.popUpCssHack()
+    },
+    popUpCssHack: function(){
         // Below is a hack to remove flatmap tooltips while popup is open
         let ftooltip = document.querySelector('.flatmap-tooltip-popup')
         if (ftooltip) ftooltip.style.display = 'none'
-        
+        document.querySelector('.mapboxgl-popup-close-button').style.display = 'block'
         document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
-          document.querySelector('.flatmap-tooltip-popup').style.display = 'block'  
+          document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
         }
-      }
+    },
+    hidePopup: function(){
+
     },
     // neuralData (uberon): Sets prop input for neural path pop up
-    neuralData: function(uberon){
-      if (uberon){
-        if (nerveMap[uberon]){
+    neuralData: function(data){
+      let content = {
+        title: undefined, components: undefined, start: undefined, distribution: undefined, actions: [{
+          title: "View Source",
+          resource: "https://doi.org/10.1002/ca.23296",
+          type: "URL"
+        }, {
+          title: "Explore data",
+          label: "Stimulation",
+          resource: undefined,
+          type: "Search",
+          nervePath: true,
+          filter: {
+            facet: 'Vagus Nerve',
+            term: 'genotype'
+          },
+        },
+        ],
+      }
+      let feature = data.resource[0]
+      if (feature){
+        if (nerveMap[feature]){
           this.tooltipVisible = true
-          this.tooltipContent = nerveMap[uberon]
-          this.tooltipContent.uberon = uberon
+          this.tooltipContent = nerveMap[feature]
+          this.tooltipContent.uberon = feature
+        } else {
+          this.tooltipVisible = true
+          this.tooltipContent = content
+          this.tooltipContent.uberon = feature
+          this.tooltipContent.title = data.label
         }
       }
     },
     onActionClick: function(action) {
       this.$emit("onActionClick", action);
     },
-    showPopup: function(featureId, node, options) {
-      let myOptions = options;
-      if (this.mapImp) {
-        if (myOptions) {
-          if (!myOptions.className)
-            myOptions.className = "flatmapvuer-popover";
-        } else {
-          myOptions = {className: "flatmapvuer-popover"};
-        }
-        this.mapImp.showPopup(featureId, node, myOptions);
-      }
-    },
+    // // old popup (unused) 
+    // showPopup: function(featureId, node, options) {
+    //   let myOptions = options;
+    //   if (this.mapImp) {
+    //     if (myOptions) {
+    //       if (!myOptions.className)
+    //         myOptions.className = "flatmapvuer-popover";
+    //     } else {
+    //       myOptions = {className: "flatmapvuer-popover"};
+    //     }
+    //     this.mapImp.showPopup(featureId, node, myOptions);
+    //   }
+    // },
     showMarkerPopup: function(featureId, node, options) {
       if (this.mapImp) {
         this.mapImp.showMarkerPopup(featureId, node, options);
@@ -660,6 +694,7 @@ export default {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   pointer-events: none;
+  display: none;
   background: #fff;
   border: 1px solid rgb(131, 0, 191);
   display: flex;
