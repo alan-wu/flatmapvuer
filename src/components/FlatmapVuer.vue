@@ -221,12 +221,12 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkPopups: function(data){
       window.mapImp = this.mapImp
-      if (data.resource[0] && data.eventType == 'click'){
+      if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)){
         this.createPopup(data)
       }
     },
     createPopup: function(data){
-      this.neuralData(data)
+      this.createTooltipFromNeuronCuration(data)
       this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
       this.popUpCssHack()
     },
@@ -242,39 +242,59 @@ export default {
     hidePopup: function(){
 
     },
-    // neuralData (uberon): Sets prop input for neural path pop up
-    neuralData: function(data){
+    // Cre
+    createTooltipFromNeuronCuration: function(data){
+      const feature = data.resource[0]
       let content = {
         title: undefined, components: undefined, start: undefined, distribution: undefined, actions: [{
           title: "View Source",
           resource: "https://doi.org/10.1002/ca.23296",
           type: "URL"
-        }, {
-          title: "Explore data",
-          label: "Stimulation",
-          resource: undefined,
-          type: "Search",
-          nervePath: true,
-          filter: {
-            facet: 'Vagus Nerve',
-            term: 'genotype'
-          },
-        },
-        ],
+        }]
       }
-      let feature = data.resource[0]
-      if (feature){
-        if (nerveMap[feature]){
+
+      // hardcoded data check
+      if (feature && nerveMap[feature]){
           this.tooltipVisible = true
           this.tooltipContent = nerveMap[feature]
           this.tooltipContent.uberon = feature
-        } else {
+      } else {
+
+        // neural data check
+        if (feature){
+          if (feature.includes('ilxtr:neuron')){
+            this.tooltipVisible = true
+            this.tooltipContent = content
+            this.tooltipContent.uberon = feature
+            this.tooltipContent.title = data.label
+            this.tooltipContent.actions.push({
+              title: 'View Datasets with connection',
+              label: 'Neuron Datasets',
+              resource: data.feature,
+              type: 'Neuron Search',
+              nervePath: true,
+            })
+          }
+        }
+        // annotated with datset check
+        if (data.dataset){
           this.tooltipVisible = true
           this.tooltipContent = content
           this.tooltipContent.uberon = feature
           this.tooltipContent.title = data.label
+          this.tooltipContent.actions.push({
+            title: "View Dataset",
+            resource: data.dataset,
+            type: "URL",
+            nervePath: false,
+          })
+        }
+        else{
+          this.tooltipVisible = false
+          return false
         }
       }
+      return true
     },
     onActionClick: function(action) {
       this.$emit("onActionClick", action);

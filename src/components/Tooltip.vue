@@ -143,6 +143,7 @@ export default {
   font-weight: 400;
   /* outline: thin red solid; */
   padding: 1em !important;
+  overflow: hidden;
 }
 
 .title{
