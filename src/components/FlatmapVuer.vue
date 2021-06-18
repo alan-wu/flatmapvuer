@@ -94,7 +94,7 @@
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
-      <Tooltip ref="tooltip" :content="tooltipContent" @onActionClick="onActionClick"/>
+      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" @onActionClick="onActionClick"/>
     </div>
   </div>
 </template>
@@ -235,6 +235,7 @@ export default {
         let ftooltip = document.querySelector('.flatmap-tooltip-popup')
         if (ftooltip) ftooltip.style.display = 'none'
         document.querySelector('.mapboxgl-popup-close-button').style.display = 'block'
+        this.$refs.tooltip.$el.style.display = 'flex'
         document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
           document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
         }
@@ -710,6 +711,10 @@ export default {
   color: #8492a6;
   font-size: 14px;
   margin-bottom: 20px;
+}
+
+.tooltip {
+  display: none;
 }
 
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content {
