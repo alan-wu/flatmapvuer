@@ -252,17 +252,22 @@ export default {
           type: "URL"
         }]
       }
+      
+      let foundAnnotations = false
+      this.tooltipVisible = false
 
       // hardcoded data check
       if (feature && nerveMap[feature]){
-          this.tooltipVisible = true
-          this.tooltipContent = nerveMap[feature]
-          this.tooltipContent.uberon = feature
+        foundAnnotations = true
+        this.tooltipVisible = true
+        this.tooltipContent = nerveMap[feature]
+        this.tooltipContent.uberon = feature
       } else {
 
         // neural data check
         if (feature){
           if (feature.includes('ilxtr:neuron')){
+            foundAnnotations = true
             this.tooltipVisible = true
             this.tooltipContent = content
             this.tooltipContent.uberon = feature
@@ -270,7 +275,7 @@ export default {
             this.tooltipContent.actions.push({
               title: 'View Datasets with connection',
               label: 'Neuron Datasets',
-              resource: data.feature,
+              resource: feature.split(':')[1],
               type: 'Neuron Search',
               nervePath: true,
             })
@@ -278,6 +283,7 @@ export default {
         }
         // annotated with datset check
         if (data.dataset){
+          foundAnnotations = true
           this.tooltipVisible = true
           this.tooltipContent = content
           this.tooltipContent.uberon = feature
@@ -289,12 +295,8 @@ export default {
             nervePath: false,
           })
         }
-        else{
-          this.tooltipVisible = false
-          return false
-        }
       }
-      return true
+      if(foundAnnotations) { return true } else { return false }
     },
     onActionClick: function(action) {
       this.$emit("onActionClick", action);
