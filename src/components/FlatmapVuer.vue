@@ -205,7 +205,7 @@ export default {
         const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
         //this.simulateClickCallback(data.resource[0])
-        this.checkPopups(data)
+        this.checkAndCreatePopups(data)
         this.$emit("resource-selected", data);
       }
     },
@@ -219,16 +219,11 @@ export default {
       this.setTimeoutId = setTimeout( ()=>{this.lastHover = undefined}, 1400)
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
-    checkPopups: function(data){
-      window.mapImp = this.mapImp
-      if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)){
-        this.createPopup(data)
+    checkAndCreatePopups: function(data){
+      if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)) { 
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
+        this.popUpCssHack()
       }
-    },
-    createPopup: function(data){
-      this.createTooltipFromNeuronCuration(data)
-      this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
-      this.popUpCssHack()
     },
     popUpCssHack: function(){
         // Below is a hack to remove flatmap tooltips while popup is open
@@ -524,6 +519,7 @@ export default {
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
     let endpoint = this.flatmapAPI;
+    console.log(endpoint)
     if (!endpoint)
       endpoint = "https://mapcore-demo.org/flatmaps/";
     this.mapManager = new flatmap.MapManager(endpoint);
@@ -727,6 +723,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 12px;
 }
 
 >>> .mapboxgl-popup.flatmap-marker-popup{

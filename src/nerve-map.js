@@ -40,6 +40,13 @@ export default {
     }],
   },
   'UBERON:0018675': {
+    title: 'Pelvic splanchnic nerve', components: undefined, start: undefined, distribution: undefined, actions: [{
+      title: "View Source",
+      resource: "https://doi.org/10.1002/ca.23296",
+      type: "URL"
+    }],
+  },
+  'UBERON:0018683': {
     title: 'Lumbar splanchnic nerve', components: undefined, start: undefined, distribution: undefined, actions: [{
       title: "View Source",
       resource: "https://doi.org/10.1002/ca.23296",
@@ -48,6 +55,13 @@ export default {
   },
   'UBERON:0001650': {
     title: 'Hypoglossal nerve', components: undefined, start: undefined, distribution: undefined, actions: [{
+      title: "View Source",
+      resource: "https://doi.org/10.1002/ca.23296",
+      type: "URL"
+    }],
+  },
+  'UBERON:0005303': {
+    title: 'Hypogastric nerve', components: undefined, start: undefined, distribution: undefined, actions: [{
       title: "View Source",
       resource: "https://doi.org/10.1002/ca.23296",
       type: "URL"
