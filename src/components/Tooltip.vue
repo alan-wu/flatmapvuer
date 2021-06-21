@@ -17,7 +17,7 @@
         <span class="attribute-content">{{content.distribution}}</span>
       </div>
       <div v-if="content.uberon" class="block">
-        <div class="attribute-title">Uberon</div>
+        <div class="attribute-title">Feature Id</div>
         <span class="attribute-content">{{content.uberon}}</span>
       </div>
       <el-button v-for="action in content.actions" round :key="action.title"
@@ -143,6 +143,7 @@ export default {
   font-weight: 400;
   /* outline: thin red solid; */
   padding: 1em !important;
+  overflow: hidden;
 }
 
 .title{

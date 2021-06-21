@@ -5,7 +5,7 @@
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
     <SvgSpriteColor/>
-    <div style="height:100%;width:100%;position:relative;overflow-y:none" @click="checkNeuronClicked">
+    <div style="height:100%;width:100%;position:relative;overflow-y:none">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
         v-if="displayWarning" :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisibilities[6].value"
@@ -94,7 +94,7 @@
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
-      <Tooltip ref="tooltip" :content="tooltipContent" @onActionClick="onActionClick"/>
+      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" @onActionClick="onActionClick"/>
     </div>
   </div>
 </template>
@@ -197,13 +197,15 @@ export default {
       }
     },
     eventCallback: function() {
+      
       return (eventType, feature, ...args) => {
         const label = feature.label;
         const resource = [ feature.models ];
         const taxonomy = this.entry;
-        const data = { taxonomy: taxonomy, resource: resource, label: label,
+        const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
-        this.simulateClickCallback(data.resource[0])
+        //this.simulateClickCallback(data.resource[0])
+        this.checkAndCreatePopups(data)
         this.$emit("resource-selected", data);
       }
     },
@@ -217,51 +219,97 @@ export default {
       this.setTimeoutId = setTimeout( ()=>{this.lastHover = undefined}, 1400)
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
-    checkNeuronClicked: function(){
-      if (this.lastHover){
-        this.neuralData(this.lastHover)
-        this.mapImp.showPopup(this.mapImp.modelFeatureIds(this.lastHover)[0],this.$refs.tooltip.$el)
-        // Below is a hack to remove flatmap tooltips while popup is open
-        document.querySelector('.flatmap-tooltip-popup').style.display = 'none'
-        document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
-          document.querySelector('.flatmap-tooltip-popup').style.display = 'block'  
-        }
+    checkAndCreatePopups: function(data){
+      if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)) { 
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
+        this.popUpCssHack()
       }
     },
-    // neuralData (uberon): Sets prop input for neural path pop up
-    neuralData: function(uberon){
-      if (uberon){
-        if (nerveMap[uberon]){
+    popUpCssHack: function(){
+        // Below is a hack to remove flatmap tooltips while popup is open
+        let ftooltip = document.querySelector('.flatmap-tooltip-popup')
+        if (ftooltip) ftooltip.style.display = 'none'
+        document.querySelector('.mapboxgl-popup-close-button').style.display = 'block'
+        this.$refs.tooltip.$el.style.display = 'flex'
+        document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
+          document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
+        }
+    },
+    hidePopup: function(){
+
+    },
+    // Cre
+    createTooltipFromNeuronCuration: function(data){
+      const feature = data.resource[0]
+      let content = {
+        title: undefined, components: undefined, start: undefined, distribution: undefined, actions: [{
+          title: "View Source",
+          resource: "https://doi.org/10.1002/ca.23296",
+          type: "URL"
+        }]
+      }
+      
+      let foundAnnotations = false
+      this.tooltipVisible = false
+
+      // hardcoded data check
+      if (feature && nerveMap[feature]){
+        foundAnnotations = true
+        this.tooltipVisible = true
+        this.tooltipContent = nerveMap[feature]
+        this.tooltipContent.uberon = feature
+      } else {
+
+        // neural data check
+        if (feature){
+          if (feature.includes('ilxtr:neuron')){
+            foundAnnotations = true
+            this.tooltipVisible = true
+            this.tooltipContent = content
+            this.tooltipContent.uberon = feature
+            this.tooltipContent.title = data.label
+            this.tooltipContent.actions.push({
+              title: 'View Datasets with connection',
+              label: 'Neuron Datasets',
+              resource: feature.split(':')[1],
+              type: 'Neuron Search',
+              nervePath: true,
+            })
+          }
+        }
+        // annotated with datset check
+        if (data.dataset){
+          foundAnnotations = true
           this.tooltipVisible = true
-          this.tooltipContent = nerveMap[uberon]
-          this.tooltipContent.uberon = uberon
+          this.tooltipContent = content
+          this.tooltipContent.uberon = feature
+          this.tooltipContent.title = data.label
+          this.tooltipContent.actions.push({
+            title: "View Dataset",
+            resource: data.dataset,
+            type: "URL",
+            nervePath: false,
+          })
         }
       }
+      if(foundAnnotations) { return true } else { return false }
     },
     onActionClick: function(action) {
       this.$emit("onActionClick", action);
     },
-    getCoordinatesOfLastClick: function() {
-      if (this.mapImp) {
-        if (this.mapImp._userInteractions._lastClickedLocation) {
-          return this.mapImp._map.project(
-            this.mapImp._userInteractions._lastClickedLocation);
-        }
-      }
-      return undefined;
-    },
-    showPopup: function(featureId, node, options) {
-      let myOptions = options;
-      if (this.mapImp) {
-        if (myOptions) {
-          if (!myOptions.className)
-            myOptions.className = "flatmapvuer-popover";
-        } else {
-          myOptions = {className: "flatmapvuer-popover"};
-        }
-        this.mapImp.showPopup(featureId, node, myOptions);
-      }
-    },
+    // // old popup (unused) 
+    // showPopup: function(featureId, node, options) {
+    //   let myOptions = options;
+    //   if (this.mapImp) {
+    //     if (myOptions) {
+    //       if (!myOptions.className)
+    //         myOptions.className = "flatmapvuer-popover";
+    //     } else {
+    //       myOptions = {className: "flatmapvuer-popover"};
+    //     }
+    //     this.mapImp.showPopup(featureId, node, myOptions);
+    //   }
+    // },
     showMarkerPopup: function(featureId, node, options) {
       if (this.mapImp) {
         this.mapImp.showMarkerPopup(featureId, node, options);
@@ -662,15 +710,21 @@ export default {
   margin-bottom: 20px;
 }
 
+.tooltip {
+  display: none;
+}
+
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   pointer-events: none;
+  display: none;
   background: #fff;
   border: 1px solid rgb(131, 0, 191);
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 12px;
 }
 
 >>> .mapboxgl-popup.flatmap-marker-popup{
