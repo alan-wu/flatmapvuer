@@ -113,7 +113,7 @@ export default {
       initial: "Rat",
       visible: false,
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
   mounted: function() {

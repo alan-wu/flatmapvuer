@@ -336,6 +336,23 @@ export default {
         if (this.entry == state.entry)
           this._viewportToBeSet = state.viewport;
       }
+    },
+    /**
+     * Function to display features with annotation matching the provided term.
+     */
+    searchAndShowResult: function(term) {
+      if (this.mapImp) {
+        if (term === undefined || term === "") {
+          this.mapImp.clearSearchResults();
+        }
+        else {
+          let searchResults = this.mapImp.search(term);
+          if (searchResults && searchResults.__featureIds.length > 0)
+            this.mapImp.showSearchResults(searchResults);
+          else
+            this.mapImp.clearSearchResults();
+        }
+      }
     }
   },
   props: {
