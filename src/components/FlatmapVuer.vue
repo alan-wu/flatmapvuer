@@ -418,7 +418,6 @@ export default {
             this.mapImp.setState(this._viewportToBeSet);
           else if (state && state.viewport)
             this.mapImp.setState(state.viewport);
-          this.mapImp.zoomTo('UBERON:0000948');
         });
       } else if (state) {
         if (this.entry == state.entry)
