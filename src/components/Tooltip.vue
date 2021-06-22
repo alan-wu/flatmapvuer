@@ -21,7 +21,7 @@
         <span class="attribute-content">{{content.uberon}}</span>
       </div>
       <el-button v-for="action in content.actions" round :key="action.title"
-        class="button" @click="onActionClick(action)">
+        class="button" @click="resourceSelected(action)">
         {{action.title}}</el-button>
     </el-main>
   </div>
@@ -68,8 +68,8 @@ export default {
   mounted: function() {
   },
   methods: {
-    onActionClick: function(action) {
-      this.$emit("onActionClick", action);
+    resourceSelected: function(action) {
+      this.$emit("resource-selected", action);
       
     },
     onClose: function() {

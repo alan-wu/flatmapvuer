@@ -21,7 +21,7 @@
     @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap=true :flatmapAPI="flatmapAPI" @onActionClick="onActionClick"/>
+      :displayMinimap=true :flatmapAPI="flatmapAPI"/>
   </div>
 </template>
 
@@ -56,7 +56,7 @@ export default {
         this.$refs.multi.setState(this._mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
-      if (resource.eventType == "click")
+      if (resource.eventType != "hover")
         console.log(resource);
     },
     FlatmapReady: function(component) {
@@ -64,9 +64,6 @@ export default {
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
       console.log(taxon, id);
     },
-    onActionClick: function(action) {
-      console.log("onActionClick", action);
-    }
   },
   data: function(){
     return {
