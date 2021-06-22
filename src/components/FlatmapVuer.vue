@@ -18,7 +18,7 @@
       </i>
       <div class="bottom-right-control">
         <el-popover content="Zoom in" placement="left" 
-          :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[0].value">
+          :appendToBody=false trigger="manual" popper-class="flatmap-popper left-popper" v-model="hoverVisibilities[0].value">
           <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
             @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
@@ -34,12 +34,12 @@
         </el-popover>
       </div>
       <el-popover content="Change pathway visibility" placement="right"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper right-popper" v-model="hoverVisibilities[4].value" ref="checkBoxPopover"/>
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
         <div class="pathway-container" v-if="pathways.length > 0 && pathControls"
            v-popover:checkBoxPopover>
           <el-popover content="Find these markers for data" placement="right"
-            :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right" v-model="hoverVisibilities[5].value" ref="markerPopover">
+            :appendToBody=false trigger="manual" popper-class="flatmap-popper popper-bump-right  right-popper" v-model="hoverVisibilities[5].value" ref="markerPopover">
           </el-popover>
           <div v-show="hoverVisibilities[5].value" class="flatmap-marker-help" v-html="flatmapMarker" v-popover:markerPopover></div>
           <el-row>
@@ -89,7 +89,7 @@
         </el-row>
       </el-popover>
       <el-popover  content="Change background color" placement="right" v-model="hoverVisibilities[3].value"
-        :appendToBody=false trigger="manual" popper-class="flatmap-popper">
+        :appendToBody=false trigger="manual" popper-class="flatmap-popper right-popper">
         <SvgIcon v-popover:backgroundPopover icon="changeBckgd" class="icon-button background-colour" 
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
@@ -880,9 +880,7 @@ export default {
 >>> .flatmap-marker{
   cursor: pointer;
 }
->>> .flatmap-popper .popper__arrow::after{
-  border-left-color: #8300bf !important;
-}
+
 >>>.el-loading-spinner i{
   color: #8300bf;  
 }
@@ -900,18 +898,32 @@ export default {
   min-width: unset;
 }
 
->>>.el-popper[x-placement^="right"] .popper__arrow {
-  left: -8px;
+>>>.flatmap-popper.left-popper .popper__arrow{
+  border-left-color: #8300bf !important;
 }
 
+>>>.flatmap-popper.left-popper .popper__arrow:after{
+  border-left-color: #f3ecf6 !important;
+}
 
->>>.el-popper[x-placement^="top"] .popper__arrow::after {
+>>>.flatmap-popper.right-popper .popper__arrow{
+  border-right-color: #8300bf !important;
+}
+
+>>>.flatmap-popper.right-popper .popper__arrow:after{
+  border-right-color: #f3ecf6 !important;
+}
+
+>>>.flatmap-popper.el-popper[x-placement^="top"] .popper__arrow {
   border-top-color:#8300bf !important;
-  border-left-color:transparent !important;
-  border-right-color:transparent !important;
+}
+
+>>>.flatmap-popper.el-popper[x-placement^="top"] .popper__arrow:after{
+  border-top-color: #f3ecf6 !important;
 }
 
 >>>.popper-zoomout {
+  padding-right:13px!important;
   left:-21px!important;
 }
 
