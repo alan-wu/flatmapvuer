@@ -720,6 +720,8 @@ export default {
   display: none;
   background: #fff;
   border: 1px solid rgb(131, 0, 191);
+  padding-left: 6px;
+  padding-right: 6px;
   display: flex;
   justify-content: center;
   align-items: center;
