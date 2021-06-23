@@ -94,7 +94,7 @@
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
-      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" @onActionClick="onActionClick"/>
+      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" @resource-selected="resourceSelected"/>
     </div>
   </div>
 </template>
@@ -235,6 +235,9 @@ export default {
           document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
         }
     },
+    resourceSelected: function(action){
+      this.$emit("resource-selected", action)
+    },
     hidePopup: function(){
 
     },
@@ -293,9 +296,6 @@ export default {
         }
       }
       if(foundAnnotations) { return true } else { return false }
-    },
-    onActionClick: function(action) {
-      this.$emit("onActionClick", action);
     },
     // // old popup (unused) 
     // showPopup: function(featureId, node, options) {
@@ -737,6 +737,8 @@ export default {
   display: none;
   background: #fff;
   border: 1px solid rgb(131, 0, 191);
+  padding-left: 6px;
+  padding-right: 6px;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -45,7 +45,6 @@
       :displayMinimap="displayMinimap"
       style="height:100%"
       :flatmapAPI="flatmapAPI"
-      @onActionClick="onActionClick"
     />
   </div>
 </template>
@@ -150,8 +149,8 @@ export default {
         }
       }
     },
-    onActionClick: function(action) {
-      this.$emit("onActionClick", action);
+    resourceSelected: function(action) {
+      this.$emit("resource-selected", action);
     },
   },
   props: {
