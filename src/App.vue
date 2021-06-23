@@ -77,8 +77,8 @@ export default {
   },
   data: function(){
     return {
-      featureInfo: false,
-      searchable: false,
+      featureInfo: true,
+      searchable: true,
       pathControls: true,
       minZoom: 4,
       availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human", displayWarning:true},
@@ -140,6 +140,10 @@ export default {
 
 body {
   margin: 0px;
+}
+
+.mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+  margin-top:120px;
 }
 
 .popover{
