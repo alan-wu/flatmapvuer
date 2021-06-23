@@ -212,7 +212,8 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data){
       if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)) { 
-        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el,
+          {className: "flatmap-tooltip-dialog"})
         this.popUpCssHack()
       }
     },
@@ -710,7 +711,15 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content {
   margin-bottom: 12px;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content {
+  margin-top: 18px;
 }
 
 >>> .mapboxgl-popup.flatmap-marker-popup{
@@ -733,26 +742,26 @@ export default {
 
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after,
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
-    top: calc(100% - 1px);
+    top: 100%;
 }
 
 /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after {
-    margin: 0 auto;
+    margin-top: -1px;
     border-color: rgb(255, 255, 255) transparent transparent  transparent ;
-    border-width: 11.5px;
+    border-width: 12px;
 }
 
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after,
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
-    top: calc(-100% + 7px);
+    top: calc(-100% + 6px);
 }
 
 /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after {
-    margin: 0 auto;
+    margin-top: 1px;
     border-color:  transparent transparent rgb(255, 255, 255) transparent ;
-    border-width: 11.5px;
+    border-width: 12px;
 }
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
@@ -762,18 +771,22 @@ export default {
 
 /* this border color controlls the outside, thin border */
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
-    margin-top: 1px;
+    margin: 0 auto;
     border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
     border-width: 12px;
 }
 
 >>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
-    margin-top: -2px;
+    margin: 0 auto;
     border-color: transparent  transparent rgb(131, 0, 191) transparent ;
     border-width: 12px;
 }
 
 >>> .flatmap-tooltip-popup .mapboxgl-popup-tip{
+  display: none;
+}
+
+>>> .flatmap-tooltip-dialog .mapboxgl-popup-tip {
   display: none;
 }
 
