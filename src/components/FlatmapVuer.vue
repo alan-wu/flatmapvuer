@@ -204,44 +204,32 @@ export default {
         const taxonomy = this.entry;
         const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
-        //this.simulateClickCallback(data.resource[0])
-        this.checkAndCreatePopups(data)
+        if (feature && feature.type !== "marker")
+          this.checkAndCreatePopups(data)
         this.$emit("resource-selected", data);
       }
-    },
-     // simulateClickCallback is a hack function to simulate getting click events from the flatmap
-     //   This is done by temporarily storing the last hovered uberon in this.$data
-    simulateClickCallback: function(uberon){
-      this.lastHover = uberon
-      if (this.setTimeoutId){
-        clearTimeout(this.setTimeoutId)
-      }
-      this.setTimeoutId = setTimeout( ()=>{this.lastHover = undefined}, 1400)
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data){
       if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)) { 
-        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el)
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el,
+          {className: "flatmap-tooltip-dialog"})
         this.popUpCssHack()
       }
     },
     popUpCssHack: function(){
-        // Below is a hack to remove flatmap tooltips while popup is open
-        let ftooltip = document.querySelector('.flatmap-tooltip-popup')
-        if (ftooltip) ftooltip.style.display = 'none'
-        document.querySelector('.mapboxgl-popup-close-button').style.display = 'block'
-        this.$refs.tooltip.$el.style.display = 'flex'
-        document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
-          document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
-        }
+      // Below is a hack to remove flatmap tooltips while popup is open
+      let ftooltip = document.querySelector('.flatmap-tooltip-popup')
+      if (ftooltip) ftooltip.style.display = 'none'
+      document.querySelector('.mapboxgl-popup-close-button').style.display = 'block'
+      this.$refs.tooltip.$el.style.display = 'flex'
+      document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
+        document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
+      }
     },
     resourceSelected: function(action){
       this.$emit("resource-selected", action)
     },
-    hidePopup: function(){
-
-    },
-    // Cre
     createTooltipFromNeuronCuration: function(data){
       const feature = data.resource[0]
       let content = {
@@ -297,19 +285,19 @@ export default {
       }
       if(foundAnnotations) { return true } else { return false }
     },
-    // // old popup (unused) 
-    // showPopup: function(featureId, node, options) {
-    //   let myOptions = options;
-    //   if (this.mapImp) {
-    //     if (myOptions) {
-    //       if (!myOptions.className)
-    //         myOptions.className = "flatmapvuer-popover";
-    //     } else {
-    //       myOptions = {className: "flatmapvuer-popover"};
-    //     }
-    //     this.mapImp.showPopup(featureId, node, myOptions);
-    //   }
-    // },
+    // Keeping this as an API 
+    showPopup: function(featureId, node, options) {
+      let myOptions = options;
+      if (this.mapImp) {
+        if (myOptions) {
+          if (!myOptions.className)
+            myOptions.className = "flatmapvuer-popover";
+        } else {
+          myOptions = {className: "flatmapvuer-popover"};
+        }
+        this.mapImp.showPopup(featureId, node, myOptions);
+      }
+    },
     showMarkerPopup: function(featureId, node, options) {
       if (this.mapImp) {
         this.mapImp.showMarkerPopup(featureId, node, options);
@@ -496,7 +484,6 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
-      lastHover: undefined,
       tooltipContent: {},
     };
   },
@@ -519,7 +506,6 @@ export default {
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
     let endpoint = this.flatmapAPI;
-    console.log(endpoint)
     if (!endpoint)
       endpoint = "https://mapcore-demo.org/flatmaps/";
     this.mapManager = new flatmap.MapManager(endpoint);
@@ -725,7 +711,15 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content {
   margin-bottom: 12px;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content {
+  margin-top: 18px;
 }
 
 >>> .mapboxgl-popup.flatmap-marker-popup{
@@ -734,23 +728,40 @@ export default {
   background: #fff;
 }
 
+
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content::after,
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content::before {
     content: '';
     display: block;
     position: absolute;
-    top: 100%;
     width: 0;
     height: 0;
     border-style: solid;
     flex-shrink: 0;
 }
 
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after,
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
+    top: 100%;
+}
+
 /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
->>>.flatmap-tooltip-popup .mapboxgl-popup-content::after {
-    margin: 0 auto;
-    border-color: rgb(250, 250, 250) transparent transparent  transparent ;
-    border-width: 11px;
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after {
+    margin-top: -1px;
+    border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+    border-width: 12px;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after,
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
+    top: calc(-100% + 6px);
+}
+
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after {
+    margin-top: 1px;
+    border-color:  transparent transparent rgb(255, 255, 255) transparent ;
+    border-width: 12px;
 }
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
@@ -759,13 +770,23 @@ export default {
 }
 
 /* this border color controlls the outside, thin border */
->>>.flatmap-tooltip-popup .mapboxgl-popup-content::before {
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
     margin: 0 auto;
     border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
     border-width: 12px;
 }
 
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
+    margin: 0 auto;
+    border-color: transparent  transparent rgb(131, 0, 191) transparent ;
+    border-width: 12px;
+}
+
 >>> .flatmap-tooltip-popup .mapboxgl-popup-tip{
+  display: none;
+}
+
+>>> .flatmap-tooltip-dialog .mapboxgl-popup-tip {
   display: none;
 }
 

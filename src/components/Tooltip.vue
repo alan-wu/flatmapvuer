@@ -198,23 +198,41 @@ export default {
   border: 1px solid #ac76c5 !important;
 }
 
+
 .tooltip-container::after,
 .tooltip-container::before {
     content: '';
     display: block;
     position: absolute;
-    top: 100%;
     width: 0;
     height: 0;
     border-style: solid;
     flex-shrink: 0;
 }
 
+.mapboxgl-popup-anchor-bottom .tooltip-container::after,
+.mapboxgl-popup-anchor-bottom .tooltip-container::before {
+    top: 100%;
+}
+
+.mapboxgl-popup-anchor-top .tooltip-container::after,
+.mapboxgl-popup-anchor-top .tooltip-container::before {
+    top: -24px;
+}
+
+
 /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-.tooltip-container::after {
-    margin: 0 auto;
-    border-color: rgb(250, 250, 250) transparent transparent  transparent ;
-    border-width: 11px;
+.mapboxgl-popup-anchor-bottom .tooltip-container::after {
+    margin-top:-1px;
+    border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+    border-width: 12px;
+}
+
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+.mapboxgl-popup-anchor-top .tooltip-container::after {
+    margin-top: 1px;
+    border-color: transparent transparent rgb(255, 255, 255) transparent ;
+    border-width: 12px;
 }
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
@@ -223,11 +241,17 @@ export default {
 }
 
 /* this border color controlls the outside, thin border */
-.tooltip-container::before {
+.mapboxgl-popup-anchor-bottom .tooltip-container::before {
     margin: 0 auto;
     border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
     border-width: 12px;
 }
 
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+.mapboxgl-popup-anchor-top .tooltip-container::before {
+    margin: 0 auto;
+    border-color: transparent transparent rgb(131, 0, 191) transparent ;
+    border-width: 12px;
+}
 
 </style>
