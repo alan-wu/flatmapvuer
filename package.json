@@ -1,6 +1,6 @@
 {
-  "version": "0.1.32-alpha-1",
-  "name": "@tehsurfer/flatmapvuer",
+  "name": "@abi-software/flatmapvuer",
+  "version": "0.1.33-beta-1",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
     "dist/*",
@@ -16,7 +16,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@abi-software/flatmap-viewer": "^2.1.0-beta.2",
+    "@abi-software/flatmap-viewer": "^2.1.0-beta.3",
     "@abi-software/svg-sprite": "^0.1.11",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
     "@vue/cli-plugin-eslint": "^4.0.0",
-    "@vue/cli-service": "^4.0.0",
+    "@vue/cli-service": "^4.5.13",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "eslint": "^5.16.0",
