@@ -399,6 +399,8 @@ export default {
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
           this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
+          this.mapImp.setBackgroundOpacity(1);
+          this.backgroundChangeCallback(this.currentBackground);
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
