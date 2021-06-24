@@ -260,7 +260,7 @@ export default {
             this.tooltipContent.uberon = feature
             this.tooltipContent.title = data.label
             this.tooltipContent.actions.push({
-              title: 'View Datasets with connection',
+              title: 'Find datasets with connection',
               label: 'Neuron Datasets',
               resource: feature.split(':')[1],
               type: 'Neuron Search',
@@ -699,6 +699,10 @@ export default {
 
 .tooltip {
   display: none;
+}
+
+>>> .mapboxgl-popup{
+  max-width: 300px !important;
 }
 
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content {

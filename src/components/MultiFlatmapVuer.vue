@@ -305,9 +305,6 @@ export default {
   box-shadow: none !important;
 }
 
->>> .flatmap-popper.right-popper .popper__arrow:after{
-  border-right-color: #f3ecf6 !important;
-}
 </style>
 
 
