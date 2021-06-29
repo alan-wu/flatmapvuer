@@ -234,7 +234,7 @@ export default {
       const feature = data.resource[0]
       let content = {
         title: undefined, components: undefined, start: undefined, distribution: undefined, actions: [{
-          title: "View Source",
+          title: "View source",
           resource: "https://doi.org/10.1002/ca.23296",
           type: "URL"
         }]
@@ -260,7 +260,7 @@ export default {
             this.tooltipContent.uberon = feature
             this.tooltipContent.title = data.label
             this.tooltipContent.actions.push({
-              title: 'Find datasets with connection',
+              title: 'View dataset',
               label: 'Neuron Datasets',
               resource: feature.split(':')[1],
               type: 'Neuron Search',
@@ -276,7 +276,7 @@ export default {
           this.tooltipContent.uberon = feature
           this.tooltipContent.title = data.label
           this.tooltipContent.actions.push({
-            title: "View Dataset",
+            title: "View dataset",
             resource: data.dataset,
             type: "URL",
             nervePath: false,

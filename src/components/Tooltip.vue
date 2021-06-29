@@ -6,7 +6,7 @@
       </div>
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
-        <span class="attribute-content">{{content.components}}</span>
+        <span class="attribute-content">{{title}}</span>
       </div>
       <div v-if="content.start" class="block">
         <div class="attribute-title">Origin</div>
@@ -22,6 +22,7 @@
       </div>
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
+        <i v-if="action.title === 'View dataset'" class="el-icon-coin"></i>
         {{action.title}}</el-button>
     </el-main>
   </div>
@@ -47,6 +48,10 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
+const titleCase = (str) => {
+  return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+}
+
 export default {
   name: "Tooltip",
   props: { 
@@ -57,6 +62,11 @@ export default {
     content: {
       type: Object,
       default: undefined
+    }
+  },
+  computed: {
+    title: function(label){
+      return titleCase(label)
     }
   },
   data: function() {
