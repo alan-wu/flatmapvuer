@@ -392,7 +392,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: undefined
+      default: "https://mapcore-demo.org/flatmaps/"
     },
   },
   data: function() {
@@ -429,10 +429,7 @@ export default {
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
-    let endpoint = this.flatmapAPI;
-    if (!endpoint)
-      endpoint = "https://mapcore-demo.org/flatmaps/";
-    this.mapManager = new flatmap.MapManager(endpoint);
+    this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted)
       this.createFlatmap();
   }
