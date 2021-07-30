@@ -16,10 +16,6 @@
         <div class="attribute-title">Distribution</div>
         <span class="attribute-content">{{content.distribution}}</span>
       </div>
-      <div v-if="content.uberon" class="block">
-        <div class="attribute-title">Feature Id</div>
-        <span class="attribute-content">{{content.uberon}}</span>
-      </div>
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
         <i v-if="action.title === 'View dataset'" class="el-icon-coin"></i>
