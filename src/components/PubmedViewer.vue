@@ -3,12 +3,14 @@
       <div v-loading="loading.response" class="block">
         <div class="attribute-title">Pubmed Resources</div>
         <br/>
-        <div class="attribute-content" v-for="(pub, i) in pubmeds" :key="i">
-          <div v-html="pub.html"/>
-          <el-link :href="pub.url" :underline="false" class="el-link" target="_blank">{{pub.url}}</el-link>
-          <br/>
-          <br/>
-        </div> 
+        <el-carousel height="250px" width="200px">
+          <el-carousel-item v-for="(pub, i) in pubmeds" :key="i">
+            <div class="attribute-content">
+                <div v-html="pub.html"/>
+                <el-link :href="pub.url" :underline="false" class="el-link" target="_blank">{{pub.url}}</el-link>
+            </div>
+          </el-carousel-item>
+        </el-carousel>
       </div>
   </div>
 </template>
@@ -18,12 +20,16 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import {
-  Link
+  Link,
+  Carousel,
+  CarouselItem
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Link);
+Vue.use(Carousel);
+Vue.use(CarouselItem);
 
 
 export default {
@@ -116,6 +122,7 @@ export default {
 .el-link {
   color: #8300bf;
   text-decoration: none;
+  word-wrap: break-word;
 }
 
 .el-link:hover {
