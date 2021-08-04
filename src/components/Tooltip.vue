@@ -4,6 +4,8 @@
       <div class="block">
         <span class="title">{{content.title}}</span>
       </div>
+
+      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" />
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
         <span class="attribute-content">{{title}}</span>
@@ -44,11 +46,14 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
+import PubmedViewer from './PubmedViewer.vue'
+
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
 }
 
 export default {
+  components: { PubmedViewer },
   name: "Tooltip",
   props: { 
     visible: {
@@ -81,7 +86,6 @@ export default {
     onClose: function() {
       this.$emit("onClose");
     }
-   
   }
 };
 </script>

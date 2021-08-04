@@ -259,6 +259,7 @@ export default {
             this.tooltipContent = content
             this.tooltipContent.uberon = feature
             this.tooltipContent.title = data.label
+            this.tooltipContent.featureId = feature
             this.tooltipContent.actions.push({
               title: 'View dataset',
               label: 'Neuron Datasets',
