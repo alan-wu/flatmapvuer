@@ -5,7 +5,7 @@
         <span class="title">{{content.title}}</span>
       </div>
 
-      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" />
+      <pubmed-viewer v-if="content.featureId" class="block pub" :featureId="content.featureId" />
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
         <span class="attribute-content">{{title}}</span>
@@ -133,6 +133,10 @@ export default {
 
 .block {
   margin-bottom: 1.5em;
+}
+
+.pub {
+  width: 16rem;
 }
 
 .icon {
