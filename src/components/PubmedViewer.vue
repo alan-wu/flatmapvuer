@@ -4,7 +4,8 @@
         <div class="attribute-title">Pubmed Resources</div>
         <br/>
         <div class="attribute-content" v-for="(pub, i) in pubmeds" :key="i">
-          <el-link  class="link" :href="pub.url" target="_blank" :underline="false">{{pub.title}}</el-link>
+          <div v-html="pub.html"/>
+          <el-link :href="pub.url" :underline="false" class="el-link" target="_blank">{{pub.url}}</el-link>
           <br/>
           <br/>
         </div> 
@@ -54,16 +55,19 @@ export default {
     },
     titleFromPubmed: function (pubmedId){
       return new Promise((resolve) => {
-        fetch(`http://localhost:5000/pubmed/${pubmedId}`)
-        .then(response => response.text())
+        fetch(`https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=citation&contenttype=json&id=${pubmedId}`)
+        .then(response => response.json())
         .then(data => {
-          let pubmedDocument = new DOMParser().parseFromString(data, "text/html");
-          resolve(pubmedDocument.querySelector('.heading-title').innerText)
+          resolve(data.apa.format)
         })
         .catch((error) => {
           console.error('Error:', error);
         });
       })
+    },
+    splitLink(bibliographyString){
+      let split = bibliographyString.split('https')
+      return [split[0], 'https' + split[1]]
     },
     flatmapQuery: function(identifier){
       this.pubmeds = []
@@ -80,9 +84,10 @@ export default {
       .then(data => {
         this.responseData = data
         this.loading.response = false
-        data.values.forEach(val => {
-          this.titleFromPubmed(this.stripPMIDPrefix(val[0])).then(title=>{
-            this.pubmeds.push({title: title, url: `https://pubmed.ncbi.nlm.nih.gov/${identifier}/`})
+        data.values.forEach(identifier => {
+          this.titleFromPubmed(this.stripPMIDPrefix(identifier[0])).then( bib=>{
+            let [html, link] = this.splitLink(bib)
+            this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
           })
         });
       })
