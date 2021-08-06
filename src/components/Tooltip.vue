@@ -103,23 +103,6 @@ export default {
   align-items: center;
 }
 
-.main{
-  min-width: 16rem;
-}
-
-.header {
-  color: #606266;
-  line-height: 1;
-  padding: 5px 17px 0 15px;
-  font-size: 14px;
-}
-
-.icon {
-  right: 17px;
-  position: absolute;
-  padding: 5px;
-}
-
 .display {
   width: 44px;
   word-break: normal;
@@ -157,6 +140,7 @@ export default {
   /* outline: thin red solid; */
   padding: 1em !important;
   overflow: hidden;
+  min-width: 16rem;
 }
 
 .title{
