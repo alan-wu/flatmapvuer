@@ -1,14 +1,18 @@
 <template>
   <div class="tooltip-container">
      <el-main v-if="content" class="main">
-      <div class="block">
-        <span class="title">{{content.title}}</span>
+      <div class="block" v-if="content.title">
+        <span class="title">{{titleCase(content.title)}}</span>
       </div>
+      <div class="block" v-else>
+        <span class="title">{{content.featureId}}</span>
+      </div>
+      
 
       <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" />
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
-        <span class="attribute-content">{{title}}</span>
+        <span class="attribute-content">{{content.components}}</span>
       </div>
       <div v-if="content.start" class="block">
         <div class="attribute-title">Origin</div>
@@ -65,23 +69,18 @@ export default {
       default: undefined
     }
   },
-  computed: {
-    title: function(label){
-      return titleCase(label)
-    }
-  },
   data: function() {
     return {
       activeSpecies: undefined,
       appendToBody: false
     };
   },
-  mounted: function() {
-  },
   methods: {
     resourceSelected: function(action) {
-      this.$emit("resource-selected", action);
-      
+      this.$emit("resource-selected", action); 
+    },
+    titleCase: function(title){
+      return titleCase(title)
     },
     onClose: function() {
       this.$emit("onClose");
@@ -102,6 +101,10 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.main{
+  min-width: 16rem;
 }
 
 .header {
