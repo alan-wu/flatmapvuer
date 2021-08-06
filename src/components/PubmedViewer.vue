@@ -3,7 +3,11 @@
       <div v-loading="loading.response" class="block">
         <div class="attribute-title">Pubmed Resources</div>
         <br/>
-        <el-carousel height="250px" width="200px">
+        <el-carousel 
+          :autoplay="false" 
+          indicator-position="outside"
+          height="250px" width="200px"
+        >
           <el-carousel-item v-for="(pub, i) in pubmeds" :key="i">
             <div class="attribute-content">
                 <div v-html="pub.html"/>
@@ -134,4 +138,9 @@ export default {
   color: #8300bf;
   text-decoration: underline;
 }
+
+>>> .el-carousel__button {
+  background-color: rgb(131, 0, 191)  
+}
+
 </style>
