@@ -4,9 +4,11 @@
       <div class="block">
         <span class="title">{{content.title}}</span>
       </div>
+
+      <pubmed-viewer v-if="content.featureId" class="block pub" :featureId="content.featureId" />
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
-        <span class="attribute-content">{{content.components}}</span>
+        <span class="attribute-content">{{title}}</span>
       </div>
       <div v-if="content.start" class="block">
         <div class="attribute-title">Origin</div>
@@ -16,12 +18,9 @@
         <div class="attribute-title">Distribution</div>
         <span class="attribute-content">{{content.distribution}}</span>
       </div>
-      <div v-if="content.uberon" class="block">
-        <div class="attribute-title">Feature Id</div>
-        <span class="attribute-content">{{content.uberon}}</span>
-      </div>
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
+        <i v-if="action.title === 'View dataset'" class="el-icon-coin"></i>
         {{action.title}}</el-button>
     </el-main>
   </div>
@@ -47,7 +46,14 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
+import PubmedViewer from './PubmedViewer.vue'
+
+const titleCase = (str) => {
+  return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+}
+
 export default {
+  components: { PubmedViewer },
   name: "Tooltip",
   props: { 
     visible: {
@@ -57,6 +63,11 @@ export default {
     content: {
       type: Object,
       default: undefined
+    }
+  },
+  computed: {
+    title: function(label){
+      return titleCase(label)
     }
   },
   data: function() {
@@ -75,7 +86,6 @@ export default {
     onClose: function() {
       this.$emit("onClose");
     }
-   
   }
 };
 </script>
@@ -123,6 +133,10 @@ export default {
 
 .block {
   margin-bottom: 1.5em;
+}
+
+.pub {
+  width: 16rem;
 }
 
 .icon {
@@ -198,23 +212,41 @@ export default {
   border: 1px solid #ac76c5 !important;
 }
 
+
 .tooltip-container::after,
 .tooltip-container::before {
     content: '';
     display: block;
     position: absolute;
-    top: 100%;
     width: 0;
     height: 0;
     border-style: solid;
     flex-shrink: 0;
 }
 
+.mapboxgl-popup-anchor-bottom .tooltip-container::after,
+.mapboxgl-popup-anchor-bottom .tooltip-container::before {
+    top: 100%;
+}
+
+.mapboxgl-popup-anchor-top .tooltip-container::after,
+.mapboxgl-popup-anchor-top .tooltip-container::before {
+    top: -24px;
+}
+
+
 /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-.tooltip-container::after {
-    margin: 0 auto;
-    border-color: rgb(250, 250, 250) transparent transparent  transparent ;
-    border-width: 11px;
+.mapboxgl-popup-anchor-bottom .tooltip-container::after {
+    margin-top:-1px;
+    border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+    border-width: 12px;
+}
+
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+.mapboxgl-popup-anchor-top .tooltip-container::after {
+    margin-top: 1px;
+    border-color: transparent transparent rgb(255, 255, 255) transparent ;
+    border-width: 12px;
 }
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
@@ -223,11 +255,17 @@ export default {
 }
 
 /* this border color controlls the outside, thin border */
-.tooltip-container::before {
+.mapboxgl-popup-anchor-bottom .tooltip-container::before {
     margin: 0 auto;
     border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
     border-width: 12px;
 }
 
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+.mapboxgl-popup-anchor-top .tooltip-container::before {
+    margin: 0 auto;
+    border-color: transparent transparent rgb(131, 0, 191) transparent ;
+    border-width: 12px;
+}
 
 </style>
