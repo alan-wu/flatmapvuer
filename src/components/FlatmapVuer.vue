@@ -264,7 +264,7 @@ export default {
         this.tooltipContent.uberon = feature
         this.tooltipContent.title = data.label
         this.tooltipContent.actions.push({
-          title: "Search for dataset",
+          title: "View dataset",
           resource: data.dataset,
           type: "URL",
           nervePath: false,
