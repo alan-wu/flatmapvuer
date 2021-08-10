@@ -248,7 +248,7 @@ export default {
           this.tooltipContent.title = data.label
           this.tooltipContent.featureId = feature
           this.tooltipContent.actions.push({
-            title: 'View dataset',
+            title: 'Search for dataset',
             label: 'Neuron Datasets',
             resource: feature.split(':')[1],
             type: 'Neuron Search',
@@ -264,7 +264,7 @@ export default {
         this.tooltipContent.uberon = feature
         this.tooltipContent.title = data.label
         this.tooltipContent.actions.push({
-          title: "View dataset",
+          title: "Search for dataset",
           resource: data.dataset,
           type: "URL",
           nervePath: false,
