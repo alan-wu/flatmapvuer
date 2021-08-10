@@ -103,7 +103,6 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from './Tooltip'
-import nerveMap from '../nerve-map'
 import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
 import {
   Checkbox,
