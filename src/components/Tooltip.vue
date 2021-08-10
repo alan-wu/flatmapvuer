@@ -250,5 +250,4 @@ export default {
     border-color: transparent transparent rgb(131, 0, 191) transparent ;
     border-width: 12px;
 }
-
 </style>

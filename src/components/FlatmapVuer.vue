@@ -233,57 +233,45 @@ export default {
     createTooltipFromNeuronCuration: function(data){
       const feature = data.resource[0]
       let content = {
-        title: undefined, components: undefined, start: undefined, distribution: undefined, actions: [{
-          title: "View source",
-          resource: "https://doi.org/10.1002/ca.23296",
-          type: "URL"
-        }]
+        title: undefined, components: undefined, start: undefined, distribution: undefined, actions: []
       }
       
       let foundAnnotations = false
       this.tooltipVisible = false
 
-      // hardcoded data check
-      if (feature && nerveMap[feature]){
-        foundAnnotations = true
-        this.tooltipVisible = true
-        this.tooltipContent = nerveMap[feature]
-        this.tooltipContent.uberon = feature
-      } else {
-
-        // neural data check
-        if (feature){
-          if (feature.includes('ilxtr:neuron')){
-            foundAnnotations = true
-            this.tooltipVisible = true
-            this.tooltipContent = content
-            this.tooltipContent.uberon = feature
-            this.tooltipContent.title = data.label
-            this.tooltipContent.featureId = feature
-            this.tooltipContent.actions.push({
-              title: 'View dataset',
-              label: 'Neuron Datasets',
-              resource: feature.split(':')[1],
-              type: 'Neuron Search',
-              nervePath: true,
-            })
-          }
-        }
-        // annotated with datset check
-        if (data.dataset){
+      // neural data check
+      if (feature){
+        if (feature.includes('ilxtr:neuron')){
           foundAnnotations = true
           this.tooltipVisible = true
           this.tooltipContent = content
           this.tooltipContent.uberon = feature
           this.tooltipContent.title = data.label
+          this.tooltipContent.featureId = feature
           this.tooltipContent.actions.push({
-            title: "View dataset",
-            resource: data.dataset,
-            type: "URL",
-            nervePath: false,
+            title: 'View dataset',
+            label: 'Neuron Datasets',
+            resource: feature.split(':')[1],
+            type: 'Neuron Search',
+            nervePath: true,
           })
         }
       }
+      // annotated with datset check
+      if (data.dataset){
+        foundAnnotations = true
+        this.tooltipVisible = true
+        this.tooltipContent = content
+        this.tooltipContent.uberon = feature
+        this.tooltipContent.title = data.label
+        this.tooltipContent.actions.push({
+          title: "View dataset",
+          resource: data.dataset,
+          type: "URL",
+          nervePath: false,
+        })
+      }
+    
       if(foundAnnotations) { return true } else { return false }
     },
     // Keeping this as an API 
