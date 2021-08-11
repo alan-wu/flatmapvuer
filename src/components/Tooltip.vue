@@ -25,7 +25,11 @@
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
         <i v-if="action.title === 'Search for dataset' || action.title === 'View Dataset' " class="el-icon-coin"></i>
-        {{action.title}}</el-button>
+        {{action.title}}
+      </el-button>
+      <el-button  round class="button" icon="el-icon-download" @click="openKeastDoc">
+        Download list of keast publications
+      </el-button>
     </el-main>
   </div>
 </template>
@@ -51,6 +55,8 @@ Vue.use(Icon);
 Vue.use(Main);
 
 import PubmedViewer from './PubmedViewer.vue'
+
+const keastDoc = 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/Keast+Model/Keast+Model+Papers.xlsx'
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
@@ -84,6 +90,9 @@ export default {
     },
     onClose: function() {
       this.$emit("onClose");
+    },
+    openKeastDoc: function(){
+      window.open(keastDoc, '_blank')
     }
   }
 };
