@@ -9,7 +9,7 @@
       </div>
       
 
-      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" />
+      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
         <span class="attribute-content">{{content.components}}</span>
@@ -27,8 +27,8 @@
         <i v-if="action.title === 'Search for dataset' || action.title === 'View Dataset' " class="el-icon-coin"></i>
         {{action.title}}
       </el-button>
-      <el-button  round class="button" icon="el-icon-download" @click="openKeastDoc">
-        Download list of keast publications
+      <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
+        Open publications in pubmed
       </el-button>
     </el-main>
   </div>
@@ -56,8 +56,6 @@ Vue.use(Main);
 
 import PubmedViewer from './PubmedViewer.vue'
 
-const keastDoc = 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/Keast+Model/Keast+Model+Papers.xlsx'
-
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
 }
@@ -78,7 +76,8 @@ export default {
   data: function() {
     return {
       activeSpecies: undefined,
-      appendToBody: false
+      appendToBody: false,
+      pubmedSearchUrl: ''
     };
   },
   methods: {
@@ -91,8 +90,11 @@ export default {
     onClose: function() {
       this.$emit("onClose");
     },
-    openKeastDoc: function(){
-      window.open(keastDoc, '_blank')
+    openUrl: function(url){
+      window.open(url, '_blank')
+    },
+    pubmedSearchUrlUpdate: function (val){
+      this.pubmedSearchUrl = val
     }
   }
 };
