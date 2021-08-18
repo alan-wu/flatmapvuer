@@ -876,6 +876,15 @@ export default {
   min-width:128px;
 }
 
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
+  border-top-color: #fff !important;
+}
+
+
 .backgroundText {
   color: rgb(48, 49, 51);
   font-size: 14px;
