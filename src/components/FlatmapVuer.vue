@@ -80,7 +80,7 @@
         trigger="click"
         popper-class="background-popper">
         <el-row class="backgroundText">
-          Organ display
+          Organs display
         </el-row>
         <el-row class="backgroundControl" >
           <el-radio-group v-model="radio" class="flatmap-radio"
