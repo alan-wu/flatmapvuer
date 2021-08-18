@@ -9,7 +9,7 @@
       </div>
       
 
-      <pubmed-viewer v-if="content.featureId" class="block pub" :featureId="content.featureId" />
+      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
         <span class="attribute-content">{{content.components}}</span>
@@ -25,7 +25,11 @@
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
         <i v-if="action.title === 'Search for dataset' || action.title === 'View Dataset' " class="el-icon-coin"></i>
-        {{action.title}}</el-button>
+        {{action.title}}
+      </el-button>
+      <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
+        Open publications in pubmed
+      </el-button>
     </el-main>
   </div>
 </template>
@@ -72,7 +76,8 @@ export default {
   data: function() {
     return {
       activeSpecies: undefined,
-      appendToBody: false
+      appendToBody: false,
+      pubmedSearchUrl: ''
     };
   },
   methods: {
@@ -84,6 +89,12 @@ export default {
     },
     onClose: function() {
       this.$emit("onClose");
+    },
+    openUrl: function(url){
+      window.open(url, '_blank')
+    },
+    pubmedSearchUrlUpdate: function (val){
+      this.pubmedSearchUrl = val
     }
   }
 };

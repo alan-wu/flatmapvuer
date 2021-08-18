@@ -50,9 +50,12 @@ export default {
       this.flatmapQuery(val)
     }
   },
+  computed: {
+  },
   data: function() {
     return {
       pubmeds: [],
+      pubmedIds: [],
       loading: {response: true, publications: true}
     };
   },
@@ -95,17 +98,25 @@ export default {
         this.responseData = data
         this.loading.response = false
         data.values.forEach(identifier => {
-          this.titleFromPubmed(this.stripPMIDPrefix(identifier[0])).then( bib=>{
+          let ids = this.stripPMIDPrefix(identifier[0])
+          this.titleFromPubmed(ids).then( bib=>{
             let [html, link] = this.splitLink(bib)
             this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
+            
           })
         });
+        this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
       })
       .catch((error) => {
         console.error('Error:', error);
       });
+    },
+    pubmedSearchUrl: function(ids) {
+      let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
+      let params = new URLSearchParams()
+      params.append('term', ids)
+      return url + params.toString()
     }
-   
   }
 };
 </script>
@@ -142,5 +153,26 @@ export default {
 >>> .el-carousel__button {
   background-color: rgb(131, 0, 191)  
 }
+
+.button {
+  margin-left: 0px !important;
+  margin-top: 0px !important;
+  font-size: 14px !important;
+  background-color: rgb(131, 0, 191);
+  color: #fff;
+}
+
+.button+.button {
+  margin-top: 10px !important;
+  background-color: rgb(131, 0, 191);
+  color: #fff; 
+}
+
+.button:hover {
+  color: #fff !important;
+  background: #ac76c5 !important;
+  border: 1px solid #ac76c5 !important;
+}
+
 
 </style>
