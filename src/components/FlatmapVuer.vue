@@ -75,14 +75,26 @@
       <el-popover
         ref="backgroundPopover"
         placement="top-start"
-        width="128"
+        width="175"
         :appendToBody=false
         trigger="click"
         popper-class="background-popper">
         <el-row class="backgroundText">
+          Organ display
+        </el-row>
+        <el-row class="backgroundControl" >
+          <el-radio-group v-model="radio" class="flatmap-radio"
+            @change="setColour">
+            <el-radio :label="true">Colour</el-radio>
+            <el-radio :label="false">Greyscale</el-radio>
+          </el-radio-group>
+        </el-row>
+        <el-row class="backgroundSpacer">
+        </el-row>
+        <el-row class="backgroundText">
           Change background
         </el-row>
-        <el-row class="backgroundChooser" >
+        <el-row class="backgroundControl" >
           <div v-for="item in availableBackground" :key="item" 
             :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
             @click="backgroundChangeCallback(item)"/>
@@ -109,6 +121,8 @@ import {
   CheckboxGroup,
   Col,
   Loading,
+  Radio,
+  RadioGroup,
   Row
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
@@ -119,6 +133,8 @@ Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(Col);
 Vue.use(Loading.directive);
+Vue.use(Radio);
+Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
@@ -143,10 +159,21 @@ export default {
   methods: {
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
-      this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+      if (this.mapImp) {
+        this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+      }
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen;
+    },
+    /**
+     * Function to toggle colour/greyscale of organs.
+     */
+    setColour: function(flag) {
+      this.label = flag;
+      if (this.mapImp) {
+        this.mapImp.setColour(flag);
+      }
     },
     /**
      * Function to toggle paths to default.
@@ -492,6 +519,7 @@ export default {
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
       tooltipContent: {},
+      radio: true
     };
   },
   watch: {
@@ -843,7 +871,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid rgb(131, 0, 191);
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 72px;
+  height: 144px;
   width: 128px;
   min-width:128px;
 }
@@ -855,7 +883,7 @@ export default {
   line-height: 20px;
 }
 
-.backgroundChooser {
+.backgroundControl {
   display: flex;
   margin-top:16px;
 }
@@ -1038,9 +1066,29 @@ export default {
   outline:none;
 }
 
+.backgroundSpacer {
+  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 10px;
+}
+
+.flatmap-radio >>> label{
+  margin-right:20px;
+}
+
+.flatmap-radio >>> label:last-child{
+  margin-right:0px;
+}
+
+.flatmap-radio >>> .el-radio__input.is-checked+.el-radio__label {
+  color: #8300bf;
+}
+
+.flatmap-radio >>> .el-radio__input.is-checked .el-radio__inner {
+  border-color: #8300bf;
+  background: #8300bf;
+}
+
 </style>
-
-
 
 <style scoped src="../styles/purple/checkbox.css">
 </style>

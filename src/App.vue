@@ -32,17 +32,11 @@ import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import {
   Col,
   Popover,
-  RadioButton,
-  RadioGroup,
   Row,
 } from 'element-ui';
-import "./styles/purple/radio-button.css";
-import "./styles/purple/radio-group.css";
 import "./icons/mapicon-species-style.css";
 Vue.use(Col);
 Vue.use(Popover);
-Vue.use(RadioButton);
-Vue.use(RadioGroup);
 Vue.use(Row);
 
 export default {
