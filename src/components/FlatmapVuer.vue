@@ -210,6 +210,9 @@ export default {
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data){
+      window.mapImp = this.mapImp 
+      console.log('pathmodels', this.mapImp.nodePathModels(data.feature.nodeId))
+      window.pathmodels = this.mapImp.nodePathModels(data.feature.nodeId)
       if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)) { 
         this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el,
           {className: "flatmap-tooltip-dialog"})
@@ -238,6 +241,21 @@ export default {
       let foundAnnotations = false
       this.tooltipVisible = false
 
+      // nerve cuff check
+      if (data.feature.nodeId) {
+        console.log('found node id')
+        let paths = this.mapImp.nodePathModels(data.feature.nodeId)
+        if (paths.size > 0){
+          foundAnnotations = true
+          this.tooltipVisible = true
+          this.tooltipContent = content
+          this.tooltipContent.uberon = feature
+          this.tooltipContent.title = data.label
+          this.tooltipContent.featureIds = [...paths]
+        }
+        return true
+      }
+
       // neural data check
       if (feature){
         if (feature.includes('ilxtr:neuron')){
@@ -246,7 +264,7 @@ export default {
           this.tooltipContent = content
           this.tooltipContent.uberon = feature
           this.tooltipContent.title = data.label
-          this.tooltipContent.featureId = feature
+          this.tooltipContent.featureIds = [feature]
           this.tooltipContent.actions.push({
             title: 'Search for dataset',
             label: 'Neuron Datasets',

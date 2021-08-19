@@ -9,7 +9,8 @@
       </div>
       
 
-      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      <pubmed-viewer v-if="content.featureIds" class="block" :featureIds="content.featureIds" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      {{content.paths}}
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
         <span class="attribute-content">{{content.components}}</span>

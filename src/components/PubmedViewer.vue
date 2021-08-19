@@ -43,14 +43,21 @@ export default {
       type: String,
       default: ''
     },
+    featureIds: {
+      type: Array,
+      default: () => []
+    },
   },
   watch: {
     'featureId': function (val){
-      console.log('feature id watch triggered', val)
-      this.flatmapQuery(val)
+      this.flatmapQuery(val).then(pb => this.pubmeds = pb)
+    },
+    featureIds: {
+      handler: function(ids) {
+        this.flatmapQuery(ids)
+      },
+      deep: true
     }
-  },
-  computed: {
   },
   data: function() {
     return {
@@ -60,7 +67,8 @@ export default {
     };
   },
   mounted: function() {
-    this.flatmapQuery(this.featureId)
+    if (this.featureIds)
+      this.flatmapQuery(this.featureIds)
   },
   methods: {
     stripPMIDPrefix: function (pubmedId){
@@ -82,10 +90,21 @@ export default {
       let split = bibliographyString.split('https')
       return [split[0], 'https' + split[1]]
     },
-    flatmapQuery: function(identifier){
+    buildSqlStatement: function(keastIds) {
+      let sql = 'select distinct publication from publications where entity in ('
+      if (keastIds.length === 1) {
+        sql += `'${keastIds[0]}')`
+      } else if (keastIds.length > 1) {
+        for (let i in keastIds) {
+          sql += `'${keastIds[i]}'${i >= keastIds.length - 1 ? ')' : ','} `
+        }
+      }
+      return sql
+    },
+    flatmapQuery: function(keastIds){
       this.pubmeds = []
       this.loading.response = true
-      const data = { sql: 'select publication from publications where entity=?', "params": [identifier]};
+      const data = { sql: this.buildSqlStatement(keastIds)};
       fetch('https://mapcore-demo.org/devel/flatmap/v1/knowledge/query/', {
         method: 'POST',
         headers: {
@@ -102,14 +121,13 @@ export default {
           this.titleFromPubmed(ids).then( bib=>{
             let [html, link] = this.splitLink(bib)
             this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
-            
           })
         });
         this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
       })
       .catch((error) => {
         console.error('Error:', error);
-      });
+    })
     },
     pubmedSearchUrl: function(ids) {
       let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
