@@ -83,10 +83,22 @@
           Organs display
         </el-row>
         <el-row class="backgroundControl" >
-          <el-radio-group v-model="radio" class="flatmap-radio"
+          <el-radio-group v-model="colourRadio" class="flatmap-radio"
             @change="setColour">
             <el-radio :label="true">Colour</el-radio>
             <el-radio :label="false">Greyscale</el-radio>
+          </el-radio-group>
+        </el-row>
+        <el-row class="backgroundSpacer">
+        </el-row>
+        <el-row class="backgroundText">
+          Outlines display
+        </el-row>
+        <el-row class="backgroundControl" >
+          <el-radio-group v-model="outlinesRadio" class="flatmap-radio"
+            @change="setOutlines">
+            <el-radio :label="true">Show</el-radio>
+            <el-radio :label="false">Hide</el-radio>
           </el-radio-group>
         </el-row>
         <el-row class="backgroundSpacer">
@@ -170,9 +182,18 @@ export default {
      * Function to toggle colour/greyscale of organs.
      */
     setColour: function(flag) {
-      this.label = flag;
+      this.colourRadio = flag;
       if (this.mapImp) {
-        this.mapImp.setColour(flag);
+        this.mapImp.setColour({colour: flag, outline: this.outlinesRadio});
+      }
+    },
+    /**
+     * Function to toggle outlines f organs.
+     */
+    setOutlines: function(flag) {
+      this.outlineRadio = flag;
+      if (this.mapImp) {
+        this.mapImp.setColour({colour: this.colourRadio, outline: flag});
       }
     },
     /**
@@ -519,7 +540,8 @@ export default {
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
       tooltipContent: {},
-      radio: true
+      colourRadio: true,
+      outlinesRadio: true
     };
   },
   watch: {
@@ -871,9 +893,9 @@ export default {
   background-color: #ffffff;
   border: 1px solid rgb(131, 0, 191);
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 144px;
-  width: 128px;
-  min-width:128px;
+  height: 200px;
+  width: 175px;
+  min-width:175px;
 }
 
 >>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
