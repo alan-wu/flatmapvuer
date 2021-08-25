@@ -17,7 +17,7 @@
         @change="flatmapChanged"
         v-popover:selectPopover
       >
-        <el-option v-for="(item, key) in availableSpecies" :key="key" :label="key" :value="key">
+        <el-option v-for="(item, key) in speciesList" :key="key" :label="key" :value="key">
           <el-row>
             <el-col :span="8"><i :class="item.iconClass"></i></el-col>
             <el-col :span="12">{{ key }}</el-col>
@@ -26,7 +26,7 @@
       </el-select>
     </div>
     <FlatmapVuer
-      v-for="(item, key) in availableSpecies"
+      v-for="(item, key) in speciesList"
       :key="key"
       :showLayer="showLayer"
       v-show="activeSpecies==key"
@@ -71,14 +71,28 @@ export default {
     FlatmapVuer
   },
   mounted: function() {
-    if (!this.state) {
-      if (this.initial && this.availableSpecies[this.initial] !== undefined) {
-        this.activeSpecies = this.initial;
-      } else {
-        this.activeSpecies = Object.keys(this.availableSpecies)[0];
+    fetch(this.flatmapAPI)
+    .then(response => response.json())
+    .then(data => {
+      Object.keys(this.availableSpecies).forEach(key => {
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].describes == this.availableSpecies[key].taxo) {
+            this.speciesList[key] = this.availableSpecies[key];
+            break;
+          }
+        }
+      });
+      if (!this.state) {
+        if (this.initial && this.speciesList[this.initial] !== undefined) {
+          this.activeSpecies = this.initial;
+        } else {
+          this.activeSpecies = Object.keys(this.speciesList)[0];
+        }
+        Vue.nextTick(() => {
+          this.$refs[this.activeSpecies][0].createFlatmap();
+        });
       }
-      this.$refs[this.activeSpecies][0].createFlatmap();
-    }
+    });
   },
   methods: {
     FlatmapSelected: function(resource) {
@@ -211,13 +225,14 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: undefined
+      default: "https://mapcore-demo.org/flatmaps/"
     },
   },
   data: function() {
     return {
       activeSpecies: undefined,
-      appendToBody: false
+      appendToBody: false,
+      speciesList: {}
     };
   },
   watch: {

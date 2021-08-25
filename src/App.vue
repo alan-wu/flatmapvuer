@@ -113,6 +113,10 @@ body {
   margin: 0px;
 }
 
+.mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+  margin-top:120px;
+}
+
 .popover{
   top:5px;
   right:calc( 50% - 20px);

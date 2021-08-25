@@ -251,8 +251,11 @@ export default {
         const taxonomy = this.entry;
         const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
+        // Disable the nueron pop up for now.
+        /*
         if (feature && feature.type !== "marker")
           this.checkAndCreatePopups(data)
+          */
         this.$emit("resource-selected", data);
       }
     },
@@ -522,7 +525,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: undefined
+      default: "https://mapcore-demo.org/flatmaps/"
     },
   },
   data: function() {
@@ -562,10 +565,7 @@ export default {
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
-    let endpoint = this.flatmapAPI;
-    if (!endpoint)
-      endpoint = "https://mapcore-demo.org/flatmaps/";
-    this.mapManager = new flatmap.MapManager(endpoint);
+    this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted)
       this.createFlatmap();
   }
