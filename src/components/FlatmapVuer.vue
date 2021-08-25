@@ -5,7 +5,7 @@
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
     <SvgSpriteColor/>
-    <div style="height:100%;width:100%;position:relative">
+    <div style="height:100%;width:100%;position:relative;overflow-y:none">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover :content="warningMessage" placement="right"
         v-if="displayWarning" :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisibilities[6].value"
@@ -75,14 +75,38 @@
       <el-popover
         ref="backgroundPopover"
         placement="top-start"
-        width="128"
+        width="175"
         :appendToBody=false
         trigger="click"
         popper-class="background-popper">
         <el-row class="backgroundText">
+          Organs display
+        </el-row>
+        <el-row class="backgroundControl" >
+          <el-radio-group v-model="colourRadio" class="flatmap-radio"
+            @change="setColour">
+            <el-radio :label="true">Colour</el-radio>
+            <el-radio :label="false">Greyscale</el-radio>
+          </el-radio-group>
+        </el-row>
+        <el-row class="backgroundSpacer">
+        </el-row>
+        <el-row class="backgroundText">
+          Outlines display
+        </el-row>
+        <el-row class="backgroundControl" >
+          <el-radio-group v-model="outlinesRadio" class="flatmap-radio"
+            @change="setOutlines">
+            <el-radio :label="true">Show</el-radio>
+            <el-radio :label="false">Hide</el-radio>
+          </el-radio-group>
+        </el-row>
+        <el-row class="backgroundSpacer">
+        </el-row>
+        <el-row class="backgroundText">
           Change background
         </el-row>
-        <el-row class="backgroundChooser" >
+        <el-row class="backgroundControl" >
           <div v-for="item in availableBackground" :key="item" 
             :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
             @click="backgroundChangeCallback(item)"/>
@@ -94,6 +118,7 @@
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
+      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" @resource-selected="resourceSelected"/>
     </div>
   </div>
 </template>
@@ -101,12 +126,15 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
+import Tooltip from './Tooltip'
 import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
 import {
   Checkbox,
   CheckboxGroup,
   Col,
   Loading,
+  Radio,
+  RadioGroup,
   Row
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
@@ -117,6 +145,8 @@ Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(Col);
 Vue.use(Loading.directive);
+Vue.use(Radio);
+Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
@@ -131,7 +161,8 @@ export default {
   name: "FlatmapVuer",
   components: {
     SvgIcon,
-    SvgSpriteColor
+    SvgSpriteColor,
+    Tooltip
   },
   beforeCreate: function() {
     this.mapManager = undefined;
@@ -140,10 +171,30 @@ export default {
   methods: {
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
-      this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+      if (this.mapImp) {
+        this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+      }
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen;
+    },
+    /**
+     * Function to toggle colour/greyscale of organs.
+     */
+    setColour: function(flag) {
+      this.colourRadio = flag;
+      if (this.mapImp) {
+        this.mapImp.setColour({colour: flag, outline: this.outlinesRadio});
+      }
+    },
+    /**
+     * Function to toggle outlines f organs.
+     */
+    setOutlines: function(flag) {
+      this.outlineRadio = flag;
+      if (this.mapImp) {
+        this.mapImp.setColour({colour: this.colourRadio, outline: flag});
+      }
     },
     /**
      * Function to toggle paths to default.
@@ -193,24 +244,87 @@ export default {
       }
     },
     eventCallback: function() {
+      
       return (eventType, feature, ...args) => {
         const label = feature.label;
         const resource = [ feature.models ];
         const taxonomy = this.entry;
-        const data = { taxonomy: taxonomy, resource: resource, label: label,
+        const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
+        // Disable the nueron pop up for now.
+        /*
+        if (feature && feature.type !== "marker")
+          this.checkAndCreatePopups(data)
+          */
         this.$emit("resource-selected", data);
       }
     },
-    getCoordinatesOfLastClick: function() {
-      if (this.mapImp) {
-        if (this.mapImp._userInteractions._lastClickedLocation) {
-          return this.mapImp._map.project(
-            this.mapImp._userInteractions._lastClickedLocation);
+    // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
+    checkAndCreatePopups: function(data){
+      if (data.eventType == 'click' && this.createTooltipFromNeuronCuration(data)) { 
+        this.mapImp.showPopup(this.mapImp.modelFeatureIds(data.resource[0])[0],this.$refs.tooltip.$el,
+          {className: "flatmap-tooltip-dialog"})
+        this.popUpCssHack()
+      }
+    },
+    popUpCssHack: function(){
+      // Below is a hack to remove flatmap tooltips while popup is open
+      let ftooltip = document.querySelector('.flatmap-tooltip-popup')
+      if (ftooltip) ftooltip.style.display = 'none'
+      document.querySelector('.mapboxgl-popup-close-button').style.display = 'block'
+      this.$refs.tooltip.$el.style.display = 'flex'
+      document.querySelector('.mapboxgl-popup-close-button').onclick = ()=>{
+        document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
+      }
+    },
+    resourceSelected: function(action){
+      this.$emit("resource-selected", action)
+    },
+    createTooltipFromNeuronCuration: function(data){
+      const feature = data.resource[0]
+      let content = {
+        title: undefined, components: undefined, start: undefined, distribution: undefined, actions: []
+      }
+      
+      let foundAnnotations = false
+      this.tooltipVisible = false
+
+      // neural data check
+      if (feature){
+        if (feature.includes('ilxtr:neuron')){
+          foundAnnotations = true
+          this.tooltipVisible = true
+          this.tooltipContent = content
+          this.tooltipContent.uberon = feature
+          this.tooltipContent.title = data.label
+          this.tooltipContent.featureId = feature
+          this.tooltipContent.actions.push({
+            title: 'Search for dataset',
+            label: 'Neuron Datasets',
+            resource: feature.split(':')[1],
+            type: 'Neuron Search',
+            nervePath: true,
+          })
         }
       }
-      return undefined;
+      // annotated with datset check
+      if (data.dataset){
+        foundAnnotations = true
+        this.tooltipVisible = true
+        this.tooltipContent = content
+        this.tooltipContent.uberon = feature
+        this.tooltipContent.title = data.label
+        this.tooltipContent.actions.push({
+          title: "View dataset",
+          resource: data.dataset,
+          type: "URL",
+          nervePath: false,
+        })
+      }
+    
+      if(foundAnnotations) { return true } else { return false }
     },
+    // Keeping this as an API 
     showPopup: function(featureId, node, options) {
       let myOptions = options;
       if (this.mapImp) {
@@ -324,6 +438,8 @@ export default {
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
           this.sensor = new ResizeSensor(this.$refs.display, mapResize(this.mapImp));
+          this.mapImp.setBackgroundOpacity(1);
+          this.backgroundChangeCallback(this.currentBackground);
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
@@ -335,6 +451,23 @@ export default {
       } else if (state) {
         if (this.entry == state.entry)
           this._viewportToBeSet = state.viewport;
+      }
+    },
+    /**
+     * Function to display features with annotation matching the provided term.
+     */
+    searchAndShowResult: function(term) {
+      if (this.mapImp) {
+        if (term === undefined || term === "") {
+          this.mapImp.clearSearchResults();
+        }
+        else {
+          let searchResults = this.mapImp.search(term);
+          if (searchResults && searchResults.__featureIds.length > 0)
+            this.mapImp.showSearchResults(searchResults);
+          else
+            this.mapImp.clearSearchResults();
+        }
       }
     }
   },
@@ -409,6 +542,9 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
+      tooltipContent: {},
+      colourRadio: true,
+      outlinesRadio: true
     };
   },
   watch: {
@@ -616,17 +752,103 @@ export default {
   margin-bottom: 20px;
 }
 
+.tooltip {
+  display: none;
+}
+
+>>> .mapboxgl-popup{
+  max-width: 300px !important;
+}
+
 >>>.flatmap-tooltip-popup .mapboxgl-popup-content {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
-  pointer-events: auto;
+  pointer-events: none;
+  display: none;
   background: #fff;
+  border: 1px solid rgb(131, 0, 191);
+  padding-left: 6px;
+  padding-right: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content {
+  margin-bottom: 12px;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content {
+  margin-top: 18px;
 }
 
 >>> .mapboxgl-popup.flatmap-marker-popup{
   box-shadow: 1px 1px 2px rgba(0,0,0,.1);
   pointer-events: auto;
   background: #fff;
+}
+
+
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content::after,
+>>>.flatmap-tooltip-popup .mapboxgl-popup-content::before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    flex-shrink: 0;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after,
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
+    top: 100%;
+}
+
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after {
+    margin-top: -1px;
+    border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+    border-width: 12px;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after,
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
+    top: calc(-100% + 6px);
+}
+
+/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after {
+    margin-top: 1px;
+    border-color:  transparent transparent rgb(255, 255, 255) transparent ;
+    border-width: 12px;
+}
+
+/* Fix for chrome bug where under triangle pops up above one on top of it  */
+.selector:not(*:root), >>>.flatmap-tooltip-popup .mapboxgl-popup-content::after{
+  top: 99.9%;
+}
+
+/* this border color controlls the outside, thin border */
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
+    margin: 0 auto;
+    border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
+    border-width: 12px;
+}
+
+>>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
+    margin: 0 auto;
+    border-color: transparent  transparent rgb(131, 0, 191) transparent ;
+    border-width: 12px;
+}
+
+>>> .flatmap-tooltip-popup .mapboxgl-popup-tip{
+  display: none;
+}
+
+>>> .flatmap-tooltip-dialog .mapboxgl-popup-tip {
+  display: none;
 }
 
 >>> .flatmap-marker-popup .mapboxgl-popup-content {
@@ -671,10 +893,19 @@ export default {
   background-color: #ffffff;
   border: 1px solid rgb(131, 0, 191);
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 72px;
-  width: 128px;
-  min-width:128px;
+  height: 200px;
+  width: 175px;
+  min-width:175px;
 }
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
+  border-top-color: #fff !important;
+}
+
 
 .backgroundText {
   color: rgb(48, 49, 51);
@@ -683,7 +914,7 @@ export default {
   line-height: 20px;
 }
 
-.backgroundChooser {
+.backgroundControl {
   display: flex;
   margin-top:16px;
 }
@@ -795,6 +1026,10 @@ export default {
   display: none;
 }
 
+>>> .mapboxgl-popup-content {
+  padding: 0px;
+}
+
 >>> .flatmap-popup-popper .mapboxgl-popup-tip {
   border-bottom-color: #8300bf;  
 }
@@ -862,9 +1097,29 @@ export default {
   outline:none;
 }
 
+.backgroundSpacer {
+  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 10px;
+}
+
+.flatmap-radio >>> label{
+  margin-right:20px;
+}
+
+.flatmap-radio >>> label:last-child{
+  margin-right:0px;
+}
+
+.flatmap-radio >>> .el-radio__input.is-checked+.el-radio__label {
+  color: #8300bf;
+}
+
+.flatmap-radio >>> .el-radio__input.is-checked .el-radio__inner {
+  border-color: #8300bf;
+  background: #8300bf;
+}
+
 </style>
-
-
 
 <style scoped src="../styles/purple/checkbox.css">
 </style>

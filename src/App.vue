@@ -22,10 +22,6 @@
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
       :displayMinimap=true :flatmapAPI="flatmapAPI"/>
-    <div>
-      <TooltipVuer placement="bottom" :visible="visible" :content="tContent" 
-        :position="tStyle" :displayCloseButton="displayCloseButton" ref="tooltip" @onActionClick="onActionClick"/>
-    </div>
   </div>
 </template>
 
@@ -33,22 +29,14 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
-import { TooltipVuer } from '@abi-software/maptooltip';
-import '@abi-software/maptooltip/dist/maptooltip.css';
 import {
   Col,
   Popover,
-  RadioButton,
-  RadioGroup,
   Row,
 } from 'element-ui';
-import "./styles/purple/radio-button.css";
-import "./styles/purple/radio-group.css";
 import "./icons/mapicon-species-style.css";
 Vue.use(Col);
 Vue.use(Popover);
-Vue.use(RadioButton);
-Vue.use(RadioGroup);
 Vue.use(Row);
 
 export default {
@@ -62,18 +50,14 @@ export default {
         this.$refs.multi.setState(this._mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
-      let tooltip = this.$refs.tooltip;
-      if (resource.eventType == "mouseenter")
-        this.$refs.multi.showMarkerPopup(resource.feature.id, tooltip.$refs.content.$vnode.elm);
+      if (resource.eventType != "hover")
+        console.log(resource);
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
       console.log(taxon, id);
     },
-    onActionClick: function(action) {
-      console.log("onActionClick", action);
-    }
   },
   data: function(){
     return {
@@ -88,22 +72,7 @@ export default {
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat", displayWarning:true},
       },
-      tContent: {
-        title: "Mapping of ICN Neurons in a 3D Rat Heart",
-        description: "The distribution of neurons in the intrinsic cardiac nervous system (ICN) were mapped and visualized in a 3D reconstruction of a male rat heart.",
-        actions: [
-          {
-            title: "View 3D scaffold",
-            resource: "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json",
-            type: "Scaffold"
-          },
-          {
-            title: "View dataset",
-            resource: "https://sparc.science/datasets/37?type=dataset",
-            type: "URL"
-          }
-        ]
-      },
+      tooltipContent: undefined,
       tStyle: {
         top: "200px",
         left: "200px",
@@ -111,9 +80,8 @@ export default {
       },
       displayCloseButton: false,
       initial: "Rat",
-      visible: false,
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
   mounted: function() {
@@ -121,7 +89,6 @@ export default {
   },
   components: {
     MultiFlatmapVuer,
-    TooltipVuer
   }
 }
 </script>
@@ -136,6 +103,10 @@ export default {
   height:100%;
   width: 100%;
   position:absolute;
+}
+
+.mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+  margin-top:120px;
 }
 
 body {
@@ -168,6 +139,7 @@ body {
 .el-tabs__content {
   height:100%;
 }
+
 
 
 </style>

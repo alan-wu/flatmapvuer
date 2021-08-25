@@ -163,6 +163,9 @@ export default {
         }
       }
     },
+    resourceSelected: function(action) {
+      this.$emit("resource-selected", action);
+    },
   },
   props: {
     showLayer: {
@@ -312,9 +315,11 @@ export default {
   border-right-color: #8300bf !important;
 }
 
->>> .flatmap-popper.right-popper .popper__arrow:after{
-  border-right-color: #f3ecf6 !important;
+>>> .flatmap-marker-popup{
+  background-color: #f0f0f000  !important;
+  box-shadow: none !important;
 }
+
 </style>
 
 
