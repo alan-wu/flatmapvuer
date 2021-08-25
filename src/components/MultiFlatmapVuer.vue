@@ -71,30 +71,38 @@ export default {
     FlatmapVuer
   },
   mounted: function() {
-    fetch(this.flatmapAPI)
-    .then(response => response.json())
-    .then(data => {
-      Object.keys(this.availableSpecies).forEach(key => {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].describes == this.availableSpecies[key].taxo) {
-            this.speciesList[key] = this.availableSpecies[key];
-            break;
-          }
-        }
-      });
-      if (!this.state) {
-        if (this.initial && this.speciesList[this.initial] !== undefined) {
-          this.activeSpecies = this.initial;
-        } else {
-          this.activeSpecies = Object.keys(this.speciesList)[0];
-        }
-        Vue.nextTick(() => {
-          this.$refs[this.activeSpecies][0].createFlatmap();
-        });
-      }
-    });
+    this.initialise();
   },
   methods: {
+    initialise: function() {
+      return new Promise(resolve => {
+        fetch(this.flatmapAPI)
+        .then(response => response.json())
+        .then(data => {
+          this.speciesLis= {};
+          Object.keys(this.availableSpecies).forEach(key => {
+            for (let i = 0; i < data.length; i++) {
+              if (data[i].describes == this.availableSpecies[key].taxo) {
+                this.speciesList[key] = this.availableSpecies[key];
+                break;
+              }
+            }
+          });
+          if (!this.state) {
+            if (this.initial && this.speciesList[this.initial] !== undefined) {
+              this.activeSpecies = this.initial;
+            } else {
+              this.activeSpecies = Object.keys(this.speciesList)[0];
+            }
+            Vue.nextTick(() => {
+              if (this.$refs[this.activeSpecies])
+                this.$refs[this.activeSpecies][0].createFlatmap();
+            });
+          }
+          resolve();
+        });
+      })
+    },
     FlatmapSelected: function(resource) {
       this.$emit("resource-selected", resource);
     },
@@ -148,19 +156,21 @@ export default {
      */
     setState: function(state) {
       if (state) {
-        if (state.species && state.species !== this.activeSpecies) {
-          this.activeSpecies = state.species;
-          if (state.state) {
-            //Wait for next tick when the refs are ready for rendering
-            this.$nextTick(() => {
-              this.$refs[this.activeSpecies][0].createFlatmap(state.state);
-              this.$emit('flatmapChanged', this.activeSpecies);
-            })
+        this.initialise().then(() => {
+          if (state.species && state.species !== this.activeSpecies) {
+            this.activeSpecies = state.species;
+            if (state.state) {
+              //Wait for next tick when the refs are ready for rendering
+              this.$nextTick(() => {
+                this.$refs[this.activeSpecies][0].createFlatmap(state.state);
+                this.$emit('flatmapChanged', this.activeSpecies);
+              })
+            }
+          } else if (state.state) {
+            let map = this.getCurrentFlatmap();
+            map.setState(state.state);
           }
-        } else if (state.state) {
-          let map = this.getCurrentFlatmap();
-          map.setState(state.state);
-        }
+        })
       }
     },
     resourceSelected: function(action) {
