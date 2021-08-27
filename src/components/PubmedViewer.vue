@@ -38,7 +38,11 @@ Vue.use(CarouselItem);
 
 export default {
   name: "Tooltip",
-  props: { 
+  props: {
+    flatmapAPI: {
+      type: String,
+      default: 'https://mapcore-demo.org/current/flatmap/v2/'
+    },
     featureId: {
       type: String,
       default: ''
@@ -105,7 +109,7 @@ export default {
       this.pubmeds = []
       this.loading.response = true
       const data = { sql: this.buildSqlStatement(keastIds)};
-      fetch('https://mapcore-demo.org/devel/flatmap/v1/knowledge/query/', {
+      fetch(`${this.flatmapAPI}knowledge/query/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

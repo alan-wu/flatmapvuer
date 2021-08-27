@@ -9,7 +9,7 @@
       </div>
       
 
-      <pubmed-viewer v-if="content.featureIds" class="block" :featureIds="content.featureIds" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      <pubmed-viewer v-if="content.featureIds" class="block" :flatmapApi="flatmapApi" :featureIds="content.featureIds" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       {{content.paths}}
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
@@ -65,6 +65,10 @@ export default {
   components: { PubmedViewer },
   name: "Tooltip",
   props: { 
+    flatmapApi: {
+      type: String,
+      default: 'https://mapcore-demo.org/current/flatmap/v2/'
+    },
     visible: {
       type: Boolean,
       default: false

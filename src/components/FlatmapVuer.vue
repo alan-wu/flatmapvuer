@@ -94,7 +94,7 @@
           :class="{ open: drawerOpen, close: !drawerOpen }" slot="reference"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
-      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" @resource-selected="resourceSelected"/>
+      <Tooltip ref="tooltip" class="tooltip" :content="tooltipContent" :flatmapAPI="flatmapAPI" @resource-selected="resourceSelected"/>
     </div>
   </div>
 </template>
