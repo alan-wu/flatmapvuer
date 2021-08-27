@@ -75,14 +75,38 @@
       <el-popover
         ref="backgroundPopover"
         placement="top-start"
-        width="128"
+        width="175"
         :appendToBody=false
         trigger="click"
         popper-class="background-popper">
         <el-row class="backgroundText">
+          Organs display
+        </el-row>
+        <el-row class="backgroundControl" >
+          <el-radio-group v-model="colourRadio" class="flatmap-radio"
+            @change="setColour">
+            <el-radio :label="true">Colour</el-radio>
+            <el-radio :label="false">Greyscale</el-radio>
+          </el-radio-group>
+        </el-row>
+        <el-row class="backgroundSpacer">
+        </el-row>
+        <el-row class="backgroundText">
+          Outlines display
+        </el-row>
+        <el-row class="backgroundControl" >
+          <el-radio-group v-model="outlinesRadio" class="flatmap-radio"
+            @change="setOutlines">
+            <el-radio :label="true">Show</el-radio>
+            <el-radio :label="false">Hide</el-radio>
+          </el-radio-group>
+        </el-row>
+        <el-row class="backgroundSpacer">
+        </el-row>
+        <el-row class="backgroundText">
           Change background
         </el-row>
-        <el-row class="backgroundChooser" >
+        <el-row class="backgroundControl" >
           <div v-for="item in availableBackground" :key="item" 
             :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
             @click="backgroundChangeCallback(item)"/>
@@ -109,6 +133,8 @@ import {
   CheckboxGroup,
   Col,
   Loading,
+  Radio,
+  RadioGroup,
   Row
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
@@ -119,6 +145,8 @@ Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(Col);
 Vue.use(Loading.directive);
+Vue.use(Radio);
+Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require('css-element-queries/src/ResizeSensor');
 
@@ -143,10 +171,30 @@ export default {
   methods: {
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
-      this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+      if (this.mapImp) {
+        this.mapImp.setBackgroundColour(this.currentBackground, 1 );
+      }
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen;
+    },
+    /**
+     * Function to toggle colour/greyscale of organs.
+     */
+    setColour: function(flag) {
+      this.colourRadio = flag;
+      if (this.mapImp) {
+        this.mapImp.setColour({colour: flag, outline: this.outlinesRadio});
+      }
+    },
+    /**
+     * Function to toggle outlines f organs.
+     */
+    setOutlines: function(flag) {
+      this.outlineRadio = flag;
+      if (this.mapImp) {
+        this.mapImp.setColour({colour: this.colourRadio, outline: flag});
+      }
     },
     /**
      * Function to toggle paths to default.
@@ -203,8 +251,11 @@ export default {
         const taxonomy = this.entry;
         const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
+        // Disable the nueron pop up for now.
+        /*
         if (feature && feature.type !== "marker")
           this.checkAndCreatePopups(data)
+          */
         this.$emit("resource-selected", data);
       }
     },
@@ -419,6 +470,23 @@ export default {
         if (this.entry == state.entry)
           this._viewportToBeSet = state.viewport;
       }
+    },
+    /**
+     * Function to display features with annotation matching the provided term.
+     */
+    searchAndShowResult: function(term) {
+      if (this.mapImp) {
+        if (term === undefined || term === "") {
+          this.mapImp.clearSearchResults();
+        }
+        else {
+          let searchResults = this.mapImp.search(term);
+          if (searchResults && searchResults.__featureIds.length > 0)
+            this.mapImp.showSearchResults(searchResults);
+          else
+            this.mapImp.clearSearchResults();
+        }
+      }
     }
   },
   props: {
@@ -475,7 +543,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: undefined
+      default: "https://mapcore-demo.org/flatmaps/"
     },
   },
   data: function() {
@@ -493,6 +561,8 @@ export default {
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
       tooltipContent: {},
+      colourRadio: true,
+      outlinesRadio: true
     };
   },
   watch: {
@@ -513,10 +583,7 @@ export default {
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
-    let endpoint = this.flatmapAPI;
-    if (!endpoint)
-      endpoint = "https://mapcore-demo.org/flatmaps/";
-    this.mapManager = new flatmap.MapManager(endpoint);
+    this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted)
       this.createFlatmap();
   }
@@ -844,10 +911,19 @@ export default {
   background-color: #ffffff;
   border: 1px solid rgb(131, 0, 191);
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 72px;
-  width: 128px;
-  min-width:128px;
+  height: 200px;
+  width: 175px;
+  min-width:175px;
 }
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
+  border-top-color: #fff !important;
+}
+
 
 .backgroundText {
   color: rgb(48, 49, 51);
@@ -856,7 +932,7 @@ export default {
   line-height: 20px;
 }
 
-.backgroundChooser {
+.backgroundControl {
   display: flex;
   margin-top:16px;
 }
@@ -1039,9 +1115,29 @@ export default {
   outline:none;
 }
 
+.backgroundSpacer {
+  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 10px;
+}
+
+.flatmap-radio >>> label{
+  margin-right:20px;
+}
+
+.flatmap-radio >>> label:last-child{
+  margin-right:0px;
+}
+
+.flatmap-radio >>> .el-radio__input.is-checked+.el-radio__label {
+  color: #8300bf;
+}
+
+.flatmap-radio >>> .el-radio__input.is-checked .el-radio__inner {
+  border-color: #8300bf;
+  background: #8300bf;
+}
+
 </style>
-
-
 
 <style scoped src="../styles/purple/checkbox.css">
 </style>

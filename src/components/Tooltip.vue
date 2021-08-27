@@ -137,6 +137,10 @@ export default {
   margin-bottom: 1.5em;
 }
 
+.pub {
+  width: 16rem;
+}
+
 .icon {
   right: 0px;
   position: absolute;
