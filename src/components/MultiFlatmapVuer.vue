@@ -262,7 +262,7 @@ export default {
 <style scoped src="../styles/purple/option.css">
 </style>
 
-<style scoped>
+<style scoped lang="scss">
 .multi-container {
   height: 100%;
   width: 100%;
@@ -290,29 +290,27 @@ export default {
   left: 16px;
   top: 44px;
   position: absolute;
+  ::v-deep .el-input__inner {
+    color: rgb(48, 49, 51);
+    padding-top: 0.25em;
+    .is-focus {
+      border: 1px solid #8300bf;
+    }
+  }
 }
 
-.select-box >>> .el-input__inner {
-  color: rgb(48, 49, 51);
-  padding-top: 0.25em;
+.flatmap_dropdown {
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.selected {
+      color: #8300bf;
+      font-weight: normal;
+    }
+  }
 }
 
-.select-box >>> .is-focus .el-input__inner {
-  border: 1px solid #8300bf;
-}
-
-.flatmap_dropdown .el-select-dropdown__item {
-  white-space: nowrap;
-  text-align: left;
-
-}
-
-.flatmap_dropdown .el-select-dropdown__item.selected {
-  color: #8300bf;
-  font-weight: normal;
-}
-
->>>.flatmap-popper {
+::v-deep .flatmap-popper {
   padding: 6px 4px;
   font-size:12px;
   color: rgb(48, 49, 51);
@@ -320,12 +318,14 @@ export default {
   border: 1px solid rgb(131, 0, 191);
   white-space: nowrap;
   min-width: unset;
-}
->>> .flatmap-popper.right-popper .popper__arrow{
-  border-right-color: #8300bf !important;
+  .right-popper {
+    .popper__arrow{
+      border-right-color: #8300bf !important;
+    }
+  }
 }
 
->>> .flatmap-marker-popup{
+::v-deep .flatmap-marker-popup{
   background-color: #f0f0f000  !important;
   box-shadow: none !important;
 }

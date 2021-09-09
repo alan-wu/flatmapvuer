@@ -121,7 +121,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .attribute-title{
   font-size: 16px;
   font-weight: 600;
@@ -138,19 +138,13 @@ export default {
   color: #8300bf;
   text-decoration: none;
   word-wrap: break-word;
+  &:hover, &:focus{
+    color: #8300bf;
+    text-decoration: underline;
+  }
 }
 
-.el-link:hover {
-  color: #8300bf;
-  text-decoration: underline;
-}
-
-.el-link:focus {
-  color: #8300bf;
-  text-decoration: underline;
-}
-
->>> .el-carousel__button {
+::v-deep .el-carousel__button {
   background-color: rgb(131, 0, 191)  
 }
 
@@ -160,19 +154,16 @@ export default {
   font-size: 14px !important;
   background-color: rgb(131, 0, 191);
   color: #fff;
+  &:hover{
+    color: #fff !important;
+    background: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+  }
+  &+.button {
+    margin-top: 10px !important;
+    background-color: rgb(131, 0, 191);
+    color: #fff; 
+  }
 }
-
-.button+.button {
-  margin-top: 10px !important;
-  background-color: rgb(131, 0, 191);
-  color: #fff; 
-}
-
-.button:hover {
-  color: #fff !important;
-  background: #ac76c5 !important;
-  border: 1px solid #ac76c5 !important;
-}
-
 
 </style>
