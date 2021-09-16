@@ -293,7 +293,7 @@ export default {
     color: rgb(48, 49, 51);
     padding-top: 0.25em;
     .is-focus {
-      border: 1px solid #8300bf;
+      border: 1px solid $app-primary-color;
     }
   }
 }
@@ -303,7 +303,7 @@ export default {
     white-space: nowrap;
     text-align: left;
     &.selected {
-      color: #8300bf;
+      color: $app-primary-color;
       font-weight: normal;
     }
   }
@@ -314,12 +314,12 @@ export default {
   font-size:12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
   .right-popper {
     .popper__arrow{
-      border-right-color: #8300bf !important;
+      border-right-color: $app-primary-color !important;
     }
   }
 }

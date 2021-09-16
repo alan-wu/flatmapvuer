@@ -140,24 +140,24 @@ export default {
 }
 
 .el-link {
-  color: #8300bf;
+  color: $app-primary-color;
   text-decoration: none;
   word-wrap: break-word;
   &:hover, &:focus{
-    color: #8300bf;
+    color: $app-primary-color;
     text-decoration: underline;
   }
 }
 
 ::v-deep .el-carousel__button {
-  background-color: rgb(131, 0, 191)  
+  background-color: $app-primary-color;  
 }
 
 .button {
   margin-left: 0px !important;
   margin-top: 0px !important;
   font-size: 14px !important;
-  background-color: rgb(131, 0, 191);
+  background-color: $app-primary-color;
   color: #fff;
   &:hover{
     color: #fff !important;
@@ -166,7 +166,7 @@ export default {
   }
   &+.button {
     margin-top: 10px !important;
-    background-color: rgb(131, 0, 191);
+    background-color: $app-primary-color;
     color: #fff; 
   }
 }

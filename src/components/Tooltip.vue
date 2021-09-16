@@ -114,7 +114,7 @@ export default {
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   pointer-events: auto;
   background: #fff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -196,7 +196,7 @@ export default {
   margin-left: 0px !important;
   margin-top: 0px !important;
   font-size: 14px !important;
-  background-color: rgb(131, 0, 191);
+  background-color: $app-primary-color;
   color: #fff;
   &+.button {
     margin-top: 10px !important;
@@ -232,7 +232,7 @@ export default {
     }
     &::before {
       margin: 0 auto;
-      border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
+      border-color: $app-primary-color  transparent  transparent transparent ;
     }
   }
 }
@@ -249,7 +249,7 @@ export default {
     }
     &::before {
       margin: 0 auto;
-      border-color: transparent transparent rgb(131, 0, 191) transparent ;
+      border-color: transparent transparent $app-primary-color transparent ;
     }
   }
 }

@@ -587,7 +587,7 @@ export default {
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #ff8400;
+  color: $warning;
 
   &:hover {
     cursor: pointer;
@@ -599,12 +599,12 @@ export default {
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: #ff8400;
+  background-color: $warning
 
   &.right-popper {
     .popper__arrow {
       &::after {
-        border-right-color: #ff8400 !important;
+        border-right-color: $warning !important;
       }
     }
   }
@@ -723,7 +723,7 @@ export default {
 
 ::v-deep .el-checkbox__label {
   padding-left:5px;
-  color: rgb(131, 0, 191);
+  color: $app-primary-color;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0px;
@@ -733,14 +733,14 @@ export default {
 ::v-deep .el-checkbox__input {
   &.is-indeterminate, &.is-checked {
     .el-checkbox__inner {
-      background-color: #8300bf;
-      border-color: #8300bf;
+      background-color: $app-primary-color;
+      border-color: $app-primary-color;
     }
   }
 }
 
 ::v-deep .el-checkbox__label {
-  color:  #8300bf !important;
+  color:  $app-primary-color !important;
 }
 
 .el-dropdown-link {
@@ -781,7 +781,7 @@ export default {
       /* this border color controlls the outside, thin border */
       &::before {
         margin: 0 auto;
-        border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
+        border-color: $app-primary-color  transparent  transparent transparent ;
       }
     }
   }
@@ -799,7 +799,7 @@ export default {
       }
       &::before {
         margin: 0 auto;
-        border-color: transparent  transparent rgb(131, 0, 191) transparent ;
+        border-color: transparent  transparent $app-primary-color transparent ;
       }
     }
   }
@@ -809,7 +809,7 @@ export default {
     pointer-events: none;
     display: none;
     background: #fff;
-    border: 1px solid rgb(131, 0, 191);
+    border: 1px solid $app-primary-color;
     padding-left: 6px;
     padding-right: 6px;
     display: flex;
@@ -895,14 +895,14 @@ export default {
 ::v-deep .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   height: 200px;
   width: 175px;
   min-width:175px;
   &.el-popper[x-placement^="top"] {
     .popper__arrow { 
-      border-top-color: #8300bf !important;
+      border-top-color: $app-primary-color !important;
       &::after {
         border-top-color: #fff !important;
       }
@@ -928,7 +928,7 @@ export default {
   border: 1px solid rgb(144, 147, 153);
   margin-left:20px;
   &.active {
-    border:2px solid #8300bf;
+    border:2px solid $app-primary-color;
   }
   &:hover{
     cursor: pointer;
@@ -954,7 +954,7 @@ export default {
 .icon-button {
   height:24px!important;
   width:24px!important;
-  color: #8300bf;
+  color: $app-primary-color;
   &:hover {
     cursor:pointer;
   }
@@ -965,7 +965,7 @@ export default {
   font-size:12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
 }
@@ -976,20 +976,20 @@ export default {
 
 ::v-deep .el-loading-spinner {
   i, .el-loading-text {
-    color: #8300bf;
+    color: $app-primary-color;
   }
 }
 
 ::v-deep .flatmap-popup-popper {
   .mapboxgl-popup-tip {
-    border-bottom-color: #8300bf;  
+    border-bottom-color: $app-primary-color;  
   }
   .mapboxgl-popup-content {
     padding: 6px 4px;
     font-size:12px;
     color: rgb(48, 49, 51);
     background-color: #f3ecf6;
-    border: 1px solid rgb(131, 0, 191);
+    border: 1px solid $app-primary-color;
     white-space: nowrap;
     min-width: unset;
     .mapboxgl-popup-close-button {
@@ -1001,7 +1001,7 @@ export default {
 ::v-deep .flatmap-popper {
   &.left-popper {
     .popper__arrow {
-      border-left-color: #8300bf !important;
+      border-left-color: $app-primary-color !important;
       &::after {
         border-left-color: #f3ecf6 !important;
       }
@@ -1010,7 +1010,7 @@ export default {
 
   &.right-popper {
     .popper__arrow {
-      border-right-color: #8300bf !important;
+      border-right-color: $app-primary-color !important;
       &:after {
         border-right-color: #f3ecf6 !important;
       }
@@ -1019,7 +1019,7 @@ export default {
 
   &.el-popper[x-placement^="top"] {
     .popper__arrow {
-      border-top-color: #8300bf !important;
+      border-top-color: $app-primary-color !important;
       &:after {
         border-top-color: #f3ecf6 !important;
       }
@@ -1084,7 +1084,7 @@ export default {
   background-color: #FFFFFF;
   i {
     margin-top:12px;
-    color: #8300bf;
+    color: $app-primary-color;
     transition-delay: 0.9s;
   }
   &.open {
@@ -1120,11 +1120,11 @@ export default {
   .el-radio__input {
     &.is-checked{
       &+.el-radio__label {
-        color: #8300bf;
+        color: $app-primary-color;
       }
       .el-radio__inner {
-        border-color: #8300bf;
-        background: #8300bf;
+        border-color: $app-primary-color;
+        background: $app-primary-color;
       }
     }
   }
