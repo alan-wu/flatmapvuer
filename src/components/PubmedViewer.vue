@@ -122,6 +122,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "@/assets/styles";
+@import "~element-ui/packages/theme-chalk/src/link";
+@import "~element-ui/packages/theme-chalk/src/carousel";
+@import "~element-ui/packages/theme-chalk/src/carousel-item";
+
 .attribute-title{
   font-size: 16px;
   font-weight: 600;

@@ -257,12 +257,11 @@ export default {
 };
 </script>
 
-<style scoped src="../styles/purple/select.css">
-</style>
-<style scoped src="../styles/purple/option.css">
-</style>
-
 <style scoped lang="scss">
+@import "@/assets/styles";
+@import "~element-ui/packages/theme-chalk/src/select";
+@import "~element-ui/packages/theme-chalk/src/option";
+
 .multi-container {
   height: 100%;
   width: 100%;

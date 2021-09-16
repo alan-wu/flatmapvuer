@@ -93,7 +93,10 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+@import "@/assets/styles";
+@import "@/assets/app";
+
 #app {
   font-family: 'Asap', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -140,8 +143,4 @@ body {
   height:100%;
 }
 
-
-
-</style>
-<style scoped src="./styles/purple/popover.css">
 </style>

@@ -574,6 +574,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+@import "@/assets/styles";
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/checkbox";
+@import "~element-ui/packages/theme-chalk/src/checkbox-group";
+@import "~element-ui/packages/theme-chalk/src/loading";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 .warning-icon {
   position: absolute;
   top: 90px;
@@ -837,7 +844,6 @@ export default {
     top: 99.9%;
   }
 }
-
 
 ::v-deep .flatmap-tooltip-dialog {
   .mapboxgl-popup-tip {
@@ -1127,13 +1133,3 @@ export default {
 
 </style>
 
-<style scoped src="../styles/purple/checkbox.css">
-</style>
-<style scoped src="../styles/purple/checkbox-group.css">
-</style>
-<style scoped src="../styles/purple/row.css">
-</style>
-<style scoped src="../styles/purple/button.css">
-</style>
-<style scoped src="../styles/purple/loading.css">
-</style>
