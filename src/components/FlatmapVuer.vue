@@ -599,7 +599,7 @@ export default {
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: $warning
+  background-color: $warning;
 
   &.right-popper {
     .popper__arrow {
