@@ -101,7 +101,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/styles";
 @import "~element-ui/packages/theme-chalk/src/button";
 @import "~element-ui/packages/theme-chalk/src/container";
 @import "~element-ui/packages/theme-chalk/src/header";

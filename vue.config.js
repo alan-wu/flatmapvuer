@@ -5,5 +5,13 @@ module.exports = {
     if(process.env.NODE_ENV === 'production') {
       config.externals = [nodeExternals({}) ];
     }
+  },
+  css: {
+    //Import variables into all stylesheets.
+    loaderOptions: {
+      sass: {
+        prependData: `@import '@/assets/styles';`
+      }
+    }
   }
 }

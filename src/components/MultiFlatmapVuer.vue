@@ -258,7 +258,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/styles";
 @import "~element-ui/packages/theme-chalk/src/select";
 @import "~element-ui/packages/theme-chalk/src/option";
 
