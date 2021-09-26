@@ -252,10 +252,8 @@ export default {
         const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
         // Disable the nueron pop up for now.
-        /*
         if (feature && feature.type !== "marker")
           this.checkAndCreatePopups(data)
-          */
         this.$emit("resource-selected", data);
       }
     },
@@ -588,8 +586,10 @@ export default {
 >>> .warning-popper {
   padding:9px 10px;
   min-width:150px;
+  max-width: 400px;
   font-size:12px;
   color: #fff;
+  word-break: keep-all;
   background-color: #ff8400;
 }
 >>> .warning-popper.right-popper .popper__arrow::after{
@@ -985,7 +985,7 @@ export default {
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
   border: 1px solid rgb(131, 0, 191);
-  white-space: nowrap;
+  word-break: keep-all;
   min-width: unset;
 }
 
