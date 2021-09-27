@@ -121,7 +121,11 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/link";
+@import "~element-ui/packages/theme-chalk/src/carousel";
+@import "~element-ui/packages/theme-chalk/src/carousel-item";
+
 .attribute-title{
   font-size: 16px;
   font-weight: 600;
@@ -135,44 +139,35 @@ export default {
 }
 
 .el-link {
-  color: #8300bf;
+  color: $app-primary-color;
   text-decoration: none;
   word-wrap: break-word;
+  &:hover, &:focus{
+    color: $app-primary-color;
+    text-decoration: underline;
+  }
 }
 
-.el-link:hover {
-  color: #8300bf;
-  text-decoration: underline;
-}
-
-.el-link:focus {
-  color: #8300bf;
-  text-decoration: underline;
-}
-
->>> .el-carousel__button {
-  background-color: rgb(131, 0, 191)  
+::v-deep .el-carousel__button {
+  background-color: $app-primary-color;  
 }
 
 .button {
   margin-left: 0px !important;
   margin-top: 0px !important;
   font-size: 14px !important;
-  background-color: rgb(131, 0, 191);
+  background-color: $app-primary-color;
   color: #fff;
+  &:hover{
+    color: #fff !important;
+    background: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+  }
+  &+.button {
+    margin-top: 10px !important;
+    background-color: $app-primary-color;
+    color: #fff; 
+  }
 }
-
-.button+.button {
-  margin-top: 10px !important;
-  background-color: rgb(131, 0, 191);
-  color: #fff; 
-}
-
-.button:hover {
-  color: #fff !important;
-  background: #ac76c5 !important;
-  border: 1px solid #ac76c5 !important;
-}
-
 
 </style>

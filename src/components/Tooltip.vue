@@ -100,15 +100,20 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/container";
+@import "~element-ui/packages/theme-chalk/src/header";
+@import "~element-ui/packages/theme-chalk/src/icon";
+@import "~element-ui/packages/theme-chalk/src/main";
+
 .tooltip-container {
-  text-align:justify;
   text-align:justify;
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,.1);
   pointer-events: auto;
   background: #fff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,9 +128,11 @@ export default {
   text-align: left;
   width: 16em;
   line-height: 1.5em !important;
-  font-weight: 600;
   font-size: 1em;
   font-family: Helvetica;
+  font-weight: 500;
+  /* font-weight: bold; */
+  padding-bottom: 8px;
 }
 
 .block {
@@ -158,14 +165,6 @@ export default {
   min-width: 16rem;
 }
 
-.title{
-  font-size: 18px;
-  font-weight: 500;
-  /* font-weight: bold; */
-  padding-bottom: 8px;
-
-}
-
 .attribute-title{
   font-size: 16px;
   font-weight: 600;
@@ -183,36 +182,33 @@ export default {
   width: 100%;
 }
 
-.main  .el-button.is-round{
-  border-radius: 4px;
-  padding: 9px 20px 10px 20px;
-  display: flex;
-  height: 36px;
+.main {
+  .el-button.is-round{
+    border-radius: 4px;
+    padding: 9px 20px 10px 20px;
+    display: flex;
+    height: 36px;
+  }
 }
 
 .button {
   margin-left: 0px !important;
   margin-top: 0px !important;
   font-size: 14px !important;
-  background-color: rgb(131, 0, 191);
+  background-color: $app-primary-color;
   color: #fff;
+  &+.button {
+    margin-top: 10px !important;
+  }
+  &:hover {
+    color: #fff !important;
+    background: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+  }
 }
 
-.button+.button {
-  margin-top: 10px !important;
-  background-color: rgb(131, 0, 191);
-  color: #fff; 
-}
-
-.button:hover {
-  color: #fff !important;
-  background: #ac76c5 !important;
-  border: 1px solid #ac76c5 !important;
-}
-
-
-.tooltip-container::after,
-.tooltip-container::before {
+.tooltip-container{
+  &::after, &::before {
     content: '';
     display: block;
     position: absolute;
@@ -220,49 +216,46 @@ export default {
     height: 0;
     border-style: solid;
     flex-shrink: 0;
+  }
 }
 
-.mapboxgl-popup-anchor-bottom .tooltip-container::after,
-.mapboxgl-popup-anchor-bottom .tooltip-container::before {
-    top: 100%;
+.mapboxgl-popup-anchor-bottom {
+  .tooltip-container {
+    &::after, &::before {
+      top: 100%;
+      border-width: 12px;
+    }
+    &::after {
+      margin-top:-1px;
+      border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+    }
+    &::before {
+      margin: 0 auto;
+      border-color: $app-primary-color  transparent  transparent transparent ;
+    }
+  }
 }
 
-.mapboxgl-popup-anchor-top .tooltip-container::after,
-.mapboxgl-popup-anchor-top .tooltip-container::before {
-    top: -24px;
+.mapboxgl-popup-anchor-top {
+  .tooltip-container {
+    &::after, &::before {
+      top: -24px;
+      border-width: 12px;
+    }
+    &::after {
+      margin-top: 1px;
+      border-color: transparent transparent rgb(255, 255, 255) transparent ;
+    }
+    &::before {
+      margin: 0 auto;
+      border-color: transparent transparent $app-primary-color transparent ;
+    }
+  }
 }
 
-
-/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-.mapboxgl-popup-anchor-bottom .tooltip-container::after {
-    margin-top:-1px;
-    border-color: rgb(255, 255, 255) transparent transparent  transparent ;
-    border-width: 12px;
-}
-
-/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-.mapboxgl-popup-anchor-top .tooltip-container::after {
-    margin-top: 1px;
-    border-color: transparent transparent rgb(255, 255, 255) transparent ;
-    border-width: 12px;
-}
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
 .selector:not(*:root), .tooltip-container::after{
   top: 99.4%;
-}
-
-/* this border color controlls the outside, thin border */
-.mapboxgl-popup-anchor-bottom .tooltip-container::before {
-    margin: 0 auto;
-    border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
-    border-width: 12px;
-}
-
-/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-.mapboxgl-popup-anchor-top .tooltip-container::before {
-    margin: 0 auto;
-    border-color: transparent transparent rgb(131, 0, 191) transparent ;
-    border-width: 12px;
 }
 </style>

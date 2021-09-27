@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.2.3-beta-features-3",
+  "version": "0.2.3-beta-features-4",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
     "dist/*",
@@ -34,6 +34,8 @@
     "babel-plugin-component": "^1.1.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
+    "node-sass": "^4.14.1",
+    "sass-loader": "^8.0.2",
     "vue-template-compiler": "^2.6.10",
     "webpack-node-externals": "^2.5.2"
   },
