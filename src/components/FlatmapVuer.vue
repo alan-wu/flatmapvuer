@@ -635,7 +635,7 @@ export default {
     },
     warningMessage: {
       type: String,
-      default: "Beta feature - under active development"
+      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
     },
     /**
      * State containing state of the flatmap.
