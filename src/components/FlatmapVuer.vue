@@ -352,8 +352,10 @@ export default {
           eventType: eventType
         };
         // Disable the nueron pop up for now.
+        /*
         if (feature && feature.type !== "marker")
           this.checkAndCreatePopups(data);
+          */
         this.$emit("resource-selected", data);
       };
     },
