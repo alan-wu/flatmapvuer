@@ -220,7 +220,7 @@ export default {
     },
     warningMessage: {
       type: String,
-      default: "Beta feature - under active development"
+      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
     },
     availableSpecies: {},
     /**
@@ -316,9 +316,12 @@ export default {
   border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
-  .right-popper {
-    .popper__arrow{
+  &.right-popper {
+    .popper__arrow {
       border-right-color: $app-primary-color !important;
+      &:after {
+        border-right-color: #f3ecf6 !important;
+      }
     }
   }
 }
