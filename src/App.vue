@@ -30,11 +30,13 @@
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import {
+  Button,
   Col,
   Popover,
   Row,
 } from 'element-ui';
 import "./icons/mapicon-species-style.css";
+Vue.use(Button);
 Vue.use(Col);
 Vue.use(Popover);
 Vue.use(Row);
@@ -93,7 +95,12 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 #app {
   font-family: 'Asap', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -140,8 +147,4 @@ body {
   height:100%;
 }
 
-
-
-</style>
-<style scoped src="./styles/purple/popover.css">
 </style>

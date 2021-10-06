@@ -573,27 +573,40 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/checkbox";
+@import "~element-ui/packages/theme-chalk/src/checkbox-group";
+@import "~element-ui/packages/theme-chalk/src/loading";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 .warning-icon {
   position: absolute;
   top: 90px;
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #ff8400;
+  color: $warning;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
-.warning-icon:hover {
-  cursor: pointer;
-}
->>> .warning-popper {
+
+::v-deep .warning-popper {
   padding:9px 10px;
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: #ff8400;
-}
->>> .warning-popper.right-popper .popper__arrow::after{
-  border-right-color: #ff8400 !important;
+  background-color: $warning;
+
+  &.right-popper {
+    .popper__arrow {
+      &::after {
+        border-right-color: $warning !important;
+      }
+    }
+  }
 }
 
 .warning-text{
@@ -607,39 +620,32 @@ export default {
   width:25px;
   margin-right: 5px;
   display: inline-block;
+  &.cns {
+    background:#9b1fc1;
+  }
+  &.lcn {
+    background:#f19e38;
+  }
+  &.para-pre {
+    background:#3f8f4a;
+  }
+  &.para-post {
+    background:repeating-linear-gradient(90deg,#3f8f4a,#3f8f4a 6px,transparent 0,transparent 9px);
+  }
+  &.sensory {
+    background:#2a62f6;
+  }
+  &.somatic {
+    background:#98561d;
+  }
+  &.symp-pre {
+    background: #ea3423;
+  }
+  &.symp-post {
+    background: repeating-linear-gradient(90deg,#ea3423,#ea3423 6px,transparent 0,transparent 9px);
+  }
 }
 
-.path-visual.cns {
-  background:#9b1fc1;
-}
-
-.path-visual.lcn {
-  background:#f19e38;
-}
-
-.path-visual.para-pre {
-  background:#3f8f4a;
-}
-
-.path-visual.para-post {
-  background:repeating-linear-gradient(90deg,#3f8f4a,#3f8f4a 6px,transparent 0,transparent 9px);
-}
-
-.path-visual.sensory {
-  background:#2a62f6;
-}
-
-.path-visual.somatic {
-  background:#98561d;
-}
-
-.path-visual.symp-pre {
-  background: #ea3423;
-}
-
-.path-visual.symp-post {
-  background: repeating-linear-gradient(90deg,#ea3423,#ea3423 6px,transparent 0,transparent 9px);
-}
 
 .flatmap-container {
   height: 100%;
@@ -650,12 +656,12 @@ export default {
   position: absolute;
   bottom: 0px;
   transition: all 1s ease;
-}
-.pathway-location.open {
-  left: 0px;
-}
-.pathway-location.close {
-  left: -298px;
+  &.open {
+    left: 0px;
+  }
+  &.close {
+    left: -298px;
+  }
 }
 
 .pathway-container {
@@ -710,32 +716,30 @@ export default {
   display: inline-block;
 }
 
->>> .popper-bump-right{
+::v-deep .popper-bump-right{
   left: 30px;
 }
 
->>> .el-checkbox__label {
+::v-deep .el-checkbox__label {
   padding-left:5px;
-  color: rgb(131, 0, 191);
+  color: $app-primary-color;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0px;
   line-height: 14px;
 }
 
->>> .el-checkbox__input.is-indeterminate .el-checkbox__inner
-{
-  background-color: #8300bf;
-  border-color:  #8300bf;
+::v-deep .el-checkbox__input {
+  &.is-indeterminate, &.is-checked {
+    .el-checkbox__inner {
+      background-color: $app-primary-color;
+      border-color: $app-primary-color;
+    }
+  }
 }
 
->>> .el-checkbox__input.is-checked .el-checkbox__inner {
-  background-color: #8300bf;
-  border-color:  #8300bf;
-}
-
->>> .el-checkbox__label {
-  color:  #8300bf !important;
+::v-deep .el-checkbox__label {
+  color:  $app-primary-color !important;
 }
 
 .el-dropdown-link {
@@ -756,116 +760,115 @@ export default {
   display: none;
 }
 
->>> .mapboxgl-popup{
+::v-deep .mapboxgl-popup{
   max-width: 300px !important;
 }
 
->>>.flatmap-tooltip-popup .mapboxgl-popup-content {
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.1);
-  pointer-events: none;
-  display: none;
-  background: #fff;
-  border: 1px solid rgb(131, 0, 191);
-  padding-left: 6px;
-  padding-right: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
+::v-deep .flatmap-tooltip-popup {
+  &.mapboxgl-popup-anchor-bottom {
+    .mapboxgl-popup-content {
+      margin-bottom: 12px;
+      &::after, &::before {
+        top: 100%;
+        border-width: 12px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        margin-top: -1px;
+        border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+      }
+      /* this border color controlls the outside, thin border */
+      &::before {
+        margin: 0 auto;
+        border-color: $app-primary-color  transparent  transparent transparent ;
+      }
+    }
+  }
+  &.mapboxgl-popup-anchor-top {
+    .mapboxgl-popup-content {
+      margin-top: 18px;
+      &::after, &::before {
+        top: calc(-100% + 6px);
+        border-width: 12px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        margin-top: 1px;
+        border-color:  transparent transparent rgb(255, 255, 255) transparent ;
+      }
+      &::before {
+        margin: 0 auto;
+        border-color: transparent  transparent $app-primary-color transparent ;
+      }
+    }
+  }
+  .mapboxgl-popup-content {
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    pointer-events: none;
+    display: none;
+    background: #fff;
+    border: 1px solid $app-primary-color;
+    padding-left: 6px;
+    padding-right: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &::after, &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      flex-shrink: 0;
+    }
+  }
+  .mapboxgl-popup-tip{
+    display: none;
+  }
 }
 
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content {
-  margin-bottom: 12px;
-}
-
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content {
-  margin-top: 18px;
-}
-
->>> .mapboxgl-popup.flatmap-marker-popup{
-  box-shadow: 1px 1px 2px rgba(0,0,0,.1);
-  pointer-events: auto;
-  background: #fff;
-}
-
-
->>>.flatmap-tooltip-popup .mapboxgl-popup-content::after,
->>>.flatmap-tooltip-popup .mapboxgl-popup-content::before {
-    content: '';
-    display: block;
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    flex-shrink: 0;
-}
-
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after,
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
-    top: 100%;
-}
-
-/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::after {
-    margin-top: -1px;
-    border-color: rgb(255, 255, 255) transparent transparent  transparent ;
-    border-width: 12px;
-}
-
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after,
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
-    top: calc(-100% + 6px);
-}
-
-/* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::after {
-    margin-top: 1px;
-    border-color:  transparent transparent rgb(255, 255, 255) transparent ;
-    border-width: 12px;
+::v-deep .mapboxgl-popup {
+  &.flatmap-marker-popup{
+    box-shadow: 1px 1px 2px rgba(0,0,0,.1);
+    pointer-events: auto;
+    background: #fff;
+  }
 }
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
-.selector:not(*:root), >>>.flatmap-tooltip-popup .mapboxgl-popup-content::after{
-  top: 99.9%;
+.selector:not(*:root), ::v-deep.flatmap-tooltip-popup {
+  .mapboxgl-popup-content::after{
+    top: 99.9%;
+  }
 }
 
-/* this border color controlls the outside, thin border */
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-content::before {
-    margin: 0 auto;
-    border-color: rgb(131, 0, 191)  transparent  transparent transparent ;
-    border-width: 12px;
+::v-deep .flatmap-tooltip-dialog {
+  .mapboxgl-popup-tip {
+    display: none;
+  }
 }
 
->>>.flatmap-tooltip-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-content::before {
-    margin: 0 auto;
-    border-color: transparent  transparent rgb(131, 0, 191) transparent ;
-    border-width: 12px;
+::v-deep .flatmap-marker-popup {
+  .mapboxgl-popup-content {
+    padding: 0px;
+  }
 }
 
->>> .flatmap-tooltip-popup .mapboxgl-popup-tip{
-  display: none;
-}
-
->>> .flatmap-tooltip-dialog .mapboxgl-popup-tip {
-  display: none;
-}
-
->>> .flatmap-marker-popup .mapboxgl-popup-content {
-  padding: 0px;
-}
-
->>>.flatmapvuer-popover .mapboxgl-popup-close-button {
-  position: absolute;
-  right: 0.5em;
-  top: 0;
-  border: 0;
-  border-radius: 0 3px 0 0;
-  cursor: pointer;
-  background-color: transparent;
-  font-size: 2.5em;
-  color: grey;
-  top: 0.95em;
+::v-deep .flatmapvuer-popover {
+  .mapboxgl-popup-close-button {
+    position: absolute;
+    right: 0.5em;
+    top: 0;
+    border: 0;
+    border-radius: 0 3px 0 0;
+    cursor: pointer;
+    background-color: transparent;
+    font-size: 2.5em;
+    color: grey;
+    top: 0.95em;
+  }
 }
 
 .zoomOut{
@@ -888,24 +891,23 @@ export default {
   left: 24px;
 }
 
->>> .background-popper {
+::v-deep .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   height: 200px;
   width: 175px;
   min-width:175px;
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow { 
+      border-top-color: $app-primary-color !important;
+      &::after {
+        border-top-color: #fff !important;
+      }
+    }
+  }
 }
-
->>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color: #8300bf !important;
-}
-
->>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
-  border-top-color: #fff !important;
-}
-
 
 .backgroundText {
   color: rgb(48, 49, 51);
@@ -924,23 +926,22 @@ export default {
   height:20px;
   border: 1px solid rgb(144, 147, 153);
   margin-left:20px;
-}
-.backgroundChoice.active {
-  border:2px solid #8300bf;
-}
-.backgroundChoice:hover {
-  cursor: pointer;
-}
-
-.backgroundChoice.white {
-  background-color: white;
-  margin-left:10px;
-}
-.backgroundChoice.black {
-  background-color: black;
-}
-.backgroundChoice.lightskyblue {
-  background-color: lightskyblue;
+  &.active {
+    border:2px solid $app-primary-color;
+  }
+  &:hover{
+    cursor: pointer;
+  }
+  &.white {
+    background-color: white;
+    margin-left:10px;
+  }
+  &.black {
+    background-color: black;
+  }
+  &.lightskyblue {
+    background-color: white;
+  }
 }
 
 .togglePaths {
@@ -952,86 +953,92 @@ export default {
 .icon-button {
   height:24px!important;
   width:24px!important;
-  color: #8300bf;
-}
-.icon-button:hover {
-  cursor:pointer;
+  color: $app-primary-color;
+  &:hover {
+    cursor:pointer;
+  }
 }
 
->>> .flatmap-popper {
+::v-deep .flatmap-popper {
   padding: 6px 4px;
   font-size:12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
 }
 
->>> .flatmap-marker{
+::v-deep .flatmap-marker{
   cursor: pointer;
 }
 
->>>.el-loading-spinner i{
-  color: #8300bf;  
-}
->>>.el-loading-spinner .el-loading-text {
-  color: #8300bf; 
-}
-
->>> .flatmap-popup-popper .mapboxgl-popup-content {
-  padding: 6px 4px;
-  font-size:12px;
-  color: rgb(48, 49, 51);
-  background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
-  white-space: nowrap;
-  min-width: unset;
+::v-deep .el-loading-spinner {
+  i, .el-loading-text {
+    color: $app-primary-color;
+  }
 }
 
->>>.flatmap-popper.left-popper .popper__arrow{
-  border-left-color: #8300bf !important;
+::v-deep .flatmap-popup-popper {
+  .mapboxgl-popup-tip {
+    border-bottom-color: $app-primary-color;  
+  }
+  .mapboxgl-popup-content {
+    padding: 6px 4px;
+    font-size:12px;
+    color: rgb(48, 49, 51);
+    background-color: #f3ecf6;
+    border: 1px solid $app-primary-color;
+    white-space: nowrap;
+    min-width: unset;
+    .mapboxgl-popup-close-button {
+      display: none;
+    }
+  }
 }
 
->>>.flatmap-popper.left-popper .popper__arrow:after{
-  border-left-color: #f3ecf6 !important;
+::v-deep .flatmap-popper {
+  &.left-popper {
+    .popper__arrow {
+      border-left-color: $app-primary-color !important;
+      &::after {
+        border-left-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.right-popper {
+    .popper__arrow {
+      border-right-color: $app-primary-color !important;
+      &:after {
+        border-right-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
+        border-top-color: #f3ecf6 !important;
+      }
+    }
+  }
 }
 
->>>.flatmap-popper.right-popper .popper__arrow{
-  border-right-color: #8300bf !important;
-}
-
->>>.flatmap-popper.right-popper .popper__arrow:after{
-  border-right-color: #f3ecf6 !important;
-}
-
->>>.flatmap-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color:#8300bf !important;
-}
-
->>>.flatmap-popper.el-popper[x-placement^="top"] .popper__arrow:after{
-  border-top-color: #f3ecf6 !important;
-}
-
->>>.popper-zoomout {
+::v-deep .popper-zoomout {
   padding-right:13px!important;
   left:-21px!important;
 }
 
->>>.popper-zoomout .popper__arrow{
-  left:53px!important;
+::v-deep .popper-zoomout {
+  .popper__arrow {
+    left:53px!important;
+  }
 }
 
->>> .flatmap-popup-popper .mapboxgl-popup-content .mapboxgl-popup-close-button {
-  display: none;
-}
-
->>> .mapboxgl-popup-content {
+::v-deep .mapboxgl-popup-content {
   padding: 0px;
-}
-
->>> .flatmap-popup-popper .mapboxgl-popup-tip {
-  border-bottom-color: #8300bf;  
 }
 
 .bottom-right-control {
@@ -1040,61 +1047,61 @@ export default {
   bottom:16px;
 }
 
->>> .my-drawer {
+::v-deep .my-drawer {
   background: rgba(0,0,0,0);
   box-shadow: none;
 }
 
-.drawer >>> .el-drawer:focus{
-  outline:none;
+.drawer {
+  ::v-deep .el-drawer:focus{
+    outline:none;
+  }
 }
 
-.open-drawer{
+.open-drawer, .drawer-button {
+  z-index: 8;
   width: 20px;
   height: 40px;
-  z-index: 8;
-  position: absolute;
-  left: 0px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
   border: solid 1px #e4e7ed;
-  background-color: #F7FAFF;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
+}
+
+.open-drawer{
+  position: absolute;
+  left: 0px;
+  background-color: #F7FAFF;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
 }
 
 .drawer-button {
   float: left;
-  width: 20px;
-  height: 40px;
-  z-index: 8;
   margin-top:calc(50% - 36px);
-  border: solid 1px #e4e7ed;
   border-left: 0;
   background-color: #FFFFFF;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  pointer-events: auto;
+  i {
+    margin-top:12px;
+    color: $app-primary-color;
+    transition-delay: 0.9s;
+  }
+  &.open {
+    i {
+      transform: rotate(0deg) scaleY(2.5);
+    }
+  }
+  &.close {
+    i {
+      transform: rotate(180deg) scaleY(2.5);
+    }
+  }
 }
 
-.drawer-button i{
-  margin-top:12px;
-  color: #8300bf;
-  transition-delay: 0.9s;
-}
-
-.drawer-button.open i{
-  transform: rotate(0deg) scaleY(2.5);
-}
-
-.drawer-button.close i{
-  transform: rotate(180deg) scaleY(2.5);
-}
-
->>>.mapboxgl-canvas-container canvas {
-  outline:none;
+::v-deep .mapboxgl-canvas-container {
+  canvas {
+    outline:none;
+  }
 }
 
 .backgroundSpacer {
@@ -1102,32 +1109,26 @@ export default {
   margin-bottom: 10px;
 }
 
-.flatmap-radio >>> label{
-  margin-right:20px;
+.flatmap-radio {
+  ::v-deep label{
+    margin-right:20px;
+    &:last-child{
+      margin-right:0px;
+    }
+  }
+  .el-radio__input {
+    &.is-checked{
+      &+.el-radio__label {
+        color: $app-primary-color;
+      }
+      .el-radio__inner {
+        border-color: $app-primary-color;
+        background: $app-primary-color;
+      }
+    }
+  }
 }
 
-.flatmap-radio >>> label:last-child{
-  margin-right:0px;
-}
-
-.flatmap-radio >>> .el-radio__input.is-checked+.el-radio__label {
-  color: #8300bf;
-}
-
-.flatmap-radio >>> .el-radio__input.is-checked .el-radio__inner {
-  border-color: #8300bf;
-  background: #8300bf;
-}
 
 </style>
 
-<style scoped src="../styles/purple/checkbox.css">
-</style>
-<style scoped src="../styles/purple/checkbox-group.css">
-</style>
-<style scoped src="../styles/purple/row.css">
-</style>
-<style scoped src="../styles/purple/button.css">
-</style>
-<style scoped src="../styles/purple/loading.css">
-</style>
