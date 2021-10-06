@@ -104,7 +104,6 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/button";
 @import "~element-ui/packages/theme-chalk/src/container";
 @import "~element-ui/packages/theme-chalk/src/header";
-@import "~element-ui/packages/theme-chalk/src/icon";
 @import "~element-ui/packages/theme-chalk/src/main";
 
 .tooltip-container {
