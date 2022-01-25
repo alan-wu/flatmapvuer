@@ -9,7 +9,7 @@
       </div>
       
 
-      <pubmed-viewer v-if="content.featureId" class="block" :featureId="content.featureId" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      <pubmed-viewer v-if="content.featureId" class="block" :flatmapAPI=flatmapAPI :featureId="content.featureId" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       <div v-if="content.components" class="block">
         <div class="attribute-title">Components</div>
         <span class="attribute-content">{{content.components}}</span>
@@ -71,6 +71,13 @@ export default {
     content: {
       type: Object,
       default: undefined
+    },
+        /**
+     * Specify the endpoint of the flatmap server.
+     */
+    flatmapAPI: {
+      type: String,
+      default: "https://mapcore-demo.org/flatmaps/"
     }
   },
   data: function() {
