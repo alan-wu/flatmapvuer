@@ -6,7 +6,7 @@
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
-    <SvgSpriteColor />
+    <map-svg-sprite-color />
     <div style="height:100%;width:100%;position:relative;overflow-y:none">
       <div style="height:100%;width:100%;" ref="display"></div>
       <el-popover
@@ -37,7 +37,7 @@
           popper-class="flatmap-popper left-popper"
           v-model="hoverVisibilities[0].value"
         >
-          <SvgIcon
+          <map-svg-icon
             icon="zoomIn"
             class="icon-button zoomIn"
             slot="reference"
@@ -54,7 +54,7 @@
           popper-class="flatmap-popper popper-zoomout"
           v-model="hoverVisibilities[1].value"
         >
-          <SvgIcon
+          <map-svg-icon
             icon="zoomOut"
             class="icon-button zoomOut"
             slot="reference"
@@ -71,7 +71,7 @@
           popper-class="flatmap-popper"
           v-model="hoverVisibilities[2].value"
         >
-          <SvgIcon
+          <map-svg-icon
             icon="resetZoom"
             class="icon-button resetView"
             slot="reference"
@@ -197,7 +197,7 @@
         trigger="manual"
         popper-class="flatmap-popper right-popper"
       >
-        <SvgIcon
+        <map-svg-icon
           v-popover:backgroundPopover
           icon="changeBckgd"
           class="icon-button background-colour"
@@ -211,6 +211,7 @@
         ref="tooltip"
         class="tooltip"
         :content="tooltipContent"
+        :flatmapAPI="flatmapAPI"
         @resource-selected="resourceSelected"
       />
     </div>
@@ -221,7 +222,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from "./Tooltip";
-import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
+import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import {
   Checkbox,
   CheckboxGroup,
@@ -253,8 +254,8 @@ const mapResize = map => {
 export default {
   name: "FlatmapVuer",
   components: {
-    SvgIcon,
-    SvgSpriteColor,
+    MapSvgIcon,
+    MapSvgSpriteColor,
     Tooltip
   },
   beforeCreate: function() {
@@ -352,10 +353,8 @@ export default {
           eventType: eventType
         };
         // Disable the nueron pop up for now.
-        /*
         if (feature && feature.type !== "marker")
           this.checkAndCreatePopups(data);
-          */
         this.$emit("resource-selected", data);
       };
     },

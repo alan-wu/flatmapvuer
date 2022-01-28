@@ -43,6 +43,13 @@ export default {
       type: String,
       default: ''
     },
+    /**
+     * Specify the endpoint of the flatmap server.
+     */
+    flatmapAPI: {
+      type: String,
+      default: "https://mapcore-demo.org/flatmaps/"
+    }
   },
   watch: {
     'featureId': function (val){
@@ -85,8 +92,9 @@ export default {
     flatmapQuery: function(identifier){
       this.pubmeds = []
       this.loading.response = true
+      let endpoint = this.flatmapAPI + 'knowledge/query/';
       const data = { sql: 'select publication from publications where entity=?', "params": [identifier]};
-      fetch('https://mapcore-demo.org/devel/flatmap/v1/knowledge/query/', {
+      fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

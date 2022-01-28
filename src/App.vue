@@ -83,7 +83,7 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
+      flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
     }
   },
   mounted: function() {
