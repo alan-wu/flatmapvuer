@@ -18,7 +18,8 @@
     </el-popover>
   
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
-    @resource-selected="FlatmapSelected" :minZoom="minZoom"
+      @resource-selected="FlatmapSelected" :minZoom="minZoom"
+      @pan-zoom-callback="panZoomcallback"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
       :displayMinimap=true :flatmapAPI="flatmapAPI"/>
@@ -58,8 +59,12 @@ export default {
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
+      component.addPanZoomEvent();
       console.log(taxon, id);
     },
+    panZoomcallback: function(payload) {
+      console.log(payload);
+    }
   },
   data: function(){
     return {

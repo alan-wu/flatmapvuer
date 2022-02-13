@@ -338,24 +338,32 @@ export default {
         this.mapImp.showPaths(this.checkedItems);
       }
     },
+    addPanZoomEvent: function() {
+      this.mapImp.panZoomEvent('pan');
+      this.mapImp.panZoomEvent('zoom');
+    },
     eventCallback: function() {
-      return (eventType, feature, ...args) => {
-        const label = feature.label;
-        const resource = [feature.models];
-        const taxonomy = this.entry;
-        const data = {
-          dataset: feature.dataset,
-          taxonomy: taxonomy,
-          resource: resource,
-          label: label,
-          feature: feature,
-          userData: args,
-          eventType: eventType
-        };
-        // Disable the nueron pop up for now.
-        if (feature && feature.type !== "marker")
-          this.checkAndCreatePopups(data);
-        this.$emit("resource-selected", data);
+      return (eventType, data, ...args) => {
+        if (eventType !== "pan-zoom") {
+          const label = data.label;
+          const resource = [data.models];
+          const taxonomy = this.entry;
+          const payload = {
+            dataset: data.dataset,
+            taxonomy: taxonomy,
+            resource: resource,
+            label: label,
+            feature: data,
+            userData: args,
+            eventType: eventType
+          };
+          // Disable the nueron pop up for now.
+          if (data && data.type !== "marker")
+            this.checkAndCreatePopups(data);
+          this.$emit("resource-selected", payload);
+        } else {
+          this.$emit("pan-zoom-callback", data);
+        }
       };
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
