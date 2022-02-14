@@ -59,7 +59,7 @@ export default {
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
-      component.addPanZoomEvent();
+      component.enablePanZoomEvents(true);
       console.log(taxon, id);
     },
     panZoomcallback: function(payload) {
@@ -78,6 +78,7 @@ export default {
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat", displayWarning:true},
+        "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
       tStyle: {
@@ -86,9 +87,10 @@ export default {
         position: "absolute"
       },
       displayCloseButton: false,
-      initial: "Rat",
+      initial: "digestive tract",
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
     }
   },
   mounted: function() {
