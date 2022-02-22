@@ -60,6 +60,7 @@ export default {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
       component.enablePanZoomEvents(true);
+      component.showPathwaysDrawer(false);
       console.log(taxon, id);
     },
     panZoomcallback: function(payload) {
@@ -72,12 +73,12 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human", displayWarning:true},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat", displayWarning:false},
-        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"icon-mapicon_mouse", displayWarning:true},
+      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false},
+        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
-        "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig", displayWarning:true}, 
-        "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat", displayWarning:true},
+        "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
+        "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
         "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
@@ -90,7 +91,7 @@ export default {
       initial: "digestive tract",
       helpMode: false,
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
-      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
   mounted: function() {

@@ -338,9 +338,8 @@ export default {
         this.mapImp.showPaths(this.checkedItems);
       }
     },
-    addPanZoomEvent: function() {
-      this.mapImp.panZoomEvent('pan');
-      this.mapImp.panZoomEvent('zoom');
+    enablePanZoomEvents: function(flag) {
+      this.mapImp.enablePanZoomEvents(flag);
     },
     eventCallback: function() {
       return (eventType, data, ...args) => {
@@ -585,6 +584,13 @@ export default {
       } else if (state) {
         if (this.entry == state.entry) this._viewportToBeSet = state.viewport;
       }
+    },
+    showMinimap: function(flag) {
+      if (this.mapImp)
+        this.mapImp.showMinimap(flag);
+    },
+    showPathwaysDrawer: function(flag) {
+      this.drawerOpen = flag;
     },
     /**
      * Function to display features with annotation matching the provided term.
