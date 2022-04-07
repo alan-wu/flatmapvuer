@@ -71,10 +71,15 @@
           popper-class="flatmap-popper"
           v-model="hoverVisibilities[2].value"
         >
+          <div>
+            Fit to
+            <br>
+            window
+          </div>
           <map-svg-icon
-            icon="resetZoom"
-            class="icon-button resetView"
             slot="reference"
+            icon="fitWindow"
+            class="icon-button fitWindow"
             @click.native="resetView()"
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
@@ -1017,7 +1022,7 @@ export default {
   padding-left: 8px;
 }
 
-.resetView {
+.fitWindow {
   padding-left: 8px;
 }
 
