@@ -88,7 +88,7 @@ export default {
         position: "absolute"
       },
       displayCloseButton: false,
-      initial: "digestive tract",
+      initial: "Rat",
       helpMode: false,
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
