@@ -71,10 +71,15 @@
           popper-class="flatmap-popper"
           v-model="hoverVisibilities[2].value"
         >
+          <div>
+            Fit to
+            <br>
+            window
+          </div>
           <map-svg-icon
-            icon="resetZoom"
-            class="icon-button resetView"
             slot="reference"
+            icon="fitWindow"
+            class="icon-button fitWindow"
             @click.native="resetView()"
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
@@ -338,24 +343,31 @@ export default {
         this.mapImp.showPaths(this.checkedItems);
       }
     },
+    enablePanZoomEvents: function(flag) {
+      this.mapImp.enablePanZoomEvents(flag);
+    },
     eventCallback: function() {
-      return (eventType, feature, ...args) => {
-        const label = feature.label;
-        const resource = [feature.models];
-        const taxonomy = this.entry;
-        const data = {
-          dataset: feature.dataset,
-          taxonomy: taxonomy,
-          resource: resource,
-          label: label,
-          feature: feature,
-          userData: args,
-          eventType: eventType
-        };
-        // Disable the nueron pop up for now.
-        if (feature && feature.type !== "marker")
-          this.checkAndCreatePopups(data);
-        this.$emit("resource-selected", data);
+      return (eventType, data, ...args) => {
+        if (eventType !== "pan-zoom") {
+          const label = data.label;
+          const resource = [data.models];
+          const taxonomy = this.entry;
+          const payload = {
+            dataset: data.dataset,
+            taxonomy: taxonomy,
+            resource: resource,
+            label: label,
+            feature: data,
+            userData: args,
+            eventType: eventType
+          };
+          // Disable the nueron pop up for now.
+          if (data && data.type !== "marker")
+            this.checkAndCreatePopups(data);
+          this.$emit("resource-selected", payload);
+        } else {
+          this.$emit("pan-zoom-callback", data);
+        }
       };
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
@@ -577,6 +589,13 @@ export default {
       } else if (state) {
         if (this.entry == state.entry) this._viewportToBeSet = state.viewport;
       }
+    },
+    showMinimap: function(flag) {
+      if (this.mapImp)
+        this.mapImp.showMinimap(flag);
+    },
+    showPathwaysDrawer: function(flag) {
+      this.drawerOpen = flag;
     },
     /**
      * Function to display features with annotation matching the provided term.
@@ -1003,7 +1022,7 @@ export default {
   padding-left: 8px;
 }
 
-.resetView {
+.fitWindow {
   padding-left: 8px;
 }
 

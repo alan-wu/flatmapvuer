@@ -36,6 +36,7 @@
       :ref="key"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
+      @pan-zoom-callback="panZoomCallback"
       :featureInfo="featureInfo"
       :minZoom="minZoom"
       :pathControls="pathControls"
@@ -118,6 +119,9 @@ export default {
     },
     getCurrentFlatmap: function() {
       return this.$refs[this.activeSpecies][0];
+    },
+    panZoomCallback: function(payload) {
+      this.$emit("pan-zoom-callback", payload);
     },
     showPopup: function(featureId, node, options) {
       let map = this.getCurrentFlatmap();
