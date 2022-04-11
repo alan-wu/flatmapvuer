@@ -62,6 +62,7 @@ export default {
       component.enablePanZoomEvents(true);
       component.showPathwaysDrawer(false);
       console.log(taxon, id);
+      component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
       console.log(payload);
