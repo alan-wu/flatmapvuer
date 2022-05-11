@@ -604,13 +604,18 @@ export default {
       if (this.mapImp) {
         if (term === undefined || term === "") {
           this.mapImp.clearSearchResults();
+          return true;
         } else {
           let searchResults = this.mapImp.search(term);
-          if (searchResults && searchResults.__featureIds.length > 0)
+          if (searchResults && searchResults.__featureIds.length > 0) {
             this.mapImp.showSearchResults(searchResults);
-          else this.mapImp.clearSearchResults();
+            return true;
+          }
+          else
+            this.mapImp.clearSearchResults();
         }
       }
+      return false;
     }
   },
   props: {
