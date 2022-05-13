@@ -52,6 +52,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import EventBus from './EventBus'
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
 import { Col, Option, Select, Row, Popover } from "element-ui";  
@@ -72,6 +73,10 @@ export default {
   },
   mounted: function() {
     this.initialise();
+    EventBus.$on('onActionClick', (action) =>{
+      console.log('actionclick recived')
+      this.FlatmapSelected(action)
+    })
   },
   methods: {
     initialise: function() {

@@ -140,6 +140,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
+
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
@@ -251,11 +252,10 @@ export default {
         const taxonomy = this.entry;
         const data = { dataset: feature.dataset, taxonomy: taxonomy, resource: resource, label: label,
           feature: feature, userData: args, eventType: eventType};
-        // Disable the nueron pop up for now.
-        /*
+
+        // Neuron pop up check
         if (feature && feature.type !== "marker")
           this.checkAndCreatePopups(data)
-          */
         this.$emit("resource-selected", data);
       }
     },
@@ -560,7 +560,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
-      tooltipContent: {},
+      tooltipContent: { featureIds: []},
       colourRadio: true,
       outlinesRadio: true
     };

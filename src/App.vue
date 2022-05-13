@@ -51,7 +51,7 @@ export default {
     },
     FlatmapSelected: function(resource) {
       if (resource.eventType != "hover")
-        console.log(resource);
+        console.log('resource', resource);
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
@@ -81,7 +81,8 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      // flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
     }
   },
   mounted: function() {

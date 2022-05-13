@@ -1,27 +1,42 @@
 <template>
   <div class="tooltip-container">
-     <el-main v-if="content" class="main">
+     <el-main v-if="content" class="main" v-loading="loading">
       <div class="block" v-if="content.title">
-        <span class="title">{{titleCase(content.title)}}</span>
+        <span class="title">{{capitalise(content.title)}}</span>
       </div>
       <div class="block" v-else>
         <span class="title">{{content.featureId}}</span>
       </div>
-      
-
-      <pubmed-viewer v-if="content.featureIds" class="block" :flatmapApi="flatmapApi" :featureIds="content.featureIds" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
+      <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :flatmapAPI="flatmapAPI" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       {{content.paths}}
-      <div v-if="content.components" class="block">
+      <div v-if="this.components" class="block">
         <div class="attribute-title">Components</div>
-        <span class="attribute-content">{{content.components}}</span>
+        <div v-for="component in components" class="attribute-content"  :key="component">
+          {{ capitalise(component) }}
+        </div>
       </div>
-      <div v-if="content.start" class="block">
-        <div class="attribute-title">Origin</div>
-        <span class="attribute-content">{{content.start}}</span>
+      <div v-if="this.dendrites" class="block">
+        <div class="attribute-title">Dendrites</div>
+        <div v-for="dendrite in dendrites" class="attribute-content"  :key="dendrite">
+          {{ capitalise(dendrite) }}
+        </div>
+        <el-button v-show="dendritesWithDatasets.length > 0" class="button" @click="openDendrites">
+          Explore dendrite data
+        </el-button>
       </div>
-      <div v-if="content.distribution" class="block">
-        <div class="attribute-title">Distribution</div>
-        <span class="attribute-content">{{content.distribution}}</span>
+      <div v-if="this.axons" class="block">
+        <div class="attribute-title">Axons</div>
+        <div v-for="axon in axons" class="attribute-content"  :key="axon">
+          {{ capitalise(axon) }}
+        </div>
+        <el-button v-show="axonsWithDatasets.length > 0" class="button" @click="openAxons">
+          Explore axon data
+        </el-button>
+      </div>
+      <div v-if="content.uberon" class="block">
+        <div class="attribute-title">Feature Id</div>
+        <span class="attribute-content">{{content.uberon}}</span>
       </div>
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
@@ -55,17 +70,23 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
+// pubmedviewer is currently not in use, but still under review so not ready to delete yet
 import PubmedViewer from './PubmedViewer.vue'
+import EventBus from './EventBus'
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+}
+
+const capitalise = function(str){
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 export default {
   components: { PubmedViewer },
   name: "Tooltip",
   props: { 
-    flatmapApi: {
+    flatmapAPI: {
       type: String,
       default: 'https://mapcore-demo.org/current/flatmap/v2/'
     },
@@ -82,8 +103,25 @@ export default {
     return {
       activeSpecies: undefined,
       appendToBody: false,
-      pubmedSearchUrl: ''
+      pubmedSearchUrl: '',
+      loading: false,
+      axons: [],
+      dendrites: [],
+      components: [],
+      axonsWithDatasets: [],
+      dendritesWithDatasets: [],
+      uberons: [{id: undefined, name: undefined}]
     };
+  },
+  watch: {
+    'content.featureIds': {
+      handler: function(){
+        this.pathwayQuery(this.content.featureIds)
+      }
+    }
+  },
+  mounted: function(){
+    this.getOrganCuries()
   },
   methods: {
     resourceSelected: function(action) {
@@ -92,14 +130,136 @@ export default {
     titleCase: function(title){
       return titleCase(title)
     },
+    capitalise: function(text){
+      return capitalise(text)
+    },
     onClose: function() {
       this.$emit("onClose");
     },
     openUrl: function(url){
       window.open(url, '_blank')
     },
+    openAxons: function(){
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.axonsWithDatasets.map(a=>a.name)})
+    },
+    openDendrites: function(){
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.dendritesWithDatasets.map(a=>a.name)})
+    },
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
+    },
+    findComponents: function(connectivity){
+      let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
+      let nodes = [...new Set(dnodes)]; // remove duplicates
+
+      let found = []
+      let terminal = false
+      nodes.forEach(node=>{
+          let n = node.flat() // Find all terms on the node
+          terminal = false
+
+          // Check if the node is an axon or dendrite
+          n.forEach(s=>{
+              if(connectivity.axons.includes(s)){
+                  terminal = true
+              }
+              if(connectivity.dendrites.includes(s)){
+                  terminal = true
+              }
+          })
+          if (!terminal){
+            found.push(node)
+          }
+      })
+
+      // remove duplicates
+      let foundUnique = [...new Set(found.map(n=>n[0]))]
+      return foundUnique
+    },
+    getOrganCuries: function(){
+      fetch('https://api.sparc.science/get-organ-curies/')
+        .then(response=>response.json())
+        .then(data=>{
+          this.uberons = data.uberon.array
+        })
+    },
+    buildConnectivitySqlStatement: function(keastIds) {
+      let sql = 'select knowledge from knowledge where entity in ('
+      if (keastIds.length === 1) {
+        sql += `'${keastIds[0]}')`
+      } else if (keastIds.length > 1) {
+        for (let i in keastIds) {
+          sql += `'${keastIds[i]}'${i >= keastIds.length - 1 ? ')' : ','} `
+        }
+      }
+      return sql
+    },
+    buildLabelSqlStatement: function(uberons) {
+      let sql = 'select label from labels where entity in ('
+      if (uberons.length === 1) {
+        sql += `'${uberons[0]}')`
+      } else if (uberons.length > 1) {
+        for (let i in uberons) {
+          sql += `'${uberons[i]}'${i >= uberons.length - 1 ? ')' : ','} `
+        }
+      }
+      return sql
+    },
+    createLabelLookup: function(uberons) {
+      return new Promise(resolve=> {
+        let uberonMap = {}
+        const data = { sql: this.buildLabelSqlStatement(uberons)}
+        fetch(`${this.flatmapAPI}knowledge/query/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          })
+          .then(response => response.json())
+          .then(data => {
+            uberons.forEach((el,i)=>{
+              uberonMap[el] = data.values[i][0]
+            })
+            resolve(uberonMap)
+          })
+      })
+    },
+    pathwayQuery: function(keastIds){
+      this.axons = []
+      this.dendrites = []
+      this.components = []
+      this.loading = true
+      if (!keastIds || keastIds.length == 0) return
+      const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
+      fetch(`${this.flatmapAPI}knowledge/query/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      .then(response => response.json())
+      .then(data => {
+        let connectivity = JSON.parse(data.values[0][0])
+        let components = this.findComponents(connectivity)
+
+        // Create list of ids to get labels for
+        let conIds = connectivity.axons.concat(connectivity.dendrites.concat(components))
+        this.createLabelLookup(conIds).then(lookUp=>{
+          this.axons = connectivity.axons.map(a=>lookUp[a])
+          this.dendrites = connectivity.dendrites.map(d=>lookUp[d])
+          this.components = components.map(c=>lookUp[c])
+        })
+
+        // Filter for the anatomy which is annotated on datasets
+        this.axonsWithDatasets = this.uberons.filter(ub => connectivity.axons.indexOf(ub.id) !== -1)
+        this.dendritesWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
+        this.loading = false
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      })
     }
   }
 };
@@ -166,8 +326,9 @@ export default {
 .title{
   font-size: 18px;
   font-weight: 500;
-  /* font-weight: bold; */
+  font-weight: bold;
   padding-bottom: 8px;
+  color: rgb(131, 0, 191);
 
 }
 
@@ -180,7 +341,7 @@ export default {
 
 .attribute-content{
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .popover-container {

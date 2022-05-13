@@ -26,7 +26,8 @@ import Vue from "vue";
 import {
   Link,
   Carousel,
-  CarouselItem
+  CarouselItem,
+  Button
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -34,6 +35,7 @@ locale.use(lang);
 Vue.use(Link);
 Vue.use(Carousel);
 Vue.use(CarouselItem);
+Vue.use(Button);
 
 
 export default {
@@ -43,20 +45,16 @@ export default {
       type: String,
       default: 'https://mapcore-demo.org/current/flatmap/v2/'
     },
-    featureId: {
-      type: String,
-      default: ''
-    },
-    featureIds: {
-      type: Array,
-      default: () => []
+    entry: {
+      type: Object,
+      default: () => {}
     },
   },
   watch: {
-    'featureId': function (val){
+    'entry.featureId': function (val){
       this.flatmapQuery(val).then(pb => this.pubmeds = pb)
     },
-    featureIds: {
+    'entry.featureIds': {
       handler: function(ids) {
         this.flatmapQuery(ids)
       },
@@ -65,14 +63,15 @@ export default {
   },
   data: function() {
     return {
+      data: {},
       pubmeds: [],
       pubmedIds: [],
       loading: {response: true, publications: true}
     };
   },
   mounted: function() {
-    if (this.featureIds)
-      this.flatmapQuery(this.featureIds)
+    if (this.entry.featureIds)
+      this.flatmapQuery(this.entry.featureIds)
   },
   methods: {
     stripPMIDPrefix: function (pubmedId){
@@ -94,7 +93,7 @@ export default {
       let split = bibliographyString.split('https')
       return [split[0], 'https' + split[1]]
     },
-    buildSqlStatement: function(keastIds) {
+    buildPubmedSqlStatement: function(keastIds) {
       let sql = 'select distinct publication from publications where entity in ('
       if (keastIds.length === 1) {
         sql += `'${keastIds[0]}')`
@@ -108,7 +107,8 @@ export default {
     flatmapQuery: function(keastIds){
       this.pubmeds = []
       this.loading.response = true
-      const data = { sql: this.buildSqlStatement(keastIds)};
+      const data = { sql: this.buildPubmedSqlStatement(keastIds)};
+      console.log(data)
       fetch(`${this.flatmapAPI}knowledge/query/`, {
         method: 'POST',
         headers: {
