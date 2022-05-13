@@ -36,6 +36,7 @@
       :ref="key"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
+      @pan-zoom-callback="panZoomCallback"
       :featureInfo="featureInfo"
       :minZoom="minZoom"
       :pathControls="pathControls"
@@ -123,6 +124,9 @@ export default {
     },
     getCurrentFlatmap: function() {
       return this.$refs[this.activeSpecies][0];
+    },
+    panZoomCallback: function(payload) {
+      this.$emit("pan-zoom-callback", payload);
     },
     showPopup: function(featureId, node, options) {
       let map = this.getCurrentFlatmap();
@@ -225,7 +229,7 @@ export default {
     },
     warningMessage: {
       type: String,
-      default: "Beta feature - under active development"
+      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
     },
     availableSpecies: {},
     /**
@@ -262,12 +266,10 @@ export default {
 };
 </script>
 
-<style scoped src="../styles/purple/select.css">
-</style>
-<style scoped src="../styles/purple/option.css">
-</style>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/select";
+@import "~element-ui/packages/theme-chalk/src/option";
 
-<style scoped>
 .multi-container {
   height: 100%;
   width: 100%;
@@ -295,42 +297,45 @@ export default {
   left: 16px;
   top: 44px;
   position: absolute;
+  ::v-deep .el-input__inner {
+    color: rgb(48, 49, 51);
+    padding-top: 0.25em;
+    .is-focus {
+      border: 1px solid $app-primary-color;
+    }
+  }
 }
 
-.select-box >>> .el-input__inner {
-  color: rgb(48, 49, 51);
-  padding-top: 0.25em;
+.flatmap_dropdown {
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.selected {
+      color: $app-primary-color;
+      font-weight: normal;
+    }
+  }
 }
 
-.select-box >>> .is-focus .el-input__inner {
-  border: 1px solid #8300bf;
-}
-
-.flatmap_dropdown .el-select-dropdown__item {
-  white-space: nowrap;
-  text-align: left;
-
-}
-
-.flatmap_dropdown .el-select-dropdown__item.selected {
-  color: #8300bf;
-  font-weight: normal;
-}
-
->>>.flatmap-popper {
+::v-deep .flatmap-popper {
   padding: 6px 4px;
   font-size:12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
-}
->>> .flatmap-popper.right-popper .popper__arrow{
-  border-right-color: #8300bf !important;
+  &.right-popper {
+    .popper__arrow {
+      border-right-color: $app-primary-color !important;
+      &:after {
+        border-right-color: #f3ecf6 !important;
+      }
+    }
+  }
 }
 
->>> .flatmap-marker-popup{
+::v-deep .flatmap-marker-popup{
   background-color: #f0f0f000  !important;
   box-shadow: none !important;
 }

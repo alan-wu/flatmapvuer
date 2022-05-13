@@ -18,7 +18,8 @@
     </el-popover>
   
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
-    @resource-selected="FlatmapSelected" :minZoom="minZoom"
+      @resource-selected="FlatmapSelected" :minZoom="minZoom"
+      @pan-zoom-callback="panZoomcallback"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
       :displayMinimap=true :flatmapAPI="flatmapAPI"/>
@@ -30,11 +31,13 @@
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import {
+  Button,
   Col,
   Popover,
   Row,
 } from 'element-ui';
 import "./icons/mapicon-species-style.css";
+Vue.use(Button);
 Vue.use(Col);
 Vue.use(Popover);
 Vue.use(Row);
@@ -56,8 +59,14 @@ export default {
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
+      component.enablePanZoomEvents(true);
+      component.showPathwaysDrawer(false);
       console.log(taxon, id);
+      component.searchAndShowResult("heart");
     },
+    panZoomcallback: function(payload) {
+      console.log(payload);
+    }
   },
   data: function(){
     return {
@@ -65,12 +74,13 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human", displayWarning:true},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat", displayWarning:false},
-        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"icon-mapicon_mouse", displayWarning:true},
+      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false},
+        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
-        "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig", displayWarning:true}, 
-        "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat", displayWarning:true},
+        "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
+        "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
+        "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
       tStyle: {
@@ -83,6 +93,8 @@ export default {
       helpMode: false,
       // flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+      //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
   mounted: function() {
@@ -94,7 +106,12 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 #app {
   font-family: 'Asap', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -141,8 +158,4 @@ body {
   height:100%;
 }
 
-
-
-</style>
-<style scoped src="./styles/purple/popover.css">
 </style>
