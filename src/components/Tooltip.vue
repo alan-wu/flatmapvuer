@@ -98,13 +98,6 @@ export default {
       type: Object,
       default: undefined
     },
-        /**
-     * Specify the endpoint of the flatmap server.
-     */
-    flatmapAPI: {
-      type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
-    }
   },
   data: function() {
     return {

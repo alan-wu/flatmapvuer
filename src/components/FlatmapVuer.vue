@@ -364,7 +364,7 @@ export default {
           };
           // Disable the nueron pop up for now.
           if (data && data.type !== "marker")
-            this.checkAndCreatePopups(data);
+            this.checkAndCreatePopups(payload);
           this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
@@ -415,7 +415,6 @@ export default {
 
       // nerve cuff check
       if (data.feature.nodeId) {
-        console.log('found node id')
         let paths = this.mapImp.nodePathModels(data.feature.nodeId)
         if (paths.size > 0){
           foundAnnotations = true

@@ -75,7 +75,6 @@ export default {
   mounted: function() {
     this.initialise();
     EventBus.$on('onActionClick', (action) =>{
-      console.log('actionclick recived')
       this.FlatmapSelected(action)
     })
   },

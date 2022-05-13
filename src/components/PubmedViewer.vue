@@ -60,8 +60,7 @@ export default {
     'entry.featureIds': {
       handler: function(ids) {
         this.flatmapQuery(ids)
-      },
-      deep: true
+      }
     }
   },
   data: function() {
@@ -108,8 +107,11 @@ export default {
       return sql
     },
     flatmapQuery: function(keastIds){
+      if(!keastIds || keastIds.length === 0) return
       this.pubmeds = []
       this.loading.response = true
+
+      // fetch pubmed publications for the given ids
       const data = { sql: this.buildPubmedSqlStatement(keastIds)};
       console.log(data)
       fetch(`${this.flatmapAPI}knowledge/query/`, {
@@ -123,6 +125,8 @@ export default {
       .then(data => {
         this.responseData = data
         this.loading.response = false
+
+        // create links for each pubmedId
         data.values.forEach(identifier => {
           let ids = this.stripPMIDPrefix(identifier[0])
           this.titleFromPubmed(ids).then( bib=>{
