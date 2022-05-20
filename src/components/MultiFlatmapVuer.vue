@@ -87,7 +87,7 @@ export default {
           this.speciesLis= {};
           Object.keys(this.availableSpecies).forEach(key => {
             for (let i = 0; i < data.length; i++) {
-              if (data[i].describes == this.availableSpecies[key].taxo) {
+              if (data[i].taxon === this.availableSpecies[key].taxo) {
                 this.speciesList[key] = this.availableSpecies[key];
                 break;
               }
