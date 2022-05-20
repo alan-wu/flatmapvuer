@@ -46,6 +46,7 @@
       :displayMinimap="displayMinimap"
       style="height:100%"
       :flatmapAPI="flatmapAPI"
+      :sparcAPI="sparcAPI"
     />
   </div>
 </template>
@@ -245,6 +246,10 @@ export default {
       type: String,
       default: "https://mapcore-demo.org/flatmaps/"
     },
+    sparcAPI: {
+      type: String,
+      default: "https://api.sparc.science/"
+    } 
   },
   data: function() {
     return {

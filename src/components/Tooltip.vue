@@ -8,7 +8,7 @@
         <span class="title">{{content.featureId}}</span>
       </div>
       <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
-      <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :flatmapAPI="flatmapAPI" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       {{content.paths}}
       <div v-if="this.components" class="block">
         <div class="attribute-title">Components</div>
@@ -86,10 +86,6 @@ export default {
   components: { PubmedViewer },
   name: "Tooltip",
   props: { 
-    flatmapAPI: {
-      type: String,
-      default: 'https://mapcore-demo.org/current/flatmap/v2/'
-    },
     visible: {
       type: Boolean,
       default: false
@@ -113,6 +109,7 @@ export default {
       uberons: [{id: undefined, name: undefined}]
     };
   },
+  inject: ['sparcAPI', 'flatmapAPI'],
   watch: {
     'content.featureIds': {
       handler: function(){
@@ -134,7 +131,7 @@ export default {
       return capitalise(text)
     },
     onClose: function() {
-      this.$emit("onClose");
+      this.$emit("onClose")
     },
     openUrl: function(url){
       window.open(url, '_blank')
@@ -150,7 +147,7 @@ export default {
     },
     findComponents: function(connectivity){
       let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-      let nodes = [...new Set(dnodes)]; // remove duplicates
+      let nodes = [...new Set(dnodes)] // remove duplicates
 
       let found = []
       let terminal = false
@@ -177,7 +174,7 @@ export default {
       return foundUnique
     },
     getOrganCuries: function(){
-      fetch('https://api.sparc.science/get-organ-curies/')
+      fetch(`${this.sparcAPI}get-organ-curies/`)
         .then(response=>response.json())
         .then(data=>{
           this.uberons = data.uberon.array

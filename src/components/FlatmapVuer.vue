@@ -216,7 +216,6 @@
         ref="tooltip"
         class="tooltip"
         :content="tooltipContent"
-        :flatmapAPI="flatmapAPI"
         @resource-selected="resourceSelected"
       />
     </div>
@@ -417,12 +416,12 @@ export default {
       if (data.feature.nodeId) {
         let paths = this.mapImp.nodePathModels(data.feature.nodeId)
         if (paths.size > 0){
-          foundAnnotations = true
-          this.tooltipVisible = true
-          this.tooltipContent = content
-          this.tooltipContent.uberon = feature
-          this.tooltipContent.title = data.label
-          this.tooltipContent.featureIds = [...paths]
+          foundAnnotations = true;
+          this.tooltipVisible = true;
+          this.tooltipContent = content;
+          this.tooltipContent.uberon = feature;
+          this.tooltipContent.title = data.label;
+          this.tooltipContent.featureIds = [...paths];
         }
         return true
       }
@@ -430,12 +429,12 @@ export default {
       // neural data check
       if (feature){
         if (feature.includes('ilxtr:neuron')){
-          foundAnnotations = true
-          this.tooltipVisible = true
-          this.tooltipContent = content
-          this.tooltipContent.uberon = feature
-          this.tooltipContent.title = data.label
-          this.tooltipContent.featureIds = [feature]
+          foundAnnotations = true;
+          this.tooltipVisible = true;
+          this.tooltipContent = content;
+          this.tooltipContent.uberon = feature;
+          this.tooltipContent.title = data.label;
+          this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
             title: "Search for dataset",
             label: "Neuron Datasets",
@@ -683,6 +682,16 @@ export default {
     flatmapAPI: {
       type: String,
       default: "https://mapcore-demo.org/flatmaps/"
+    },
+    sparcAPI: {
+      type: String,
+      default: "https://api.sparc.science/"
+    }
+  },
+  provide() {
+    return {
+      sparcAPI: this.sparcAPI,
+      flatmapAPI: this.flatmapAPI
     }
   },
   data: function() {

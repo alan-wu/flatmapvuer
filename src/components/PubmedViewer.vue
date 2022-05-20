@@ -41,13 +41,6 @@ Vue.use(Button);
 export default {
   name: "Tooltip",
   props: {
-        /**
-     * Specify the endpoint of the flatmap server.
-     */
-    flatmapAPI: {
-      type: String,
-      default: 'https://mapcore-demo.org/current/flatmap/v2/'
-    },
     entry: {
       type: Object,
       default: () => {}
@@ -63,6 +56,7 @@ export default {
       }
     }
   },
+  inject: ['flatmapAPI'],
   data: function() {
     return {
       data: {},
@@ -87,7 +81,7 @@ export default {
           resolve(data.apa.format)
         })
         .catch((error) => {
-          console.error('Error:', error);
+          console.error('Error:', error)
         });
       })
     },
@@ -113,7 +107,6 @@ export default {
 
       // fetch pubmed publications for the given ids
       const data = { sql: this.buildPubmedSqlStatement(keastIds)};
-      console.log(data)
       fetch(`${this.flatmapAPI}knowledge/query/`, {
         method: 'POST',
         headers: {
@@ -137,7 +130,7 @@ export default {
         this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error('Error:', error)
     })
     },
     pubmedSearchUrl: function(ids) {
