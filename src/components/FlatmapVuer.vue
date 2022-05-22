@@ -216,7 +216,6 @@
         ref="tooltip"
         class="tooltip"
         :content="tooltipContent"
-        :flatmapAPI="flatmapAPI"
         @resource-selected="resourceSelected"
       />
     </div>
@@ -240,6 +239,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
+
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
@@ -363,7 +363,7 @@ export default {
           };
           // Disable the nueron pop up for now.
           if (data && data.type !== "marker")
-            this.checkAndCreatePopups(data);
+            this.checkAndCreatePopups(payload);
           this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
@@ -412,15 +412,29 @@ export default {
       let foundAnnotations = false;
       this.tooltipVisible = false;
 
-      // neural data check
-      if (feature) {
-        if (feature.includes("ilxtr:neuron")) {
+      // nerve cuff check
+      if (data.feature.nodeId) {
+        let paths = this.mapImp.nodePathModels(data.feature.nodeId)
+        if (paths.size > 0){
           foundAnnotations = true;
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
           this.tooltipContent.title = data.label;
-          this.tooltipContent.featureId = feature;
+          this.tooltipContent.featureIds = [...paths];
+        }
+        return true
+      }
+
+      // neural data check
+      if (feature){
+        if (feature.includes('ilxtr:neuron')){
+          foundAnnotations = true;
+          this.tooltipVisible = true;
+          this.tooltipContent = content;
+          this.tooltipContent.uberon = feature;
+          this.tooltipContent.title = data.label;
+          this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
             title: "Search for dataset",
             label: "Neuron Datasets",
@@ -673,6 +687,16 @@ export default {
     flatmapAPI: {
       type: String,
       default: "https://mapcore-demo.org/flatmaps/"
+    },
+    sparcAPI: {
+      type: String,
+      default: "https://api.sparc.science/"
+    }
+  },
+  provide() {
+    return {
+      sparcAPI: this.sparcAPI,
+      flatmapAPI: this.flatmapAPI
     }
   },
   data: function() {
@@ -696,7 +720,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
-      tooltipContent: {},
+      tooltipContent: { featureIds: []},
       colourRadio: true,
       outlinesRadio: true
     };

@@ -46,6 +46,7 @@
       :displayMinimap="displayMinimap"
       style="height:100%"
       :flatmapAPI="flatmapAPI"
+      :sparcAPI="sparcAPI"
     />
   </div>
 </template>
@@ -53,6 +54,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import EventBus from './EventBus'
 import Vue from "vue";
 import FlatmapVuer from "./FlatmapVuer.vue";
 import { Col, Option, Select, Row, Popover } from "element-ui";  
@@ -73,6 +75,9 @@ export default {
   },
   mounted: function() {
     this.initialise();
+    EventBus.$on('onActionClick', (action) =>{
+      this.FlatmapSelected(action)
+    })
   },
   methods: {
     initialise: function() {
@@ -83,7 +88,7 @@ export default {
           this.speciesLis= {};
           Object.keys(this.availableSpecies).forEach(key => {
             for (let i = 0; i < data.length; i++) {
-              if (data[i].describes == this.availableSpecies[key].taxo) {
+              if (data[i].taxon === this.availableSpecies[key].taxo) {
                 this.speciesList[key] = this.availableSpecies[key];
                 break;
               }
@@ -241,6 +246,10 @@ export default {
       type: String,
       default: "https://mapcore-demo.org/flatmaps/"
     },
+    sparcAPI: {
+      type: String,
+      default: "https://api.sparc.science/"
+    } 
   },
   data: function() {
     return {
