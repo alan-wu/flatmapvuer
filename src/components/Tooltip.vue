@@ -79,7 +79,9 @@ const titleCase = (str) => {
 }
 
 const capitalise = function(str){
-  return str.charAt(0).toUpperCase() + str.slice(1)
+  if (str)
+    return str.charAt(0).toUpperCase() + str.slice(1)
+  return ""
 }
 
 export default {
@@ -214,9 +216,10 @@ export default {
             body: JSON.stringify(data),
           })
           .then(response => response.json())
-          .then(data => {
+          .then(payload => {
             uberons.forEach((el,i)=>{
-              uberonMap[el] = data.values[i][0]
+              if (payload.values[i])
+                uberonMap[el] = payload.values[i][0]
             })
             resolve(uberonMap)
           })
