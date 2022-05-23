@@ -194,7 +194,7 @@ export default {
       return sql
     },
     buildLabelSqlStatement: function(uberons) {
-      let sql = 'select label from labels where entity in ('
+      let sql = 'select entity, label from labels where entity in ('
       if (uberons.length === 1) {
         sql += `'${uberons[0]}')`
       } else if (uberons.length > 1) {
@@ -217,10 +217,13 @@ export default {
           })
           .then(response => response.json())
           .then(payload => {
-            uberons.forEach((el,i)=>{
-              if (payload.values[i])
-                uberonMap[el] = payload.values[i][0]
-            })
+            const entity = payload.keys.indexOf("entity");
+            const label = payload.keys.indexOf("label");
+            if (entity > -1 && label > -1) {
+              payload.values.forEach(pair => {
+                uberonMap[pair[entity]] = pair[label];
+              });
+            }
             resolve(uberonMap)
           })
       })
