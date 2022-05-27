@@ -436,7 +436,7 @@ export default {
           this.tooltipContent.title = data.label;
           this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
-            title: "Search for dataset",
+            title: "Search for datasets",
             label: "Neuron Datasets",
             resource: feature.split(":")[1],
             type: "Neuron Search",
