@@ -79,7 +79,9 @@ const titleCase = (str) => {
 }
 
 const capitalise = function(str){
-  return str.charAt(0).toUpperCase() + str.slice(1)
+  if (str)
+    return str.charAt(0).toUpperCase() + str.slice(1)
+  return ""
 }
 
 export default {
@@ -192,7 +194,7 @@ export default {
       return sql
     },
     buildLabelSqlStatement: function(uberons) {
-      let sql = 'select label from labels where entity in ('
+      let sql = 'select entity, label from labels where entity in ('
       if (uberons.length === 1) {
         sql += `'${uberons[0]}')`
       } else if (uberons.length > 1) {
@@ -214,10 +216,14 @@ export default {
             body: JSON.stringify(data),
           })
           .then(response => response.json())
-          .then(data => {
-            uberons.forEach((el,i)=>{
-              uberonMap[el] = data.values[i][0]
-            })
+          .then(payload => {
+            const entity = payload.keys.indexOf("entity");
+            const label = payload.keys.indexOf("label");
+            if (entity > -1 && label > -1) {
+              payload.values.forEach(pair => {
+                uberonMap[pair[entity]] = pair[label];
+              });
+            }
             resolve(uberonMap)
           })
       })
