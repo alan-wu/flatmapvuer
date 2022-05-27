@@ -40,7 +40,7 @@
       </div>
       <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
-        <i v-if="action.title === 'Search for dataset' || action.title === 'View Dataset' " class="el-icon-coin"></i>
+        <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
         {{action.title}}
       </el-button>
       <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">

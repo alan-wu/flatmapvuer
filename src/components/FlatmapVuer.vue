@@ -379,7 +379,7 @@ export default {
         this.mapImp.showPopup(
           this.mapImp.modelFeatureIds(data.resource[0])[0],
           this.$refs.tooltip.$el,
-          { className: "flatmap-tooltip-dialog" }
+          { className: "flatmapvuer-popover", positionAtLastClick: true }
         );
         this.popUpCssHack();
       }
@@ -472,7 +472,7 @@ export default {
         if (myOptions) {
           if (!myOptions.className) myOptions.className = "flatmapvuer-popover";
         } else {
-          myOptions = { className: "flatmapvuer-popover" };
+          myOptions = { className: "flatmapvuer-popover", positionAtLastClick: true };
         }
         this.mapImp.showPopup(featureId, node, myOptions);
       }
