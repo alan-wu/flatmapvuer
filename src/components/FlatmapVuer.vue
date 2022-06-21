@@ -414,7 +414,7 @@ export default {
 
       // nerve cuff check
       if (data.feature.nodeId) {
-        let paths = this.mapImp.nodePathModels(data.feature.nodeId)
+        let paths = this.mapImp.nodePathModels(data.feature.nodeId);
         if (paths.size > 0){
           foundAnnotations = true;
           this.tooltipVisible = true;
