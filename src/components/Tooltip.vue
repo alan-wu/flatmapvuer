@@ -17,7 +17,7 @@
         </div>
       </div>
       <div v-if="this.dendrites" class="block">
-        <div class="attribute-title">Dendrites</div>
+        <div class="attribute-title">Origin</div>
         <div v-for="dendrite in dendrites" class="attribute-content"  :key="dendrite">
           {{ capitalise(dendrite) }}
         </div>
@@ -26,7 +26,7 @@
         </el-button>
       </div>
       <div v-if="this.axons" class="block">
-        <div class="attribute-title">Axons</div>
+        <div class="attribute-title">Destination</div>
         <div v-for="axon in axons" class="attribute-content"  :key="axon">
           {{ capitalise(axon) }}
         </div>
