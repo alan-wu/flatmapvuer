@@ -181,12 +181,12 @@ export default {
           let n = node.flat() // Find all terms on the node
           terminal = false
 
-          // Check if the node is an destination or origin
+          // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
           n.forEach(s=>{
-              if(connectivity.destinations.includes(s)){
+              if(connectivity.axons.includes(s)){
                   terminal = true
               }
-              if(connectivity.origins.includes(s)){
+              if(connectivity.dendrites.includes(s)){
                   terminal = true
               }
           })
@@ -272,16 +272,16 @@ export default {
         let components = this.findComponents(connectivity)
 
         // Create list of ids to get labels for
-        let conIds = connectivity.destinations.concat(connectivity.origins.concat(components))
+        let conIds = connectivity.axons.concat(connectivity.dendrites.concat(components))
         this.createLabelLookup(conIds).then(lookUp=>{
-          this.destinations = connectivity.destinations.map(a=>lookUp[a])
-          this.origins = connectivity.origins.map(d=>lookUp[d])
+          this.destinations = connectivity.axons.map(a=>lookUp[a])
+          this.origins = connectivity.dendrites.map(d=>lookUp[d])
           this.components = components.map(c=>lookUp[c])
         })
 
         // Filter for the anatomy which is annotated on datasets
-        this.destinationsWithDatasets = this.uberons.filter(ub => connectivity.destinations.indexOf(ub.id) !== -1)
-        this.originsWithDatasets = this.uberons.filter(ub => connectivity.origins.indexOf(ub.id) !== -1)
+        this.destinationsWithDatasets = this.uberons.filter(ub => connectivity.axons.indexOf(ub.id) !== -1)
+        this.originsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
         this.loading = false
       })
       .catch((error) => {
