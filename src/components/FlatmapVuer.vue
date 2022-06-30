@@ -374,17 +374,18 @@ export default {
     checkAndCreatePopups: function(data) {
       if (
         data.eventType == "click" &&
-        this.createTooltipFromNeuronCuration(data)
+        this.hasNeuronTooltip(data)
       ) {
+        this.createTooltipFromNeuronCuration(data)
         this.mapImp.showPopup(
           this.mapImp.modelFeatureIds(data.resource[0])[0],
           this.$refs.tooltip.$el,
           { className: "flatmapvuer-popover", positionAtLastClick: true }
         );
-        this.popUpCssHack();
+        this.popUpCssHacks()
       }
     },
-    popUpCssHack: function() {
+    popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
       let ftooltip = document.querySelector(".flatmap-tooltip-popup");
       if (ftooltip) ftooltip.style.display = "none";
@@ -399,6 +400,28 @@ export default {
     resourceSelected: function(action) {
       this.$emit("resource-selected", action);
     },
+    hasNeuronTooltip: function(data) {
+
+      // nerve cuff check
+      if (data.feature.nodeId) {
+        return true
+      }
+
+      // neural data check
+      if (data.resource[0]){
+        if (data.resource[0].includes('ilxtr:neuron')){
+          return true
+        }
+      }
+      // annotated with datset check
+      if (data.dataset) {
+        return true
+      }
+
+      // if there is no cuff, neural data, or dataset we do not display neuron tooltip
+      return false
+
+    },
     createTooltipFromNeuronCuration: function(data) {
       const feature = data.resource[0];
       let content = {
@@ -409,14 +432,12 @@ export default {
         actions: []
       };
 
-      let foundAnnotations = false;
       this.tooltipVisible = false;
 
       // nerve cuff check
       if (data.feature.nodeId) {
         let paths = this.mapImp.nodePathModels(data.feature.nodeId);
         if (paths.size > 0){
-          foundAnnotations = true;
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
@@ -429,7 +450,6 @@ export default {
       // neural data check
       if (feature){
         if (feature.includes('ilxtr:neuron')){
-          foundAnnotations = true;
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
@@ -446,7 +466,6 @@ export default {
       }
       // annotated with datset check
       if (data.dataset) {
-        foundAnnotations = true;
         this.tooltipVisible = true;
         this.tooltipContent = content;
         this.tooltipContent.uberon = feature;
@@ -457,12 +476,6 @@ export default {
           type: "URL",
           nervePath: false
         });
-      }
-
-      if (foundAnnotations) {
-        return true;
-      } else {
-        return false;
       }
     },
     // Keeping this as an API
