@@ -27,7 +27,7 @@
           >
           <i slot="reference" class="el-icon-warning-outline info"/>
           <span style="word-break: keep-all;">
-            Origin is the point of the neuron population closest to the brain (or spinal cord)
+            <i>Origin</i> is where the dendrites stem from
           </span>
           </el-popover>
         </div>
@@ -49,7 +49,7 @@
           >
           <i slot="reference" class="el-icon-warning-outline info"/>
           <span style="word-break: keep-all;">
-          Destination is the point of the neuron population furthest from the brain (or spinal cord)
+          <i>Destination</i> is where the axons terminate (& in the cases of some psuedoinunipolar neurons, where their dendritic "terminals" are)
           </span>
           </el-popover>
         </div>
