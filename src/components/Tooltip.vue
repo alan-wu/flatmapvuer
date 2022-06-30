@@ -16,7 +16,7 @@
           {{ capitalise(component) }}
         </div>
       </div>
-      <div v-if="this.dendrites" class="block">
+      <div v-if="this.origins" class="block">
         <div class="attribute-title">Origin
           <el-popover
           width="250"
@@ -30,14 +30,14 @@
           </div>
           </el-popover>
         </div>
-        <div v-for="dendrite in dendrites" class="attribute-content"  :key="dendrite">
-          {{ capitalise(dendrite) }}
+        <div v-for="origin in origins" class="attribute-content"  :key="origin">
+          {{ capitalise(origin) }}
         </div>
-        <el-button v-show="dendritesWithDatasets.length > 0" class="button" @click="openDendrites">
-          Explore dendrite data
+        <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
+          Explore origin data
         </el-button>
       </div>
-      <div v-if="this.axons" class="block">
+      <div v-if="this.destinations" class="block">
         <div class="attribute-title">Destination
           <el-popover
           width="250"
@@ -51,11 +51,11 @@
           </div>
           </el-popover>
         </div>
-        <div v-for="axon in axons" class="attribute-content"  :key="axon">
-          {{ capitalise(axon) }}
+        <div v-for="destination in destinations" class="attribute-content"  :key="destination">
+          {{ capitalise(destination) }}
         </div>
-        <el-button v-show="axonsWithDatasets.length > 0" class="button" @click="openAxons">
-          Explore axon data
+        <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+          Explore destination data
         </el-button>
       </div>
       <div v-if="content.uberon" class="block">
@@ -127,11 +127,11 @@ export default {
       appendToBody: false,
       pubmedSearchUrl: '',
       loading: false,
-      axons: [],
-      dendrites: [],
+      destinations: [],
+      origins: [],
       components: [],
-      axonsWithDatasets: [],
-      dendritesWithDatasets: [],
+      destinationsWithDatasets: [],
+      originsWithDatasets: [],
       uberons: [{id: undefined, name: undefined}]
     };
   },
@@ -163,10 +163,10 @@ export default {
       window.open(url, '_blank')
     },
     openAxons: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.axonsWithDatasets.map(a=>a.name)})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
     },
     openDendrites: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.dendritesWithDatasets.map(a=>a.name)})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.originsWithDatasets.map(a=>a.name)})
     },
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
@@ -181,12 +181,12 @@ export default {
           let n = node.flat() // Find all terms on the node
           terminal = false
 
-          // Check if the node is an axon or dendrite
+          // Check if the node is an destination or origin
           n.forEach(s=>{
-              if(connectivity.axons.includes(s)){
+              if(connectivity.destinations.includes(s)){
                   terminal = true
               }
-              if(connectivity.dendrites.includes(s)){
+              if(connectivity.origins.includes(s)){
                   terminal = true
               }
           })
@@ -253,8 +253,8 @@ export default {
       })
     },
     pathwayQuery: function(keastIds){
-      this.axons = []
-      this.dendrites = []
+      this.destinations = []
+      this.origins = []
       this.components = []
       this.loading = true
       if (!keastIds || keastIds.length == 0) return
@@ -272,16 +272,16 @@ export default {
         let components = this.findComponents(connectivity)
 
         // Create list of ids to get labels for
-        let conIds = connectivity.axons.concat(connectivity.dendrites.concat(components))
+        let conIds = connectivity.destinations.concat(connectivity.origins.concat(components))
         this.createLabelLookup(conIds).then(lookUp=>{
-          this.axons = connectivity.axons.map(a=>lookUp[a])
-          this.dendrites = connectivity.dendrites.map(d=>lookUp[d])
+          this.destinations = connectivity.destinations.map(a=>lookUp[a])
+          this.origins = connectivity.origins.map(d=>lookUp[d])
           this.components = components.map(c=>lookUp[c])
         })
 
         // Filter for the anatomy which is annotated on datasets
-        this.axonsWithDatasets = this.uberons.filter(ub => connectivity.axons.indexOf(ub.id) !== -1)
-        this.dendritesWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
+        this.destinationsWithDatasets = this.uberons.filter(ub => connectivity.destinations.indexOf(ub.id) !== -1)
+        this.originsWithDatasets = this.uberons.filter(ub => connectivity.origins.indexOf(ub.id) !== -1)
         this.loading = false
       })
       .catch((error) => {
