@@ -17,7 +17,19 @@
         </div>
       </div>
       <div v-if="this.dendrites" class="block">
-        <div class="attribute-title">Origin</div>
+        <div class="attribute-title">Origin
+          <el-popover
+          width="250"
+          trigger="hover"
+          :append-to-body=false
+          popper-class="popover-origin-help"
+          >
+          <i slot="reference" class="el-icon-warning-outline info"/>
+          <div>
+            Origin is the point of the neuron path closest to the brain (or spinal cord)
+          </div>
+          </el-popover>
+        </div>
         <div v-for="dendrite in dendrites" class="attribute-content"  :key="dendrite">
           {{ capitalise(dendrite) }}
         </div>
@@ -26,7 +38,19 @@
         </el-button>
       </div>
       <div v-if="this.axons" class="block">
-        <div class="attribute-title">Destination</div>
+        <div class="attribute-title">Destination
+          <el-popover
+          width="250"
+          trigger="hover"
+          :append-to-body=false
+          popper-class="popover-origin-help"
+          >
+          <i slot="reference" class="el-icon-warning-outline info"/>
+          <div>
+            Destination is the point of the neuron path furthest from the brain (or spinal cord)
+          </div>
+          </el-popover>
+        </div>
         <div v-for="axon in axons" class="attribute-content"  :key="axon">
           {{ capitalise(axon) }}
         </div>
@@ -318,6 +342,16 @@ export default {
 
 .icon:hover {
   cursor: pointer;
+}
+
+.popover-origin-help {
+  text-transform: none !important; // need to overide the tooltip text transform
+}
+
+.info{
+  transform: rotate(180deg);
+  color: #8300bf;
+  margin-left: 8px;
 }
 
 .main {
