@@ -460,6 +460,7 @@ export default {
             label: "Neuron Datasets",
             resource: feature.split(":")[1],
             type: "Neuron Search",
+            feature: feature,
             nervePath: true
           });
         }
@@ -474,6 +475,7 @@ export default {
           title: "View dataset",
           resource: data.dataset,
           type: "URL",
+          feature: feature,
           nervePath: false
         });
       }

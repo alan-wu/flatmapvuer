@@ -17,7 +17,8 @@
         </div>
       </div>
       <div v-if="this.origins" class="block">
-        <div class="attribute-title">Origin
+        <div>
+          <span class="attribute-title">Origin</span>
           <el-popover
           width="250"
           trigger="hover"
@@ -25,9 +26,9 @@
           popper-class="popover-origin-help"
           >
           <i slot="reference" class="el-icon-warning-outline info"/>
-          <div>
-            Origin is the point of the neuron path closest to the brain (or spinal cord)
-          </div>
+          <span style="word-break: keep-all;">
+            Origin is the point of the neuron population closest to the brain (or spinal cord)
+          </span>
           </el-popover>
         </div>
         <div v-for="origin in origins" class="attribute-content"  :key="origin">
@@ -38,7 +39,8 @@
         </el-button>
       </div>
       <div v-if="this.destinations" class="block">
-        <div class="attribute-title">Destination
+        <div>
+          <span class="attribute-title">Destination</span>
           <el-popover
           width="250"
           trigger="hover"
@@ -46,9 +48,9 @@
           popper-class="popover-origin-help"
           >
           <i slot="reference" class="el-icon-warning-outline info"/>
-          <div>
-            Destination is the point of the neuron path furthest from the brain (or spinal cord)
-          </div>
+          <span style="word-break: keep-all;">
+          Destination is the point of the neuron population furthest from the brain (or spinal cord)
+          </span>
           </el-popover>
         </div>
         <div v-for="destination in destinations" class="attribute-content"  :key="destination">
@@ -62,11 +64,18 @@
         <div class="attribute-title">Feature Id</div>
         <span class="attribute-content">{{content.uberon}}</span>
       </div>
-      <el-button v-for="action in content.actions" round :key="action.title"
+
+      <!-- Disable search components button until I can get uberons-> labels for them -->
+      <!-- <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
+        Search for data on components
+      </el-button> -->
+
+      <!-- Disable neuron search until it is ready -->
+      <!-- <el-button v-for="action in content.actions" round :key="action.title"
         class="button" @click="resourceSelected(action)">
         <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
         {{action.title}}
-      </el-button>
+      </el-button> -->
       <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
         Open publications in pubmed
       </el-button>
@@ -132,6 +141,7 @@ export default {
       components: [],
       destinationsWithDatasets: [],
       originsWithDatasets: [],
+      componentsWithDatasets: [],
       uberons: [{id: undefined, name: undefined}]
     };
   },
@@ -161,6 +171,9 @@ export default {
     },
     openUrl: function(url){
       window.open(url, '_blank')
+    },
+    openAll: function(){
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.components.map(a=>a.name)})
     },
     openAxons: function(){
       EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
@@ -282,6 +295,7 @@ export default {
         // Filter for the anatomy which is annotated on datasets
         this.destinationsWithDatasets = this.uberons.filter(ub => connectivity.axons.indexOf(ub.id) !== -1)
         this.originsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
+        this.componentsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
         this.loading = false
       })
       .catch((error) => {
