@@ -61,10 +61,10 @@
         </el-button>
       </div>
 
-      <!-- Disable search components button until I can get uberons-> labels for them -->
-      <!-- <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
+      <!-- We will serach on components until we can search on neurons -->
+      <el-button v-show="components.length > 0" class="button" @click="openAll">
         Search for data on components
-      </el-button> -->
+      </el-button>
 
       <!-- Disable neuron search until it is ready -->
       <!-- <el-button v-for="action in content.actions" round :key="action.title"
@@ -169,7 +169,7 @@ export default {
       window.open(url, '_blank')
     },
     openAll: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.components.map(a=>a.name)})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.components})
     },
     openAxons: function(){
       EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
