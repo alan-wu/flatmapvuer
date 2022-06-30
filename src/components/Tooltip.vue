@@ -60,10 +60,6 @@
           Explore destination data
         </el-button>
       </div>
-      <div v-if="content.uberon" class="block">
-        <div class="attribute-title">Feature Id</div>
-        <span class="attribute-content">{{content.uberon}}</span>
-      </div>
 
       <!-- Disable search components button until I can get uberons-> labels for them -->
       <!-- <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
