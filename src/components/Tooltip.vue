@@ -158,7 +158,7 @@ export default {
   },
   computed: {
     originDescription: function(){
-      if( this.content.title.toLowerCase().includes('motor')){
+      if(this.content && this.content.title && this.content.title.toLowerCase().includes('motor')){
         return this.originDescriptions.motor
       } else {
         return this.originDescriptions.sensory
