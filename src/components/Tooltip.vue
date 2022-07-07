@@ -10,12 +10,6 @@
       <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
       <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
       {{content.paths}}
-      <div v-if="this.components" class="block">
-        <div class="attribute-title">Components</div>
-        <div v-for="component in components" class="attribute-content"  :key="component">
-          {{ capitalise(component) }}
-        </div>
-      </div>
       <div v-if="this.origins" class="block">
         <div>
           <span class="attribute-title">Origin</span>
@@ -27,7 +21,7 @@
           >
           <i slot="reference" class="el-icon-warning-outline info"/>
           <span style="word-break: keep-all;">
-            <i>Origin</i> is where the dendrites stem from
+            <i>Origin</i> {{originDescription}}
           </span>
           </el-popover>
         </div>
@@ -37,6 +31,12 @@
         <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
           Explore origin data
         </el-button>
+      </div>
+      <div v-if="this.components" class="block">
+        <div class="attribute-title">Components</div>
+        <div v-for="component in components" class="attribute-content"  :key="component">
+          {{ capitalise(component) }}
+        </div>
       </div>
       <div v-if="this.destinations" class="block">
         <div>
@@ -137,6 +137,10 @@ export default {
       components: [],
       destinationsWithDatasets: [],
       originsWithDatasets: [],
+      originDescriptions: {
+        'motor': 'is the location of the initial cell body of the circuit',
+        'sensory': 'is the location of the initial cell body in the PNS circuit'
+      },
       componentsWithDatasets: [],
       uberons: [{id: undefined, name: undefined}]
     };
@@ -151,6 +155,15 @@ export default {
   },
   mounted: function(){
     this.getOrganCuries()
+  },
+  computed: {
+    originDescription: function(){
+      if( this.content.title.toLowerCase().includes('motor')){
+        return this.originDescriptions.motor
+      } else {
+        return this.originDescriptions.sensory
+      }
+    }
   },
   methods: {
     resourceSelected: function(action) {
