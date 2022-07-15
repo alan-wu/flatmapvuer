@@ -49,7 +49,7 @@
           >
           <i slot="reference" class="el-icon-warning-outline info"/>
           <span style="word-break: keep-all;">
-          <i>Destination</i> is where the axons terminate (& in the cases of some psuedounipolar neurons, where their dendritic "terminals" are)
+          <i>Destination</i> is where the axons terminate
           </span>
           </el-popover>
         </div>
