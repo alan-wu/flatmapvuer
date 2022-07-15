@@ -376,13 +376,13 @@ export default {
         data.eventType == "click" &&
         this.hasNeuronTooltip(data)
       ) {
-        this.createTooltipFromNeuronCuration(data)
+        this.createTooltipFromNeuronCuration(data);
         this.mapImp.showPopup(
           this.mapImp.modelFeatureIds(data.resource[0])[0],
           this.$refs.tooltip.$el,
           { className: "flatmapvuer-popover", positionAtLastClick: true }
         );
-        this.popUpCssHacks()
+        this.popUpCssHacks();
       }
     },
     popUpCssHacks: function() {
