@@ -91,9 +91,9 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
-      // flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-      flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      // flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },

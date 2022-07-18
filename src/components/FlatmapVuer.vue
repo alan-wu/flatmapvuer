@@ -402,11 +402,6 @@ export default {
     },
     hasNeuronTooltip: function(data) {
 
-      // nerve cuff check
-      if (data.feature.nodeId) {
-        return true
-      }
-
       // neural data check
       if (data.resource[0]){
         if (data.resource[0].includes('ilxtr:neuron')){
@@ -433,19 +428,6 @@ export default {
       };
 
       this.tooltipVisible = false;
-
-      // nerve cuff check
-      if (data.feature.nodeId) {
-        let paths = this.mapImp.nodePathModels(data.feature.nodeId);
-        if (paths.size > 0){
-          this.tooltipVisible = true;
-          this.tooltipContent = content;
-          this.tooltipContent.uberon = feature;
-          this.tooltipContent.title = data.label;
-          this.tooltipContent.featureIds = [...paths];
-        }
-        return true
-      }
 
       // neural data check
       if (feature){
