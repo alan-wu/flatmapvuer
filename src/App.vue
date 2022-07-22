@@ -53,8 +53,8 @@ export default {
         this.$refs.multi.setState(this._mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
-      if (resource.eventType != "hover")
-        console.log(resource);
+      if (resource.eventType === "click")
+        console.log('resource', resource);
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
@@ -65,7 +65,7 @@ export default {
       component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
-      console.log(payload);
+      this.payload = payload
     }
   },
   data: function(){
@@ -91,8 +91,10 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
-      //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
-      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
+      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+      // flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
   mounted: function() {

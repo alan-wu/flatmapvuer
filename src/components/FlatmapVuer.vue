@@ -216,7 +216,6 @@
         ref="tooltip"
         class="tooltip"
         :content="tooltipContent"
-        :flatmapAPI="flatmapAPI"
         @resource-selected="resourceSelected"
       />
     </div>
@@ -240,6 +239,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
+
 locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
@@ -363,7 +363,7 @@ export default {
           };
           // Disable the nueron pop up for now.
           if (data && data.type !== "marker")
-            this.checkAndCreatePopups(data);
+            this.checkAndCreatePopups(payload);
           this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
@@ -374,17 +374,18 @@ export default {
     checkAndCreatePopups: function(data) {
       if (
         data.eventType == "click" &&
-        this.createTooltipFromNeuronCuration(data)
+        this.hasNeuronTooltip(data)
       ) {
+        this.createTooltipFromNeuronCuration(data);
         this.mapImp.showPopup(
           this.mapImp.modelFeatureIds(data.resource[0])[0],
           this.$refs.tooltip.$el,
-          { className: "flatmap-tooltip-dialog" }
+          { className: "flatmapvuer-popover", positionAtLastClick: true }
         );
-        this.popUpCssHack();
+        this.popUpCssHacks();
       }
     },
-    popUpCssHack: function() {
+    popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
       let ftooltip = document.querySelector(".flatmap-tooltip-popup");
       if (ftooltip) ftooltip.style.display = "none";
@@ -399,6 +400,23 @@ export default {
     resourceSelected: function(action) {
       this.$emit("resource-selected", action);
     },
+    hasNeuronTooltip: function(data) {
+
+      // neural data check
+      if (data.resource[0]){
+        if (data.resource[0].includes('ilxtr:neuron')){
+          return true
+        }
+      }
+      // annotated with datset check
+      if (data.dataset) {
+        return true
+      }
+
+      // if there is no cuff, neural data, or dataset we do not display neuron tooltip
+      return false
+
+    },
     createTooltipFromNeuronCuration: function(data) {
       const feature = data.resource[0];
       let content = {
@@ -409,30 +427,28 @@ export default {
         actions: []
       };
 
-      let foundAnnotations = false;
       this.tooltipVisible = false;
 
       // neural data check
-      if (feature) {
-        if (feature.includes("ilxtr:neuron")) {
-          foundAnnotations = true;
+      if (feature){
+        if (feature.includes('ilxtr:neuron')){
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
           this.tooltipContent.title = data.label;
-          this.tooltipContent.featureId = feature;
+          this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
-            title: "Search for dataset",
+            title: "Search for datasets",
             label: "Neuron Datasets",
             resource: feature.split(":")[1],
             type: "Neuron Search",
+            feature: feature,
             nervePath: true
           });
         }
       }
       // annotated with datset check
       if (data.dataset) {
-        foundAnnotations = true;
         this.tooltipVisible = true;
         this.tooltipContent = content;
         this.tooltipContent.uberon = feature;
@@ -441,14 +457,9 @@ export default {
           title: "View dataset",
           resource: data.dataset,
           type: "URL",
+          feature: feature,
           nervePath: false
         });
-      }
-
-      if (foundAnnotations) {
-        return true;
-      } else {
-        return false;
       }
     },
     // Keeping this as an API
@@ -458,7 +469,7 @@ export default {
         if (myOptions) {
           if (!myOptions.className) myOptions.className = "flatmapvuer-popover";
         } else {
-          myOptions = { className: "flatmapvuer-popover" };
+          myOptions = { className: "flatmapvuer-popover", positionAtLastClick: true };
         }
         this.mapImp.showPopup(featureId, node, myOptions);
       }
@@ -673,6 +684,16 @@ export default {
     flatmapAPI: {
       type: String,
       default: "https://mapcore-demo.org/flatmaps/"
+    },
+    sparcAPI: {
+      type: String,
+      default: "https://api.sparc.science/"
+    }
+  },
+  provide() {
+    return {
+      sparcAPI: this.sparcAPI,
+      flatmapAPI: this.flatmapAPI
     }
   },
   data: function() {
@@ -696,7 +717,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
-      tooltipContent: {},
+      tooltipContent: { featureIds: []},
       colourRadio: true,
       outlinesRadio: true
     };

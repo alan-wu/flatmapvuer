@@ -26,7 +26,8 @@ import Vue from "vue";
 import {
   Link,
   Carousel,
-  CarouselItem
+  CarouselItem,
+  Button
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -34,40 +35,39 @@ locale.use(lang);
 Vue.use(Link);
 Vue.use(Carousel);
 Vue.use(CarouselItem);
+Vue.use(Button);
 
 
 export default {
   name: "Tooltip",
-  props: { 
-    featureId: {
-      type: String,
-      default: ''
+  props: {
+    entry: {
+      type: Object,
+      default: () => {}
     },
-    /**
-     * Specify the endpoint of the flatmap server.
-     */
-    flatmapAPI: {
-      type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
-    }
   },
   watch: {
-    'featureId': function (val){
-      console.log('feature id watch triggered', val)
-      this.flatmapQuery(val)
+    'entry.featureId': function (val){
+      this.flatmapQuery(val).then(pb => this.pubmeds = pb)
+    },
+    'entry.featureIds': {
+      handler: function(ids) {
+        this.flatmapQuery(ids)
+      }
     }
   },
-  computed: {
-  },
+  inject: ['flatmapAPI'],
   data: function() {
     return {
+      data: {},
       pubmeds: [],
       pubmedIds: [],
       loading: {response: true, publications: true}
     };
   },
   mounted: function() {
-    this.flatmapQuery(this.featureId)
+    if (this.entry.featureIds)
+      this.flatmapQuery(this.entry.featureIds)
   },
   methods: {
     stripPMIDPrefix: function (pubmedId){
@@ -81,7 +81,7 @@ export default {
           resolve(data.apa.format)
         })
         .catch((error) => {
-          console.error('Error:', error);
+          console.error('Error:', error)
         });
       })
     },
@@ -89,12 +89,25 @@ export default {
       let split = bibliographyString.split('https')
       return [split[0], 'https' + split[1]]
     },
-    flatmapQuery: function(identifier){
+    buildPubmedSqlStatement: function(keastIds) {
+      let sql = 'select distinct publication from publications where entity in ('
+      if (keastIds.length === 1) {
+        sql += `'${keastIds[0]}')`
+      } else if (keastIds.length > 1) {
+        for (let i in keastIds) {
+          sql += `'${keastIds[i]}'${i >= keastIds.length - 1 ? ')' : ','} `
+        }
+      }
+      return sql
+    },
+    flatmapQuery: function(keastIds){
+      if(!keastIds || keastIds.length === 0) return
       this.pubmeds = []
       this.loading.response = true
-      let endpoint = this.flatmapAPI + 'knowledge/query/';
-      const data = { sql: 'select publication from publications where entity=?', "params": [identifier]};
-      fetch(endpoint, {
+
+      // fetch pubmed publications for the given ids
+      const data = { sql: this.buildPubmedSqlStatement(keastIds)};
+      fetch(`${this.flatmapAPI}knowledge/query/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,19 +118,20 @@ export default {
       .then(data => {
         this.responseData = data
         this.loading.response = false
+
+        // create links for each pubmedId
         data.values.forEach(identifier => {
           let ids = this.stripPMIDPrefix(identifier[0])
           this.titleFromPubmed(ids).then( bib=>{
             let [html, link] = this.splitLink(bib)
             this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
-            
           })
         });
         this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
       })
       .catch((error) => {
-        console.error('Error:', error);
-      });
+        console.error('Error:', error)
+    })
     },
     pubmedSearchUrl: function(ids) {
       let url = 'https://pubmed.ncbi.nlm.nih.gov/?'

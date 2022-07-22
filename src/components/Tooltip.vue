@@ -1,32 +1,77 @@
 <template>
   <div class="tooltip-container">
-     <el-main v-if="content" class="main">
+     <el-main v-if="content" class="main" v-loading="loading">
       <div class="block" v-if="content.title">
-        <span class="title">{{titleCase(content.title)}}</span>
+        <span class="title">{{capitalise(content.title)}}</span>
       </div>
       <div class="block" v-else>
         <span class="title">{{content.featureId}}</span>
       </div>
-      
-
-      <pubmed-viewer v-if="content.featureId" class="block" :flatmapAPI=flatmapAPI :featureId="content.featureId" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
-      <div v-if="content.components" class="block">
+      <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
+      <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+      {{content.paths}}
+      <div v-if="this.origins" class="block">
+        <div>
+          <span class="attribute-title">Origin</span>
+          <el-popover
+          width="250"
+          trigger="hover"
+          :append-to-body=false
+          popper-class="popover-origin-help"
+          >
+          <i slot="reference" class="el-icon-warning-outline info"/>
+          <span style="word-break: keep-all;">
+            <i>Origin</i> {{originDescription}}
+          </span>
+          </el-popover>
+        </div>
+        <div v-for="origin in origins" class="attribute-content"  :key="origin">
+          {{ capitalise(origin) }}
+        </div>
+        <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
+          Explore origin data
+        </el-button>
+      </div>
+      <div v-if="this.components" class="block">
         <div class="attribute-title">Components</div>
-        <span class="attribute-content">{{content.components}}</span>
+        <div v-for="component in components" class="attribute-content"  :key="component">
+          {{ capitalise(component) }}
+        </div>
       </div>
-      <div v-if="content.start" class="block">
-        <div class="attribute-title">Origin</div>
-        <span class="attribute-content">{{content.start}}</span>
+      <div v-if="this.destinations" class="block">
+        <div>
+          <span class="attribute-title">Destination</span>
+          <el-popover
+          width="250"
+          trigger="hover"
+          :append-to-body=false
+          popper-class="popover-origin-help"
+          >
+          <i slot="reference" class="el-icon-warning-outline info"/>
+          <span style="word-break: keep-all;">
+          <i>Destination</i> is where the axons terminate
+          </span>
+          </el-popover>
+        </div>
+        <div v-for="destination in destinations" class="attribute-content"  :key="destination">
+          {{ capitalise(destination) }}
+        </div>
+        <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+          Explore destination data
+        </el-button>
       </div>
-      <div v-if="content.distribution" class="block">
-        <div class="attribute-title">Distribution</div>
-        <span class="attribute-content">{{content.distribution}}</span>
-      </div>
-      <el-button v-for="action in content.actions" round :key="action.title"
-        class="button" @click="resourceSelected(action)">
-        <i v-if="action.title === 'Search for dataset' || action.title === 'View Dataset' " class="el-icon-coin"></i>
-        {{action.title}}
+
+      <!-- We will serach on components until we can search on neurons -->
+      <el-button v-show="components.length > 0" class="button" @click="openAll">
+        Search for data on components
       </el-button>
+
+      <!-- Disable neuron search until it is ready -->
+      <!-- <el-button v-for="action in content.actions" round :key="action.title"
+        class="button" @click="resourceSelected(action)">
+        <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
+        {{action.title}}
+      </el-button> -->
       <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
         Open publications in pubmed
       </el-button>
@@ -54,10 +99,18 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
+// pubmedviewer is currently not in use, but still under review so not ready to delete yet
 import PubmedViewer from './PubmedViewer.vue'
+import EventBus from './EventBus'
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+}
+
+const capitalise = function(str){
+  if (str)
+    return str.charAt(0).toUpperCase() + str.slice(1)
+  return ""
 }
 
 export default {
@@ -72,20 +125,45 @@ export default {
       type: Object,
       default: undefined
     },
-        /**
-     * Specify the endpoint of the flatmap server.
-     */
-    flatmapAPI: {
-      type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
-    }
   },
   data: function() {
     return {
       activeSpecies: undefined,
       appendToBody: false,
-      pubmedSearchUrl: ''
+      pubmedSearchUrl: '',
+      loading: false,
+      destinations: [],
+      origins: [],
+      components: [],
+      destinationsWithDatasets: [],
+      originsWithDatasets: [],
+      originDescriptions: {
+        'motor': 'is the location of the initial cell body of the circuit',
+        'sensory': 'is the location of the initial cell body in the PNS circuit'
+      },
+      componentsWithDatasets: [],
+      uberons: [{id: undefined, name: undefined}]
     };
+  },
+  inject: ['sparcAPI', 'flatmapAPI'],
+  watch: {
+    'content.featureIds': {
+      handler: function(){
+        this.pathwayQuery(this.content.featureIds)
+      }
+    }
+  },
+  mounted: function(){
+    this.getOrganCuries()
+  },
+  computed: {
+    originDescription: function(){
+      if(this.content && this.content.title && this.content.title.toLowerCase().includes('motor')){
+        return this.originDescriptions.motor
+      } else {
+        return this.originDescriptions.sensory
+      }
+    }
   },
   methods: {
     resourceSelected: function(action) {
@@ -94,14 +172,144 @@ export default {
     titleCase: function(title){
       return titleCase(title)
     },
+    capitalise: function(text){
+      return capitalise(text)
+    },
     onClose: function() {
-      this.$emit("onClose");
+      this.$emit("onClose")
     },
     openUrl: function(url){
       window.open(url, '_blank')
     },
+    openAll: function(){
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.components})
+    },
+    openAxons: function(){
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
+    },
+    openDendrites: function(){
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.originsWithDatasets.map(a=>a.name)})
+    },
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
+    },
+    findComponents: function(connectivity){
+      let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
+      let nodes = [...new Set(dnodes)] // remove duplicates
+
+      let found = []
+      let terminal = false
+      nodes.forEach(node=>{
+          let n = node.flat() // Find all terms on the node
+          terminal = false
+
+          // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
+          n.forEach(s=>{
+              if(connectivity.axons.includes(s)){
+                  terminal = true
+              }
+              if(connectivity.dendrites.includes(s)){
+                  terminal = true
+              }
+          })
+          if (!terminal){
+            found.push(node)
+          }
+      })
+
+      // remove duplicates
+      let foundUnique = [...new Set(found.map(n=>n[0]))]
+      return foundUnique
+    },
+    getOrganCuries: function(){
+      fetch(`${this.sparcAPI}get-organ-curies/`)
+        .then(response=>response.json())
+        .then(data=>{
+          this.uberons = data.uberon.array
+        })
+    },
+    buildConnectivitySqlStatement: function(keastIds) {
+      let sql = 'select knowledge from knowledge where entity in ('
+      if (keastIds.length === 1) {
+        sql += `'${keastIds[0]}')`
+      } else if (keastIds.length > 1) {
+        for (let i in keastIds) {
+          sql += `'${keastIds[i]}'${i >= keastIds.length - 1 ? ')' : ','} `
+        }
+      }
+      return sql
+    },
+    buildLabelSqlStatement: function(uberons) {
+      let sql = 'select entity, label from labels where entity in ('
+      if (uberons.length === 1) {
+        sql += `'${uberons[0]}')`
+      } else if (uberons.length > 1) {
+        for (let i in uberons) {
+          sql += `'${uberons[i]}'${i >= uberons.length - 1 ? ')' : ','} `
+        }
+      }
+      return sql
+    },
+    createLabelLookup: function(uberons) {
+      return new Promise(resolve=> {
+        let uberonMap = {}
+        const data = { sql: this.buildLabelSqlStatement(uberons)}
+        fetch(`${this.flatmapAPI}knowledge/query/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          })
+          .then(response => response.json())
+          .then(payload => {
+            const entity = payload.keys.indexOf("entity");
+            const label = payload.keys.indexOf("label");
+            if (entity > -1 && label > -1) {
+              payload.values.forEach(pair => {
+                uberonMap[pair[entity]] = pair[label];
+              });
+            }
+            resolve(uberonMap)
+          })
+      })
+    },
+    pathwayQuery: function(keastIds){
+      this.destinations = []
+      this.origins = []
+      this.components = []
+      this.loading = true
+      if (!keastIds || keastIds.length == 0) return
+      const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
+      fetch(`${this.flatmapAPI}knowledge/query/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      .then(response => response.json())
+      .then(data => {
+        let connectivity = JSON.parse(data.values[0][0])
+        let components = this.findComponents(connectivity)
+
+        // Create list of ids to get labels for
+        let conIds = connectivity.axons.concat(connectivity.dendrites.concat(components))
+        this.createLabelLookup(conIds).then(lookUp=>{
+          this.destinations = connectivity.axons.map(a=>lookUp[a])
+          this.origins = connectivity.dendrites.map(d=>lookUp[d])
+          this.components = components.map(c=>lookUp[c])
+        })
+
+        // Filter for the anatomy which is annotated on datasets
+        this.destinationsWithDatasets = this.uberons.filter(ub => connectivity.axons.indexOf(ub.id) !== -1)
+        this.originsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
+        this.componentsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
+        this.loading = false
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      })
     }
   }
 };
@@ -159,6 +367,16 @@ export default {
   cursor: pointer;
 }
 
+.popover-origin-help {
+  text-transform: none !important; // need to overide the tooltip text transform
+}
+
+.info{
+  transform: rotate(180deg);
+  color: #8300bf;
+  margin-left: 8px;
+}
+
 .main {
   font-size: 14px;
   text-align: left;
@@ -171,6 +389,15 @@ export default {
   min-width: 16rem;
 }
 
+.title{
+  font-size: 18px;
+  font-weight: 500;
+  font-weight: bold;
+  padding-bottom: 8px;
+  color: rgb(131, 0, 191);
+
+}
+
 .attribute-title{
   font-size: 16px;
   font-weight: 600;
@@ -180,7 +407,7 @@ export default {
 
 .attribute-content{
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .popover-container {
