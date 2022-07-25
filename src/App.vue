@@ -53,15 +53,26 @@ export default {
         this.$refs.multi.setState(this._mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
-      if (resource.eventType === "click")
+      if (resource.eventType === "click") {
         console.log('resource', resource);
+        if (resource.feature && resource.feature.label) {
+          let url =  'https://models.physiomeproject.org/@@search?SearchableText=' + resource.feature.label;
+          const a = document.createElement("a");
+          a.href = url;
+          const evt = document.createEvent("MouseEvents");
+          evt.initMouseEvent(
+            "click", true, true, window, 0, 0, 0, 0, 0,
+            true, false, false, false, 0, null);
+          a.dispatchEvent(evt);
+        }
+      }
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
+      console.log(taxon, id);
       component.enablePanZoomEvents(true);
       component.showPathwaysDrawer(false);
-      console.log(taxon, id);
       component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
@@ -74,13 +85,7 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false},
-        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
-        "Kember":{taxo: "ABI:1000001", displayWarning:true},
-        "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
-        "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
-        "digestive tract":{taxo: "digestive tract", displayWarning:true}
+      availableSpecies : {"Functional Connectivity":{taxo: "FunctionalConnectivity", displayWarning:true}
       },
       tooltipContent: undefined,
       tStyle: {
@@ -89,10 +94,10 @@ export default {
         position: "absolute"
       },
       displayCloseButton: false,
-      initial: "Rat",
+      initial: "Functional Connectivity",
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
-      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       // flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
