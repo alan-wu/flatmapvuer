@@ -9,25 +9,49 @@
     <map-svg-sprite-color />
     <div style="height:100%;width:100%;position:relative;overflow-y:none">
       <div style="height:100%;width:100%;" ref="display"></div>
-      <el-popover
-        :content="warningMessage"
-        placement="right"
-        v-if="displayWarning"
-        :appendToBody="false"
-        trigger="manual"
-        popper-class="warning-popper flatmap-popper right-popper"
-        v-model="hoverVisibilities[6].value"
-        ref="warningPopover"
-      ></el-popover>
-      <i
-        class="el-icon-warning warning-icon"
-        v-if="displayWarning"
-        @mouseover="showToolitip(6)"
-        @mouseout="hideToolitip(6)"
-        v-popover:warningPopover
-      >
-        <span class="warning-text">Beta</span>
-      </i>
+      <div class="beta-popovers">
+        <div>
+          <el-popover
+            :content="warningMessage"
+            placement="right"
+            v-if="displayWarning"
+            :appendToBody="false"
+            trigger="manual"
+            popper-class="warning-popper flatmap-popper right-popper"
+            v-model="hoverVisibilities[6].value"
+            ref="warningPopover"
+          ></el-popover>
+          <i
+            class="el-icon-warning warning-icon"
+            v-if="displayWarning"
+            @mouseover="showToolitip(6)"
+            @mouseout="hideToolitip(6)"
+            v-popover:warningPopover
+          >
+          <span class="warning-text">Beta</span>
+        </i>
+        </div>
+        <el-popover
+          :content="successMessage"
+          placement="right"
+          v-if="displaySuccess"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="warning-popper flatmap-popper right-popper"
+          v-model="hoverVisibilities[6].value"
+          ref="successPopover"
+        ></el-popover>
+        <i
+          class="el-icon-warning success-icon"
+          v-if="displaySuccess"
+          @mouseover="showToolitip(6)"
+          @mouseout="hideToolitip(6)"
+          v-popover:successPopover
+        >
+          <span class="warning-text">What's new?</span>
+        </i>
+      </div>
+
       <div class="bottom-right-control">
         <el-popover
           content="Zoom in"
@@ -709,9 +733,12 @@ export default {
         { value: false },
         { value: false },
         { value: false },
+        { value: false },
         { value: false }
       ],
       inHelp: false,
+      displaySuccess: true,
+      successMessage: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
@@ -753,12 +780,15 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.warning-icon {
+.beta-popovers{
   position: absolute;
   top: 90px;
-  left: 37px;
+  left: 16px;
   text-align: left;
-  font-size: 25px;
+  font-size: 25px;  
+}
+
+.warning-icon {
   color: $warning;
 
   &:hover {
@@ -767,6 +797,21 @@ export default {
 }
 
 .warning-text {
+  font-family: Asap, sans-serif;
+  font-size: 15px;
+  vertical-align: 5px;
+}
+
+.success-icon {
+  color: $success;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.success-text {
+  font-family: Asap, sans-serif;
   font-size: 15px;
   vertical-align: 5px;
 }
