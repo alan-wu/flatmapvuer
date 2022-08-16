@@ -38,14 +38,14 @@
           :appendToBody="false"
           trigger="manual"
           popper-class="warning-popper flatmap-popper right-popper"
-          v-model="hoverVisibilities[6].value"
+          v-model="hoverVisibilities[7].value"
           ref="successPopover"
         ></el-popover>
         <i
           class="el-icon-warning success-icon"
           v-if="displaySuccess"
-          @mouseover="showToolitip(6)"
-          @mouseout="hideToolitip(6)"
+          @mouseover="showToolitip(7)"
+          @mouseout="hideToolitip(7)"
           v-popover:successPopover
         >
           <span class="warning-text">What's new?</span>
