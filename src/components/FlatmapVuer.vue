@@ -32,21 +32,21 @@
         </i>
         </div>
         <el-popover
-          :content="successMessage"
+          :content="latestChangesMessage"
           placement="right"
-          v-if="displaySuccess"
+          v-if="displayLatestChanges"
           :appendToBody="false"
           trigger="manual"
           popper-class="warning-popper flatmap-popper right-popper"
           v-model="hoverVisibilities[7].value"
-          ref="successPopover"
+          ref="latestChangesPopover"
         ></el-popover>
         <i
-          class="el-icon-warning success-icon"
-          v-if="displaySuccess"
+          class="el-icon-warning latest-changesicon"
+          v-if="displayLatestChanges"
           @mouseover="showToolitip(7)"
           @mouseout="hideToolitip(7)"
-          v-popover:successPopover
+          v-popover:latestChangesPopover
         >
           <span class="warning-text">What's new?</span>
         </i>
@@ -737,8 +737,8 @@ export default {
         { value: false }
       ],
       inHelp: false,
-      displaySuccess: true,
-      successMessage: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
+      displayLatestChanges: true,
+      latestChangesMessage: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
@@ -802,7 +802,7 @@ export default {
   vertical-align: 5px;
 }
 
-.success-icon {
+.latest-changesicon {
   color: $success;
 
   &:hover {
@@ -810,7 +810,7 @@ export default {
   }
 }
 
-.success-text {
+.latest-changestext {
   font-family: Asap, sans-serif;
   font-size: 15px;
   vertical-align: 5px;
