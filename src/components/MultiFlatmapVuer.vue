@@ -33,6 +33,8 @@
       :entry="item.taxo"
       :displayWarning="item.displayWarning"
       :warningMessage="warningMessage"
+      :displayLatestChanges="item.displayLatestChanges"
+      :latestChangesMessage="item.latestChangesMessage"
       :ref="key"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"

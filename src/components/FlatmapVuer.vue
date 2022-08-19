@@ -14,7 +14,6 @@
           <el-popover
             :content="warningMessage"
             placement="right"
-            v-if="displayWarning"
             :appendToBody="false"
             trigger="manual"
             popper-class="warning-popper flatmap-popper right-popper"
@@ -23,7 +22,7 @@
           ></el-popover>
           <i
             class="el-icon-warning warning-icon"
-            v-if="displayWarning"
+            v-if="displayWarning && warningMessage"
             @mouseover="showToolitip(6)"
             @mouseout="hideToolitip(6)"
             v-popover:warningPopover
@@ -43,7 +42,7 @@
         ></el-popover>
         <i
           class="el-icon-warning latest-changesicon"
-          v-if="displayLatestChanges"
+          v-if="displayLatestChanges && latestChangesMessage"
           @mouseover="showToolitip(7)"
           @mouseout="hideToolitip(7)"
           v-popover:latestChangesPopover
@@ -683,17 +682,25 @@ export default {
       type: Boolean,
       default: true
     },
-    displayWarning: {
-      type: Boolean,
-      default: true
-    },
     displayMinimap: {
+      type: Boolean,
+      default: false
+    },
+    displayWarning: {
       type: Boolean,
       default: false
     },
     warningMessage: {
       type: String,
       default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
+    },
+    displayLatestChanges: {
+      type: Boolean,
+      default: false,
+    },
+    latestChangesMessage: {
+      type: String,
+      default: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
     },
     /**
      * State containing state of the flatmap.
@@ -712,7 +719,7 @@ export default {
     sparcAPI: {
       type: String,
       default: "https://api.sparc.science/"
-    }
+    },
   },
   provide() {
     return {
@@ -737,8 +744,6 @@ export default {
         { value: false }
       ],
       inHelp: false,
-      displayLatestChanges: true,
-      latestChangesMessage: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
