@@ -293,20 +293,25 @@ export default {
       .then(response => response.json())
       .then(data => {
         let connectivity = JSON.parse(data.values[0][0])
+        
         let components = this.findComponents(connectivity)
 
         // Create list of ids to get labels for
-        let conIds = connectivity.axons.concat(connectivity.dendrites.concat(components))
+        window.connectivity = connectivity
+        let axons = connectivity.axons.map(a=>a[0])
+        let dendrites = connectivity.dendrites.map(d=>d[0])
+        let conIds = axons.concat(dendrites.concat(components))
+        window.conIds = conIds
         this.createLabelLookup(conIds).then(lookUp=>{
-          this.destinations = connectivity.axons.map(a=>lookUp[a])
-          this.origins = connectivity.dendrites.map(d=>lookUp[d])
+          this.destinations = axons.map(a=>lookUp[a])
+          this.origins = dendrites.map(d=>lookUp[d])
           this.components = components.map(c=>lookUp[c])
         })
 
         // Filter for the anatomy which is annotated on datasets
-        this.destinationsWithDatasets = this.uberons.filter(ub => connectivity.axons.indexOf(ub.id) !== -1)
-        this.originsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
-        this.componentsWithDatasets = this.uberons.filter(ub => connectivity.dendrites.indexOf(ub.id) !== -1)
+        this.destinationsWithDatasets = this.uberons.filter(ub => axons.indexOf(ub.id) !== -1)
+        this.originsWithDatasets = this.uberons.filter(ub => dendrites.indexOf(ub.id) !== -1)
+        this.componentsWithDatasets = this.uberons.filter(ub => dendrites.indexOf(ub.id) !== -1)
         this.loading = false
       })
       .catch((error) => {
