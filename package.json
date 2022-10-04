@@ -23,6 +23,9 @@
   "dependencies": {
     "@abi-software/flatmap-viewer": "^2.2.1-beta.8",
     "@abi-software/svg-sprite": "^0.1.14",
+    "@vue/cli-plugin-babel": "^4.0.0",
+    "@vue/cli-plugin-eslint": "^4.0.0",
+    "@vue/cli-service": "^4.5.13",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",
