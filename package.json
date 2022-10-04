@@ -9,6 +9,10 @@
     "*.json",
     "*.js"
   ],
+  "engines": {
+    "node": "14.18.3",
+    "npm": "6.14.15"
+  },
   "scripts": {
     "serve": "vue-cli-service serve --port 8082",
     "build": "vue-cli-service build --dest test_html --mode staging",
