@@ -425,6 +425,8 @@ export default {
     },
     hasNeuronTooltip: function(data) {
 
+      console.log('resource clicked: ', data)
+
       // neural data check
       if (data.resource[0]){
         if (data.resource[0].includes('ilxtr:neuron')){

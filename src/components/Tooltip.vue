@@ -28,6 +28,7 @@
           </div>
           <div v-for="origin in origins" class="attribute-content"  :key="origin">
             {{ capitalise(origin) }}
+            <div class="seperator"></div>
           </div>
           <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
             Explore origin data
@@ -37,6 +38,7 @@
           <div class="attribute-title">Components</div>
           <div v-for="component in components" class="attribute-content"  :key="component">
             {{ capitalise(component) }}
+            <div class="seperator"></div>
           </div>
         </div>
         <div v-if="this.destinations" class="block">
@@ -56,6 +58,7 @@
           </div>
           <div v-for="destination in destinations" class="attribute-content"  :key="destination">
             {{ capitalise(destination) }}
+            <div class="seperator"></div>
           </div>
           <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
             Explore destination data
@@ -107,6 +110,12 @@ import EventBus from './EventBus'
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+}
+
+const inArray = function(ar1, ar2){
+    let as1 = JSON.stringify(ar1)
+    let as2 = JSON.stringify(ar2)
+    return as1.indexOf(as2) !== -1
 }
 
 const capitalise = function(str){
@@ -195,6 +204,32 @@ export default {
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
     },
+    findAllIdsFromConnectivity(connectivity){
+      let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
+      let nodes = [...new Set(dnodes)] // remove duplicates
+      let found = []
+      nodes.forEach(n=>{
+        if (Array.isArray(n)){
+          found.push(n.flat())
+        } else {
+          found.push(n)
+        }
+      })
+      return [... new Set(found.flat())]
+    },
+    flattenConntectivity(connectivity){
+      let dnodes = connectivity.flat() // get nodes from edgelist
+      let nodes = [...new Set(dnodes)] // remove duplicates
+      let found = []
+      nodes.forEach(n=>{
+        if (Array.isArray(n)){
+          found.push(n.flat())
+        } else {
+          found.push(n)
+        }
+      })
+      return found.flat()
+    },
     findComponents: function(connectivity){
       let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
       let nodes = [...new Set(dnodes)] // remove duplicates
@@ -202,26 +237,20 @@ export default {
       let found = []
       let terminal = false
       nodes.forEach(node=>{
-          let n = node.flat() // Find all terms on the node
-          terminal = false
-
-          // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-          n.forEach(s=>{
-              if(connectivity.axons.includes(s)){
-                  terminal = true
-              }
-              if(connectivity.dendrites.includes(s)){
-                  terminal = true
-              }
-          })
-          if (!terminal){
-            found.push(node)
-          }
+        terminal = false
+        // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
+        if(inArray(connectivity.axons,node)){
+          terminal = true
+        }
+        if(inArray(connectivity.dendrites, node)){
+          terminal = true
+        }
+        if (!terminal){
+          found.push(node)
+        }
       })
 
-      // remove duplicates
-      let foundUnique = [...new Set(found.map(n=>n[0]))]
-      return foundUnique
+      return found
     },
     getOrganCuries: function(){
       fetch(`${this.sparcAPI}get-organ-curies/`)
@@ -276,6 +305,29 @@ export default {
           })
       })
     },
+    createComponentsLabelList: function(components, lookUp){
+      let labelList = []
+      components.forEach(n=>{
+        labelList.push(this.createLabelFromNeuralNode(n[0]), lookUp)
+        if (n.length === 2){
+          labelList.push(this.createLabelFromNeuralNode(n[1]), lookUp)
+        }
+      })
+      return labelList
+    },
+    createLabelFromNeuralNode: function(node, lookUp){
+      let label = lookUp[node[0]]
+      if (node.length === 2 && node[1].length > 0){
+        node[1].forEach(n=>{
+          if (lookUp[n] == undefined){
+            label += `, ${n}` 
+          } else {
+            label += `, ${lookUp[n]}`
+          }
+        })
+      }
+      return label
+    },
     pathwayQuery: function(keastIds){
       this.destinations = []
       this.origins = []
@@ -294,24 +346,29 @@ export default {
       .then(data => {
         let connectivity = JSON.parse(data.values[0][0])
         
+        // Filter the origin and destinations from components
         let components = this.findComponents(connectivity)
 
-        // Create list of ids to get labels for
-        window.connectivity = connectivity
-        let axons = connectivity.axons.map(a=>a[0])
-        let dendrites = connectivity.dendrites.map(d=>d[0])
-        let conIds = axons.concat(dendrites.concat(components))
-        window.conIds = conIds
+        // process the nodes for finding datasets
+        let componentsFlat = this.flattenConntectivity(components)
+        let axons = connectivity.axons
+        let dendrites = connectivity.dendrites
+        let axonsFlat = this.flattenConntectivity(axons)
+        let dendritesFlat = this.flattenConntectivity(dendrites)
+
+        let conIds = this.findAllIdsFromConnectivity(connectivity)  // Create list of ids to get labels for
+
+        // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
         this.createLabelLookup(conIds).then(lookUp=>{
-          this.destinations = axons.map(a=>lookUp[a])
-          this.origins = dendrites.map(d=>lookUp[d])
-          this.components = components.map(c=>lookUp[c])
+          this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
+          this.origins = dendrites.map(d=>this.createLabelFromNeuralNode(d,lookUp))
+          this.components = components.map(c=>this.createLabelFromNeuralNode(c, lookUp))
         })
 
         // Filter for the anatomy which is annotated on datasets
-        this.destinationsWithDatasets = this.uberons.filter(ub => axons.indexOf(ub.id) !== -1)
-        this.originsWithDatasets = this.uberons.filter(ub => dendrites.indexOf(ub.id) !== -1)
-        this.componentsWithDatasets = this.uberons.filter(ub => dendrites.indexOf(ub.id) !== -1)
+        this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
+        this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
+        this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
         this.loading = false
       })
       .catch((error) => {
@@ -382,6 +439,12 @@ export default {
   transform: rotate(180deg);
   color: #8300bf;
   margin-left: 8px;
+}
+
+.seperator {
+  width:90%;
+  height:0.5px;
+  background-color:#bfbec2;
 }
 
 .main {
