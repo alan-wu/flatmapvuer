@@ -7,74 +7,76 @@
       <div class="block" v-else>
         <span class="title">{{content.featureId}}</span>
       </div>
-      <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
-      <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
-      {{content.paths}}
-      <div v-if="this.origins" class="block">
-        <div>
-          <span class="attribute-title">Origin</span>
-          <el-popover
-          width="250"
-          trigger="hover"
-          :append-to-body=false
-          popper-class="popover-origin-help"
-          >
-          <i slot="reference" class="el-icon-warning-outline info"/>
-          <span style="word-break: keep-all;">
-            <i>Origin</i> {{originDescription}}
-          </span>
-          </el-popover>
+      <div class="content-container scrollbar">
+        <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
+        <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
+        {{content.paths}}
+        <div v-if="this.origins" class="block">
+          <div>
+            <span class="attribute-title">Origin</span>
+            <el-popover
+            width="250"
+            trigger="hover"
+            :append-to-body=false
+            popper-class="popover-origin-help"
+            >
+            <i slot="reference" class="el-icon-warning-outline info"/>
+            <span style="word-break: keep-all;">
+              <i>Origin</i> {{originDescription}}
+            </span>
+            </el-popover>
+          </div>
+          <div v-for="origin in origins" class="attribute-content"  :key="origin">
+            {{ capitalise(origin) }}
+          </div>
+          <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
+            Explore origin data
+          </el-button>
         </div>
-        <div v-for="origin in origins" class="attribute-content"  :key="origin">
-          {{ capitalise(origin) }}
+        <div v-if="this.components" class="block">
+          <div class="attribute-title">Components</div>
+          <div v-for="component in components" class="attribute-content"  :key="component">
+            {{ capitalise(component) }}
+          </div>
         </div>
-        <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
-          Explore origin data
+        <div v-if="this.destinations" class="block">
+          <div>
+            <span class="attribute-title">Destination</span>
+            <el-popover
+            width="250"
+            trigger="hover"
+            :append-to-body=false
+            popper-class="popover-origin-help"
+            >
+            <i slot="reference" class="el-icon-warning-outline info"/>
+            <span style="word-break: keep-all;">
+            <i>Destination</i> is where the axons terminate
+            </span>
+            </el-popover>
+          </div>
+          <div v-for="destination in destinations" class="attribute-content"  :key="destination">
+            {{ capitalise(destination) }}
+          </div>
+          <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+            Explore destination data
+          </el-button>
+        </div>
+
+        <!-- We will serach on components until we can search on neurons -->
+        <el-button v-show="components.length > 0" class="button" @click="openAll">
+          Search for data on components
+        </el-button>
+
+        <!-- Disable neuron search until it is ready -->
+        <!-- <el-button v-for="action in content.actions" round :key="action.title"
+          class="button" @click="resourceSelected(action)">
+          <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
+          {{action.title}}
+        </el-button> -->
+        <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
+          Open publications in pubmed
         </el-button>
       </div>
-      <div v-if="this.components" class="block">
-        <div class="attribute-title">Components</div>
-        <div v-for="component in components" class="attribute-content"  :key="component">
-          {{ capitalise(component) }}
-        </div>
-      </div>
-      <div v-if="this.destinations" class="block">
-        <div>
-          <span class="attribute-title">Destination</span>
-          <el-popover
-          width="250"
-          trigger="hover"
-          :append-to-body=false
-          popper-class="popover-origin-help"
-          >
-          <i slot="reference" class="el-icon-warning-outline info"/>
-          <span style="word-break: keep-all;">
-          <i>Destination</i> is where the axons terminate
-          </span>
-          </el-popover>
-        </div>
-        <div v-for="destination in destinations" class="attribute-content"  :key="destination">
-          {{ capitalise(destination) }}
-        </div>
-        <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
-          Explore destination data
-        </el-button>
-      </div>
-
-      <!-- We will serach on components until we can search on neurons -->
-      <el-button v-show="components.length > 0" class="button" @click="openAll">
-        Search for data on components
-      </el-button>
-
-      <!-- Disable neuron search until it is ready -->
-      <!-- <el-button v-for="action in content.actions" round :key="action.title"
-        class="button" @click="resourceSelected(action)">
-        <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
-        {{action.title}}
-      </el-button> -->
-      <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
-        Open publications in pubmed
-      </el-button>
     </el-main>
   </div>
 </template>
@@ -484,6 +486,29 @@ export default {
       border-color: transparent transparent $app-primary-color transparent ;
     }
   }
+}
+
+.content-container {
+  overflow-y: scroll;
+  scrollbar-width: thin !important;
+  height: 200px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 12px;
+  right: -12px;
+  background-color: #f5f5f5;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  background-color: #979797;
 }
 
 

@@ -9,25 +9,48 @@
     <map-svg-sprite-color />
     <div style="height:100%;width:100%;position:relative;overflow-y:none">
       <div style="height:100%;width:100%;" ref="display"></div>
-      <el-popover
-        :content="warningMessage"
-        placement="right"
-        v-if="displayWarning"
-        :appendToBody="false"
-        trigger="manual"
-        popper-class="warning-popper flatmap-popper right-popper"
-        v-model="hoverVisibilities[6].value"
-        ref="warningPopover"
-      ></el-popover>
-      <i
-        class="el-icon-warning warning-icon"
-        v-if="displayWarning"
-        @mouseover="showToolitip(6)"
-        @mouseout="hideToolitip(6)"
-        v-popover:warningPopover
-      >
-        <span class="warning-text">Beta</span>
-      </i>
+      <div class="beta-popovers">
+        <div>
+          <el-popover
+            :content="warningMessage"
+            placement="right"
+            :appendToBody="false"
+            trigger="manual"
+            popper-class="warning-popper flatmap-popper right-popper"
+            v-model="hoverVisibilities[6].value"
+            ref="warningPopover"
+          ></el-popover>
+          <i
+            class="el-icon-warning warning-icon"
+            v-if="displayWarning && warningMessage"
+            @mouseover="showToolitip(6)"
+            @mouseout="hideToolitip(6)"
+            v-popover:warningPopover
+          >
+          <span class="warning-text">Beta</span>
+        </i>
+        </div>
+        <el-popover
+          :content="latestChangesMessage"
+          placement="right"
+          v-if="displayLatestChanges"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="warning-popper flatmap-popper right-popper"
+          v-model="hoverVisibilities[7].value"
+          ref="latestChangesPopover"
+        ></el-popover>
+        <i
+          class="el-icon-warning latest-changesicon"
+          v-if="displayLatestChanges && latestChangesMessage"
+          @mouseover="showToolitip(7)"
+          @mouseout="hideToolitip(7)"
+          v-popover:latestChangesPopover
+        >
+          <span class="warning-text">What's new?</span>
+        </i>
+      </div>
+
       <div class="bottom-right-control">
         <el-popover
           content="Zoom in"
@@ -659,17 +682,25 @@ export default {
       type: Boolean,
       default: true
     },
-    displayWarning: {
-      type: Boolean,
-      default: true
-    },
     displayMinimap: {
+      type: Boolean,
+      default: false
+    },
+    displayWarning: {
       type: Boolean,
       default: false
     },
     warningMessage: {
       type: String,
       default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
+    },
+    displayLatestChanges: {
+      type: Boolean,
+      default: false,
+    },
+    latestChangesMessage: {
+      type: String,
+      default: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
     },
     /**
      * State containing state of the flatmap.
@@ -688,7 +719,7 @@ export default {
     sparcAPI: {
       type: String,
       default: "https://api.sparc.science/"
-    }
+    },
   },
   provide() {
     return {
@@ -703,6 +734,7 @@ export default {
       isIndeterminate: false,
       checkAll: true,
       hoverVisibilities: [
+        { value: false },
         { value: false },
         { value: false },
         { value: false },
@@ -753,12 +785,15 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.warning-icon {
+.beta-popovers{
   position: absolute;
   top: 90px;
-  left: 37px;
+  left: 16px;
   text-align: left;
-  font-size: 25px;
+  font-size: 25px;  
+}
+
+.warning-icon {
   color: $warning;
 
   &:hover {
@@ -767,6 +802,21 @@ export default {
 }
 
 .warning-text {
+  font-family: Asap, sans-serif;
+  font-size: 15px;
+  vertical-align: 5px;
+}
+
+.latest-changesicon {
+  color: $success;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.latest-changestext {
+  font-family: Asap, sans-serif;
   font-size: 15px;
   vertical-align: 5px;
 }
