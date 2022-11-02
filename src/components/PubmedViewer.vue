@@ -120,14 +120,16 @@ export default {
         this.loading.response = false
 
         // create links for each pubmedId
-        data.values.forEach(identifier => {
-          let ids = this.stripPMIDPrefix(identifier[0])
-          this.titleFromPubmed(ids).then( bib=>{
-            let [html, link] = this.splitLink(bib)
-            this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
-          })
-        });
-        this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
+        if (data.values.length > 0){
+          data.values.forEach(identifier => {
+            let ids = this.stripPMIDPrefix(identifier[0])
+            this.titleFromPubmed(ids).then( bib=>{
+              let [html, link] = this.splitLink(bib)
+              this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
+            })
+          });
+          this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
+        }
       })
       .catch((error) => {
         console.error('Error:', error)

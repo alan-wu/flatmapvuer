@@ -26,9 +26,9 @@
             </span>
             </el-popover>
           </div>
-          <div v-for="origin in origins" class="attribute-content"  :key="origin">
+          <div v-for="(origin, i) in origins" class="attribute-content"  :key="origin">
             {{ capitalise(origin) }}
-            <div class="seperator"></div>
+            <div v-if="i != origins.length - 1" class="seperator"></div>
           </div>
           <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
             Explore origin data
@@ -36,9 +36,9 @@
         </div>
         <div v-if="this.components" class="block">
           <div class="attribute-title">Components</div>
-          <div v-for="component in components" class="attribute-content"  :key="component">
+          <div v-for="(component, i) in components" class="attribute-content"  :key="component">
             {{ capitalise(component) }}
-            <div class="seperator"></div>
+            <div v-if="i != components.length - 1" class="seperator"></div>
           </div>
         </div>
         <div v-if="this.destinations" class="block">
@@ -56,9 +56,9 @@
             </span>
             </el-popover>
           </div>
-          <div v-for="destination in destinations" class="attribute-content"  :key="destination">
+          <div v-for="(destination, i) in destinations" class="attribute-content"  :key="destination">
             {{ capitalise(destination) }}
-            <div class="seperator"></div>
+            <div v-if="i != destinations.length - 1" class="seperator"></div>
           </div>
           <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
             Explore destination data
@@ -116,6 +116,11 @@ const inArray = function(ar1, ar2){
     let as1 = JSON.stringify(ar1)
     let as2 = JSON.stringify(ar2)
     return as1.indexOf(as2) !== -1
+}
+
+// remove duplicates by stringifying the objects
+const removeDuplicates = function(arrayOfAnything){
+  return [...new Set(arrayOfAnything.map(e => JSON.stringify(e)))].map(e => JSON.parse(e)) 
 }
 
 const capitalise = function(str){
@@ -232,7 +237,7 @@ export default {
     },
     findComponents: function(connectivity){
       let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-      let nodes = [...new Set(dnodes)] // remove duplicates
+      let nodes = removeDuplicates(dnodes)
 
       let found = []
       let terminal = false
@@ -345,14 +350,14 @@ export default {
       .then(response => response.json())
       .then(data => {
         let connectivity = JSON.parse(data.values[0][0])
-        
+        window.connectivity = connectivity
         // Filter the origin and destinations from components
         let components = this.findComponents(connectivity)
 
         // process the nodes for finding datasets
         let componentsFlat = this.flattenConntectivity(components)
-        let axons = connectivity.axons
-        let dendrites = connectivity.dendrites
+        let axons = removeDuplicates(connectivity.axons)
+        let dendrites = removeDuplicates(connectivity.dendrites)
         let axonsFlat = this.flattenConntectivity(axons)
         let dendritesFlat = this.flattenConntectivity(dendrites)
 
