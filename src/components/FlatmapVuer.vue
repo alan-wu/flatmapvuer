@@ -797,7 +797,7 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.beta-popovers{
+.beta-popovers {
   position: absolute;
   top: 90px;
   left: 16px;
@@ -895,7 +895,7 @@ export default {
 }
 
 .svg-legends-container {
-  width:auto;
+  width:70%;
   height:auto;
 }
 
