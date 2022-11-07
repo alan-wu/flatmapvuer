@@ -350,7 +350,6 @@ export default {
       .then(response => response.json())
       .then(data => {
         let connectivity = JSON.parse(data.values[0][0])
-        window.connectivity = connectivity
         // Filter the origin and destinations from components
         let components = this.findComponents(connectivity)
 
