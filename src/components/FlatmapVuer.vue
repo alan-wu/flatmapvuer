@@ -1180,7 +1180,7 @@ export default {
     background-color: black;
   }
   &.lightskyblue {
-    background-color: white;
+    background-color: lightskyblue;
   }
 }
 
