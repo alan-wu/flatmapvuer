@@ -119,6 +119,7 @@
         ref="checkBoxPopover"
       />
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
+        <svg-legends class= "svg-legends-container"/>
         <div
           class="pathway-container"
           v-if="pathways.length > 0 && pathControls"
@@ -250,6 +251,7 @@
 import Vue from "vue";
 import Tooltip from "./Tooltip";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import SvgLegends from "./legends/Legends";
 import {
   Checkbox,
   CheckboxGroup,
@@ -284,7 +286,8 @@ export default {
   components: {
     MapSvgIcon,
     MapSvgSpriteColor,
-    Tooltip
+    Tooltip,
+    SvgLegends
   },
   beforeCreate: function() {
     this.mapManager = undefined;
@@ -641,6 +644,7 @@ export default {
           return true;
         } else {
           let searchResults = this.mapImp.search(term);
+          console.log(searchResults)
           if (searchResults && searchResults.__featureIds.length > 0) {
             this.mapImp.showSearchResults(searchResults);
             return true;
@@ -650,7 +654,15 @@ export default {
         }
       }
       return false;
-    }
+    },
+    /**
+     * Get the list of suggested terms
+     */
+    searchSuggestions: function(term) {
+      if (this.mapImp)
+        return this.mapImp.search(term);
+      return [];
+    },
   },
   props: {
     entry: String,
@@ -880,6 +892,11 @@ export default {
   &.close {
     left: -298px;
   }
+}
+
+.svg-legends-container {
+  width:auto;
+  height:auto;
 }
 
 .pathway-container {
