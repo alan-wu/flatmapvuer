@@ -895,8 +895,8 @@ export default {
 }
 
 .svg-legends-container {
-  width:300px;
-  height:300px;
+  width:auto;
+  height:auto;
 }
 
 .pathway-container {

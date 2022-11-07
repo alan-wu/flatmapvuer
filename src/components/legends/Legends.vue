@@ -1,6 +1,6 @@
 <template>
   <div>
-    <svg width="100%" height="100%"  class="my-svg-component">
+    <svg viewBox="0 0 500 450"  class="my-svg-component">
       <defs>
         <bx:grid x="0" y="0" width="32.516" height="20.447"/>
       </defs>
