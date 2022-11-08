@@ -129,6 +129,8 @@ export default {
             })
           });
           this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
+        } else {
+           this.$emit('pubmedSearchUrl', '') // Clears the pubmed search button 
         }
       })
       .catch((error) => {

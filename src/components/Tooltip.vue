@@ -76,7 +76,7 @@
           <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
           {{action.title}}
         </el-button> -->
-        <el-button  v-if="pubmedSearchUrl" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
+        <el-button  v-if="pubmedSearchUrl != ''" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
           Open publications in pubmed
         </el-button>
       </div>
