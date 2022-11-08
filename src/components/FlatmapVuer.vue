@@ -119,12 +119,12 @@
         ref="checkBoxPopover"
       />
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
-        <svg-legends class= "svg-legends-container"/>
         <div
           class="pathway-container"
           v-if="pathways.length > 0 && pathControls"
           v-popover:checkBoxPopover
         >
+          <svg-legends class= "svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -797,7 +797,7 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.beta-popovers{
+.beta-popovers {
   position: absolute;
   top: 90px;
   left: 16px;
@@ -895,7 +895,7 @@ export default {
 }
 
 .svg-legends-container {
-  width:auto;
+  width:70%;
   height:auto;
 }
 
@@ -907,7 +907,6 @@ export default {
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
-  padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
 }
@@ -1180,7 +1179,7 @@ export default {
     background-color: black;
   }
   &.lightskyblue {
-    background-color: white;
+    background-color: lightskyblue;
   }
 }
 
