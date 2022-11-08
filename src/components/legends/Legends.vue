@@ -43,11 +43,7 @@ export default {
   fill:#333333;
 }
 .st4 {
-  stroke:#fff;
-  stroke-width:3px;
   font-family:auto;
-  paint-order: stroke;
-  font-weight: 600;
 }
 .st5 {
   font-size:30px;

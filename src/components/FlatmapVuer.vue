@@ -119,12 +119,12 @@
         ref="checkBoxPopover"
       />
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
-        <svg-legends class= "svg-legends-container"/>
         <div
           class="pathway-container"
           v-if="pathways.length > 0 && pathControls"
           v-popover:checkBoxPopover
         >
+          <svg-legends class= "svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -907,7 +907,6 @@ export default {
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
-  padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
 }
