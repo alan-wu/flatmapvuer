@@ -74,7 +74,8 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+      availableSpecies : {"Human Female":{id: "human-flatmap_female", taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Human Male":{id: "human-flatmap_male", taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false, displayLatestChanges:true},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
@@ -91,9 +92,15 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
+<<<<<<< HEAD
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
        flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+=======
+      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+      //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+>>>>>>> 8b6e5c3b6a70d65b5807cf82a85e581dc14f1cfa
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },

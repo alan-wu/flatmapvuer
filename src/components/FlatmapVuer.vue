@@ -378,8 +378,10 @@ export default {
           const label = data.label;
           const resource = [data.models];
           const taxonomy = this.entry;
+          const flatmapId = this.flatmapId;
           const payload = {
             dataset: data.dataset,
+            flatmapId: flatmapId,
             taxonomy: taxonomy,
             resource: resource,
             label: label,
@@ -564,6 +566,7 @@ export default {
       if (this.mapImp) {
         let state = {
           entry: this.entry,
+          flatmapId: this.flatmapId,
           viewport: this.mapImp.getState()
         };
         return state;
@@ -572,8 +575,8 @@ export default {
     },
     setState: function(state) {
       if (state) {
-        if (this.mapImp && state.entry) {
-          if (this.entry == state.entry)
+        if (this.mapImp && (state.entry || state.flatmapId)) {
+          if ((this.flatmapId && (this.flatmapId == state.flatmapId)) || (this.entry == state.entry))
             if (state.viewport) {
               this.mapImp.setState(state.viewport);
             }
@@ -589,8 +592,14 @@ export default {
         if (this.displayMinimap) {
           minimap = { position: "top-right" };
         }
-        let entry = this.entry;
-        if (state && state.entry) entry = state.entry;
+
+        let entry = this.flatmapId;
+        if (state && state.flatmapId) entry = state.flatmapId;
+        if  (!entry) {
+          entry = this.entry;
+          if (state && state.entry) entry = state.entry;
+        }
+
         let promise1 = this.mapManager.loadMap(
           entry,
           this.$refs.display,
@@ -624,7 +633,8 @@ export default {
             this.mapImp.setState(state.viewport);
         });
       } else if (state) {
-        if (this.entry == state.entry) this._viewportToBeSet = state.viewport;
+        if ((this.flatmapId == state.flatmapId) || this.entry == state.entry)
+          this._viewportToBeSet = state.viewport;
       }
     },
     showMinimap: function(flag) {
@@ -666,6 +676,7 @@ export default {
   },
   props: {
     entry: String,
+    flatmapId: String,
     featureInfo: {
       type: Boolean,
       default: false
@@ -768,6 +779,9 @@ export default {
   },
   watch: {
     entry: function() {
+      if (!this.state) this.createFlatmap();
+    },
+    flatmapId: function() {
       if (!this.state) this.createFlatmap();
     },
     helpMode: function(val) {
