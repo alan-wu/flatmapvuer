@@ -24,7 +24,7 @@ module.exports = {
     //Import variables into all stylesheets.
     loaderOptions: {
       sass: {
-        prependData: `@import '@/assets/styles';`
+        additionalData: `@import '@/assets/styles';`
       }
     }
   }
