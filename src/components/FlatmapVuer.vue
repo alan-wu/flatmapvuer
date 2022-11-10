@@ -1288,7 +1288,7 @@ export default {
   z-index: 8;
   width: 20px;
   height: 40px;
-  border: solid 1px #e4e7ed;
+  border: solid 1px $app-primary-color;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -1305,8 +1305,7 @@ export default {
 .drawer-button {
   float: left;
   margin-top: calc(50% - 36px);
-  border-left: 0;
-  background-color: #ffffff;
+  background-color: #F9F2FC;
   i {
     margin-top: 12px;
     color: $app-primary-color;
