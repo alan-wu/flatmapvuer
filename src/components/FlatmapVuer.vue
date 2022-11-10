@@ -1306,7 +1306,9 @@ export default {
   float: left;
   margin-top: calc(50% - 36px);
   background-color: #F9F2FC;
+
   i {
+    font-weight: 600; 
     margin-top: 12px;
     color: $app-primary-color;
     transition-delay: 0.9s;
