@@ -1315,12 +1315,12 @@ export default {
   }
   &.open {
     i {
-      transform: rotate(0deg) scaleY(2.5);
+      transform: rotate(0deg) scaleY(2);
     }
   }
   &.close {
     i {
-      transform: rotate(180deg) scaleY(2.5);
+      transform: rotate(180deg) scaleY(2);
     }
   }
 }
