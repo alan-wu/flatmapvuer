@@ -644,7 +644,6 @@ export default {
           return true;
         } else {
           let searchResults = this.mapImp.search(term);
-          console.log(searchResults)
           if (searchResults && searchResults.__featureIds.length > 0) {
             this.mapImp.showSearchResults(searchResults);
             return true;
