@@ -124,6 +124,7 @@
           v-if="pathways.length > 0 && pathControls"
           v-popover:checkBoxPopover
         >
+          <svg-legends class= "svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -250,6 +251,7 @@
 import Vue from "vue";
 import Tooltip from "./Tooltip";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import SvgLegends from "./legends/Legends";
 import {
   Checkbox,
   CheckboxGroup,
@@ -284,7 +286,8 @@ export default {
   components: {
     MapSvgIcon,
     MapSvgSpriteColor,
-    Tooltip
+    Tooltip,
+    SvgLegends
   },
   beforeCreate: function() {
     this.mapManager = undefined;
@@ -650,7 +653,15 @@ export default {
         }
       }
       return false;
-    }
+    },
+    /**
+     * Get the list of suggested terms
+     */
+    searchSuggestions: function(term) {
+      if (this.mapImp)
+        return this.mapImp.search(term);
+      return [];
+    },
   },
   props: {
     entry: String,
@@ -785,7 +796,7 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.beta-popovers{
+.beta-popovers {
   position: absolute;
   top: 90px;
   left: 16px;
@@ -882,6 +893,11 @@ export default {
   }
 }
 
+.svg-legends-container {
+  width:70%;
+  height:auto;
+}
+
 .pathway-container {
   float: left;
   padding-left: 16px;
@@ -890,7 +906,6 @@ export default {
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
-  padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
 }
@@ -1163,7 +1178,7 @@ export default {
     background-color: black;
   }
   &.lightskyblue {
-    background-color: white;
+    background-color: lightskyblue;
   }
 }
 
