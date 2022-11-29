@@ -253,7 +253,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
+      default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
     sparcAPI: {
       type: String,
