@@ -722,7 +722,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
+      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information",
     },
     /**
      * State containing state of the flatmap.
