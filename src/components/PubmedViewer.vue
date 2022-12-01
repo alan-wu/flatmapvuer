@@ -48,11 +48,11 @@ export default {
   },
   watch: {
     'entry.featureId': function (val){
-      this.flatmapQuery(val).then(pb => this.pubmeds = pb)
+      this.pubmedQueryOnIds(val).then(pb => this.pubmeds = pb)
     },
     'entry.featureIds': {
       handler: function(ids) {
-        this.flatmapQuery(ids)
+        this.pubmedQueryOnIds(ids)
       }
     }
   },
@@ -67,7 +67,7 @@ export default {
   },
   mounted: function() {
     if (this.entry.featureIds)
-      this.flatmapQuery(this.entry.featureIds)
+      this.pubmedQueryOnIds(this.entry.featureIds)
   },
   methods: {
     stripPMIDPrefix: function (pubmedId){
@@ -100,14 +100,12 @@ export default {
       }
       return sql
     },
-    flatmapQuery: function(keastIds){
-      if(!keastIds || keastIds.length === 0) return
-      this.pubmeds = []
-      this.loading.response = true
-
-      // fetch pubmed publications for the given ids
-      const data = { sql: this.buildPubmedSqlStatement(keastIds)};
-      fetch(`${this.flatmapAPI}knowledge/query/`, {
+    buildPubmedSqlStatementForModels: function(model) {
+      return `select distinct publication from publications where entity = '${model}'`
+    },
+    flatmapQuery: function(sql){
+      const data = { sql: sql}
+      return fetch(`${this.flatmapAPI}knowledge/query/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +113,16 @@ export default {
         body: JSON.stringify(data),
       })
       .then(response => response.json())
-      .then(data => {
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+    },
+    pubmedQueryOnIds: function(keastIds){
+      if(!keastIds || keastIds.length === 0) return
+      this.pubmeds = []
+      this.loading.response = true
+      const sql = this.buildPubmedSqlStatement(keastIds)
+      this.flatmapQuery(sql).then(data=>{
         this.responseData = data
         this.loading.response = false
 
@@ -130,12 +137,18 @@ export default {
           });
           this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
         } else {
-           this.$emit('pubmedSearchUrl', '') // Clears the pubmed search button 
+          this.pubmedQueryOnModels(this.entry.source)
         }
       })
-      .catch((error) => {
-        console.error('Error:', error)
-    })
+    },
+    pubmedQueryOnModels(source){
+      this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
+        if (data.values.length > 0){
+          this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
+        } else {
+          this.$emit('pubmedSearchUrl', '') // Clears the pubmed search button 
+        } 
+      })
     },
     pubmedSearchUrl: function(ids) {
       let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
