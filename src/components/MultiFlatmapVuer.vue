@@ -31,6 +31,7 @@
       :showLayer="showLayer"
       v-show="activeSpecies==key"
       :entry="item.taxo"
+      :flatmap-id="item.id"
       :displayWarning="item.displayWarning"
       :warningMessage="warningMessage"
       :displayLatestChanges="item.displayLatestChanges"
@@ -90,8 +91,14 @@ export default {
           this.speciesLis= {};
           Object.keys(this.availableSpecies).forEach(key => {
             for (let i = 0; i < data.length; i++) {
-              if (data[i].taxon === this.availableSpecies[key].taxo) {
+              if (this.availableSpecies[key].id === data[i].id) {
                 this.speciesList[key] = this.availableSpecies[key];
+                break;
+              }
+              if (this.availableSpecies[key].taxo === data[i].taxon) {
+                this.speciesList[key] = this.availableSpecies[key];
+                //make sure the id is unset as it fails to match the one on
+                this.speciesList[key].id = undefined;
                 break;
               }
             }
@@ -246,7 +253,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
+      default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
     sparcAPI: {
       type: String,
@@ -312,7 +319,8 @@ export default {
   }
 }
 
-.flatmap_dropdown {
+::v-deep .flatmap_dropdown {
+  min-width: 160px!important;
   .el-select-dropdown__item {
     white-space: nowrap;
     text-align: left;

@@ -74,12 +74,14 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+      availableSpecies : {"Human Female":{id: "human-flatmap_female", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Human Male":{id: "human-flatmap_male", taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false, displayLatestChanges:true},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
+        "Functional Connectivity": {id: "fc-cardio", displayWarning:true},
         "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
@@ -91,9 +93,9 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
-      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
-      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-      // flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+       flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
