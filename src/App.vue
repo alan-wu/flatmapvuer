@@ -74,8 +74,9 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human Female":{id: "human-flatmap_female", iconClass:"mapicon-icon_human", displayWarning:true},
-        "Human Male":{id: "human-flatmap_male", taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+      availableSpecies : {
+        "Human Female":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000383", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Human Male":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000384", iconClass:"mapicon-icon_human", displayWarning:true},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false, displayLatestChanges:true},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},

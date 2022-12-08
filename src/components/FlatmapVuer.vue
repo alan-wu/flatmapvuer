@@ -378,10 +378,10 @@ export default {
           const label = data.label;
           const resource = [data.models];
           const taxonomy = this.entry;
-          const flatmapId = this.flatmapId;
+          const biologicalSex = this.biologicalSex;
           const payload = {
             dataset: data.dataset,
-            flatmapId: flatmapId,
+            biologicalSex: biologicalSex,
             taxonomy: taxonomy,
             resource: resource,
             label: label,
@@ -566,7 +566,7 @@ export default {
       if (this.mapImp) {
         let state = {
           entry: this.entry,
-          flatmapId: this.flatmapId,
+          biologicalSex: this.biologicalSex,
           viewport: this.mapImp.getState()
         };
         return state;
@@ -575,11 +575,13 @@ export default {
     },
     setState: function(state) {
       if (state) {
-        if (this.mapImp && (state.entry || state.flatmapId)) {
-          if ((this.flatmapId && (this.flatmapId == state.flatmapId)) || (this.entry == state.entry))
-            if (state.viewport) {
-              this.mapImp.setState(state.viewport);
-            }
+        if (this.mapImp && 
+          (state.entry && (this.entry == state.entry)) &&
+          (!state.biologicalSex || (state.biologicalSex === this.biologicalSex))) 
+        {
+          if (state.viewport) {
+            this.mapImp.setState(state.viewport);
+          }
         } else {
           this.createFlatmap(state);
         }
@@ -593,15 +595,41 @@ export default {
           minimap = { position: "top-right" };
         }
 
-        let entry = this.flatmapId;
-        if (state && state.flatmapId) entry = state.flatmapId;
-        if  (!entry) {
-          entry = this.entry;
-          if (state && state.entry) entry = state.entry;
+        //As for flatmap-viewer@2.2.6, see belowf for the documentation 
+        //for the identifier:
+
+        //@arg identifier {string|Object}
+        // A string or object identifying the map to load. If a string its
+        // value can be either the map's ``uuid``, assigned at generation time,
+        // or taxon and biological sex identifiers of the species that the map
+        // represents. The latest version of a map is loaded unless it has been
+        // identified using a ``uuid`` (see below).
+        // @arg identifier.taxon {string} The taxon identifier of the species 
+        //  represented by the map. This is specified as metadata in the map's source file.
+        // @arg identifier.biologicalSex {string} The biological sex of the species
+        // represented by the map. This is specified as metadatain the map's source file.
+        // @arg identifier.uuid {string} The unique uuid the flatmap. If given then this exact map will
+        //  be loaded, overriding ``taxon`` and ``biologicalSex``.
+
+        let identifier = { taxon: this.entry };
+        if (state && state.entry) {
+          identifier.taxon = state.entry;
+          if (state.biologicalSex) {
+            identifier["biologicalSex"] = state.biologicalSex;
+          } else if (identifier.taxon === "NCBITaxon:9606") {
+            //For backward compatibility
+            identifier["biologicalSex"] ="PATO:0000384";
+          }
+        } else {
+          // Set the bioloicalSex now if map is not resumed from
+          // a saved state
+          if (this.biologicalSex) {
+            identifier["biologicalSex"] = this.biologicalSex;
+          }
         }
 
         let promise1 = this.mapManager.loadMap(
-          entry,
+          identifier,
           this.$refs.display,
           this.eventCallback(),
           {
@@ -633,7 +661,7 @@ export default {
             this.mapImp.setState(state.viewport);
         });
       } else if (state) {
-        if ((this.flatmapId == state.flatmapId) || this.entry == state.entry)
+        if (this.entry == state.entry)
           this._viewportToBeSet = state.viewport;
       }
     },
@@ -675,7 +703,7 @@ export default {
   },
   props: {
     entry: String,
-    flatmapId: String,
+    biologicalSex: String,
     featureInfo: {
       type: Boolean,
       default: false
@@ -778,9 +806,6 @@ export default {
   },
   watch: {
     entry: function() {
-      if (!this.state) this.createFlatmap();
-    },
-    flatmapId: function() {
       if (!this.state) this.createFlatmap();
     },
     helpMode: function(val) {

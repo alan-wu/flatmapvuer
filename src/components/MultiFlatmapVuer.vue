@@ -31,7 +31,7 @@
       :showLayer="showLayer"
       v-show="activeSpecies==key"
       :entry="item.taxo"
-      :flatmap-id="item.id"
+      :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
       :warningMessage="warningMessage"
       :displayLatestChanges="item.displayLatestChanges"
@@ -88,18 +88,20 @@ export default {
         fetch(this.flatmapAPI)
         .then(response => response.json())
         .then(data => {
-          this.speciesLis= {};
+          this.speciesList= {};
           Object.keys(this.availableSpecies).forEach(key => {
             for (let i = 0; i < data.length; i++) {
-              if (this.availableSpecies[key].id === data[i].id) {
-                this.speciesList[key] = this.availableSpecies[key];
-                break;
-              }
               if (this.availableSpecies[key].taxo === data[i].taxon) {
-                this.speciesList[key] = this.availableSpecies[key];
-                //make sure the id is unset as it fails to match the one on
-                this.speciesList[key].id = undefined;
-                break;
+                if (this.availableSpecies[key].biologicalSex) {
+                  if (data[i].biologicalSex && 
+                    data[i].biologicalSex === this.availableSpecies[key].biologicalSex) {
+                      this.speciesList[key] = this.availableSpecies[key];
+                      break;
+                    }
+                } else {
+                  this.speciesList[key] = this.availableSpecies[key];
+                  break;
+                }
               }
             }
           });
