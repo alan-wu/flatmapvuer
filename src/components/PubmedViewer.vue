@@ -1,42 +1,12 @@
 <template>
   <div class="pubmed-container">
-      <div v-loading="loading.response" class="block">
-        <div class="attribute-title">Pubmed Resources</div>
-        <br/>
-        <el-carousel 
-          :autoplay="false" 
-          indicator-position="outside"
-          height="250px" width="200px"
-        >
-          <el-carousel-item v-for="(pub, i) in pubmeds" :key="i">
-            <div class="attribute-content">
-                <div v-html="pub.html"/>
-                <el-link :href="pub.url" :underline="false" class="el-link" target="_blank">{{pub.url}}</el-link>
-            </div>
-          </el-carousel-item>
-        </el-carousel>
-      </div>
+    <!-- To view old pubmed display go to: https://github.com/Tehsurfer/flatmapvuer/commit/eca131f8d32cdcac4d136d1722d7fe4df25f6c3a -->
   </div>
 </template>
 
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import {
-  Link,
-  Carousel,
-  CarouselItem,
-  Button
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-locale.use(lang);
-Vue.use(Link);
-Vue.use(Carousel);
-Vue.use(CarouselItem);
-Vue.use(Button);
-
 
 export default {
   name: "Tooltip",
@@ -59,10 +29,8 @@ export default {
   inject: ['flatmapAPI'],
   data: function() {
     return {
-      data: {},
       pubmeds: [],
       pubmedIds: [],
-      loading: {response: true, publications: true}
     };
   },
   mounted: function() {
@@ -72,22 +40,6 @@ export default {
   methods: {
     stripPMIDPrefix: function (pubmedId){
       return pubmedId.split(':')[1]
-    },
-    titleFromPubmed: function (pubmedId){
-      return new Promise((resolve) => {
-        fetch(`https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=citation&contenttype=json&id=${pubmedId}`)
-        .then(response => response.json())
-        .then(data => {
-          resolve(data.apa.format)
-        })
-        .catch((error) => {
-          console.error('Error:', error)
-        });
-      })
-    },
-    splitLink(bibliographyString){
-      let split = bibliographyString.split('https')
-      return [split[0], 'https' + split[1]]
     },
     buildPubmedSqlStatement: function(keastIds) {
       let sql = 'select distinct publication from publications where entity in ('
@@ -119,24 +71,13 @@ export default {
     },
     pubmedQueryOnIds: function(keastIds){
       if(!keastIds || keastIds.length === 0) return
-      this.pubmeds = []
-      this.loading.response = true
       const sql = this.buildPubmedSqlStatement(keastIds)
       this.flatmapQuery(sql).then(data=>{
         this.responseData = data
-        this.loading.response = false
-
-        // create links for each pubmedId
+        // Create pubmed url on paths if we have them
         if (data.values.length > 0){
-          data.values.forEach(identifier => {
-            let ids = this.stripPMIDPrefix(identifier[0])
-            this.titleFromPubmed(ids).then( bib=>{
-              let [html, link] = this.splitLink(bib)
-              this.pubmeds.push({identifier: identifier[0] , html: html, url: link})
-            })
-          });
           this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
-        } else {
+        } else { // Create pubmed url on models
           this.pubmedQueryOnModels(this.entry.source)
         }
       })
