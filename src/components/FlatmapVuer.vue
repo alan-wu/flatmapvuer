@@ -566,9 +566,15 @@ export default {
       if (this.mapImp) {
         let state = {
           entry: this.entry,
-          biologicalSex: this.biologicalSex,
           viewport: this.mapImp.getState()
         };
+        const identifier = this.mapImp.getIdentifier();
+        if (this.biologicalSex)
+          state['biologicalSex'] = this.biologicalSex;
+        else if (identifier && identifier.biologicalSex)
+          state['biologicalSex'] = identifier.biologicalSex;
+        if (identifier && identifier.uuid)
+          state['uuid'] = identifier.uuid;
         return state;
       }
       return undefined;
@@ -703,7 +709,10 @@ export default {
   },
   props: {
     entry: String,
-    biologicalSex: String,
+    biologicalSex: {
+      type: String,
+      default: ""
+    },
     featureInfo: {
       type: Boolean,
       default: false
