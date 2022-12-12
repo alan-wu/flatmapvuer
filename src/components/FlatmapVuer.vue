@@ -595,7 +595,7 @@ export default {
           minimap = { position: "top-right" };
         }
 
-        //As for flatmap-viewer@2.2.6, see belowf for the documentation 
+        //As for flatmap-viewer@2.2.7, see below for the documentation 
         //for the identifier:
 
         //@arg identifier {string|Object}
@@ -912,6 +912,9 @@ export default {
       transparent 0,
       transparent 9px
     );
+  }
+  &.other {
+    background: #888;
   }
 }
 
@@ -1299,10 +1302,6 @@ export default {
       display: none;
     }
   }
-}
-
-::v-deep .flatmap-popper {
-  
 }
 
 ::v-deep .popper-zoomout {
