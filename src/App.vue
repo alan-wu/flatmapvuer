@@ -11,7 +11,7 @@
         <el-row :gutter="20">
           <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
           <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
-          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+          <el-button :disabled="mapSettings.length === 0" @click="restoreSettings()" size="mini">Restore Settings</el-button>
         </el-row>
       </div>
       <el-button class="options-button" icon="el-icon-setting" slot="reference">Options</el-button>
@@ -46,11 +46,11 @@ export default {
   name: 'app',
   methods: {
     saveSettings: function() {
-      this._mapSettings.push(this.$refs.multi.getState());
+      this.mapSettings.push(this.$refs.multi.getState());
     },
     restoreSettings: function() {
-      if (this._mapSettings.length > 0)
-        this.$refs.multi.setState(this._mapSettings.pop());
+      if (this.mapSettings.length > 0)
+        this.$refs.multi.setState(this.mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
       if (resource.eventType === "click")
@@ -74,12 +74,15 @@ export default {
       searchable: true,
       pathControls: true,
       minZoom: 4,
-      availableSpecies : {"Human":{taxo: "NCBITaxon:9606", iconClass:"mapicon-icon_human", displayWarning:true},
+      availableSpecies : {
+        "Human Female":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000383", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Human Male":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000384", iconClass:"mapicon-icon_human", displayWarning:true},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false, displayLatestChanges:true},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
+        "Functional Connectivity": {id: "fc-cardio", displayWarning:true},
         "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
@@ -91,14 +94,12 @@ export default {
       displayCloseButton: false,
       initial: "Rat",
       helpMode: false,
-      // flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
-      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-      // flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      mapSettings: [],
+      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
+      //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+       flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
-  },
-  mounted: function() {
-    this._mapSettings = [];
   },
   components: {
     MultiFlatmapVuer,

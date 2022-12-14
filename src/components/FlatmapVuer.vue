@@ -378,8 +378,10 @@ export default {
           const label = data.label;
           const resource = [data.models];
           const taxonomy = this.entry;
+          const biologicalSex = this.biologicalSex;
           const payload = {
             dataset: data.dataset,
+            biologicalSex: biologicalSex,
             taxonomy: taxonomy,
             resource: resource,
             label: label,
@@ -568,17 +570,26 @@ export default {
           entry: this.entry,
           viewport: this.mapImp.getState()
         };
+        const identifier = this.mapImp.getIdentifier();
+        if (this.biologicalSex)
+          state['biologicalSex'] = this.biologicalSex;
+        else if (identifier && identifier.biologicalSex)
+          state['biologicalSex'] = identifier.biologicalSex;
+        if (identifier && identifier.uuid)
+          state['uuid'] = identifier.uuid;
         return state;
       }
       return undefined;
     },
     setState: function(state) {
       if (state) {
-        if (this.mapImp && state.entry) {
-          if (this.entry == state.entry)
-            if (state.viewport) {
-              this.mapImp.setState(state.viewport);
-            }
+        if (this.mapImp && 
+          (state.entry && (this.entry == state.entry)) &&
+          (!state.biologicalSex || (state.biologicalSex === this.biologicalSex))) 
+        {
+          if (state.viewport) {
+            this.mapImp.setState(state.viewport);
+          }
         } else {
           this.createFlatmap(state);
         }
@@ -591,10 +602,42 @@ export default {
         if (this.displayMinimap) {
           minimap = { position: "top-right" };
         }
-        let entry = this.entry;
-        if (state && state.entry) entry = state.entry;
+
+        //As for flatmap-viewer@2.2.7, see below for the documentation 
+        //for the identifier:
+
+        //@arg identifier {string|Object}
+        // A string or object identifying the map to load. If a string its
+        // value can be either the map's ``uuid``, assigned at generation time,
+        // or taxon and biological sex identifiers of the species that the map
+        // represents. The latest version of a map is loaded unless it has been
+        // identified using a ``uuid`` (see below).
+        // @arg identifier.taxon {string} The taxon identifier of the species 
+        //  represented by the map. This is specified as metadata in the map's source file.
+        // @arg identifier.biologicalSex {string} The biological sex of the species
+        // represented by the map. This is specified as metadatain the map's source file.
+        // @arg identifier.uuid {string} The unique uuid the flatmap. If given then this exact map will
+        //  be loaded, overriding ``taxon`` and ``biologicalSex``.
+
+        let identifier = { taxon: this.entry };
+        if (state && state.entry) {
+          identifier.taxon = state.entry;
+          if (state.biologicalSex) {
+            identifier["biologicalSex"] = state.biologicalSex;
+          } else if (identifier.taxon === "NCBITaxon:9606") {
+            //For backward compatibility
+            identifier["biologicalSex"] ="PATO:0000384";
+          }
+        } else {
+          // Set the bioloicalSex now if map is not resumed from
+          // a saved state
+          if (this.biologicalSex) {
+            identifier["biologicalSex"] = this.biologicalSex;
+          }
+        }
+
         let promise1 = this.mapManager.loadMap(
-          entry,
+          identifier,
           this.$refs.display,
           this.eventCallback(),
           {
@@ -626,7 +669,8 @@ export default {
             this.mapImp.setState(state.viewport);
         });
       } else if (state) {
-        if (this.entry == state.entry) this._viewportToBeSet = state.viewport;
+        if (this.entry == state.entry)
+          this._viewportToBeSet = state.viewport;
       }
     },
     showMinimap: function(flag) {
@@ -667,6 +711,10 @@ export default {
   },
   props: {
     entry: String,
+    biologicalSex: {
+      type: String,
+      default: ""
+    },
     featureInfo: {
       type: Boolean,
       default: false
@@ -713,7 +761,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
+      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information",
     },
     /**
      * State containing state of the flatmap.
@@ -727,7 +775,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
+      default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
     sparcAPI: {
       type: String,
@@ -875,6 +923,9 @@ export default {
       transparent 0,
       transparent 9px
     );
+  }
+  &.other {
+    background: #888;
   }
 }
 
@@ -1262,10 +1313,6 @@ export default {
       display: none;
     }
   }
-}
-
-::v-deep .flatmap-popper {
-  
 }
 
 ::v-deep .popper-zoomout {
