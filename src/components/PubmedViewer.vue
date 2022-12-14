@@ -84,7 +84,7 @@ export default {
     },
     pubmedQueryOnModels(source){
       this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
-        if (data.values.length > 0){
+        if (Array.isArray(data.values) && data.values.length > 0){
           this.$emit('pubmedSearchUrl', this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0]))))
         } else {
           this.$emit('pubmedSearchUrl', '') // Clears the pubmed search button 
