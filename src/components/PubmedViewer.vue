@@ -17,9 +17,6 @@ export default {
     },
   },
   watch: {
-    'entry.featureId': function (val){
-      this.pubmedQueryOnIds(val).then(pb => this.pubmeds = pb)
-    },
     'entry.featureIds': {
       handler: function(ids) {
         this.pubmedQueryOnIds(ids)
