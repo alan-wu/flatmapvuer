@@ -463,6 +463,7 @@ export default {
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
+          this.tooltipContent.source = data.feature.source;
           this.tooltipContent.title = data.label;
           this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
@@ -480,6 +481,7 @@ export default {
         this.tooltipVisible = true;
         this.tooltipContent = content;
         this.tooltipContent.uberon = feature;
+        this.tooltipContent.source = data.feature.source;
         this.tooltipContent.title = data.label;
         this.tooltipContent.actions.push({
           title: "View dataset",

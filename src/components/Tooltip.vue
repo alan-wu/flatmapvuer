@@ -8,8 +8,6 @@
         <span class="title">{{content.featureId}}</span>
       </div>
       <div class="content-container scrollbar">
-        <!-- Currently we don't show the pubmed viewer, will remove once we are certain it won't be used -->
-        <pubmed-viewer v-if="content.featureIds" v-show="false" class="block" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
         {{content.paths}}
         <div v-if="this.origins" class="block">
           <div>
@@ -65,17 +63,12 @@
           </el-button>
         </div>
 
-        <!-- We will serach on components until we can search on neurons -->
         <el-button v-show="components.length > 0" class="button" @click="openAll">
           Search for data on components
         </el-button>
 
-        <!-- Disable neuron search until it is ready -->
-        <!-- <el-button v-for="action in content.actions" round :key="action.title"
-          class="button" @click="resourceSelected(action)">
-          <i v-if="action.title === 'Search for datasets' || action.title === 'View Dataset' " class="el-icon-coin"></i>
-          {{action.title}}
-        </el-button> -->
+        <!-- pubmed-viewer is just used for processing pubmed requests (no display) -->
+        <pubmed-viewer v-if="content.featureIds" v-show="false" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
         <el-button  v-if="pubmedSearchUrl != ''" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
           Open publications in pubmed
         </el-button>
@@ -333,6 +326,38 @@ export default {
       }
       return label
     },
+    processConnectivity(connectivity){
+      // Filter the origin and destinations from components
+      let components = this.findComponents(connectivity)
+
+      // Remove duplicates
+      let axons = removeDuplicates(connectivity.axons)
+      let dendrites = removeDuplicates(connectivity.dendrites)
+
+      // Create list of ids to get labels for
+      let conIds = this.findAllIdsFromConnectivity(connectivity)  
+
+      // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
+      this.createLabelLookup(conIds).then(lookUp=>{
+        this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
+        this.origins = dendrites.map(d=>this.createLabelFromNeuralNode(d,lookUp))
+        this.components = components.map(c=>this.createLabelFromNeuralNode(c, lookUp))
+      })
+
+      this.flattenAndFindDatasets(components, axons, dendrites)
+    },
+    flattenAndFindDatasets(components, axons, dendrites){
+      
+      // process the nodes for finding datasets (Note this is not critical to the tooltip, only for the 'search on components' button)
+      let componentsFlat = this.flattenConntectivity(components)
+      let axonsFlat = this.flattenConntectivity(axons)
+      let dendritesFlat = this.flattenConntectivity(dendrites)
+
+      // Filter for the anatomy which is annotated on datasets
+      this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
+      this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
+      this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
+    },
     pathwayQuery: function(keastIds){
       this.destinations = []
       this.origins = []
@@ -350,29 +375,7 @@ export default {
       .then(response => response.json())
       .then(data => {
         let connectivity = JSON.parse(data.values[0][0])
-        // Filter the origin and destinations from components
-        let components = this.findComponents(connectivity)
-
-        // process the nodes for finding datasets
-        let componentsFlat = this.flattenConntectivity(components)
-        let axons = removeDuplicates(connectivity.axons)
-        let dendrites = removeDuplicates(connectivity.dendrites)
-        let axonsFlat = this.flattenConntectivity(axons)
-        let dendritesFlat = this.flattenConntectivity(dendrites)
-
-        let conIds = this.findAllIdsFromConnectivity(connectivity)  // Create list of ids to get labels for
-
-        // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
-        this.createLabelLookup(conIds).then(lookUp=>{
-          this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
-          this.origins = dendrites.map(d=>this.createLabelFromNeuralNode(d,lookUp))
-          this.components = components.map(c=>this.createLabelFromNeuralNode(c, lookUp))
-        })
-
-        // Filter for the anatomy which is annotated on datasets
-        this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
-        this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
-        this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
+        this.processConnectivity(connectivity)
         this.loading = false
       })
       .catch((error) => {
