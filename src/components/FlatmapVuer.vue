@@ -12,7 +12,7 @@
       <div class="beta-popovers">
         <div>
           <el-popover
-            :content="warningMessage"
+            :content="isLegacy ? 'This is a legacy map, you may view the latest map instead.' : warningMessage"
             placement="right"
             :appendToBody="false"
             trigger="manual"
@@ -27,7 +27,13 @@
             @mouseout="hideToolitip(6)"
             v-popover:warningPopover
           >
-          <span class="warning-text">Beta</span>
+            <template v-if="isLegacy">
+              <span class="warning-text">Legacy Map</span>
+              <div class="latest-map-text" @click="viewLatestMap">Click here for the latest map</div>
+            </template>
+            <template v-else>
+              <span class="warning-text">Beta</span>
+            </template>
         </i>
         </div>
         <el-popover
@@ -294,6 +300,19 @@ export default {
     this.mapImp = undefined;
   },
   methods: {
+    viewLatestMap: function() {
+      let biologicalSex = this.biologicalSex ? this.biologicalSex : undefined;
+      //Human requires special handling
+      if (this.entry === "NCBITaxon:9606") {
+        biologicalSex = "PATO:0000384";
+      }
+      const state = {
+        entry: this.entry,
+        biologicalSex,
+        viewport: this.mapImp.getState()
+      };
+      this.$emit("view-latest-map", state);
+    },
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
       if (this.mapImp) {
@@ -620,13 +639,17 @@ export default {
         //  be loaded, overriding ``taxon`` and ``biologicalSex``.
 
         let identifier = { taxon: this.entry };
-        if (state && state.entry) {
-          identifier.taxon = state.entry;
-          if (state.biologicalSex) {
-            identifier["biologicalSex"] = state.biologicalSex;
-          } else if (identifier.taxon === "NCBITaxon:9606") {
-            //For backward compatibility
-            identifier["biologicalSex"] ="PATO:0000384";
+        if (state) {
+          if (state.uuid) {
+            identifier = { uuid: state.uuid };
+          } else if (state.entry) {
+            identifier.taxon = state.entry;
+            if (state.biologicalSex) {
+              identifier["biologicalSex"] = state.biologicalSex;
+            } else if (identifier.taxon === "NCBITaxon:9606") {
+              //For backward compatibility
+              identifier["biologicalSex"] ="PATO:0000384";
+            }
           }
         } else {
           // Set the bioloicalSex now if map is not resumed from
@@ -669,8 +692,11 @@ export default {
             this.mapImp.setState(state.viewport);
         });
       } else if (state) {
-        if (this.entry == state.entry)
+        if (this.entry == state.entry) {
           this._viewportToBeSet = state.viewport;
+          if (this.mapImp && !this.loading)
+            this.mapImp.setState(this._viewportToBeSet);
+        }
       }
     },
     showMinimap: function(flag) {
@@ -754,6 +780,10 @@ export default {
     warningMessage: {
       type: String,
       default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
+    },
+    isLegacy: {
+      type: Boolean,
+      default: false
     },
     displayLatestChanges: {
       type: Boolean,
@@ -866,6 +896,15 @@ export default {
   font-family: Asap, sans-serif;
   font-size: 15px;
   vertical-align: 5px;
+}
+
+.latest-map-text {
+  color: $app-primary-color;;
+  font-family: Asap, sans-serif;
+  font-size: 12px;
+  margin-top: 5px;
+  vertical-align: 10px;
+  cursor: pointer;
 }
 
 .latest-changesicon {
