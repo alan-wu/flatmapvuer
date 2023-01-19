@@ -639,6 +639,7 @@ export default {
         //  be loaded, overriding ``taxon`` and ``biologicalSex``.
 
         let identifier = { taxon: this.entry };
+        //This now handle the uses of uuid in the permalink
         if (state) {
           if (state.uuid) {
             identifier = { uuid: state.uuid };
