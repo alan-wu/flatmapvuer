@@ -101,18 +101,18 @@ export default {
           .then(response => response.json())
           .then(data => {
             //Check each key in the provided availableSpecies against the one 
-            // on the server, add them to the Select if the key is found
+            //on the server, add them to the Select if the key is found
             Object.keys(this.availableSpecies).forEach(key => {
               for (let i = 0; i < data.length; i++) {
                 if (this.availableSpecies[key].taxo === data[i].taxon) {
                   if (this.availableSpecies[key].biologicalSex) {
                     if (data[i].biologicalSex && 
                       data[i].biologicalSex === this.availableSpecies[key].biologicalSex) {
-                        this.speciesList[key] = this.availableSpecies[key];
+                        this.$set(this.speciesList, key, this.availableSpecies[key]);
                         break;
                       }
                   } else {
-                    this.speciesList[key] = this.availableSpecies[key];
+                    this.$set(this.speciesList, key, this.availableSpecies[key]);
                     break;
                   }
                 }
@@ -200,11 +200,15 @@ export default {
           else
             name = name + ` ${state.species}`;
         }
-        this.speciesList[name] = {
-          taxo: taxo,
-          isLegacy: true,
-          displayWarning: true
-        };
+        this.$set(
+          this.speciesList,
+          name, 
+          {
+            taxo: taxo,
+            isLegacy: true,
+            displayWarning: true
+          }
+        );
         return {
           species: name,
           state: {
