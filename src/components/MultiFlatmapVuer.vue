@@ -183,6 +183,11 @@ export default {
         }
       }
     },
+    /**
+     * Create a legacy entry with the provided information
+     * 
+     * @private
+     */
     createLegacyEntry: function(state, taxo, uuid) {
       if (uuid && taxo) {
         let name = "Legacy";
@@ -201,9 +206,9 @@ export default {
           species: name,
           state: {
             entry: taxo,
-            uuid: uuid
+            uuid: uuid,
+            viewport: state.state.viewport,
           },
-          viewport: state.state.viewport,
         }
       }
     },
