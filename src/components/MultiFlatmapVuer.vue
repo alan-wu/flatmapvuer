@@ -94,42 +94,45 @@ export default {
   methods: {
     initialise: function() {
       return new Promise(resolve => {
-        fetch(this.flatmapAPI)
-        .then(response => response.json())
-        .then(data => {
-          this.speciesList= {};
-          //Check each key in the provided availableSpecies against the one 
-          // on the server, add them to the Select if the key is found
-          Object.keys(this.availableSpecies).forEach(key => {
-            for (let i = 0; i < data.length; i++) {
-              if (this.availableSpecies[key].taxo === data[i].taxon) {
-                if (this.availableSpecies[key].biologicalSex) {
-                  if (data[i].biologicalSex && 
-                    data[i].biologicalSex === this.availableSpecies[key].biologicalSex) {
-                      this.speciesList[key] = this.availableSpecies[key];
-                      break;
-                    }
-                } else {
-                  this.speciesList[key] = this.availableSpecies[key];
-                  break;
+        if (this.requireInitialisation) {
+          //It has not been initialised yet
+          this.requireInitialisation = false;
+          fetch(this.flatmapAPI)
+          .then(response => response.json())
+          .then(data => {
+            //Check each key in the provided availableSpecies against the one 
+            // on the server, add them to the Select if the key is found
+            Object.keys(this.availableSpecies).forEach(key => {
+              for (let i = 0; i < data.length; i++) {
+                if (this.availableSpecies[key].taxo === data[i].taxon) {
+                  if (this.availableSpecies[key].biologicalSex) {
+                    if (data[i].biologicalSex && 
+                      data[i].biologicalSex === this.availableSpecies[key].biologicalSex) {
+                        this.speciesList[key] = this.availableSpecies[key];
+                        break;
+                      }
+                  } else {
+                    this.speciesList[key] = this.availableSpecies[key];
+                    break;
+                  }
                 }
               }
+            });
+            if (!this.state) {
+              //No state resuming, set the current flatmap to {this.initial}
+              if (this.initial && this.speciesList[this.initial] !== undefined) {
+                this.activeSpecies = this.initial;
+              } else {
+                this.activeSpecies = Object.keys(this.speciesList)[0];
+              }
+              Vue.nextTick(() => {
+                if (this.$refs[this.activeSpecies])
+                  this.$refs[this.activeSpecies][0].createFlatmap();
+              });
             }
           });
-          if (!this.state) {
-            //No state resuming, set the current flatmap to {this.initial}
-            if (this.initial && this.speciesList[this.initial] !== undefined) {
-              this.activeSpecies = this.initial;
-            } else {
-              this.activeSpecies = Object.keys(this.speciesList)[0];
-            }
-            Vue.nextTick(() => {
-              if (this.$refs[this.activeSpecies])
-                this.$refs[this.activeSpecies][0].createFlatmap();
-            });
-          }
-          resolve();
-        });
+        }
+        resolve();
       })
     },
     FlatmapSelected: function(resource) {
@@ -382,7 +385,8 @@ export default {
     return {
       activeSpecies: undefined,
       appendToBody: false,
-      speciesList: {}
+      speciesList: {},
+      requireInitialisation: true,
     };
   },
   watch: {
