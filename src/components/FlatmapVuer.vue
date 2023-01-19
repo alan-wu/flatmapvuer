@@ -639,7 +639,7 @@ export default {
         //  be loaded, overriding ``taxon`` and ``biologicalSex``.
 
         let identifier = { taxon: this.entry };
-        //This now handle the uses of uuid in the permalink
+        //This now handle the uses of uuid when resuming states
         if (state) {
           if (state.uuid) {
             identifier = { uuid: state.uuid };
@@ -989,13 +989,15 @@ export default {
 .svg-legends-container {
   width:70%;
   height:auto;
+  position:relative;
+  max-height:140px;
 }
 
 .pathway-container {
   float: left;
   padding-left: 16px;
   padding-right: 18px;
-  max-height: calc(100% - 184px);
+  max-height: calc(100% - 140px);
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
