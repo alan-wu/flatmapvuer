@@ -242,7 +242,10 @@ export default {
             return new Promise(() => {
               const mapManager = new (require("@abi-software/flatmap-viewer")).MapManager(this.flatmapAPI);
               //mapManager.findMap_ is an async function so we need to wrap this with a promise
-              mapManager.findMap_({taxon: mapState.entry}).then(map => {
+              const identifier = { taxon: mapState.entry };
+              if (mapState.biologicalSex)
+                identifier['biologicalSex'] = mapState.biologicalSex;
+              mapManager.findMap_(identifier).then(map => {
                 if (map.uuid !== mapState.uuid) {
                   return this.createLegacyEntry(state, mapState.entry, mapState.uuid);
                 }
