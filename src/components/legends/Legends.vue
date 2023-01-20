@@ -29,7 +29,7 @@ export default {
 <style scoped lang="scss">
 .legends-container {
   pointer-events: none;
-  transform: translate(0px, -20px);
+  transform: translate(0px, -35px);
 }
 
 .st0-translate {
