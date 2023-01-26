@@ -14,7 +14,7 @@
         placeholder="Select"
         class="select-box"
         popper-class="flatmap_dropdown"
-        @change="flatmapChanged"
+        @change="setSpecies"
         v-popover:selectPopover
       >
         <el-option v-for="(item, key) in speciesList" :key="key" :label="key" :value="key">
@@ -85,6 +85,10 @@ export default {
   components: {
     FlatmapVuer
   },
+  beforeMount() {
+    this._resolveList = [];
+    this._initialised = false;
+  },
   mounted: function() {
     this.initialise();
     EventBus.$on('onActionClick', (action) =>{
@@ -100,6 +104,7 @@ export default {
           fetch(this.flatmapAPI)
           .then(response => response.json())
           .then(data => {
+            this._initialised = true;
             //Check each key in the provided availableSpecies against the one 
             //on the server, add them to the Select if the key is found
             Object.keys(this.availableSpecies).forEach(key => {
@@ -118,10 +123,18 @@ export default {
                 }
               }
             });
-            if (!this.state) {
+            //Use the state species if it does not have any other information (state.state === undefined)
+            let species = this.initial;
+            if (this.state) {
+              if (!this.state.state && this.state.species)
+                species = this.state.species;
+              else
+                species = undefined;
+            }
+            if (species) {
               //No state resuming, set the current flatmap to {this.initial}
-              if (this.initial && this.speciesList[this.initial] !== undefined) {
-                this.activeSpecies = this.initial;
+              if (species && this.speciesList[species] !== undefined) {
+                this.activeSpecies = species;
               } else {
                 this.activeSpecies = Object.keys(this.speciesList)[0];
               }
@@ -130,9 +143,16 @@ export default {
                   this.$refs[this.activeSpecies][0].createFlatmap();
               });
             }
+            resolve();
+            this._resolveList.forEach(other => { other(); });
           });
+        } else if (this._initialised) {
+          //resolve as it has been initialised
+          resolve();
+        } else {
+          //resolve when the list request has been resolved
+          this._resolveList.push(resolve);
         }
-        resolve();
       })
     },
     FlatmapSelected: function(resource) {
@@ -162,11 +182,19 @@ export default {
       let map = this.getCurrentFlatmap();
       map.showMarkerPopup(featureId, node, options);
     },
-    flatmapChanged: function(species, viewport){
-      if (this.activeSpecies != species) 
+    setSpecies: function(species, state, numberOfRetry) {
+      if (this.$refs && species in this.$refs) {
         this.activeSpecies = species;
-      this.$refs[this.activeSpecies][0].createFlatmap(viewport);
-      this.$emit('flatmapChanged', this.activeSpecies);
+        this.$refs[this.activeSpecies][0].createFlatmap(state);
+        this.$emit('flatmapChanged', this.activeSpecies);
+      } else if (numberOfRetry) {
+        const retry = numberOfRetry - 1;
+        if (retry >= 0) {
+          Vue.nextTick(() => {
+            this.setSpecies(species, state, retry);
+          });
+        }
+      }
     },
     /**
      * Function to switch to the latest existing map from 
@@ -181,7 +209,7 @@ export default {
         if (!species.isLegacy &&
           (species.taxo === state.entry) && 
          (species.biologicalSex === state.biologicalSex)) {
-           this.flatmapChanged(keys[i], state);
+           this.setSpecies(keys[i], state, 0);
            return;
         }
       }
@@ -285,26 +313,17 @@ export default {
      */
     setState: function(state) {
       if (state) {
-        this.initialise().then(() => {
           //Update state if required
-          this.updateState(state).then(currentState => {
+        this.updateState(state).then(currentState => {
+          this.initialise().then(() => {
             if (currentState.species && (currentState.species !== this.activeSpecies)) {
-              this.activeSpecies = currentState.species;
-              if (currentState.state) {
-                //Wait for next tick when the refs are ready for rendering
-                this.$nextTick(() => {
-                  if (this.activeSpecies in this.$refs) {
-                    this.$refs[this.activeSpecies][0].createFlatmap(currentState.state);
-                    this.$emit('flatmapChanged', this.activeSpecies);
-                  }
-                })
-              }
+              this.setSpecies(currentState.species, currentState.state, 5);
             } else if (currentState.state) {
               let map = this.getCurrentFlatmap();
               map.setState(currentState.state);
             }
           });
-        })
+        });
       }
     },
     resourceSelected: function(action) {
