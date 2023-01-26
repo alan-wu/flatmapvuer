@@ -516,9 +516,9 @@ export default {
       let myOptions = options;
       if (this.mapImp) {
         if (myOptions) {
-          if (!myOptions.className) myOptions.className = "flatmapvuer-popover";
+          if (!myOptions.className) myOptions.className = "custom-popup";
         } else {
-          myOptions = { className: "flatmapvuer-popover", positionAtLastClick: true };
+          myOptions = { className: "custom-popup", positionAtLastClick: true };
         }
         this.mapImp.showPopup(featureId, node, myOptions);
       }
@@ -708,17 +708,28 @@ export default {
       this.drawerOpen = flag;
     },
     /**
-     * Function to display features with annotation matching the provided term.
+     * Function to display features with annotation matching the provided term,
+     * with the option to display the label using displayLabel flag. 
      */
-    searchAndShowResult: function(term) {
+    searchAndShowResult: function(term, displayLabel) {
       if (this.mapImp) {
         if (term === undefined || term === "") {
           this.mapImp.clearSearchResults();
           return true;
         } else {
-          let searchResults = this.mapImp.search(term);
-          if (searchResults && searchResults.__featureIds.length > 0) {
+          const searchResults = this.mapImp.search(term);
+          if (searchResults && searchResults.results &&
+            searchResults.results.length > 0) {
             this.mapImp.showSearchResults(searchResults);
+            if (displayLabel && 
+              searchResults.results[0].featureId && 
+              searchResults.results[0].text ) {
+              this.mapImp.showPopup(
+                searchResults.results[0].featureId,
+                searchResults.results[0].text,
+                {className: "custom-popup", positionAtLastClick: false }
+              )
+            }
             return true;
           }
           else
@@ -1457,6 +1468,82 @@ export default {
       .el-radio__inner {
         border-color: $app-primary-color;
         background: $app-primary-color;
+      }
+    }
+  }
+}
+
+::v-deep .custom-popup {
+  .mapboxgl-popup-tip {
+    display: none;
+  }
+  .mapboxgl-popup-content {
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    display: none;
+    background: #fff;
+    font-family: "Asap",sans-serif;
+    font-size: 12pt;
+    color: $app-primary-color;
+    border: 1px solid $app-primary-color;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &::after,
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      flex-shrink: 0;
+    }
+    .mapboxgl-popup-close-button {
+      display: none;
+    }
+  }
+  &.mapboxgl-popup-anchor-bottom {
+    .mapboxgl-popup-content {
+      margin-bottom: 12px;
+      &::after,
+      &::before {
+        top: 100%;
+        border-width: 12px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        margin-top: -1px;
+        border-color: rgb(255, 255, 255) transparent transparent transparent;
+      }
+      /* this border color controlls the outside, thin border */
+      &::before {
+        margin: 0 auto;
+        border-color: $app-primary-color transparent transparent transparent;
+      }
+    }
+  }
+  &.mapboxgl-popup-anchor-top {
+    .mapboxgl-popup-content {
+      margin-top: 18px;
+      &::after,
+      &::before {
+        top: calc(-100% + 6px);
+        border-width: 12px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        margin-top: 1px;
+        border-color: transparent transparent rgb(255, 255, 255) transparent;
+      }
+      &::before {
+        margin: 0 auto;
+        border-color: transparent transparent $app-primary-color transparent;
       }
     }
   }
