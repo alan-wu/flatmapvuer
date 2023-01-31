@@ -703,7 +703,7 @@ export default {
         });
       } else if (state) {
         if (this.entry == state.entry) {
-          this._stateToBeSet = { viewport: state.viewport, searchTerm: searchTerm };
+          this._stateToBeSet = { viewport: state.viewport, searchTerm: state.searchTerm };
           if (this.mapImp && !this.loading)
             this.restoreMapState(this._stateToBeSet);
         }
