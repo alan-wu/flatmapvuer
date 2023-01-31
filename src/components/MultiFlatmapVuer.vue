@@ -123,10 +123,11 @@ export default {
                 }
               }
             });
-            //Use the state species if it does not have any other information (state.state === undefined)
+            //Use the state species if it does not have any other species information 
             let species = this.initial;
             if (this.state) {
-              if (!this.state.state && this.state.species)
+              const mapState = this.state.state;
+              if ((!mapState || ( !mapState.uuid && !mapState.entry )) && this.state.species)
                 species = this.state.species;
               else
                 species = undefined;
@@ -138,10 +139,7 @@ export default {
               } else {
                 this.activeSpecies = Object.keys(this.speciesList)[0];
               }
-              Vue.nextTick(() => {
-                if (this.$refs[this.activeSpecies])
-                  this.$refs[this.activeSpecies][0].createFlatmap();
-              });
+              this.setSpecies(this.activeSpecies, this.state ? this.state.state : undefined, 5);
             }
             resolve();
             this._resolveList.forEach(other => { other(); });
@@ -243,6 +241,7 @@ export default {
             entry: taxo,
             uuid: uuid,
             viewport: state.state.viewport,
+            searchTerm: state.state.searchTerm
           },
         }
       }

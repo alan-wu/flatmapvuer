@@ -614,6 +614,14 @@ export default {
         }
       }
     },
+    restoreMapState: function(state) {
+      if (state) {
+        if (state.viewport)
+          this.mapImp.setState(state.viewport);
+        if (state.searchTerm)
+          this.searchAndShowResult(state.searchTerm, true);
+      }
+    },
     createFlatmap: function(state) {
       if (!this.mapImp && !this.loading) {
         this.loading = true;
@@ -687,16 +695,17 @@ export default {
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
-          if (this._viewportToBeSet)
-            this.mapImp.setState(this._viewportToBeSet);
-          else if (state && state.viewport)
-            this.mapImp.setState(state.viewport);
+          if (this._stateToBeSet)
+            this.restoreMapState(this._viewportToBeSet);
+          else {
+            this.restoreMapState(state);
+          }
         });
       } else if (state) {
         if (this.entry == state.entry) {
-          this._viewportToBeSet = state.viewport;
+          this._stateToBeSet = { viewport: state.viewport, searchTerm: searchTerm };
           if (this.mapImp && !this.loading)
-            this.mapImp.setState(this._viewportToBeSet);
+            this.restoreMapState(this._stateToBeSet);
         }
       }
     },
@@ -723,7 +732,7 @@ export default {
             this.mapImp.showSearchResults(searchResults);
             if (displayLabel && 
               searchResults.results[0].featureId && 
-              searchResults.results[0].text ) {
+              searchResults.results[0].text) {
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
                 searchResults.results[0].text,
