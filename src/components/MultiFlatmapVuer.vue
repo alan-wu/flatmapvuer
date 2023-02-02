@@ -86,6 +86,8 @@ export default {
     FlatmapVuer
   },
   beforeMount() {
+    //List for resolving the promise in initialise
+    //if initialise is called multiple times
     this._resolveList = [];
     this._initialised = false;
   },
@@ -104,7 +106,6 @@ export default {
           fetch(this.flatmapAPI)
           .then(response => response.json())
           .then(data => {
-            this._initialised = true;
             //Check each key in the provided availableSpecies against the one 
             //on the server, add them to the Select if the key is found
             Object.keys(this.availableSpecies).forEach(key => {
@@ -141,14 +142,16 @@ export default {
               }
               this.setSpecies(this.activeSpecies, this.state ? this.state.state : undefined, 5);
             }
+            this._initialised = true;
             resolve();
+            //Resolve all other promises resolve in the list
             this._resolveList.forEach(other => { other(); });
           });
         } else if (this._initialised) {
           //resolve as it has been initialised
           resolve();
         } else {
-          //resolve when the list request has been resolved
+          //resolve when the async initialisation is finished 
           this._resolveList.push(resolve);
         }
       })
