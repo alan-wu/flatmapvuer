@@ -12,7 +12,7 @@
       <div class="beta-popovers">
         <div>
           <el-popover
-            :content="warningMessage"
+            :content="isLegacy ? 'This is a legacy map, you may view the latest map instead.' : warningMessage"
             placement="right"
             :appendToBody="false"
             trigger="manual"
@@ -27,7 +27,13 @@
             @mouseout="hideToolitip(6)"
             v-popover:warningPopover
           >
-          <span class="warning-text">Beta</span>
+            <template v-if="isLegacy">
+              <span class="warning-text">Legacy Map</span>
+              <div class="latest-map-text" @click="viewLatestMap">Click here for the latest map</div>
+            </template>
+            <template v-else>
+              <span class="warning-text">Beta</span>
+            </template>
         </i>
         </div>
         <el-popover
@@ -124,6 +130,7 @@
           v-if="pathways.length > 0 && pathControls"
           v-popover:checkBoxPopover
         >
+          <svg-legends class= "svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -250,6 +257,7 @@
 import Vue from "vue";
 import Tooltip from "./Tooltip";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import SvgLegends from "./legends/Legends";
 import {
   Checkbox,
   CheckboxGroup,
@@ -284,13 +292,27 @@ export default {
   components: {
     MapSvgIcon,
     MapSvgSpriteColor,
-    Tooltip
+    Tooltip,
+    SvgLegends
   },
   beforeCreate: function() {
     this.mapManager = undefined;
     this.mapImp = undefined;
   },
   methods: {
+    viewLatestMap: function() {
+      let biologicalSex = this.biologicalSex ? this.biologicalSex : undefined;
+      //Human requires special handling
+      if (this.entry === "NCBITaxon:9606") {
+        biologicalSex = "PATO:0000384";
+      }
+      const state = {
+        entry: this.entry,
+        biologicalSex,
+        viewport: this.mapImp.getState()
+      };
+      this.$emit("view-latest-map", state);
+    },
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
       if (this.mapImp) {
@@ -375,8 +397,10 @@ export default {
           const label = data.label;
           const resource = [data.models];
           const taxonomy = this.entry;
+          const biologicalSex = this.biologicalSex;
           const payload = {
             dataset: data.dataset,
+            biologicalSex: biologicalSex,
             taxonomy: taxonomy,
             resource: resource,
             label: label,
@@ -458,6 +482,7 @@ export default {
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
+          this.tooltipContent.source = data.feature.source;
           this.tooltipContent.title = data.label;
           this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
@@ -475,6 +500,7 @@ export default {
         this.tooltipVisible = true;
         this.tooltipContent = content;
         this.tooltipContent.uberon = feature;
+        this.tooltipContent.source = data.feature.source;
         this.tooltipContent.title = data.label;
         this.tooltipContent.actions.push({
           title: "View dataset",
@@ -490,9 +516,9 @@ export default {
       let myOptions = options;
       if (this.mapImp) {
         if (myOptions) {
-          if (!myOptions.className) myOptions.className = "flatmapvuer-popover";
+          if (!myOptions.className) myOptions.className = "custom-popup";
         } else {
-          myOptions = { className: "flatmapvuer-popover", positionAtLastClick: true };
+          myOptions = { className: "custom-popup", positionAtLastClick: true };
         }
         this.mapImp.showPopup(featureId, node, myOptions);
       }
@@ -563,20 +589,37 @@ export default {
           entry: this.entry,
           viewport: this.mapImp.getState()
         };
+        const identifier = this.mapImp.getIdentifier();
+        if (this.biologicalSex)
+          state['biologicalSex'] = this.biologicalSex;
+        else if (identifier && identifier.biologicalSex)
+          state['biologicalSex'] = identifier.biologicalSex;
+        if (identifier && identifier.uuid)
+          state['uuid'] = identifier.uuid;
         return state;
       }
       return undefined;
     },
     setState: function(state) {
       if (state) {
-        if (this.mapImp && state.entry) {
-          if (this.entry == state.entry)
-            if (state.viewport) {
-              this.mapImp.setState(state.viewport);
-            }
+        if (this.mapImp && 
+          (state.entry && (this.entry == state.entry)) &&
+          (!state.biologicalSex || (state.biologicalSex === this.biologicalSex))) 
+        {
+          if (state.viewport) {
+            this.mapImp.setState(state.viewport);
+          }
         } else {
           this.createFlatmap(state);
         }
+      }
+    },
+    restoreMapState: function(state) {
+      if (state) {
+        if (state.viewport)
+          this.mapImp.setState(state.viewport);
+        if (state.searchTerm)
+          this.searchAndShowResult(state.searchTerm, true);
       }
     },
     createFlatmap: function(state) {
@@ -586,10 +629,47 @@ export default {
         if (this.displayMinimap) {
           minimap = { position: "top-right" };
         }
-        let entry = this.entry;
-        if (state && state.entry) entry = state.entry;
+
+        //As for flatmap-viewer@2.2.7, see below for the documentation 
+        //for the identifier:
+
+        //@arg identifier {string|Object}
+        // A string or object identifying the map to load. If a string its
+        // value can be either the map's ``uuid``, assigned at generation time,
+        // or taxon and biological sex identifiers of the species that the map
+        // represents. The latest version of a map is loaded unless it has been
+        // identified using a ``uuid`` (see below).
+        // @arg identifier.taxon {string} The taxon identifier of the species 
+        //  represented by the map. This is specified as metadata in the map's source file.
+        // @arg identifier.biologicalSex {string} The biological sex of the species
+        // represented by the map. This is specified as metadatain the map's source file.
+        // @arg identifier.uuid {string} The unique uuid the flatmap. If given then this exact map will
+        //  be loaded, overriding ``taxon`` and ``biologicalSex``.
+
+        let identifier = { taxon: this.entry };
+        //This now handle the uses of uuid when resuming states
+        if (state) {
+          if (state.uuid) {
+            identifier = { uuid: state.uuid };
+          } else if (state.entry) {
+            identifier.taxon = state.entry;
+            if (state.biologicalSex) {
+              identifier["biologicalSex"] = state.biologicalSex;
+            } else if (identifier.taxon === "NCBITaxon:9606") {
+              //For backward compatibility
+              identifier["biologicalSex"] ="PATO:0000384";
+            }
+          }
+        } else {
+          // Set the bioloicalSex now if map is not resumed from
+          // a saved state
+          if (this.biologicalSex) {
+            identifier["biologicalSex"] = this.biologicalSex;
+          }
+        }
+
         let promise1 = this.mapManager.loadMap(
-          entry,
+          identifier,
           this.$refs.display,
           this.eventCallback(),
           {
@@ -598,8 +678,9 @@ export default {
             //debug: true,
             featureInfo: this.featureInfo,
             "min-zoom": this.minZoom,
-            pathControls: false,
+            pathControls: this.pathControls,
             searchable: this.searchable,
+            layerControl: this.layerControl,
             tooltips: this.tooltips,
             minimap: minimap
           }
@@ -615,13 +696,16 @@ export default {
           this.pathways = this.mapImp.pathTypes();
           this.$emit("ready", this);
           this.loading = false;
-          if (this._viewportToBeSet)
-            this.mapImp.setState(this._viewportToBeSet);
-          else if (state && state.viewport)
-            this.mapImp.setState(state.viewport);
+          if (this._stateToBeSet)
+            this.restoreMapState(this._stateToBeSet);
+          else {
+            this.restoreMapState(state);
+          }
         });
       } else if (state) {
-        if (this.entry == state.entry) this._viewportToBeSet = state.viewport;
+        this._stateToBeSet = { viewport: state.viewport, searchTerm: state.searchTerm };
+        if (this.mapImp && !this.loading)
+          this.restoreMapState(this._stateToBeSet);
       }
     },
     showMinimap: function(flag) {
@@ -632,17 +716,28 @@ export default {
       this.drawerOpen = flag;
     },
     /**
-     * Function to display features with annotation matching the provided term.
+     * Function to display features with annotation matching the provided term,
+     * with the option to display the label using displayLabel flag. 
      */
-    searchAndShowResult: function(term) {
+    searchAndShowResult: function(term, displayLabel) {
       if (this.mapImp) {
         if (term === undefined || term === "") {
           this.mapImp.clearSearchResults();
           return true;
         } else {
-          let searchResults = this.mapImp.search(term);
-          if (searchResults && searchResults.__featureIds.length > 0) {
+          const searchResults = this.mapImp.search(term);
+          if (searchResults && searchResults.results &&
+            searchResults.results.length > 0) {
             this.mapImp.showSearchResults(searchResults);
+            if (displayLabel && 
+              searchResults.results[0].featureId && 
+              searchResults.results[0].text) {
+              this.mapImp.showPopup(
+                searchResults.results[0].featureId,
+                searchResults.results[0].text,
+                {className: "custom-popup", positionAtLastClick: false }
+              )
+            }
             return true;
           }
           else
@@ -650,10 +745,22 @@ export default {
         }
       }
       return false;
-    }
+    },
+    /**
+     * Get the list of suggested terms
+     */
+    searchSuggestions: function(term) {
+      if (this.mapImp)
+        return this.mapImp.search(term);
+      return [];
+    },
   },
   props: {
     entry: String,
+    biologicalSex: {
+      type: String,
+      default: ""
+    },
     featureInfo: {
       type: Boolean,
       default: false
@@ -664,11 +771,15 @@ export default {
     },
     pathControls: {
       type: Boolean,
-      default: true
+      default: false
     },
     searchable: {
       type: Boolean,
       default: false
+    },
+    layerControl: {
+        type: Boolean,
+        default: false
     },
     tooltips: {
       type: Boolean,
@@ -694,13 +805,17 @@ export default {
       type: String,
       default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
     },
+    isLegacy: {
+      type: Boolean,
+      default: false
+    },
     displayLatestChanges: {
       type: Boolean,
       default: false,
     },
     latestChangesMessage: {
       type: String,
-      default: "Bladder connectivity can now be explored and searched on when selected! To see it, click on any of the paths coming from the bladder. Other pathways will be searchable soon.",
+      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information",
     },
     /**
      * State containing state of the flatmap.
@@ -714,7 +829,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: "https://mapcore-demo.org/flatmaps/"
+      default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
     sparcAPI: {
       type: String,
@@ -785,7 +900,7 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.beta-popovers{
+.beta-popovers {
   position: absolute;
   top: 90px;
   left: 16px;
@@ -805,6 +920,15 @@ export default {
   font-family: Asap, sans-serif;
   font-size: 15px;
   vertical-align: 5px;
+}
+
+.latest-map-text {
+  color: $app-primary-color;;
+  font-family: Asap, sans-serif;
+  font-size: 12px;
+  margin-top: 5px;
+  vertical-align: 10px;
+  cursor: pointer;
 }
 
 .latest-changesicon {
@@ -863,6 +987,9 @@ export default {
       transparent 9px
     );
   }
+  &.other {
+    background: #888;
+  }
 }
 
 .flatmap-container {
@@ -882,15 +1009,21 @@ export default {
   }
 }
 
+.svg-legends-container {
+  width:70%;
+  height:auto;
+  position:relative;
+  max-height:140px;
+}
+
 .pathway-container {
   float: left;
   padding-left: 16px;
   padding-right: 18px;
-  max-height: calc(100% - 184px);
+  max-height: calc(100% - 140px);
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
-  padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
 }
@@ -1163,7 +1296,7 @@ export default {
     background-color: black;
   }
   &.lightskyblue {
-    background-color: white;
+    background-color: lightskyblue;
   }
 }
 
@@ -1247,10 +1380,6 @@ export default {
   }
 }
 
-::v-deep .flatmap-popper {
-  
-}
-
 ::v-deep .popper-zoomout {
   padding-right: 13px !important;
   left: -21px !important;
@@ -1288,7 +1417,7 @@ export default {
   z-index: 8;
   width: 20px;
   height: 40px;
-  border: solid 1px #e4e7ed;
+  border: solid 1px $app-primary-color;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -1305,21 +1434,22 @@ export default {
 .drawer-button {
   float: left;
   margin-top: calc(50% - 36px);
-  border-left: 0;
-  background-color: #ffffff;
+  background-color: #F9F2FC;
+
   i {
+    font-weight: 600; 
     margin-top: 12px;
     color: $app-primary-color;
     transition-delay: 0.9s;
   }
   &.open {
     i {
-      transform: rotate(0deg) scaleY(2.5);
+      transform: rotate(0deg) scaleY(2);
     }
   }
   &.close {
     i {
-      transform: rotate(180deg) scaleY(2.5);
+      transform: rotate(180deg) scaleY(2);
     }
   }
 }
@@ -1350,6 +1480,82 @@ export default {
       .el-radio__inner {
         border-color: $app-primary-color;
         background: $app-primary-color;
+      }
+    }
+  }
+}
+
+::v-deep .custom-popup {
+  .mapboxgl-popup-tip {
+    display: none;
+  }
+  .mapboxgl-popup-content {
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    display: none;
+    background: #fff;
+    font-family: "Asap",sans-serif;
+    font-size: 12pt;
+    color: $app-primary-color;
+    border: 1px solid $app-primary-color;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &::after,
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      flex-shrink: 0;
+    }
+    .mapboxgl-popup-close-button {
+      display: none;
+    }
+  }
+  &.mapboxgl-popup-anchor-bottom {
+    .mapboxgl-popup-content {
+      margin-bottom: 12px;
+      &::after,
+      &::before {
+        top: 100%;
+        border-width: 12px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        margin-top: -1px;
+        border-color: rgb(255, 255, 255) transparent transparent transparent;
+      }
+      /* this border color controlls the outside, thin border */
+      &::before {
+        margin: 0 auto;
+        border-color: $app-primary-color transparent transparent transparent;
+      }
+    }
+  }
+  &.mapboxgl-popup-anchor-top {
+    .mapboxgl-popup-content {
+      margin-top: 18px;
+      &::after,
+      &::before {
+        top: calc(-100% + 6px);
+        border-width: 12px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        margin-top: 1px;
+        border-color: transparent transparent rgb(255, 255, 255) transparent;
+      }
+      &::before {
+        margin: 0 auto;
+        border-color: transparent transparent $app-primary-color transparent;
       }
     }
   }

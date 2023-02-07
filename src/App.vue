@@ -11,7 +11,7 @@
         <el-row :gutter="20">
           <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
           <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
-          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+          <el-button :disabled="mapSettings.length === 0" @click="restoreSettings()" size="mini">Restore Settings</el-button>
         </el-row>
       </div>
       <el-button class="options-button" icon="el-icon-setting" slot="reference">Options</el-button>
@@ -20,9 +20,10 @@
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
       @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @pan-zoom-callback="panZoomcallback"
-      @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
+      @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable"
+      :layerControl="layerControl"
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap=true :flatmapAPI="flatmapAPI"/>
+      :displayMinimap=false :flatmapAPI="flatmapAPI"/>
   </div>
 </template>
 
@@ -46,11 +47,11 @@ export default {
   name: 'app',
   methods: {
     saveSettings: function() {
-      this._mapSettings.push(this.$refs.multi.getState());
+      this.mapSettings.push(this.$refs.multi.getState());
     },
     restoreSettings: function() {
-      if (this._mapSettings.length > 0)
-        this.$refs.multi.setState(this._mapSettings.pop());
+      if (this.mapSettings.length > 0)
+        this.$refs.multi.setState(this.mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
       if (resource.eventType === "click") {
@@ -68,12 +69,15 @@ export default {
       }
     },
     FlatmapReady: function(component) {
+      console.log(component);
+      /*
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
       console.log(taxon, id);
       component.enablePanZoomEvents(true);
       component.showPathwaysDrawer(false);
       component.searchAndShowResult("heart");
+      */
     },
     panZoomcallback: function(payload) {
       this.payload = payload
@@ -84,6 +88,7 @@ export default {
       featureInfo: true,
       searchable: true,
       pathControls: true,
+      layerControl: true,
       minZoom: 4,
       availableSpecies : {"Functional Connectivity":{taxo: "FunctionalConnectivity", displayWarning:true}
       },
@@ -96,14 +101,12 @@ export default {
       displayCloseButton: false,
       initial: "Functional Connectivity",
       helpMode: false,
+      mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
-       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-      // flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
+      flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
-  },
-  mounted: function() {
-    this._mapSettings = [];
   },
   components: {
     MultiFlatmapVuer,
