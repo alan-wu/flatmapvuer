@@ -57,14 +57,18 @@ export default {
       if (resource.eventType === "click") {
         console.log('resource', resource);
         if (resource.feature && resource.feature.label) {
-          let url =  'https://models.physiomeproject.org/@@search?SearchableText=' + resource.feature.label;
-          const a = document.createElement("a");
-          a.href = url;
-          const evt = document.createEvent("MouseEvents");
-          evt.initMouseEvent(
-            "click", true, true, window, 0, 0, 0, 0, 0,
-            true, false, false, false, 0, null);
-          a.dispatchEvent(evt);
+          if (resource.feature.label !== "Wikipedia" &&
+            resource.feature.label !== "PubMed" &&
+            resource.feature.label !== "Provenance") {
+            let url =  'https://models.physiomeproject.org/@@search?SearchableText=' + resource.feature.label;
+            const a = document.createElement("a");
+            a.href = url;
+            const evt = document.createEvent("MouseEvents");
+            evt.initMouseEvent(
+              "click", true, true, window, 0, 0, 0, 0, 0,
+              true, false, false, false, 0, null);
+            a.dispatchEvent(evt);
+          }
         }
       }
     },
