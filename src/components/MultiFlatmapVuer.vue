@@ -25,6 +25,7 @@
         </el-option>
       </el-select>
     </div>
+    <!-- The element below is placed onto the flatmap when it is ready -->
     <i class="el-icon-close minimap-close" ref="minimapClose" v-show="minimapCloseShow" @click="closeMinimap"></i>
     <FlatmapVuer
       v-for="(item, key) in speciesList"
@@ -162,17 +163,16 @@ export default {
     },
     FlatmapReady: function(component) {
       this.$emit("ready", component);
-      this.addCloseButtonToMinimap()
+      this.addCloseButtonToMinimap();
     },
     closeMinimap: function(){
       this.getCurrentFlatmap().showMinimap(false);
     },
     addCloseButtonToMinimap: function(){
-      window.multi = this.$refs.multiContainer
-      let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap')
-      this.$refs.minimapClose.parentNode.removeChild(this.$refs.minimapClose)
-      minimapEl.appendChild(this.$refs.minimapClose)
-      this.minimapCloseShow = true
+      let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap');
+      this.$refs.minimapClose.parentNode.removeChild(this.$refs.minimapClose);
+      minimapEl.appendChild(this.$refs.minimapClose);
+      this.minimapCloseShow = true;
     },
     getCoordinatesOfLastClick: function() {
       const flatmap = this.$refs[this.activeSpecies];
@@ -484,7 +484,7 @@ export default {
 
 ::v-deep .maplibregl-ctrl-minimap {
   @media (max-width: 1250px) {
-    height: 110px !important;
+    height: 110px !important; // important is needed here as we are over-riding the style set by the flatmap
     width: 160px !important;
     >>> .maplibregl-canvas .mapboxgl-canvas {
       height: 110px !important;
