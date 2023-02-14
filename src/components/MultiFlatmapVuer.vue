@@ -1,5 +1,5 @@
 <template>
-  <div class="multi-container">
+  <div class="multi-container" ref="multiContainer">
     <div style="position:absolute;z-index:10;">
       <div class="species-display-text">
         Species
@@ -25,6 +25,7 @@
         </el-option>
       </el-select>
     </div>
+    <i class="el-icon-close minimap-close" ref="minimapClose" v-show="minimapCloseShow" @click="closeMinimap"></i>
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
@@ -161,6 +162,17 @@ export default {
     },
     FlatmapReady: function(component) {
       this.$emit("ready", component);
+      this.addCloseButtonToMinimap()
+    },
+    closeMinimap: function(){
+      this.getCurrentFlatmap().showMinimap(false);
+    },
+    addCloseButtonToMinimap: function(){
+      window.multi = this.$refs.multiContainer
+      let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap')
+      this.$refs.minimapClose.parentNode.removeChild(this.$refs.minimapClose)
+      minimapEl.appendChild(this.$refs.minimapClose)
+      this.minimapCloseShow = true
     },
     getCoordinatesOfLastClick: function() {
       const flatmap = this.$refs[this.activeSpecies];
@@ -415,6 +427,7 @@ export default {
       appendToBody: false,
       speciesList: {},
       requireInitialisation: true,
+      minimapCloseShow: false
     };
   },
   watch: {
@@ -467,6 +480,29 @@ export default {
       border: 1px solid $app-primary-color;
     }
   }
+} 
+
+::v-deep .maplibregl-ctrl-minimap {
+  @media (max-width: 1250px) {
+    height: 110px !important;
+    width: 160px !important;
+    >>> .maplibregl-canvas .mapboxgl-canvas {
+      height: 110px !important;
+      width: 160px !important; 
+    }
+  }
+}
+
+.minimap-close {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+  top: 0;
+  right: 0;
+  padding-top: 3px; // needed as icon is offset
+  width: 20px;
+  height: 20px;
+  z-index: 9;
 }
 
 ::v-deep .flatmap_dropdown {
