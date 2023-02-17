@@ -512,8 +512,9 @@ export default {
     }
   }
   &.shrink {
-    height: 50px !important; // important is needed here as we are over-riding the style set by the flatmap
-    width: 70px !important;
+    transform-origin: right;
+    transform: scale(0.5); 
+    transform: scale(0.5);
   }
 }
 
@@ -529,10 +530,12 @@ export default {
   z-index: 9;
   transition: all 1s ease;
   &.shrink {
-      transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   &.enlarge {
-      transform: rotate(180deg);
+    transform: rotate(180deg) scale(2);
+    padding-bottom: 5px; // note padding is added to the opposite side since it is rotated
+    padding-left: 5px;
   }
 }
 
