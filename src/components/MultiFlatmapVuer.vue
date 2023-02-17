@@ -493,18 +493,18 @@ export default {
 
 ::v-deep .maplibregl-ctrl-minimap {
   @media (max-width: 1250px) {
-    height: 110px !important; // important is needed here as we are over-riding the style set by the flatmap
-    width: 160px !important;
+    height: 125px !important; // important is needed here as we are over-riding the style set by the flatmap
+    width: 180px !important;
     >>> .maplibregl-canvas .mapboxgl-canvas {
-      height: 110px !important;
-      width: 160px !important; 
+      height: 125px !important;
+      width: 180px !important; 
     }
   }
   transition: all 1s ease;
   &.enlarge {
     @media (max-width: 1250px) {
-      height: 110px !important; 
-      width: 160px !important;
+      height: 125px !important; 
+      width: 180px !important;
     }
     @media (min-width: 1251px) {
       height: 190px !important;
