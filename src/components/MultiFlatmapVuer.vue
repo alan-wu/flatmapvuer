@@ -25,8 +25,6 @@
         </el-option>
       </el-select>
     </div>
-    <!-- The element below is placed onto the flatmap when it is ready -->
-    <i class="el-icon-arrow-down minimap-resize" :class="{ enlarge: minimapSmall, shrink: !minimapSmall}" ref="minimapResize" v-show="minimapResizeShow" @click="closeMinimap"></i>
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
@@ -164,23 +162,6 @@ export default {
     FlatmapReady: function(component) {
       this.$emit("ready", component);
       this.addCloseButtonToMinimap();
-    },
-    closeMinimap: function(){
-      let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap'); // find minimap
-      if (this.minimapSmall) { //switch the classes on the minimap
-        minimapEl.classList.add('enlarge');
-        minimapEl.classList.remove('shrink');
-      } else {
-        minimapEl.classList.add('shrink');
-        minimapEl.classList.remove('enlarge');
-      }
-      this.minimapSmall = !this.minimapSmall;
-    },
-    addCloseButtonToMinimap: function(){
-      let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap');
-      this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
-      minimapEl.appendChild(this.$refs.minimapResize);
-      this.minimapResizeShow = true;
     },
     getCoordinatesOfLastClick: function() {
       const flatmap = this.$refs[this.activeSpecies];
@@ -434,9 +415,7 @@ export default {
       activeSpecies: undefined,
       appendToBody: false,
       speciesList: {},
-      requireInitialisation: true,
-      minimapResizeShow: false,
-      minimapSmall: false
+      requireInitialisation: true
     };
   },
   watch: {
@@ -491,53 +470,6 @@ export default {
   }
 } 
 
-::v-deep .maplibregl-ctrl-minimap {
-  @media (max-width: 1250px) {
-    height: 125px !important; // important is needed here as we are over-riding the style set by the flatmap
-    width: 180px !important;
-    >>> .maplibregl-canvas .mapboxgl-canvas {
-      height: 125px !important;
-      width: 180px !important; 
-    }
-  }
-  transition: all 1s ease;
-  &.enlarge {
-    @media (max-width: 1250px) {
-      height: 125px !important; 
-      width: 180px !important;
-    }
-    @media (min-width: 1251px) {
-      height: 190px !important;
-      width: 300px !important;
-    }
-  }
-  &.shrink {
-    transform-origin: right;
-    transform: scale(0.5); 
-    transform: scale(0.5);
-  }
-}
-
-.minimap-resize {
-  position: absolute;
-  pointer-events: all;
-  cursor: pointer;
-  top: 0;
-  right: 0;
-  padding-top: 3px; // needed as icon is offset
-  width: 20px;
-  height: 14px;
-  z-index: 9;
-  transition: all 1s ease;
-  &.shrink {
-    transform: rotate(0deg);
-  }
-  &.enlarge {
-    transform: rotate(180deg) scale(2);
-    padding-bottom: 5px; // note padding is added to the opposite side since it is rotated
-    padding-left: 5px;
-  }
-}
 
 ::v-deep .flatmap_dropdown {
   min-width: 160px!important;
