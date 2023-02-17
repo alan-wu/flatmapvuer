@@ -26,7 +26,7 @@
       </el-select>
     </div>
     <!-- The element below is placed onto the flatmap when it is ready -->
-    <i class="el-icon-close minimap-close" ref="minimapClose" v-show="minimapCloseShow" @click="closeMinimap"></i>
+    <i class="el-icon-arrow-down minimap-resize" :class="{ enlarge: minimapSmall, shrink: !minimapSmall}" ref="minimapResize" v-show="minimapResizeShow" @click="closeMinimap"></i>
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
@@ -166,13 +166,21 @@ export default {
       this.addCloseButtonToMinimap();
     },
     closeMinimap: function(){
-      this.getCurrentFlatmap().showMinimap(false);
+      let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap'); // find minimap
+      if (this.minimapSmall) { //switch the classes on the minimap
+        minimapEl.classList.add('enlarge');
+        minimapEl.classList.remove('shrink');
+      } else {
+        minimapEl.classList.add('shrink');
+        minimapEl.classList.remove('enlarge');
+      }
+      this.minimapSmall = !this.minimapSmall;
     },
     addCloseButtonToMinimap: function(){
       let minimapEl = this.$refs.multiContainer.querySelector('.maplibregl-ctrl-minimap');
-      this.$refs.minimapClose.parentNode.removeChild(this.$refs.minimapClose);
-      minimapEl.appendChild(this.$refs.minimapClose);
-      this.minimapCloseShow = true;
+      this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
+      minimapEl.appendChild(this.$refs.minimapResize);
+      this.minimapResizeShow = true;
     },
     getCoordinatesOfLastClick: function() {
       const flatmap = this.$refs[this.activeSpecies];
@@ -427,7 +435,8 @@ export default {
       appendToBody: false,
       speciesList: {},
       requireInitialisation: true,
-      minimapCloseShow: false
+      minimapResizeShow: false,
+      minimapSmall: false
     };
   },
   watch: {
@@ -491,9 +500,24 @@ export default {
       width: 160px !important; 
     }
   }
+  transition: all 1s ease;
+  &.enlarge {
+    @media (max-width: 1250px) {
+      height: 110px !important; 
+      width: 160px !important;
+    }
+    @media (min-width: 1251px) {
+      height: 190px !important;
+      width: 300px !important;
+    }
+  }
+  &.shrink {
+    height: 50px !important; // important is needed here as we are over-riding the style set by the flatmap
+    width: 70px !important;
+  }
 }
 
-.minimap-close {
+.minimap-resize {
   position: absolute;
   pointer-events: all;
   cursor: pointer;
@@ -501,8 +525,15 @@ export default {
   right: 0;
   padding-top: 3px; // needed as icon is offset
   width: 20px;
-  height: 20px;
+  height: 14px;
   z-index: 9;
+  transition: all 1s ease;
+  &.shrink {
+      transform: rotate(0deg);
+  }
+  &.enlarge {
+      transform: rotate(180deg);
+  }
 }
 
 ::v-deep .flatmap_dropdown {
