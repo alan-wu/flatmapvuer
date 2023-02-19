@@ -1,6 +1,7 @@
 <template>
   <div
     class="flatmap-container"
+    ref="flatmapContainer"
     v-loading="loading"
     element-loading-text="Loading..."
     element-loading-spinner="el-icon-loading"
@@ -56,6 +57,9 @@
           <span class="warning-text">What's new?</span>
         </i>
       </div>
+      
+      <!-- The element below is placed onto the flatmap when it is ready -->
+      <i class="el-icon-arrow-down minimap-resize" :class="{ enlarge: minimapSmall, shrink: !minimapSmall}" ref="minimapResize" v-show="minimapResizeShow" @click="closeMinimap"></i>
 
       <div class="bottom-right-control">
         <el-popover
@@ -528,6 +532,23 @@ export default {
         this.mapImp.showMarkerPopup(featureId, node, options);
       }
     },
+    closeMinimap: function(){
+      let minimapEl = this.$refs.flatmapContainer.querySelector('.maplibregl-ctrl-minimap'); // find minimap
+      if (this.minimapSmall) { //switch the classes on the minimap
+        minimapEl.classList.add('enlarge');
+        minimapEl.classList.remove('shrink');
+      } else {
+        minimapEl.classList.add('shrink');
+        minimapEl.classList.remove('enlarge');
+      }
+      this.minimapSmall = !this.minimapSmall;
+    },
+    addResizeButtonToMinimap: function(){
+      let minimapEl = this.$refs.flatmapContainer.querySelector('.maplibregl-ctrl-minimap');
+      this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
+      minimapEl.appendChild(this.$refs.minimapResize);
+      this.minimapResizeShow = true;
+    },
     setHelpMode: function(helpMode) {
       if (helpMode) {
         this.inHelp = true;
@@ -686,15 +707,7 @@ export default {
         );
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
-          this.sensor = new ResizeSensor(
-            this.$refs.display,
-            mapResize(this.mapImp)
-          );
-          this.mapImp.setBackgroundOpacity(1);
-          this.backgroundChangeCallback(this.currentBackground);
-          this.pathways = this.mapImp.pathTypes();
-          this.$emit("ready", this);
-          this.loading = false;
+          this.onFlatmapReady();
           if (this._stateToBeSet)
             this.restoreMapState(this._stateToBeSet);
           else {
@@ -706,6 +719,20 @@ export default {
         if (this.mapImp && !this.loading)
           this.restoreMapState(this._stateToBeSet);
       }
+    },
+    onFlatmapReady: function(){
+      // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
+
+      this.sensor = new ResizeSensor(
+        this.$refs.display,
+        mapResize(this.mapImp)
+      );
+      this.mapImp.setBackgroundOpacity(1);
+      this.backgroundChangeCallback(this.currentBackground);
+      this.pathways = this.mapImp.pathTypes();
+      this.$emit("ready", this);
+      this.addResizeButtonToMinimap();
+      this.loading = false;
     },
     showMinimap: function(flag) {
       if (this.mapImp)
@@ -861,7 +888,9 @@ export default {
       drawerOpen: true,
       tooltipContent: { featureIds: []},
       colourRadio: true,
-      outlinesRadio: true
+      outlinesRadio: true,
+      minimapResizeShow: false,
+      minimapSmall: false
     };
   },
   watch: {
@@ -1307,6 +1336,54 @@ export default {
   color: $app-primary-color;
   &:hover {
     cursor: pointer;
+  }
+}
+
+::v-deep .maplibregl-ctrl-minimap {
+  transform-origin: top right;
+  @media (max-width: 1250px) {
+    height: 125px !important; // important is needed here as we are over-riding the style set by the flatmap
+    width: 180px !important;
+    >>> .maplibregl-canvas .mapboxgl-canvas {
+      height: 125px !important;
+      width: 180px !important; 
+    }
+  }
+  transition: all 1s ease;
+  &.enlarge {
+    @media (max-width: 1250px) {
+      height: 125px !important; 
+      width: 180px !important;
+    }
+    @media (min-width: 1251px) {
+      height: 190px !important;
+      width: 300px !important;
+    }
+  }
+  &.shrink {
+    transform: scale(0.5); 
+    transform: scale(0.5);
+  }
+}
+
+.minimap-resize {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+  top: 0;
+  right: 0;
+  padding-top: 3px; // needed as icon is offset
+  width: 20px;
+  height: 14px;
+  z-index: 9;
+  transition: all 1s ease;
+  &.shrink {
+    transform: rotate(0deg);
+  }
+  &.enlarge {
+    transform: rotate(180deg) scale(2);
+    padding-bottom: 5px; // note padding is added to the opposite side since it is rotated
+    padding-left: 5px;
   }
 }
 
