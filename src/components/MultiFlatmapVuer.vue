@@ -1,5 +1,5 @@
 <template>
-  <div class="multi-container">
+  <div class="multi-container" ref="multiContainer">
     <div style="position:absolute;z-index:10;">
       <div class="species-display-text">
         Species
@@ -162,6 +162,7 @@ export default {
     },
     FlatmapReady: function(component) {
       this.$emit("ready", component);
+      this.addCloseButtonToMinimap();
     },
     getCoordinatesOfLastClick: function() {
       const flatmap = this.$refs[this.activeSpecies];
@@ -419,7 +420,7 @@ export default {
       activeSpecies: undefined,
       appendToBody: false,
       speciesList: {},
-      requireInitialisation: true,
+      requireInitialisation: true
     };
   },
   watch: {
@@ -472,7 +473,8 @@ export default {
       border: 1px solid $app-primary-color;
     }
   }
-}
+} 
+
 
 ::v-deep .flatmap_dropdown {
   min-width: 160px!important;
