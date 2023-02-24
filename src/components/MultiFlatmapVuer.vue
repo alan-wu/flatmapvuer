@@ -161,7 +161,6 @@ export default {
     },
     FlatmapReady: function(component) {
       this.$emit("ready", component);
-      this.addCloseButtonToMinimap();
     },
     getCoordinatesOfLastClick: function() {
       const flatmap = this.$refs[this.activeSpecies];
@@ -507,5 +506,4 @@ export default {
 }
 
 </style>
-
 
