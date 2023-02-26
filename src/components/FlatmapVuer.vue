@@ -1354,7 +1354,7 @@ export default {
     width: 300px !important;
     >>> .maplibregl-canvas .mapboxgl-canvas {
       height: 190px !important;
-      width: 300px !important; 
+      width: 300px !important;
     }
   }
   transition: all 1s ease;
