@@ -229,7 +229,7 @@
         </el-row>
       </el-popover>
       <el-popover
-        content="Change background color"
+        content="Change settings"
         placement="right"
         v-model="hoverVisibilities[3].value"
         :appendToBody="false"
