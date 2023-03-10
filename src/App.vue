@@ -56,20 +56,6 @@ export default {
     FlatmapSelected: function(resource) {
       if (resource.eventType === "click") {
         console.log('resource', resource);
-        if (resource.feature && resource.feature.label) {
-          if (resource.feature.label !== "Wikipedia" &&
-            resource.feature.label !== "PubMed" &&
-            resource.feature.label !== "Provenance") {
-            let url =  'https://models.physiomeproject.org/@@search?SearchableText=' + resource.feature.label;
-            const a = document.createElement("a");
-            a.href = url;
-            const evt = document.createEvent("MouseEvents");
-            evt.initMouseEvent(
-              "click", true, true, window, 0, 0, 0, 0, 0,
-              true, false, false, false, 0, null);
-            a.dispatchEvent(evt);
-          }
-        }
       }
     },
     FlatmapReady: function(component) {
@@ -108,7 +94,7 @@ export default {
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
-      flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
+      flatmapAPI: "https://flatmaps.celldl.org/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },

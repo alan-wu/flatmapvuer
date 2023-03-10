@@ -402,6 +402,7 @@ export default {
           const resource = [data.models];
           const taxonomy = this.entry;
           const biologicalSex = this.biologicalSex;
+          console.log('data in event cb', data)
           const payload = {
             dataset: data.dataset,
             biologicalSex: biologicalSex,
@@ -452,20 +453,9 @@ export default {
       this.$emit("resource-selected", action);
     },
     hasNeuronTooltip: function(data) {
-
-      // neural data check
-      if (data.resource[0]){
-        if (data.resource[0].includes('ilxtr:neuron')){
-          return true
-        }
-      }
-      // annotated with datset check
-      if (data.dataset) {
+      if (data){
         return true
       }
-
-      // if there is no cuff, neural data, or dataset we do not display neuron tooltip
-      return false
 
     },
     createTooltipFromNeuronCuration: function(data) {
@@ -482,7 +472,7 @@ export default {
 
       // neural data check
       if (feature){
-        if (feature.includes('ilxtr:neuron')){
+        if (feature.includes('ilxtr')){
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
