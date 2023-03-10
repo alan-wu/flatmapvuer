@@ -63,7 +63,7 @@
           </el-button>
         </div>
 
-        <el-button v-show="components.length > 0" class="button" @click="openAll">
+        <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
           Search for data on components
         </el-button>
 
@@ -191,7 +191,7 @@ export default {
       window.open(url, '_blank')
     },
     openAll: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.components})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.componentsWithDatasets.map(a=>a.name)})
     },
     openAxons: function(){
       EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
