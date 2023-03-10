@@ -9,7 +9,7 @@
       </div>
       <div class="content-container scrollbar">
         {{content.paths}}
-        <div v-if="this.origins" class="block">
+        <div v-if="this.origins && this.origins.length > 0" class="block">
           <div>
             <span class="attribute-title">Origin</span>
             <el-popover
@@ -32,14 +32,14 @@
             Explore origin data
           </el-button>
         </div>
-        <div v-if="this.components" class="block">
+        <div v-if="this.components && this.components.length > 0" class="block">
           <div class="attribute-title">Components</div>
           <div v-for="(component, i) in components" class="attribute-content"  :key="component">
             {{ capitalise(component) }}
             <div v-if="i != components.length - 1" class="seperator"></div>
           </div>
         </div>
-        <div v-if="this.destinations" class="block">
+        <div v-if="this.destinations && this.destinations.length > 0" class="block">
           <div>
             <span class="attribute-title">Destination</span>
             <el-popover
