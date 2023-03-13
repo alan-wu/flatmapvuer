@@ -131,7 +131,8 @@
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
         <div
           class="pathway-container"
-          v-if="pathways.length > 0 && pathControls"
+          :style="{'max-height': pathwaysMaxHeight + 'px'}"
+          v-if="pathControls"
           v-popover:checkBoxPopover
         >
           <svg-legends v-if="entry !== 'FunctionalConnectivity'" class="svg-legends-container"/>
@@ -150,6 +151,13 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
+          <selections-group
+            v-if="layers && layers.length > 0"
+            labelName="Layers"
+            :selections="layers"
+            @changed="layersSelected"
+            ref="layersSelection"
+          />
           <selections-group
             v-if="pathways && pathways.length > 0"
             labelName="Pathways"
@@ -202,7 +210,7 @@
       </el-popover>
       <el-popover
         content="Change settings"
-        placement="right"
+        placement="right"q
         v-model="hoverVisibilities[3].value"
         :appendToBody="false"
         trigger="manual"
@@ -253,12 +261,6 @@ Vue.use(Radio);
 Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
-
-const mapResize = map => {
-  return () => {
-    if (map) map.resize();
-  };
-};
 
 export default {
   name: "FlatmapVuer",
@@ -321,6 +323,9 @@ export default {
     resetView: function() {
       if (this.mapImp) {
         this.mapImp.resetMap();
+        if (this.$refs.layersSelection) {
+          this.$refs.layersSelection.reset();
+        }
         if (this.$refs.pathwaysSelection) {
           this.$refs.pathwaysSelection.reset();
         }
@@ -342,6 +347,11 @@ export default {
     zoomOut: function() {
       if (this.mapImp) {
         this.mapImp.zoomOut();
+      }
+    },
+    layersSelected: function(items) {
+      if (this.mapImp) {
+        console.log(items);
       }
     },
     pathwaysSelected: function(items) {
@@ -677,19 +687,35 @@ export default {
           this.restoreMapState(this._stateToBeSet);
       }
     },
+    computePathControlsMaximumHeight() {
+      const elem = this.$refs.display;
+      if (elem) {
+        const computed = getComputedStyle(elem);
+        const padding = parseInt(computed.paddingTop) + parseInt(computed.paddingBottom);
+        const height = elem.clientHeight - padding;
+        this.pathwaysMaxHeight = height - 150;
+      }
+    },
+    mapResize: function() {
+      if (this.mapImp) {
+        this.mapImp.resize();
+      }
+      this.computePathControlsMaximumHeight();
+    },
     onFlatmapReady: function(){
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-
       this.sensor = new ResizeSensor(
         this.$refs.display,
-        mapResize(this.mapImp)
+        this.mapResize
       );
       this.mapImp.setBackgroundOpacity(1);
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
+      //this.layers = this.mapImp.layers();
       this.$emit("ready", this);
       this.addResizeButtonToMinimap();
       this.loading = false;
+      this.computePathControlsMaximumHeight();
     },
     showMinimap: function(flag) {
       if (this.mapImp)
@@ -823,7 +849,9 @@ export default {
   },
   data: function() {
     return {
+      layers: [],
       pathways: [],
+      pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },
         { value: false },
@@ -949,12 +977,20 @@ export default {
   float: left;
   padding-left: 16px;
   padding-right: 18px;
-  max-height: calc(100% - 140px);
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
   padding-bottom: 16px;
   background: #ffffff;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px #c0c4cc;
+  }
 }
 
 .flatmap-marker-help {
