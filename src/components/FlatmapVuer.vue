@@ -134,7 +134,7 @@
           v-if="pathways.length > 0 && pathControls"
           v-popover:checkBoxPopover
         >
-          <svg-legends class= "svg-legends-container"/>
+          <svg-legends v-if="entry !== 'FunctionalConnectivity'" class="svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -150,41 +150,13 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
-          <el-row>
-            <el-col :span="12">
-              <div class="pathways-display-text">Pathways</div>
-            </el-col>
-            <el-col :span="12">
-              <el-checkbox
-                class="all-checkbox"
-                :indeterminate="isIndeterminate"
-                v-model="checkAll"
-                @change="handleCheckAllChange"
-              >Display all</el-checkbox>
-            </el-col>
-          </el-row>
-          <el-checkbox-group
-            v-model="checkedItems"
-            size="small"
-            class="checkbox-group"
-            @change="handleCheckedItemsChange"
-          >
-            <div class="checkbox-group-inner">
-              <el-row v-for="item in pathways" :key="item.type" :label="item.type">
-                <div class="checkbox-container">
-                  <el-checkbox
-                    class="my-checkbox"
-                    :label="item.type"
-                    @change="visibilityToggle()"
-                    :checked="true"
-                  >
-                    <div class="path-visual" :class="item.type"></div>
-                    {{item.label}}
-                  </el-checkbox>
-                </div>
-              </el-row>
-            </div>
-          </el-checkbox-group>
+          <selections-group
+            v-if="pathways && pathways.length > 0"
+            labelName="Pathways"
+            :selections="pathways"
+            @changed="pathwaysSelected"
+            ref="pathwaysSelection"
+          />
         </div>
         <div
           @click="toggleDrawer"
@@ -260,11 +232,10 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from "./Tooltip";
+import SelectionsGroup from "./SelectionsGroup.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import SvgLegends from "./legends/Legends";
 import {
-  Checkbox,
-  CheckboxGroup,
   Col,
   Loading,
   Radio,
@@ -276,8 +247,6 @@ import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
 
 locale.use(lang);
-Vue.use(Checkbox);
-Vue.use(CheckboxGroup);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Radio);
@@ -297,6 +266,7 @@ export default {
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
+    SelectionsGroup,
     SvgLegends
   },
   beforeCreate: function() {
@@ -351,9 +321,9 @@ export default {
     resetView: function() {
       if (this.mapImp) {
         this.mapImp.resetMap();
-        this.checkedItems = this.mapImp.pathTypes().map(item => item.type);
-        this.isIndeterminate = false;
-        this.checkAll = true;
+        if (this.$refs.pathwaysSelection) {
+          this.$refs.pathwaysSelection.reset();
+        }
       }
     },
     /**
@@ -374,22 +344,9 @@ export default {
         this.mapImp.zoomOut();
       }
     },
-    visibilityToggle: function() {
+    pathwaysSelected: function(items) {
       if (this.mapImp) {
-        this.mapImp.showPaths(this.checkedItems);
-      }
-    },
-    handleCheckedItemsChange: function(value) {
-      let checkedCount = value.length;
-      this.checkAll = checkedCount === this.pathways.length;
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.pathways.length;
-    },
-    handleCheckAllChange(val) {
-      this.checkedItems = val ? this.pathways.map(a => a.type) : [];
-      this.isIndeterminate = false;
-      if (this.mapImp) {
-        this.mapImp.showPaths(this.checkedItems);
+        this.mapImp.showPaths(items);
       }
     },
     enablePanZoomEvents: function(flag) {
@@ -866,10 +823,7 @@ export default {
   },
   data: function() {
     return {
-      checkedItems: [],
       pathways: [],
-      isIndeterminate: false,
-      checkAll: true,
       hoverVisibilities: [
         { value: false },
         { value: false },
@@ -919,8 +873,6 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import "~element-ui/packages/theme-chalk/src/button";
-@import "~element-ui/packages/theme-chalk/src/checkbox";
-@import "~element-ui/packages/theme-chalk/src/checkbox-group";
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
@@ -969,53 +921,6 @@ export default {
   vertical-align: 5px;
 }
 
-.path-visual {
-  margin: 3px 0;
-  height: 3px;
-  width: 25px;
-  margin-right: 5px;
-  display: inline-block;
-  &.cns {
-    background: #9b1fc1;
-  }
-  &.lcn {
-    background: #f19e38;
-  }
-  &.para-pre {
-    background: #3f8f4a;
-  }
-  &.para-post {
-    background: repeating-linear-gradient(
-      90deg,
-      #3f8f4a,
-      #3f8f4a 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.sensory {
-    background: #2a62f6;
-  }
-  &.somatic {
-    background: #98561d;
-  }
-  &.symp-pre {
-    background: #ea3423;
-  }
-  &.symp-post {
-    background: repeating-linear-gradient(
-      90deg,
-      #ea3423,
-      #ea3423 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.other {
-    background: #888;
-  }
-}
-
 .flatmap-container {
   height: 100%;
   width: 100%;
@@ -1052,70 +957,12 @@ export default {
   background: #ffffff;
 }
 
-.pathways-display-text {
-  width: 59px;
-  height: 20px;
-  color: rgb(48, 49, 51);
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 20px;
-  margin-left: 8px;
-}
-
-.all-checkbox {
-  float: right;
-}
-
-.checkbox-container {
-  display: flex;
-  cursor: pointer;
-}
-
-.checkbox-group {
-  width: 260px;
-  border: 1px solid rgb(144, 147, 153);
-  border-radius: 4px;
-  background: #ffffff;
-}
-
-.my-checkbox {
-  background-color: #fff;
-  width: 100%;
-}
-
-.checkbox-group-inner {
-  padding: 18px;
-}
-
 .flatmap-marker-help {
   display: inline-block;
 }
 
 ::v-deep .popper-bump-right {
   left: 30px;
-}
-
-::v-deep .el-checkbox__label {
-  padding-left: 5px;
-  color: $app-primary-color;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0px;
-  line-height: 14px;
-}
-
-::v-deep .el-checkbox__input {
-  &.is-indeterminate,
-  &.is-checked {
-    .el-checkbox__inner {
-      background-color: $app-primary-color;
-      border-color: $app-primary-color;
-    }
-  }
-}
-
-::v-deep .el-checkbox__label {
-  color: $app-primary-color !important;
 }
 
 .el-dropdown-link {
@@ -1322,12 +1169,6 @@ export default {
   &.lightskyblue {
     background-color: lightskyblue;
   }
-}
-
-.togglePaths {
-  top: 201px;
-  right: 20px;
-  position: absolute;
 }
 
 .icon-button {
