@@ -153,16 +153,22 @@
           ></div>
           <selections-group
             v-if="layers && layers.length > 0"
-            labelName="Layers"
+            title="Layers"
+            labelKey="description"
+            identifierKey="id"
             :selections="layers"
             @changed="layersSelected"
+            @checkAll="checkAllLayers"
             ref="layersSelection"
           />
           <selections-group
             v-if="pathways && pathways.length > 0"
-            labelName="Pathways"
+            title="Pathways"
+            labelKey="label"
+            identifierKey="type"
             :selections="pathways"
             @changed="pathwaysSelected"
+            @checkAll="checkAllPathways"
             ref="pathwaysSelection"
           />
         </div>
@@ -210,7 +216,7 @@
       </el-popover>
       <el-popover
         content="Change settings"
-        placement="right"q
+        placement="right"
         v-model="hoverVisibilities[3].value"
         :appendToBody="false"
         trigger="manual"
@@ -349,14 +355,24 @@ export default {
         this.mapImp.zoomOut();
       }
     },
-    layersSelected: function(items) {
+    layersSelected: function(payload) {
       if (this.mapImp) {
-        console.log(items);
+        this.mapImp.enableLayer(payload.key, payload.value);
       }
     },
-    pathwaysSelected: function(items) {
+    checkAllLayers: function(payload) {
       if (this.mapImp) {
-        this.mapImp.showPaths(items);
+        payload.keys.forEach(key => this.mapImp.enableLayer(key, payload.value));
+      }
+    },
+    pathwaysSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enablePath(payload.key, payload.value);
+      }
+    },
+    checkAllPathways: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enablePath(key, payload.value));
       }
     },
     enablePanZoomEvents: function(flag) {
@@ -666,7 +682,8 @@ export default {
             //debug: true,
             featureInfo: this.featureInfo,
             "min-zoom": this.minZoom,
-            pathControls: false,
+            layerControl: true,
+            pathControls: true,
             searchable: this.searchable,
             tooltips: this.tooltips,
             minimap: minimap
@@ -711,7 +728,7 @@ export default {
       this.mapImp.setBackgroundOpacity(1);
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
-      //this.layers = this.mapImp.layers();
+      this.layers = this.mapImp.getLayers();
       this.$emit("ready", this);
       this.addResizeButtonToMinimap();
       this.loading = false;

@@ -2,7 +2,7 @@
   <div>
     <el-row>
       <el-col :span="12">
-        <div class="checkall-display-text">{{labelName}}</div>
+        <div class="checkall-display-text">{{title}}</div>
       </el-col>
       <el-col :span="12">
         <el-checkbox
@@ -17,19 +17,19 @@
       v-model="checkedItems"
       size="small"
       class="checkbox-group"
-      @change="handleCheckedChange"
+      @change="handleCheckedItemsChange"
     >
       <div class="checkbox-group-inner">
-        <el-row v-for="item in selections" :key="item.type" :label="item.type">
+        <el-row v-for="item in selections" :key="item[identifierKey]" :label="item[identifierKey]">
           <div class="checkbox-container">
             <el-checkbox
               class="my-checkbox"
-              :label="item.type"
-              @change="visibilityToggle()"
+              :label="item[identifierKey]"
+              @change="visibilityToggle(item[identifierKey], $event)"
               :checked="true"
             >
-              <div class="path-visual" :class="item.type"></div>
-              {{item.label}}
+              <div class="path-visual" :class="item[identifierKey]"></div>
+              {{item[labelKey]}}
             </el-checkbox>
           </div>
         </el-row>
@@ -65,27 +65,39 @@ export default {
      * Also called when the associated button is pressed.
      */
     reset: function() {
-      this.checkedItems = this.selections.map(item => item.type);
+      this.checkedItems = this.selections.map(item => item[this.identifierKey]);
       this.isIndeterminate = false;
       this.checkAll = true;
     },
-    visibilityToggle: function() {
-      this.$emit("changed", this.checkedItems);
+    visibilityToggle: function(key, value) {
+      this.$emit("changed", {key, value});
     },
-    handleCheckedChange: function(value) {
+    handleCheckedItemsChange: function(value) {
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.selections.length;
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.selections.length;
     },
     handleCheckAllChange(val) {
-      this.checkedItems = val ? this.selections.map(a => a.type) : [];
+      this.checkedItems = val ? this.selections.map(a => a[this.identifierKey]) : [];
       this.isIndeterminate = false;
-      this.$emit("changed", this.checkedItems);
+      this.$emit("checkAll",
+      {
+        keys: this.selections.map(a => a[this.identifierKey]),
+        value: val
+      });
     },
   },
   props: {
-    labelName: {
+    identifierKey: {
+      type: String,
+      default: "id"
+    },
+    labelKey: {
+      type: String,
+      default: "label"
+    },
+    title: {
       type: String,
       default: ""
     },
@@ -95,7 +107,6 @@ export default {
         return [];
       },
     },
-    
   },
   data: function() {
     return {
@@ -119,8 +130,29 @@ export default {
   width: 25px;
   margin-right: 5px;
   display: inline-block;
+  &.arterial {
+    background: #f00;
+  }
   &.cns {
     background: #9b1fc1;
+  }
+  &.centreline {
+    background: repeating-linear-gradient(
+      90deg,
+      #2f6eba,
+      #2f6eba 6px,
+      transparent 0,
+      transparent 9px
+    );
+  }
+  &.intracardiac {
+    background: repeating-linear-gradient(
+      90deg,
+      #f19e38,
+      #f19e38 6px,
+      transparent 0,
+      transparent 9px
+    );
   }
   &.lcn {
     background: #f19e38;
@@ -154,6 +186,9 @@ export default {
       transparent 0,
       transparent 9px
     );
+  }
+  &.venous {
+    background: #2f6eba;
   }
   &.other {
     background: #888;
