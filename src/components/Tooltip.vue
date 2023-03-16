@@ -67,6 +67,8 @@
           Search for data on components
         </el-button>
 
+        <external-resource-card :resources="resources"></external-resource-card>
+
         <!-- pubmed-viewer is just used for processing pubmed requests (no display) -->
         <pubmed-viewer v-if="content.featureIds" v-show="false" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
         <el-button  v-if="pubmedSearchUrl != ''" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
@@ -100,6 +102,7 @@ Vue.use(Main);
 // pubmedviewer is currently not in use, but still under review so not ready to delete yet
 import PubmedViewer from './PubmedViewer.vue'
 import EventBus from './EventBus'
+import ExternalResourceCard from './ExternalResourceCard.vue';
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
@@ -123,7 +126,7 @@ const capitalise = function(str){
 }
 
 export default {
-  components: { PubmedViewer },
+  components: { PubmedViewer, ExternalResourceCard },
   name: "Tooltip",
   props: { 
     visible: {
@@ -168,6 +171,13 @@ export default {
     this.getOrganCuries()
   },
   computed: {
+    resources: function(){
+      let resources = []
+      if(this.content && this.content.hyperlinks){
+        resources = this.content.hyperlinks
+      }
+      return resources
+    },
     originDescription: function(){
       if(this.content && this.content.title && this.content.title.toLowerCase().includes('motor')){
         return this.originDescriptions.motor
@@ -332,18 +342,26 @@ export default {
       .then(response => response.json())
       .then(data => {
         if(data.values && data.values.length > 0 && JSON.parse(data.values[0][0]).connectivity && JSON.parse(data.values[0][0]).connectivity.length > 0) {
-          this.$emit('show-tooltip', true)
+          this.showToolipEmit(true)
           let connectivity = JSON.parse(data.values[0][0])
           this.processConnectivity(connectivity)
           this.loading = false
         } else {
-          this.$emit('show-tooltip', false) 
+          this.showToolipEmit(false)
         }
         this.controller = false
       })
       .catch((error) => {
         console.error('Error:', error);
       })
+    },
+    showToolipEmit: function(bool){
+      if(!bool && this.resources.length === 0){
+        this.$emit('show-tooltip', false)
+      } else {
+        this.$emit('show-tooltip', true)
+        this.loading = false
+      }
     },
     createComponentsLabelList: function(components, lookUp){
       let labelList = []

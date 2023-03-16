@@ -474,6 +474,7 @@ export default {
           this.tooltipContent.uberon = feature;
           this.tooltipContent.source = data.feature.source;
           this.tooltipContent.title = data.label;
+          this.tooltipContent.hyperlinks = data.feature.hyperlinks;
           this.tooltipContent.featureIds = [feature];
           this.tooltipContent.actions.push({
             title: "Search for datasets",
@@ -490,6 +491,23 @@ export default {
         this.tooltipContent = content;
         this.tooltipContent.uberon = feature;
         this.tooltipContent.source = data.feature.source;
+        this.tooltipContent.hyperlinks = data.feature.hyperlinks;
+        this.tooltipContent.title = data.label;
+        this.tooltipContent.actions.push({
+          title: "View dataset",
+          resource: data.dataset,
+          type: "URL",
+          feature: feature,
+          nervePath: false
+        });
+      }
+      // annotated with datset check
+      if (data.feature.hyperlinks.length > 0) {
+        this.tooltipVisible = true;
+        this.tooltipContent = content;
+        this.tooltipContent.uberon = feature;
+        this.tooltipContent.source = data.feature.source;
+        this.tooltipContent.hyperlinks = data.feature.hyperlinks;
         this.tooltipContent.title = data.label;
         this.tooltipContent.actions.push({
           title: "View dataset",
@@ -530,9 +548,11 @@ export default {
     },
     addResizeButtonToMinimap: function(){
       let minimapEl = this.$refs.flatmapContainer.querySelector('.maplibregl-ctrl-minimap');
-      this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
-      minimapEl.appendChild(this.$refs.minimapResize);
-      this.minimapResizeShow = true;
+      if (minimapEl){
+        this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
+        minimapEl.appendChild(this.$refs.minimapResize);
+        this.minimapResizeShow = true;
+      }
     },
     setHelpMode: function(helpMode) {
       if (helpMode) {
