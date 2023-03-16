@@ -249,8 +249,10 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
+        v-show="connectivityTooltipVisible"
         :content="tooltipContent"
         @resource-selected="resourceSelected"
+        @show-tooltip="tooltipShowEmitted"
       />
     </div>
   </div>
@@ -402,7 +404,6 @@ export default {
           const resource = [data.models];
           const taxonomy = this.entry;
           const biologicalSex = this.biologicalSex;
-          console.log('data in event cb', data)
           const payload = {
             dataset: data.dataset,
             biologicalSex: biologicalSex,
@@ -428,13 +429,9 @@ export default {
         data.eventType == "click" &&
         this.hasNeuronTooltip(data)
       ) {
+        this.$refs.tooltip.abortRequests();
         this.createTooltipFromNeuronCuration(data);
-        this.mapImp.showPopup(
-          this.mapImp.modelFeatureIds(data.resource[0])[0],
-          this.$refs.tooltip.$el,
-          { className: "flatmapvuer-popover", positionAtLastClick: true }
-        );
-        this.popUpCssHacks();
+        this.resourceForTooltip =  data.resource[0];
       }
     },
     popUpCssHacks: function() {
@@ -472,7 +469,6 @@ export default {
 
       // neural data check
       if (feature){
-        if (feature.includes('ilxtr')){
           this.tooltipVisible = true;
           this.tooltipContent = content;
           this.tooltipContent.uberon = feature;
@@ -487,7 +483,6 @@ export default {
             feature: feature,
             nervePath: true
           });
-        }
       }
       // annotated with datset check
       if (data.dataset) {
@@ -565,6 +560,17 @@ export default {
       if (!this.inHelp) {
         this.hoverVisibilities[tooltipNumber].value = false;
         clearTimeout(this.tooltipWait);
+      }
+    },
+    tooltipShowEmitted: function(show) {
+      this.connectivityTooltipVisible =  show
+      if (show) {
+        this.mapImp.showPopup(
+          this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
+          this.$refs.tooltip.$el,
+          { className: "flatmapvuer-popover", positionAtLastClick: true }
+        );
+        this.popUpCssHacks();
       }
     },
     openFlatmapHelpPopup: function() {
@@ -882,6 +888,8 @@ export default {
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
       tooltipContent: { featureIds: []},
+      connectivityTooltipVisible: false,
+      resourceForTooltip: undefined,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,

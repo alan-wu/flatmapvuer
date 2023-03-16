@@ -137,10 +137,12 @@ export default {
   },
   data: function() {
     return {
+      controller: undefined,
       activeSpecies: undefined,
       appendToBody: false,
       pubmedSearchUrl: '',
       loading: false,
+      showToolip: false,
       destinations: [],
       origins: [],
       components: [],
@@ -201,6 +203,12 @@ export default {
     },
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
+    },
+    abortRequests: function(){
+      if (this.controller){
+        this.controller.abort()
+        console.log('aborting requests')
+      }
     },
     findAllIdsFromConnectivity(connectivity){
       let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
@@ -299,8 +307,42 @@ export default {
                 uberonMap[pair[entity]] = pair[label];
               });
             }
-            resolve(uberonMap)
+          resolve(uberonMap)
           })
+      })
+    },
+    pathwayQuery: function(keastIds){
+      this.controller = new AbortController();
+      const signal = this.controller.signal;
+
+      this.destinations = []
+      this.origins = []
+      this.components = []
+      this.loading = true
+      if (!keastIds || keastIds.length == 0) return
+      const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
+      fetch(`${this.flatmapAPI}knowledge/query/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        signal: signal
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.values && data.values.length > 0 && JSON.parse(data.values[0][0]).connectivity && JSON.parse(data.values[0][0]).connectivity.length > 0) {
+          this.$emit('show-tooltip', true)
+          let connectivity = JSON.parse(data.values[0][0])
+          this.processConnectivity(connectivity)
+          this.loading = false
+        } else {
+          this.$emit('show-tooltip', false) 
+        }
+        this.controller = false
+      })
+      .catch((error) => {
+        console.error('Error:', error);
       })
     },
     createComponentsLabelList: function(components, lookUp){
@@ -357,30 +399,6 @@ export default {
       this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
       this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
       this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
-    },
-    pathwayQuery: function(keastIds){
-      this.destinations = []
-      this.origins = []
-      this.components = []
-      this.loading = true
-      if (!keastIds || keastIds.length == 0) return
-      const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
-      fetch(`${this.flatmapAPI}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      .then(response => response.json())
-      .then(data => {
-        let connectivity = JSON.parse(data.values[0][0])
-        this.processConnectivity(connectivity)
-        this.loading = false
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      })
     }
   }
 };
