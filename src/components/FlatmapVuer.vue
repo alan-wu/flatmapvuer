@@ -135,7 +135,7 @@
           v-if="pathControls"
           v-popover:checkBoxPopover
         >
-          <svg-legends v-if="entry !== 'FunctionalConnectivity'" class="svg-legends-container"/>
+          <svg-legends v-if="!isFC" class="svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -152,6 +152,27 @@
             v-popover:markerPopover
           ></div>
           <selections-group
+            v-if="!isFC && centreLines && centreLines.length > 0"
+            title="Centrelines"
+            labelKey="label"
+            identifierKey="key"
+            :selections="centreLines"
+            @changed="centreLinesSelected"
+            ref="centrelinesSelection"
+            key="centrelinesSelection"
+          />
+          <selections-group
+            v-if="sckanDisplay && sckanDisplay.length > 0"
+            title="SCKAN"
+            labelKey="label"
+            identifierKey="key"
+            :selections="sckanDisplay"
+            @changed="sckanSelected"
+            @checkAll="checkAllSCKAN"
+            ref="skcanSelection"
+            key="skcanSelection"
+          />
+          <selections-group
             v-if="layers && layers.length > 0"
             title="Layers"
             labelKey="description"
@@ -160,6 +181,7 @@
             @changed="layersSelected"
             @checkAll="checkAllLayers"
             ref="layersSelection"
+            key="layersSelection"
           />
           <selections-group
             v-if="pathways && pathways.length > 0"
@@ -170,6 +192,7 @@
             @changed="pathwaysSelected"
             @checkAll="checkAllPathways"
             ref="pathwaysSelection"
+            key="pathwaysSelection"
           />
         </div>
         <div
@@ -186,6 +209,7 @@
         width="175"
         :appendToBody="false"
         trigger="click"
+
         popper-class="background-popper"
       >
         <el-row class="backgroundText">Organs display</el-row>
@@ -353,6 +377,21 @@ export default {
     zoomOut: function() {
       if (this.mapImp) {
         this.mapImp.zoomOut();
+      }
+    },
+    centreLinesSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableCentrelines(payload.value);
+      }
+    },
+    sckanSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableSckanPath(payload.key, payload.value);
+      }
+    },
+    checkAllSCKAN: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableSckanPath(key, payload.value));
       }
     },
     layersSelected: function(payload) {
@@ -725,6 +764,9 @@ export default {
         this.$refs.display,
         this.mapResize
       );
+      if (this.mapImp.options && this.mapImp.options.style === "functional") {
+        this.isFC = true;
+      }
       this.mapImp.setBackgroundOpacity(1);
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
@@ -868,6 +910,23 @@ export default {
     return {
       layers: [],
       pathways: [],
+      sckanDisplay: [
+        {
+          label: "Path consistent with SCKAN",
+          key: "VALID",
+        },
+        {
+          label: "Path inconsistent with SCKAN",
+          key: "INVALID",
+          enable: false,
+        }
+      ],
+      centreLines: [
+        {
+          label: "Centrelines",
+          key: "centrelines"
+        }
+      ],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },
@@ -879,6 +938,7 @@ export default {
         { value: false },
         { value: false }
       ],
+      isFC: false,
       inHelp: false,
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],

@@ -6,6 +6,7 @@
       </el-col>
       <el-col :span="12">
         <el-checkbox
+          v-if="selections && selections.length > 1"
           class="all-checkbox"
           :indeterminate="isIndeterminate"
           v-model="checkAll"
@@ -26,8 +27,7 @@
               class="my-checkbox"
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
-              :checked="true"
-            >
+              :checked="!(('enable' in item) && item.enable === false)">
               <div class="path-visual" :class="item[identifierKey]"></div>
               {{item[labelKey]}}
             </el-checkbox>
@@ -65,9 +65,15 @@ export default {
      * Also called when the associated button is pressed.
      */
     reset: function() {
-      this.checkedItems = this.selections.map(item => item[this.identifierKey]);
-      this.isIndeterminate = false;
       this.checkAll = true;
+      this.checkedItems = [];
+      this.selections.forEach(item => {
+        if (!(('enable' in item) && item.enable === false)) {
+          this.checkedItems.push(item[this.identifierKey]);
+        } else {
+          this.checkAll = false;
+        }
+      });
     },
     visibilityToggle: function(key, value) {
       this.$emit("changed", {key, value});
@@ -75,12 +81,9 @@ export default {
     handleCheckedItemsChange: function(value) {
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.selections.length;
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.selections.length;
     },
     handleCheckAllChange(val) {
       this.checkedItems = val ? this.selections.map(a => a[this.identifierKey]) : [];
-      this.isIndeterminate = false;
       this.$emit("checkAll",
       {
         keys: this.selections.map(a => a[this.identifierKey]),
@@ -108,13 +111,24 @@ export default {
       },
     },
   },
+  computed: {
+    isIndeterminate: function() {
+      const count = this.checkedItems.length;
+      if ((count === 0) || this.checkAll){
+        return false;
+      }
+      return true;
+    }
+  },
   data: function() {
     return {
       checkedItems: [],
-      isIndeterminate: false,
       checkAll: true,
     };
   },
+  mounted: function() {
+    this.reset();
+  }
 };
 </script>
 

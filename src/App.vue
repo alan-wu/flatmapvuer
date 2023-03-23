@@ -62,7 +62,7 @@ export default {
       component.enablePanZoomEvents(true);
       component.showPathwaysDrawer(false);
       console.log(taxon, id);
-      component.searchAndShowResult("heart");
+      //component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
       this.payload = payload
@@ -82,7 +82,7 @@ export default {
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
-        "Functional Connectivity": {id: "fc-cardio", displayWarning:true},
+        "Functional Connectivity": {taxo: "FunctionalConnectivity", displayWarning:true},
         "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
@@ -92,12 +92,13 @@ export default {
         position: "absolute"
       },
       displayCloseButton: false,
-      initial: "Rat",
+      initial: "Functional Connectivity",
       helpMode: false,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-       flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
+      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
