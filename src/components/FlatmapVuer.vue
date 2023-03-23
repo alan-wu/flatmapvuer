@@ -276,6 +276,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
+import {FlatmapQueries} from "../services/flatmapQueries";
 
 locale.use(lang);
 Vue.use(Checkbox);
@@ -425,11 +426,11 @@ export default {
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data) {
+      // Call flatmap database to get the connection data
       if (
         data.eventType == "click" &&
         this.hasNeuronTooltip(data)
       ) {
-        this.$refs.tooltip.abortRequests();
         this.createTooltipFromNeuronCuration(data);
         this.resourceForTooltip =  data.resource[0];
       }
@@ -509,13 +510,6 @@ export default {
         this.tooltipContent.source = data.feature.source;
         this.tooltipContent.hyperlinks = data.feature.hyperlinks;
         this.tooltipContent.title = data.label;
-        this.tooltipContent.actions.push({
-          title: "View dataset",
-          resource: data.dataset,
-          type: "URL",
-          feature: feature,
-          nervePath: false
-        });
       }
     },
     // Keeping this as an API
@@ -935,6 +929,7 @@ export default {
     const flatmap = require("@abi-software/flatmap-viewer");
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted) this.createFlatmap();
+    this.flatmapQueries = new FlatmapQueries(this.flatmapAPI);
   }
 };
 </script>
