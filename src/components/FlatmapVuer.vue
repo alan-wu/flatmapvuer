@@ -169,7 +169,7 @@
             key="centrelinesSelection"
           />
           <selections-group
-            v-if="sckanDisplay && sckanDisplay.length > 0"
+            v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
             title="SCKAN"
             labelKey="label"
             identifierKey="key"
@@ -787,10 +787,11 @@ export default {
       this.pathways = this.mapImp.pathTypes();
       this.layers = this.mapImp.getLayers();
       this.systems = this.mapImp.getSystems();
-      this.$emit("ready", this);
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
+      this.drawerOpen = true;
+      this.$emit("ready", this);
     },
     showMinimap: function(flag) {
       if (this.mapImp)
@@ -960,7 +961,7 @@ export default {
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
       flatmapMarker: flatmapMarker,
-      drawerOpen: true,
+      drawerOpen: false,
       tooltipContent: { featureIds: []},
       colourRadio: true,
       outlinesRadio: true,

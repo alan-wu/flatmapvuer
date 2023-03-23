@@ -60,7 +60,7 @@ export default {
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948");
       component.enablePanZoomEvents(true);
-      component.showPathwaysDrawer(false);
+      //component.showPathwaysDrawer(false);
       console.log(taxon, id);
       //component.searchAndShowResult("heart");
     },
