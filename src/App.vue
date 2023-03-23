@@ -58,7 +58,7 @@ export default {
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
-      let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
+      let id = component.mapImp.addMarker("UBERON:0000948");
       component.enablePanZoomEvents(true);
       component.showPathwaysDrawer(false);
       console.log(taxon, id);

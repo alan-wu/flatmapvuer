@@ -151,6 +151,13 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
+          <dynamic-legends
+            v-if="isFC && systems && systems.length > 0"
+            title="Systems"
+            identifierKey="name"
+            :lists="systems"
+            key="systemslegends"
+          />
           <selections-group
             v-if="!isFC && centreLines && centreLines.length > 0"
             title="Centrelines"
@@ -272,7 +279,8 @@ import Vue from "vue";
 import Tooltip from "./Tooltip";
 import SelectionsGroup from "./SelectionsGroup.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import SvgLegends from "./legends/Legends";
+import DynamicLegends from "./legends/DynamicLegends.vue";
+import SvgLegends from "./legends/SvgLegends";
 import {
   Col,
   Loading,
@@ -295,6 +303,7 @@ const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 export default {
   name: "FlatmapVuer",
   components: {
+    DynamicLegends,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
@@ -353,6 +362,12 @@ export default {
     resetView: function() {
       if (this.mapImp) {
         this.mapImp.resetMap();
+        if (this.$refs.centrelinesSelection) {
+          this.$refs.centrelinesSelection.reset();
+        }
+        if (this.$refs.skcanSelection) {
+          this.$refs.skcanSelection.reset();
+        }
         if (this.$refs.layersSelection) {
           this.$refs.layersSelection.reset();
         }
@@ -771,6 +786,7 @@ export default {
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
       this.layers = this.mapImp.getLayers();
+      this.systems = this.mapImp.getSystems();
       this.$emit("ready", this);
       this.addResizeButtonToMinimap();
       this.loading = false;

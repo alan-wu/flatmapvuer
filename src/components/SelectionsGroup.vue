@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="selections-container">
     <el-row>
       <el-col :span="12">
         <div class="checkall-display-text">{{title}}</div>
@@ -28,7 +28,7 @@
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
               :checked="!(('enable' in item) && item.enable === false)">
-              <div class="path-visual" :class="item[identifierKey]"></div>
+              <div class="path-visual" :style="getVisualStyles(item)"></div>
               {{item[labelKey]}}
             </el-checkbox>
           </div>
@@ -90,6 +90,19 @@ export default {
         value: val
       });
     },
+    getVisualStyles(item) {
+      if ('colour' in item) {
+        if (('dashed' in item) && (item.dashed === true)) {
+          const background = `repeating-linear-gradient(90deg,${item.colour},${item.colour} 6px,transparent 0,transparent 9px)`;
+          return {'background':background};
+        }
+        else {
+          const background = item.colour;
+          return {background};
+        }
+      }
+      return {};
+    }
   },
   props: {
     identifierKey: {
@@ -138,75 +151,16 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/checkbox-group";
 @import "~element-ui/packages/theme-chalk/src/row";
 
+.selection-container {
+  margin-top:5px;
+}
+
 .path-visual {
   margin: 3px 0;
   height: 3px;
   width: 25px;
   margin-right: 5px;
   display: inline-block;
-  &.arterial {
-    background: #f00;
-  }
-  &.cns {
-    background: #9b1fc1;
-  }
-  &.centreline {
-    background: repeating-linear-gradient(
-      90deg,
-      #2f6eba,
-      #2f6eba 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.intracardiac {
-    background: repeating-linear-gradient(
-      90deg,
-      #f19e38,
-      #f19e38 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.lcn {
-    background: #f19e38;
-  }
-  &.para-pre {
-    background: #3f8f4a;
-  }
-  &.para-post {
-    background: repeating-linear-gradient(
-      90deg,
-      #3f8f4a,
-      #3f8f4a 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.sensory {
-    background: #2a62f6;
-  }
-  &.somatic {
-    background: #98561d;
-  }
-  &.symp-pre {
-    background: #ea3423;
-  }
-  &.symp-post {
-    background: repeating-linear-gradient(
-      90deg,
-      #ea3423,
-      #ea3423 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.venous {
-    background: #2f6eba;
-  }
-  &.other {
-    background: #888;
-  }
 }
 
 .checkall-display-text {
