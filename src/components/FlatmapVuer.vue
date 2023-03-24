@@ -160,7 +160,7 @@
           />
           <selections-group
             v-if="!isFC && centreLines && centreLines.length > 0"
-            title="Centrelines"
+            title="Nerves"
             labelKey="label"
             identifierKey="key"
             :selections="centreLines"
@@ -929,18 +929,13 @@ export default {
       pathways: [],
       sckanDisplay: [
         {
-          label: "Path consistent with SCKAN",
+          label: "Display Path with SCKAN",
           key: "VALID",
         },
-        {
-          label: "Path inconsistent with SCKAN",
-          key: "INVALID",
-          enable: false,
-        }
       ],
       centreLines: [
         {
-          label: "Centrelines",
+          label: "Display Nerves",
           key: "centrelines"
         }
       ],
