@@ -1,15 +1,15 @@
 <template>
   <div class="tooltip-container">
-     <el-main v-if="content" class="main" v-loading="loading">
-      <div class="block" v-if="content.title">
-        <span class="title">{{capitalise(content.title)}}</span>
+     <el-main v-if="entry" class="main" v-loading="loading">
+      <div class="block" v-if="entry.title">
+        <span class="title">{{capitalise(entry.title)}}</span>
       </div>
       <div class="block" v-else>
-        <span class="title">{{content.featureId}}</span>
+        <span class="title">{{entry.featureId}}</span>
       </div>
       <div class="content-container scrollbar">
-        {{content.paths}}
-        <div v-if="origins && origins.length > 0" class="block">
+        {{entry.paths}}
+        <div v-if="entry.origins && entry.origins.length > 0" class="block">
           <div>
             <span class="attribute-title">Origin</span>
             <el-popover
@@ -24,22 +24,22 @@
             </span>
             </el-popover>
           </div>
-          <div v-for="(origin, i) in origins" class="attribute-content"  :key="origin">
+          <div v-for="(origin, i) in entry.origins" class="attribute-content"  :key="origin">
             {{ capitalise(origin) }}
-            <div v-if="i != origins.length - 1" class="seperator"></div>
+            <div v-if="i != entry.origins.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
+          <el-button v-show="entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
             Explore origin data
           </el-button>
         </div>
-        <div v-if="components && components.length > 0" class="block">
+        <div v-if="entry.components && entry.components.length > 0" class="block">
           <div class="attribute-title">Components</div>
-          <div v-for="(component, i) in components" class="attribute-content"  :key="component">
+          <div v-for="(component, i) in entry.components" class="attribute-content"  :key="component">
             {{ capitalise(component) }}
-            <div v-if="i != components.length - 1" class="seperator"></div>
+            <div v-if="i != entry.components.length - 1" class="seperator"></div>
           </div>
         </div>
-        <div v-if="destinations && destinations.length > 0" class="block">
+        <div v-if="entry.destinations && entry.destinations.length > 0" class="block">
           <div>
             <span class="attribute-title">Destination</span>
             <el-popover
@@ -54,16 +54,16 @@
             </span>
             </el-popover>
           </div>
-          <div v-for="(destination, i) in destinations" class="attribute-content"  :key="destination">
-            {{ capitalise(destination) }}
-            <div v-if="i != destinations.length - 1" class="seperator"></div>
+          <div v-for="(destination, i) in entry.destinations" class="attribute-content"  :key="destination">
+            {{ capitalise(entry.destination) }}
+            <div v-if="i != entry.destinations.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+          <el-button v-show="entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
             Explore destination data
           </el-button>
         </div>
 
-        <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
+        <el-button v-show="entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
           Search for data on components
         </el-button>
 
@@ -100,18 +100,12 @@ Vue.use(Icon);
 Vue.use(Main);
 
 // pubmedviewer is currently not in use, but still under review so not ready to delete yet
-import PubmedViewer from './PubmedViewer.vue'
+// import PubmedViewer from './PubmedViewer.vue'
 import EventBus from './EventBus'
 import ExternalResourceCard from './ExternalResourceCard.vue';
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
-}
-
-const inArray = function(ar1, ar2){
-    let as1 = JSON.stringify(ar1)
-    let as2 = JSON.stringify(ar2)
-    return as1.indexOf(as2) !== -1
 }
 
 const capitalise = function(str){
@@ -121,14 +115,14 @@ const capitalise = function(str){
 }
 
 export default {
-  components: { PubmedViewer, ExternalResourceCard },
+  components: { ExternalResourceCard },
   name: "Tooltip",
   props: { 
     visible: {
       type: Boolean,
       default: false
     },
-    content: {
+    entry: {
       type: Object,
       default: undefined
     },
@@ -157,13 +151,13 @@ export default {
   computed: {
     resources: function(){
       let resources = []
-      if(this.content && this.content.hyperlinks){
-        resources = this.content.hyperlinks
+      if(this.entry && this.entry.hyperlinks){
+        resources = this.entry.hyperlinks
       }
       return resources
     },
     originDescription: function(){
-      if(this.content && this.content.title && this.content.title.toLowerCase().includes('motor')){
+      if(this.entry && this.entry.title && this.entry.title.toLowerCase().includes('motor')){
         return this.originDescriptions.motor
       } else {
         return this.originDescriptions.sensory

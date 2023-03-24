@@ -1,4 +1,4 @@
-
+/* eslint-disable no-alert, no-console */
 // remove duplicates by stringifying the objects
 const removeDuplicates = function(arrayOfAnything){
   return [...new Set(arrayOfAnything.map(e => JSON.stringify(e)))].map(e => JSON.parse(e)) 
@@ -24,6 +24,20 @@ export class FlatmapQueries {
         this.lookUp = lookUp
       })
     })
+  }
+
+  createTooltipData = function (eventData) {
+    this.flattenAndFindDatasets()
+    let tooltipData = {
+      destinations: this.destinations, 
+      origins: this.origins,
+      components: this.components,
+      destinationsWithDatasets: this.destinationsWithDatasets,
+      originsWithDatasets: this.originsWithDatasets,
+      componentsWithDatasets: this.componentsWithDatasets,
+      resourse: eventData.resourse
+    }
+    return tooltipData
   }
 
   getOrganCuries = function(){

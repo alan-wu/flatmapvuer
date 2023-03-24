@@ -249,10 +249,8 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
-        v-show="connectivityTooltipVisible"
-        :content="tooltipContent"
+        :content="tooltipEntry"
         @resource-selected="resourceSelected"
-        @show-tooltip="tooltipShowEmitted"
       />
     </div>
   </div>
@@ -415,8 +413,10 @@ export default {
             userData: args,
             eventType: eventType
           };
+          console.log('event type: ', eventType)
           // Disable the nueron pop up for now.
-          if (data && data.type !== "marker")
+          if (data && data.type !== "marker" && eventType === "click")
+            console.log('starting pop up')
             this.checkAndCreatePopups(payload);
           this.$emit("resource-selected", payload);
         } else {
@@ -427,13 +427,15 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data) {
       // Call flatmap database to get the connection data
-      if (
-        data.eventType == "click" &&
-        this.hasNeuronTooltip(data)
-      ) {
-        this.createTooltipFromNeuronCuration(data);
-        this.resourceForTooltip =  data.resource[0];
-      }
+      this.flatmapQueries
+        .pathwayQuery(data.models)
+        .then(connections => {
+          if(!connections) return;
+          else {
+            this.createTooltipFromNeuronCuration(data);
+            this.resourceForTooltip =  data.resource[0];
+          }
+        })
     },
     popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
@@ -450,67 +452,9 @@ export default {
     resourceSelected: function(action) {
       this.$emit("resource-selected", action);
     },
-    hasNeuronTooltip: function(data) {
-      if (data){
-        return true
-      }
-
-    },
     createTooltipFromNeuronCuration: function(data) {
-      const feature = data.resource[0];
-      let content = {
-        title: undefined,
-        components: undefined,
-        start: undefined,
-        distribution: undefined,
-        actions: []
-      };
-
-      this.tooltipVisible = false;
-
-      // neural data check
-      if (feature){
-          this.tooltipVisible = true;
-          this.tooltipContent = content;
-          this.tooltipContent.uberon = feature;
-          this.tooltipContent.source = data.feature.source;
-          this.tooltipContent.title = data.label;
-          this.tooltipContent.hyperlinks = data.feature.hyperlinks;
-          this.tooltipContent.featureIds = [feature];
-          this.tooltipContent.actions.push({
-            title: "Search for datasets",
-            label: "Neuron Datasets",
-            resource: feature.split(":")[1],
-            type: "Neuron Search",
-            feature: feature,
-            nervePath: true
-          });
-      }
-      // annotated with datset check
-      if (data.dataset) {
-        this.tooltipVisible = true;
-        this.tooltipContent = content;
-        this.tooltipContent.uberon = feature;
-        this.tooltipContent.source = data.feature.source;
-        this.tooltipContent.hyperlinks = data.feature.hyperlinks;
-        this.tooltipContent.title = data.label;
-        this.tooltipContent.actions.push({
-          title: "View dataset",
-          resource: data.dataset,
-          type: "URL",
-          feature: feature,
-          nervePath: false
-        });
-      }
-      // annotated with datset check
-      if (data.feature.hyperlinks.length > 0) {
-        this.tooltipVisible = true;
-        this.tooltipContent = content;
-        this.tooltipContent.uberon = feature;
-        this.tooltipContent.source = data.feature.source;
-        this.tooltipContent.hyperlinks = data.feature.hyperlinks;
-        this.tooltipContent.title = data.label;
-      }
+      this.tooltipEntry = this.flatmapQueries.createTooltipData(data);
+      this.displayTooltip();
     },
     // Keeping this as an API
     showPopup: function(featureId, node, options) {
@@ -576,16 +520,13 @@ export default {
         clearTimeout(this.tooltipWait);
       }
     },
-    tooltipShowEmitted: function(show) {
-      this.connectivityTooltipVisible =  show
-      if (show) {
-        this.mapImp.showPopup(
-          this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
-          this.$refs.tooltip.$el,
-          { className: "flatmapvuer-popover", positionAtLastClick: true }
-        );
-        this.popUpCssHacks();
-      }
+    displayTooltip: function() {
+      this.mapImp.showPopup(
+        this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
+        this.$refs.tooltip.$el,
+        { className: "flatmapvuer-popover", positionAtLastClick: true }
+      );
+      this.popUpCssHacks();
     },
     openFlatmapHelpPopup: function() {
       if (this.mapImp) {
@@ -901,7 +842,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
-      tooltipContent: { featureIds: []},
+      tooltipEntry: false,
       connectivityTooltipVisible: false,
       resourceForTooltip: undefined,
       colourRadio: true,
