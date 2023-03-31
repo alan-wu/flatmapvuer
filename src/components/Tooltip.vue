@@ -9,7 +9,7 @@
       </div>
       <div class="content-container scrollbar">
         {{content.paths}}
-        <div v-if="this.origins" class="block">
+        <div v-if="origins && origins.length > 0" class="block">
           <div>
             <span class="attribute-title">Origin</span>
             <el-popover
@@ -32,14 +32,14 @@
             Explore origin data
           </el-button>
         </div>
-        <div v-if="this.components" class="block">
+        <div v-if="components && components.length > 0" class="block">
           <div class="attribute-title">Components</div>
           <div v-for="(component, i) in components" class="attribute-content"  :key="component">
             {{ capitalise(component) }}
             <div v-if="i != components.length - 1" class="seperator"></div>
           </div>
         </div>
-        <div v-if="this.destinations" class="block">
+        <div v-if="destinations && destinations.length > 0" class="block">
           <div>
             <span class="attribute-title">Destination</span>
             <el-popover
@@ -63,7 +63,7 @@
           </el-button>
         </div>
 
-        <el-button v-show="components.length > 0" class="button" @click="openAll">
+        <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
           Search for data on components
         </el-button>
 
@@ -191,7 +191,7 @@ export default {
       window.open(url, '_blank')
     },
     openAll: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.components})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.componentsWithDatasets.map(a=>a.name)})
     },
     openAxons: function(){
       EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
