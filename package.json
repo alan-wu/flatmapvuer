@@ -1,6 +1,7 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.3.15",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
     "dist/*",
@@ -21,7 +22,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@abi-software/flatmap-viewer": "2.2.9",
+    "@abi-software/flatmap-viewer": "^2.2.13",
     "@abi-software/svg-sprite": "^0.1.14",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",
