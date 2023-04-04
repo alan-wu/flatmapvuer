@@ -158,6 +158,7 @@
             :lists="systems"
             key="systemslegends"
           />
+          <!--
           <selections-group
             v-if="!isFC && centreLines && centreLines.length > 0"
             title="Nerves"
@@ -168,6 +169,7 @@
             ref="centrelinesSelection"
             key="centrelinesSelection"
           />
+          -->
           <selections-group
             v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
             title="SCKAN"
@@ -396,6 +398,7 @@ export default {
     },
     centreLinesSelected: function(payload) {
       if (this.mapImp) {
+        console.log(payload.value)
         this.mapImp.enableCentrelines(payload.value);
       }
     },
@@ -785,8 +788,9 @@ export default {
       this.mapImp.setBackgroundOpacity(1);
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
-      this.layers = this.mapImp.getLayers();
-      this.systems = this.mapImp.getSystems();
+      this.mapImp.enableCentrelines(false);
+      //this.layers = this.mapImp.getLayers();
+      //this.systems = this.mapImp.getSystems();
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
