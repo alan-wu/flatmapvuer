@@ -18,6 +18,7 @@ export class FlatmapQueries {
     this.origins = []
     this.components = []
     this.uberons = []
+    this.controller = undefined
     this.getOrganCuries().then(uberons=>{
       this.uberons = uberons
       this.createLabelLookup(uberons).then(lookUp=>{
@@ -177,6 +178,13 @@ export class FlatmapQueries {
 
   pathwayQuery = function(keastIds){
     return new Promise(resolve=>{
+      // check if there is an existing query
+      if (this.controller) this.controller.abort();
+
+      // set up the abort controller
+      this.controller = new AbortController();
+      const signal = this.controller.signal;
+
       console.log('Querying for pathways')
       this.destinations = []
       this.origins = []
@@ -190,6 +198,7 @@ export class FlatmapQueries {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        signal: signal
       })
       .then(response => response.json())
       .then(data => {

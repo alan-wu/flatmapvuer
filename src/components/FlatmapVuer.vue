@@ -434,6 +434,7 @@ export default {
         .then(connections => {
           if(!connections){
             if(data.feature.hyperlinks){
+              console.log('no connections, but hyperlinks')
               this.resourceForTooltip =  data.resource[0];
               this.createTooltipFromNeuronCuration(data);
             }
