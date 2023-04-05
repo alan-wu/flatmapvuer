@@ -28,7 +28,7 @@
             {{ capitalise(origin) }}
             <div v-if="i != entry.origins.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
+          <el-button v-show="entry.originsWithDatasets && entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
             Explore origin data
           </el-button>
         </div>
@@ -55,15 +55,15 @@
             </el-popover>
           </div>
           <div v-for="(destination, i) in entry.destinations" class="attribute-content"  :key="destination">
-            {{ capitalise(entry.destination) }}
+            {{ capitalise(destination) }}
             <div v-if="i != entry.destinations.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+          <el-button v-show="entry.destinationsWithDatasets && entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
             Explore destination data
           </el-button>
         </div>
 
-        <el-button v-show="entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
+        <el-button v-show="entry.componentsWithDatasets && entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
           Search for data on components
         </el-button>
 
@@ -124,7 +124,15 @@ export default {
     },
     entry: {
       type: Object,
-      default: undefined
+      default: () => ({
+        destinations: [], 
+        origins: [],
+        components: [],
+        destinationsWithDatasets: [],
+        originsWithDatasets: [],
+        componentsWithDatasets: [],
+        resource: undefined
+      })
     },
   },
   data: function() {

@@ -94,7 +94,7 @@ export default {
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
-      flatmapAPI: "https://flatmaps.celldl.org/"
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },

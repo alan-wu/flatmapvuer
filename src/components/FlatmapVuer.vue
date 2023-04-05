@@ -249,7 +249,7 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
-        :content="tooltipEntry"
+        :entry="tooltipEntry"
         @resource-selected="resourceSelected"
       />
     </div>
@@ -415,9 +415,10 @@ export default {
           };
           console.log('event type: ', eventType)
           // Disable the nueron pop up for now.
-          if (data && data.type !== "marker" && eventType === "click")
+          if (data && data.type !== "marker" && eventType === "click"){
             console.log('starting pop up')
             this.checkAndCreatePopups(payload);
+          }
           this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
@@ -427,13 +428,18 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data) {
       // Call flatmap database to get the connection data
+      console.log('data: ', data)
       this.flatmapQueries
-        .pathwayQuery(data.models)
+        .pathwayQuery(data.resource)
         .then(connections => {
-          if(!connections) return;
-          else {
-            this.createTooltipFromNeuronCuration(data);
+          if(!connections){
+            if(data.feature.hyperlinks){
+              this.resourceForTooltip =  data.resource[0];
+              this.createTooltipFromNeuronCuration(data);
+            }
+          } else {
             this.resourceForTooltip =  data.resource[0];
+            this.createTooltipFromNeuronCuration(data);
           }
         })
     },
@@ -842,7 +848,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       drawerOpen: true,
-      tooltipEntry: false,
+      tooltipEntry: new FlatmapQueries().createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       resourceForTooltip: undefined,
       colourRadio: true,
@@ -870,7 +876,7 @@ export default {
     const flatmap = require("@abi-software/flatmap-viewer");
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted) this.createFlatmap();
-    this.flatmapQueries = new FlatmapQueries(this.flatmapAPI);
+    this.flatmapQueries = new FlatmapQueries(this.sparcAPI, this.flatmapAPI);
   }
 };
 </script>

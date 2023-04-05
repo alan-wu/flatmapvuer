@@ -27,7 +27,6 @@ export class FlatmapQueries {
   }
 
   createTooltipData = function (eventData) {
-    this.flattenAndFindDatasets()
     let tooltipData = {
       destinations: this.destinations, 
       origins: this.origins,
@@ -35,7 +34,23 @@ export class FlatmapQueries {
       destinationsWithDatasets: this.destinationsWithDatasets,
       originsWithDatasets: this.originsWithDatasets,
       componentsWithDatasets: this.componentsWithDatasets,
-      resourse: eventData.resourse
+      title: eventData.label,
+      featureId: eventData.resource,
+      hyperlinks: eventData.feature.hyperlinks
+    }
+    console.log('tooltipData', tooltipData)
+    return tooltipData
+  }
+
+  createUnfilledTooltipData = function (){
+    let tooltipData = {
+      destinations: [],
+      origins: [],
+      components: [],
+      destinationsWithDatasets: [],
+      originsWithDatasets: [],
+      componentsWithDatasets: [],
+      resource: undefined
     }
     return tooltipData
   }
@@ -65,7 +80,7 @@ export class FlatmapQueries {
     return new Promise(resolve=> {
       let uberonMap = {}
       const data = { sql: this.buildLabelSqlStatement(uberons)}
-      fetch(`${this.flatmapAPI}knowledge/query/`, {
+      fetch(`${this.flatmapApi}knowledge/query/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -162,13 +177,14 @@ export class FlatmapQueries {
 
   pathwayQuery = function(keastIds){
     return new Promise(resolve=>{
+      console.log('Querying for pathways')
       this.destinations = []
       this.origins = []
       this.components = []
       this.loading = true
       if (!keastIds || keastIds.length == 0) return
       const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
-      fetch(`${this.flatmapAPI}knowledge/query/`, {
+      fetch(`${this.flatmapApi}knowledge/query/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,10 +194,13 @@ export class FlatmapQueries {
       .then(response => response.json())
       .then(data => {
         if(this.connectivityExists(data)){
+          console.log('Connectivity data found')
           let connectivity = JSON.parse(data.values[0][0])
-          this.processConnectivity(connectivity)
-          resolve(true)
+          this.processConnectivity(connectivity).then(()=>{
+            resolve(true)
+          })
         } else {
+          console.log('No connectivity data found')
           resolve(false)
         }
       })
@@ -191,7 +210,7 @@ export class FlatmapQueries {
     })
   }
 
-  connectiviyExists = function(data){
+  connectivityExists = function(data){
     if (data.values && data.values.length > 0 && JSON.parse(data.values[0][0]).connectivity && JSON.parse(data.values[0][0]).connectivity.length > 0) {
       return true
     } else {
@@ -224,27 +243,32 @@ export class FlatmapQueries {
     this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
     this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
     this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
+    console.log('components', this.components)
   }
 
   processConnectivity(connectivity){
-    // Filter the origin and destinations from components
-    let components = this.findComponents(connectivity)
+    return new Promise (resolve=>{
+      console.log('connectivity', connectivity)
 
-    // Remove duplicates
-    let axons = removeDuplicates(connectivity.axons)
-    let dendrites = removeDuplicates(connectivity.dendrites)
+      // Filter the origin and destinations from components
+      let components = this.findComponents(connectivity)
 
-    // Create list of ids to get labels for
-    let conIds = this.findAllIdsFromConnectivity(connectivity)  
+      // Remove duplicates
+      let axons = removeDuplicates(connectivity.axons)
+      let dendrites = removeDuplicates(connectivity.dendrites)
 
-    // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
-    this.createLabelLookup(conIds).then(lookUp=>{
-      this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
-      this.origins = dendrites.map(d=>this.createLabelFromNeuralNode(d,lookUp))
-      this.components = components.map(c=>this.createLabelFromNeuralNode(c, lookUp))
+      // Create list of ids to get labels for
+      let conIds = this.findAllIdsFromConnectivity(connectivity)  
+
+      // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
+      this.createLabelLookup(conIds).then(lookUp=>{
+        this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
+        this.origins = dendrites.map(d=>this.createLabelFromNeuralNode(d,lookUp))
+        this.components = components.map(c=>this.createLabelFromNeuralNode(c, lookUp))
+        this.flattenAndFindDatasets(components, axons, dendrites)
+        resolve(true)
+      })
     })
-
-    this.flattenAndFindDatasets(components, axons, dendrites)
   }
 
   flattenConntectivity(connectivity){
