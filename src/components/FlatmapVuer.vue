@@ -131,10 +131,11 @@
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
         <div
           class="pathway-container"
-          v-if="pathways.length > 0 && pathControls"
+          :style="{'max-height': pathwaysMaxHeight + 'px'}"
+          v-if="pathControls"
           v-popover:checkBoxPopover
         >
-          <svg-legends class= "svg-legends-container"/>
+          <svg-legends v-if="!isFC" class="svg-legends-container"/>
           <el-popover
             content="Find these markers for data"
             placement="right"
@@ -150,41 +151,58 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
-          <el-row>
-            <el-col :span="12">
-              <div class="pathways-display-text">Pathways</div>
-            </el-col>
-            <el-col :span="12">
-              <el-checkbox
-                class="all-checkbox"
-                :indeterminate="isIndeterminate"
-                v-model="checkAll"
-                @change="handleCheckAllChange"
-              >Display all</el-checkbox>
-            </el-col>
-          </el-row>
-          <el-checkbox-group
-            v-model="checkedItems"
-            size="small"
-            class="checkbox-group"
-            @change="handleCheckedItemsChange"
-          >
-            <div class="checkbox-group-inner">
-              <el-row v-for="item in pathways" :key="item.type" :label="item.type">
-                <div class="checkbox-container">
-                  <el-checkbox
-                    class="my-checkbox"
-                    :label="item.type"
-                    @change="visibilityToggle()"
-                    :checked="true"
-                  >
-                    <div class="path-visual" :class="item.type"></div>
-                    {{item.label}}
-                  </el-checkbox>
-                </div>
-              </el-row>
-            </div>
-          </el-checkbox-group>
+          <dynamic-legends
+            v-if="isFC && systems && systems.length > 0"
+            title="Systems"
+            identifierKey="name"
+            :lists="systems"
+            key="systemslegends"
+          />
+          <!--
+          <selections-group
+            v-if="!isFC && centreLines && centreLines.length > 0"
+            title="Nerves"
+            labelKey="label"
+            identifierKey="key"
+            :selections="centreLines"
+            @changed="centreLinesSelected"
+            ref="centrelinesSelection"
+            key="centrelinesSelection"
+          />
+          -->
+          <selections-group
+            v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
+            title="SCKAN"
+            labelKey="label"
+            identifierKey="key"
+            :selections="sckanDisplay"
+            @changed="sckanSelected"
+            @checkAll="checkAllSCKAN"
+            ref="skcanSelection"
+            key="skcanSelection"
+          />
+          <selections-group
+            v-if="layers && layers.length > 0"
+            title="Layers"
+            labelKey="description"
+            identifierKey="id"
+            :selections="layers"
+            @changed="layersSelected"
+            @checkAll="checkAllLayers"
+            ref="layersSelection"
+            key="layersSelection"
+          />
+          <selections-group
+            v-if="pathways && pathways.length > 0"
+            title="Pathways"
+            labelKey="label"
+            identifierKey="type"
+            :selections="pathways"
+            @changed="pathwaysSelected"
+            @checkAll="checkAllPathways"
+            ref="pathwaysSelection"
+            key="pathwaysSelection"
+          />
         </div>
         <div
           @click="toggleDrawer"
@@ -200,6 +218,7 @@
         width="175"
         :appendToBody="false"
         trigger="click"
+
         popper-class="background-popper"
       >
         <el-row class="backgroundText">Organs display</el-row>
@@ -260,11 +279,11 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from "./Tooltip";
+import SelectionsGroup from "./SelectionsGroup.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import SvgLegends from "./legends/Legends";
+import DynamicLegends from "./legends/DynamicLegends.vue";
+import SvgLegends from "./legends/SvgLegends";
 import {
-  Checkbox,
-  CheckboxGroup,
   Col,
   Loading,
   Radio,
@@ -277,8 +296,6 @@ import flatmapMarker from "../icons/flatmap-marker";
 import {FlatmapQueries} from "../services/flatmapQueries";
 
 locale.use(lang);
-Vue.use(Checkbox);
-Vue.use(CheckboxGroup);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Radio);
@@ -286,18 +303,14 @@ Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 
-const mapResize = map => {
-  return () => {
-    if (map) map.resize();
-  };
-};
-
 export default {
   name: "FlatmapVuer",
   components: {
+    DynamicLegends,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
+    SelectionsGroup,
     SvgLegends
   },
   beforeCreate: function() {
@@ -352,9 +365,18 @@ export default {
     resetView: function() {
       if (this.mapImp) {
         this.mapImp.resetMap();
-        this.checkedItems = this.mapImp.pathTypes().map(item => item.type);
-        this.isIndeterminate = false;
-        this.checkAll = true;
+        if (this.$refs.centrelinesSelection) {
+          this.$refs.centrelinesSelection.reset();
+        }
+        if (this.$refs.skcanSelection) {
+          this.$refs.skcanSelection.reset();
+        }
+        if (this.$refs.layersSelection) {
+          this.$refs.layersSelection.reset();
+        }
+        if (this.$refs.pathwaysSelection) {
+          this.$refs.pathwaysSelection.reset();
+        }
       }
     },
     /**
@@ -375,22 +397,40 @@ export default {
         this.mapImp.zoomOut();
       }
     },
-    visibilityToggle: function() {
+    centreLinesSelected: function(payload) {
       if (this.mapImp) {
-        this.mapImp.showPaths(this.checkedItems);
+        console.log(payload.value)
+        this.mapImp.enableCentrelines(payload.value);
       }
     },
-    handleCheckedItemsChange: function(value) {
-      let checkedCount = value.length;
-      this.checkAll = checkedCount === this.pathways.length;
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.pathways.length;
-    },
-    handleCheckAllChange(val) {
-      this.checkedItems = val ? this.pathways.map(a => a.type) : [];
-      this.isIndeterminate = false;
+    sckanSelected: function(payload) {
       if (this.mapImp) {
-        this.mapImp.showPaths(this.checkedItems);
+        this.mapImp.enableSckanPath(payload.key, payload.value);
+      }
+    },
+    checkAllSCKAN: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableSckanPath(key, payload.value));
+      }
+    },
+    layersSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableLayer(payload.key, payload.value);
+      }
+    },
+    checkAllLayers: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableLayer(key, payload.value));
+      }
+    },
+    pathwaysSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enablePath(payload.key, payload.value);
+      }
+    },
+    checkAllPathways: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enablePath(key, payload.value));
       }
     },
     enablePanZoomEvents: function(flag) {
@@ -657,9 +697,9 @@ export default {
             //debug: true,
             featureInfo: this.featureInfo,
             "min-zoom": this.minZoom,
-            pathControls: this.pathControls,
+            layerControl: true,
+            pathControls: true,
             searchable: this.searchable,
-            layerControl: this.layerControl,
             tooltips: this.tooltips,
             minimap: minimap
           }
@@ -679,19 +719,41 @@ export default {
           this.restoreMapState(this._stateToBeSet);
       }
     },
+    computePathControlsMaximumHeight() {
+      const elem = this.$refs.display;
+      if (elem) {
+        const computed = getComputedStyle(elem);
+        const padding = parseInt(computed.paddingTop) + parseInt(computed.paddingBottom);
+        const height = elem.clientHeight - padding;
+        this.pathwaysMaxHeight = height - 150;
+      }
+    },
+    mapResize: function() {
+      if (this.mapImp) {
+        this.mapImp.resize();
+      }
+      this.computePathControlsMaximumHeight();
+    },
     onFlatmapReady: function(){
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-
       this.sensor = new ResizeSensor(
         this.$refs.display,
-        mapResize(this.mapImp)
+        this.mapResize
       );
+      if (this.mapImp.options && this.mapImp.options.style === "functional") {
+        this.isFC = true;
+      }
       this.mapImp.setBackgroundOpacity(1);
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
-      this.$emit("ready", this);
+      this.mapImp.enableCentrelines(false);
+      //this.layers = this.mapImp.getLayers();
+      //this.systems = this.mapImp.getSystems();
       this.addResizeButtonToMinimap();
       this.loading = false;
+      this.computePathControlsMaximumHeight();
+      this.drawerOpen = true;
+      this.$emit("ready", this);
     },
     showMinimap: function(flag) {
       if (this.mapImp)
@@ -829,10 +891,21 @@ export default {
   },
   data: function() {
     return {
-      checkedItems: [],
+      layers: [],
       pathways: [],
-      isIndeterminate: false,
-      checkAll: true,
+      sckanDisplay: [
+        {
+          label: "Display Path with SCKAN",
+          key: "VALID",
+        },
+      ],
+      centreLines: [
+        {
+          label: "Display Nerves",
+          key: "centrelines"
+        }
+      ],
+      pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },
         { value: false },
@@ -843,15 +916,16 @@ export default {
         { value: false },
         { value: false }
       ],
+      isFC: false,
       inHelp: false,
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
       flatmapMarker: flatmapMarker,
-      drawerOpen: true,
       tooltipEntry: new FlatmapQueries().createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       resourceForTooltip: undefined,
+      drawerOpen: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
@@ -885,8 +959,6 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import "~element-ui/packages/theme-chalk/src/button";
-@import "~element-ui/packages/theme-chalk/src/checkbox";
-@import "~element-ui/packages/theme-chalk/src/checkbox-group";
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 
@@ -935,53 +1007,6 @@ export default {
   vertical-align: 5px;
 }
 
-.path-visual {
-  margin: 3px 0;
-  height: 3px;
-  width: 25px;
-  margin-right: 5px;
-  display: inline-block;
-  &.cns {
-    background: #9b1fc1;
-  }
-  &.lcn {
-    background: #f19e38;
-  }
-  &.para-pre {
-    background: #3f8f4a;
-  }
-  &.para-post {
-    background: repeating-linear-gradient(
-      90deg,
-      #3f8f4a,
-      #3f8f4a 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.sensory {
-    background: #2a62f6;
-  }
-  &.somatic {
-    background: #98561d;
-  }
-  &.symp-pre {
-    background: #ea3423;
-  }
-  &.symp-post {
-    background: repeating-linear-gradient(
-      90deg,
-      #ea3423,
-      #ea3423 6px,
-      transparent 0,
-      transparent 9px
-    );
-  }
-  &.other {
-    background: #888;
-  }
-}
-
 .flatmap-container {
   height: 100%;
   width: 100%;
@@ -1010,47 +1035,20 @@ export default {
   float: left;
   padding-left: 16px;
   padding-right: 18px;
-  max-height: calc(100% - 140px);
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
   padding-bottom: 16px;
   background: #ffffff;
-}
 
-.pathways-display-text {
-  width: 59px;
-  height: 20px;
-  color: rgb(48, 49, 51);
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 20px;
-  margin-left: 8px;
-}
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
 
-.all-checkbox {
-  float: right;
-}
-
-.checkbox-container {
-  display: flex;
-  cursor: pointer;
-}
-
-.checkbox-group {
-  width: 260px;
-  border: 1px solid rgb(144, 147, 153);
-  border-radius: 4px;
-  background: #ffffff;
-}
-
-.my-checkbox {
-  background-color: #fff;
-  width: 100%;
-}
-
-.checkbox-group-inner {
-  padding: 18px;
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px #c0c4cc;
+  }
 }
 
 .flatmap-marker-help {
@@ -1059,29 +1057,6 @@ export default {
 
 ::v-deep .popper-bump-right {
   left: 30px;
-}
-
-::v-deep .el-checkbox__label {
-  padding-left: 5px;
-  color: $app-primary-color;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0px;
-  line-height: 14px;
-}
-
-::v-deep .el-checkbox__input {
-  &.is-indeterminate,
-  &.is-checked {
-    .el-checkbox__inner {
-      background-color: $app-primary-color;
-      border-color: $app-primary-color;
-    }
-  }
-}
-
-::v-deep .el-checkbox__label {
-  color: $app-primary-color !important;
 }
 
 .el-dropdown-link {
@@ -1288,12 +1263,6 @@ export default {
   &.lightskyblue {
     background-color: lightskyblue;
   }
-}
-
-.togglePaths {
-  top: 201px;
-  right: 20px;
-  position: absolute;
 }
 
 .icon-button {

@@ -60,14 +60,12 @@ export default {
     },
     FlatmapReady: function(component) {
       console.log(component);
-      /*
       let taxon = component.mapImp.describes;
-      let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
-      console.log(taxon, id);
+      let id = component.mapImp.addMarker("UBERON:0000948");
       component.enablePanZoomEvents(true);
-      component.showPathwaysDrawer(false);
-      component.searchAndShowResult("heart");
-      */
+      //component.showPathwaysDrawer(false);
+      console.log(taxon, id);
+      //component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
       this.payload = payload
@@ -80,7 +78,16 @@ export default {
       pathControls: true,
       layerControl: true,
       minZoom: 4,
-      availableSpecies : {"Functional Connectivity":{taxo: "FunctionalConnectivity", displayWarning:true}
+      availableSpecies : {
+        "Human Female":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000383", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Human Male":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000384", iconClass:"mapicon-icon_human", displayWarning:true},
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false, displayLatestChanges:true},
+        "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
+        "Kember":{taxo: "ABI:1000001", displayWarning:true},
+        "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
+        "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
+        "Functional Connectivity": {taxo: "FunctionalConnectivity", displayWarning:true},
+        "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
       tStyle: {
@@ -93,8 +100,10 @@ export default {
       helpMode: false,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
-      //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
+      //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
+      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/"
+      //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
