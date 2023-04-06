@@ -23,7 +23,7 @@
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable"
       :layerControl="layerControl"
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap=false :flatmapAPI="flatmapAPI"/>
+      :displayMinimap="true" :flatmapAPI="flatmapAPI"/>
   </div>
 </template>
 
