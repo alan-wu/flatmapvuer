@@ -58,11 +58,11 @@ export default {
     },
     FlatmapReady: function(component) {
       let taxon = component.mapImp.describes;
-      let id = component.mapImp.addMarker("UBERON:0000948", "simulation");
+      let id = component.mapImp.addMarker("UBERON:0000948");
       component.enablePanZoomEvents(true);
-      component.showPathwaysDrawer(false);
+      //component.showPathwaysDrawer(false);
       console.log(taxon, id);
-      component.searchAndShowResult("heart");
+      //component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
       this.payload = payload
@@ -82,7 +82,7 @@ export default {
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
-        "Functional Connectivity": {id: "fc-cardio", displayWarning:true},
+        "Functional Connectivity": {taxo: "FunctionalConnectivity", displayWarning:true},
         "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
@@ -97,7 +97,9 @@ export default {
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-       flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
+      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
+      //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/"
+      //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
   },
