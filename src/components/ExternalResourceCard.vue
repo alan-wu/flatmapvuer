@@ -15,8 +15,8 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { link } from "element-ui";
-Vue.use(link);
+import { Button } from "element-ui";
+Vue.use(Button);
 
 export default {
   name: "ExternalResourceCard",
@@ -44,9 +44,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/link";
-@import "~element-ui/packages/theme-chalk/src/carousel";
-@import "~element-ui/packages/theme-chalk/src/carousel-item";
+@import "~element-ui/packages/theme-chalk/src/button";
 
 .attribute-title{
   font-size: 16px;

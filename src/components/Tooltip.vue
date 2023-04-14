@@ -69,11 +69,6 @@
 
         <external-resource-card :resources="resources"></external-resource-card>
 
-        <!-- pubmed-viewer is just used for processing pubmed requests (no display) -->
-        <!-- <pubmed-viewer v-if="content.featureIds" v-show="false" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/> -->
-        <el-button  v-if="pubmedSearchUrl != ''" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
-          Open publications in pubmed
-        </el-button>
       </div>
     </el-main>
   </div>
@@ -99,8 +94,6 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
-// pubmedviewer is currently not in use, but still under review so not ready to delete yet
-// import PubmedViewer from './PubmedViewer.vue'
 import EventBus from './EventBus'
 import ExternalResourceCard from './ExternalResourceCard.vue';
 
@@ -199,12 +192,6 @@ export default {
     },
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
-    },
-    abortRequests: function(){
-      if (this.controller){
-        this.controller.abort()
-        console.log('aborting requests')
-      }
     },
   }
 };
