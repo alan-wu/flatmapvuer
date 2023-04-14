@@ -39,20 +39,6 @@ export class FlatmapQueries {
       featureId: eventData.resource,
       hyperlinks: eventData.feature.hyperlinks
     }
-    console.log('tooltipData', tooltipData)
-    return tooltipData
-  }
-
-  createUnfilledTooltipData = function (){
-    let tooltipData = {
-      destinations: [],
-      origins: [],
-      components: [],
-      destinationsWithDatasets: [],
-      originsWithDatasets: [],
-      componentsWithDatasets: [],
-      resource: undefined
-    }
     return tooltipData
   }
 

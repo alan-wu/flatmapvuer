@@ -303,6 +303,18 @@ Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 
+const createUnfilledTooltipData = function (){
+  return {
+    destinations: [],
+    origins: [],
+    components: [],
+    destinationsWithDatasets: [],
+    originsWithDatasets: [],
+    componentsWithDatasets: [],
+    resource: undefined
+  }
+}
+
 export default {
   name: "FlatmapVuer",
   components: {
@@ -922,7 +934,7 @@ export default {
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
       flatmapMarker: flatmapMarker,
-      tooltipEntry: new FlatmapQueries().createUnfilledTooltipData(),
+      tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       resourceForTooltip: undefined,
       drawerOpen: false,
