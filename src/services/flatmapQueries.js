@@ -29,8 +29,23 @@ export class FlatmapQueries {
   }
 
   createTooltipData = function (eventData) {
-    if(eventData.feature.hyperlinks && eventData.feature.hyperlinks.length > 0){
-      this.pubmedQueryOnIds(eventData).then(()=>{
+    return new Promise(resolve => {
+      if(!eventData.feature.hyperlinks){
+        this.pubmedQueryOnIds(eventData).then(()=>{
+          let tooltipData = {
+            destinations: this.destinations, 
+            origins: this.origins,
+            components: this.components,
+            destinationsWithDatasets: this.destinationsWithDatasets,
+            originsWithDatasets: this.originsWithDatasets,
+            componentsWithDatasets: this.componentsWithDatasets,
+            title: eventData.label,
+            featureId: eventData.resource,
+            hyperlinks: this.urls.map(url=>{return {url: url, id: 'pubmed'}})
+          }
+          resolve(tooltipData)
+        })
+      } else {  
         let tooltipData = {
           destinations: this.destinations, 
           origins: this.origins,
@@ -40,24 +55,11 @@ export class FlatmapQueries {
           componentsWithDatasets: this.componentsWithDatasets,
           title: eventData.label,
           featureId: eventData.resource,
-          hyperlinks: this.urls
+          hyperlinks: eventData.feature.hyperlinks
         }
-        return tooltipData
-      })
-    } else {
-      let tooltipData = {
-        destinations: this.destinations, 
-        origins: this.origins,
-        components: this.components,
-        destinationsWithDatasets: this.destinationsWithDatasets,
-        originsWithDatasets: this.originsWithDatasets,
-        componentsWithDatasets: this.componentsWithDatasets,
-        title: eventData.label,
-        featureId: eventData.resource,
-        hyperlinks: eventData.feature.hyperlinks
+        resolve(tooltipData)
       }
-      return tooltipData
-    }
+    })
   }
 
   getOrganCuries = function(){
@@ -340,7 +342,7 @@ export class FlatmapQueries {
   }
   flatmapQuery = function(sql){
     const data = { sql: sql}
-    return fetch(`${this.flatmapAPI}knowledge/query/`, {
+    return fetch(`${this.flatmapApi}knowledge/query/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -353,18 +355,22 @@ export class FlatmapQueries {
     })
   }
   pubmedQueryOnIds = function(eventData){
+    console.log('pubmedQueryOnIds')
+    console.log(eventData)
     const keastIds = eventData.resource
     const source = eventData.feature.source
     return new Promise(resolve=>{
       if(!keastIds || keastIds.length === 0) return
       const sql = this.buildPubmedSqlStatement(keastIds)
       this.flatmapQuery(sql).then(data=>{
-        this.responseData = data
+        console.log('resp', data)
         // Create pubmed url on paths if we have them
         if (data.values.length > 0){
-          this.urls = this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))
+          this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
+          console.log('made pubmed id request')
           resolve(true)
         } else { // Create pubmed url on models
+          console.log('made pubmed model request')
           this.pubmedQueryOnModels(source).then(()=>resolve(true))
         }
       })
@@ -374,7 +380,7 @@ export class FlatmapQueries {
     return new Promise(resolve=>{
       this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
         if (Array.isArray(data.values) && data.values.length > 0){
-          this.urls = this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))
+          this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
         } else {
           this.urls = [] // Clears the pubmed search button 
         } 

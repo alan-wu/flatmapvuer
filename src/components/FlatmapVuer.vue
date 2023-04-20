@@ -512,8 +512,11 @@ export default {
       this.$emit("resource-selected", action);
     },
     createTooltipFromNeuronCuration: function(data) {
-      this.tooltipEntry = this.flatmapQueries.createTooltipData(data);
-      this.displayTooltip();
+      this.flatmapQueries.createTooltipData(data).then(tooltipData => {
+        console.log('tooltip data: ', tooltipData)
+        this.tooltipEntry = tooltipData;
+        this.displayTooltip();
+      });
     },
     // Keeping this as an API
     showPopup: function(featureId, node, options) {
