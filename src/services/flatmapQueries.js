@@ -18,6 +18,7 @@ export class FlatmapQueries {
     this.origins = []
     this.components = []
     this.uberons = []
+    this.urls = []
     this.controller = undefined
     this.getOrganCuries().then(uberons=>{
       this.uberons = uberons
@@ -28,18 +29,35 @@ export class FlatmapQueries {
   }
 
   createTooltipData = function (eventData) {
-    let tooltipData = {
-      destinations: this.destinations, 
-      origins: this.origins,
-      components: this.components,
-      destinationsWithDatasets: this.destinationsWithDatasets,
-      originsWithDatasets: this.originsWithDatasets,
-      componentsWithDatasets: this.componentsWithDatasets,
-      title: eventData.label,
-      featureId: eventData.resource,
-      hyperlinks: eventData.feature.hyperlinks
+    if(eventData.feature.hyperlinks && eventData.feature.hyperlinks.length > 0){
+      this.pubmedQueryOnIds(eventData).then(()=>{
+        let tooltipData = {
+          destinations: this.destinations, 
+          origins: this.origins,
+          components: this.components,
+          destinationsWithDatasets: this.destinationsWithDatasets,
+          originsWithDatasets: this.originsWithDatasets,
+          componentsWithDatasets: this.componentsWithDatasets,
+          title: eventData.label,
+          featureId: eventData.resource,
+          hyperlinks: this.urls
+        }
+        return tooltipData
+      })
+    } else {
+      let tooltipData = {
+        destinations: this.destinations, 
+        origins: this.origins,
+        components: this.components,
+        destinationsWithDatasets: this.destinationsWithDatasets,
+        originsWithDatasets: this.originsWithDatasets,
+        componentsWithDatasets: this.componentsWithDatasets,
+        title: eventData.label,
+        featureId: eventData.resource,
+        hyperlinks: eventData.feature.hyperlinks
+      }
+      return tooltipData
     }
-    return tooltipData
   }
 
   getOrganCuries = function(){
@@ -303,18 +321,72 @@ export class FlatmapQueries {
     return found
   }
 
-  findAllIdsFromConnectivity(connectivity){
-    let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-    let nodes = [...new Set(dnodes)] // remove duplicates
-    let found = []
-    nodes.forEach(n=>{
-      if (Array.isArray(n)){
-        found.push(n.flat())
-      } else {
-        found.push(n)
+  stripPMIDPrefix = function (pubmedId){
+    return pubmedId.split(':')[1]
+  }
+  buildPubmedSqlStatement = function(keastIds) {
+    let sql = 'select distinct publication from publications where entity in ('
+    if (keastIds.length === 1) {
+      sql += `'${keastIds[0]}')`
+    } else if (keastIds.length > 1) {
+      for (let i in keastIds) {
+        sql += `'${keastIds[i]}'${i >= keastIds.length - 1 ? ')' : ','} `
       }
+    }
+    return sql
+  }
+  buildPubmedSqlStatementForModels = function(model) {
+    return `select distinct publication from publications where entity = '${model}'`
+  }
+  flatmapQuery = function(sql){
+    const data = { sql: sql}
+    return fetch(`${this.flatmapAPI}knowledge/query/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     })
-    return [... new Set(found.flat())]
+    .then(response => response.json())
+    .catch((error) => {
+      console.error('Error:', error)
+    })
+  }
+  pubmedQueryOnIds = function(eventData){
+    const keastIds = eventData.resource
+    const source = eventData.feature.source
+    return new Promise(resolve=>{
+      if(!keastIds || keastIds.length === 0) return
+      const sql = this.buildPubmedSqlStatement(keastIds)
+      this.flatmapQuery(sql).then(data=>{
+        this.responseData = data
+        // Create pubmed url on paths if we have them
+        if (data.values.length > 0){
+          this.urls = this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))
+          resolve(true)
+        } else { // Create pubmed url on models
+          this.pubmedQueryOnModels(source).then(()=>resolve(true))
+        }
+      })
+    })
+  }
+  pubmedQueryOnModels = function(source){
+    return new Promise(resolve=>{
+      this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
+        if (Array.isArray(data.values) && data.values.length > 0){
+          this.urls = this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))
+        } else {
+          this.urls = [] // Clears the pubmed search button 
+        } 
+        resolve(true)
+      })
+    })
+  }
+  pubmedSearchUrl = function(ids) {
+    let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
+    let params = new URLSearchParams()
+    params.append('term', ids)
+    return url + params.toString()
   }
 }
 
