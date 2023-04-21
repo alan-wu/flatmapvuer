@@ -191,7 +191,6 @@ export class FlatmapQueries {
       this.controller = new AbortController();
       const signal = this.controller.signal;
 
-      console.log('Querying for pathways')
       this.destinations = []
       this.origins = []
       this.components = []
@@ -209,7 +208,6 @@ export class FlatmapQueries {
       .then(response => response.json())
       .then(data => {
         if(this.connectivityExists(data)){
-          console.log('Connectivity data found')
           let connectivity = JSON.parse(data.values[0][0])
           this.processConnectivity(connectivity).then(()=>{
             resolve(true)
@@ -258,12 +256,10 @@ export class FlatmapQueries {
     this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
     this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
     this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
-    console.log('components', this.components)
   }
 
   processConnectivity(connectivity){
     return new Promise (resolve=>{
-      console.log('connectivity', connectivity)
 
       // Filter the origin and destinations from components
       let components = this.findComponents(connectivity)
@@ -355,22 +351,17 @@ export class FlatmapQueries {
     })
   }
   pubmedQueryOnIds = function(eventData){
-    console.log('pubmedQueryOnIds')
-    console.log(eventData)
     const keastIds = eventData.resource
     const source = eventData.feature.source
     return new Promise(resolve=>{
       if(!keastIds || keastIds.length === 0) return
       const sql = this.buildPubmedSqlStatement(keastIds)
       this.flatmapQuery(sql).then(data=>{
-        console.log('resp', data)
         // Create pubmed url on paths if we have them
         if (data.values.length > 0){
           this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
-          console.log('made pubmed id request')
           resolve(true)
         } else { // Create pubmed url on models
-          console.log('made pubmed model request')
           this.pubmedQueryOnModels(source).then(()=>resolve(true))
         }
       })

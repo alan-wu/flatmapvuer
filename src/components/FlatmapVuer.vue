@@ -465,10 +465,7 @@ export default {
             userData: args,
             eventType: eventType
           };
-          console.log('event type: ', eventType)
-          // Disable the nueron pop up for now.
           if (data && data.type !== "marker" && eventType === "click"){
-            console.log('starting pop up')
             this.checkAndCreatePopups(payload);
           }
           this.$emit("resource-selected", payload);
@@ -480,13 +477,11 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: function(data) {
       // Call flatmap database to get the connection data
-      console.log('data: ', data)
       this.flatmapQueries
         .pathwayQuery(data.resource)
         .then(connections => {
           if(!connections){
             if(data.feature.hyperlinks){
-              console.log('no connections, but hyperlinks')
               this.resourceForTooltip =  data.resource[0];
               this.createTooltipFromNeuronCuration(data);
             }
@@ -513,7 +508,6 @@ export default {
     },
     createTooltipFromNeuronCuration: function(data) {
       this.flatmapQueries.createTooltipData(data).then(tooltipData => {
-        console.log('tooltip data: ', tooltipData)
         this.tooltipEntry = tooltipData;
         this.displayTooltip();
       });
