@@ -475,11 +475,10 @@ export default {
       };
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
-    checkAndCreatePopups: function(data) {
+    checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
-      this.flatmapQueries
-        .pathwayQuery(data.resource)
-        .then(connections => {
+      console.log('data: ', data)
+      let connections = await this.flatmapQueries.pathwayQuery(data)
           if(!connections){
             if(data.feature.hyperlinks){
               this.resourceForTooltip =  data.resource[0];
@@ -489,7 +488,6 @@ export default {
             this.resourceForTooltip =  data.resource[0];
             this.createTooltipFromNeuronCuration(data);
           }
-        })
     },
     popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
@@ -507,10 +505,8 @@ export default {
       this.$emit("resource-selected", action);
     },
     createTooltipFromNeuronCuration: function(data) {
-      this.flatmapQueries.createTooltipData(data).then(tooltipData => {
-        this.tooltipEntry = tooltipData;
-        this.displayTooltip();
-      });
+      this.tooltipEntry = this.flatmapQueries.createTooltipData(data);
+      this.displayTooltip();
     },
     // Keeping this as an API
     showPopup: function(featureId, node, options) {
@@ -938,7 +934,8 @@ export default {
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
-      minimapSmall: false
+      minimapSmall: false,
+      systems: undefined,
     };
   },
   watch: {

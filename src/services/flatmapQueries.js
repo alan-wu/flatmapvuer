@@ -29,37 +29,18 @@ export class FlatmapQueries {
   }
 
   createTooltipData = function (eventData) {
-    return new Promise(resolve => {
-      if(!eventData.feature.hyperlinks){
-        this.pubmedQueryOnIds(eventData).then(()=>{
-          let tooltipData = {
-            destinations: this.destinations, 
-            origins: this.origins,
-            components: this.components,
-            destinationsWithDatasets: this.destinationsWithDatasets,
-            originsWithDatasets: this.originsWithDatasets,
-            componentsWithDatasets: this.componentsWithDatasets,
-            title: eventData.label,
-            featureId: eventData.resource,
-            hyperlinks: this.urls.map(url=>{return {url: url, id: 'pubmed'}})
-          }
-          resolve(tooltipData)
-        })
-      } else {  
-        let tooltipData = {
-          destinations: this.destinations, 
-          origins: this.origins,
-          components: this.components,
-          destinationsWithDatasets: this.destinationsWithDatasets,
-          originsWithDatasets: this.originsWithDatasets,
-          componentsWithDatasets: this.componentsWithDatasets,
-          title: eventData.label,
-          featureId: eventData.resource,
-          hyperlinks: eventData.feature.hyperlinks
-        }
-        resolve(tooltipData)
-      }
-    })
+    let tooltipData = {
+      destinations: this.destinations, 
+      origins: this.origins,
+      components: this.components,
+      destinationsWithDatasets: this.destinationsWithDatasets,
+      originsWithDatasets: this.originsWithDatasets,
+      componentsWithDatasets: this.componentsWithDatasets,
+      title: eventData.label,
+      featureId: eventData.resource,
+      hyperlinks: eventData.feature.hyperlinks ? eventData.feature.hyperlinks : this.urls.map(url=>({url: url, id: "pubmed"})),
+    }
+    return tooltipData
   }
 
   getOrganCuries = function(){
@@ -182,8 +163,7 @@ export class FlatmapQueries {
     return found
   }
 
-  pathwayQuery = function(keastIds){
-    return new Promise(resolve=>{
+  pathwayQuery = async function(eventData){
       // check if there is an existing query
       if (this.controller) this.controller.abort();
 
@@ -191,13 +171,15 @@ export class FlatmapQueries {
       this.controller = new AbortController();
       const signal = this.controller.signal;
 
+      console.log('Querying for pathways')
+      const keastIds = eventData.resource
       this.destinations = []
       this.origins = []
       this.components = []
       this.loading = true
       if (!keastIds || keastIds.length == 0) return
       const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
-      fetch(`${this.flatmapApi}knowledge/query/`, {
+      let prom1 = await fetch(`${this.flatmapApi}knowledge/query/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,17 +192,19 @@ export class FlatmapQueries {
         if(this.connectivityExists(data)){
           let connectivity = JSON.parse(data.values[0][0])
           this.processConnectivity(connectivity).then(()=>{
-            resolve(true)
+            return
           })
         } else {
           console.log('No connectivity data found')
-          resolve(false)
+          return
         }
       })
       .catch((error) => {
         console.error('Error:', error);
+        return
       })
-    })
+      let prom2 = await this.pubmedQueryOnIds(eventData)
+      return await Promise.all([prom1, prom2])
   }
 
   connectivityExists = function(data){
