@@ -151,14 +151,18 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
-          <dynamic-legends
+          <selections-group
             v-if="isFC && systems && systems.length > 0"
             title="Systems"
+            labelKey="name"
             identifierKey="name"
-            :lists="systems"
-            key="systemslegends"
+            :selections="systems"
+            colourStyle="background"
+            @changed="systemSelected"
+            @checkAll="checkAllSystems"
+            ref="systemsSelection"
+            key="systemsSelection"
           />
-          <!--
           <selections-group
             v-if="!isFC && centreLines && centreLines.length > 0"
             title="Nerves"
@@ -169,7 +173,6 @@
             ref="centrelinesSelection"
             key="centrelinesSelection"
           />
-          -->
           <selections-group
             v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
             title="SCKAN"
@@ -197,6 +200,7 @@
             title="Pathways"
             labelKey="label"
             identifierKey="type"
+            colourStyle="line"
             :selections="pathways"
             @changed="pathwaysSelected"
             @checkAll="checkAllPathways"
@@ -281,7 +285,6 @@ import Vue from "vue";
 import Tooltip from "./Tooltip";
 import SelectionsGroup from "./SelectionsGroup.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import DynamicLegends from "./legends/DynamicLegends.vue";
 import SvgLegends from "./legends/SvgLegends";
 import {
   Col,
@@ -305,7 +308,6 @@ const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 export default {
   name: "FlatmapVuer",
   components: {
-    DynamicLegends,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
@@ -373,6 +375,9 @@ export default {
         if (this.$refs.layersSelection) {
           this.$refs.layersSelection.reset();
         }
+        if (this.$refs.systemsSelection) {
+          this.$refs.pathwaysSelection.reset();
+        }
         if (this.$refs.pathwaysSelection) {
           this.$refs.pathwaysSelection.reset();
         }
@@ -398,7 +403,6 @@ export default {
     },
     centreLinesSelected: function(payload) {
       if (this.mapImp) {
-        console.log(payload.value)
         this.mapImp.enableCentrelines(payload.value);
       }
     },
@@ -410,6 +414,16 @@ export default {
     checkAllSCKAN: function(payload) {
       if (this.mapImp) {
         payload.keys.forEach(key => this.mapImp.enableSckanPath(key, payload.value));
+      }
+    },
+    systemSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableSystem(payload.key, payload.value);
+      }
+    },
+    checkAllSystems: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableSystem(key, payload.value));
       }
     },
     layersSelected: function(payload) {
@@ -789,8 +803,8 @@ export default {
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
       this.mapImp.enableCentrelines(false);
-      //this.layers = this.mapImp.getLayers();
-      //this.systems = this.mapImp.getSystems();
+      this.layers = this.mapImp.getLayers();
+      this.systems = this.mapImp.getSystems();
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
@@ -943,6 +957,7 @@ export default {
           key: "centrelines"
         }
       ],
+      systems: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },
