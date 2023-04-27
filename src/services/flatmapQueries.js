@@ -171,7 +171,6 @@ export class FlatmapQueries {
       this.controller = new AbortController();
       const signal = this.controller.signal;
 
-      console.log('Querying for pathways')
       const keastIds = eventData.resource
       this.destinations = []
       this.origins = []
