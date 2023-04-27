@@ -479,15 +479,15 @@ export default {
       // Call flatmap database to get the connection data
       console.log('data: ', data)
       let connections = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-          if(!connections){
-            if(data.feature.hyperlinks){
-              this.resourceForTooltip =  data.resource[0];
-              this.createTooltipFromNeuronCuration(data);
-            }
-          } else {
-            this.resourceForTooltip =  data.resource[0];
-            this.createTooltipFromNeuronCuration(data);
-          }
+      if(!connections){
+        if(data.feature.hyperlinks){
+          this.resourceForTooltip =  data.resource[0];
+          this.createTooltipFromNeuronCuration(data);
+        }
+      } else {
+        this.resourceForTooltip =  data.resource[0];
+        this.createTooltipFromNeuronCuration(data);
+      }
     },
     popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
