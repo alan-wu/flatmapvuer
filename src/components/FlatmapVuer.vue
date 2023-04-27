@@ -949,7 +949,6 @@ export default {
       outlinesRadio: true,
       minimapResizeShow: false,
       minimapSmall: false,
-      systems: undefined,
     };
   },
   watch: {
