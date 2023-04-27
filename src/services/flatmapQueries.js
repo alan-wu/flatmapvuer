@@ -163,7 +163,7 @@ export class FlatmapQueries {
     return found
   }
 
-  pathwayQuery = async function(eventData){
+  retrieveFlatmapKnowledgeForEvent = async function(eventData){
       // check if there is an existing query
       if (this.controller) this.controller.abort();
 

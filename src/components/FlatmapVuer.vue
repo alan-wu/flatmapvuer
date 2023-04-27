@@ -478,7 +478,7 @@ export default {
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
       console.log('data: ', data)
-      let connections = await this.flatmapQueries.pathwayQuery(data)
+      let connections = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
           if(!connections){
             if(data.feature.hyperlinks){
               this.resourceForTooltip =  data.resource[0];
