@@ -176,10 +176,9 @@ export class FlatmapQueries {
       this.destinations = []
       this.origins = []
       this.components = []
-      this.loading = true
       if (!keastIds || keastIds.length == 0) return
       const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
-      let prom1 = await fetch(`${this.flatmapApi}knowledge/query/`, {
+      let prom1 = fetch(`${this.flatmapApi}knowledge/query/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,8 +202,9 @@ export class FlatmapQueries {
         console.error('Error:', error);
         return
       })
-      let prom2 = await this.pubmedQueryOnIds(eventData)
-      return await Promise.all([prom1, prom2])
+      let prom2 = this.pubmedQueryOnIds(eventData)
+      let d = await Promise.all([prom1, prom2])
+      return d
   }
 
   connectivityExists = function(data){
@@ -306,6 +306,7 @@ export class FlatmapQueries {
   stripPMIDPrefix = function (pubmedId){
     return pubmedId.split(':')[1]
   }
+
   buildPubmedSqlStatement = function(keastIds) {
     let sql = 'select distinct publication from publications where entity in ('
     if (keastIds.length === 1) {
@@ -317,9 +318,11 @@ export class FlatmapQueries {
     }
     return sql
   }
+
   buildPubmedSqlStatementForModels = function(model) {
     return `select distinct publication from publications where entity = '${model}'`
   }
+
   flatmapQuery = function(sql){
     const data = { sql: sql}
     return fetch(`${this.flatmapApi}knowledge/query/`, {
@@ -334,6 +337,7 @@ export class FlatmapQueries {
       console.error('Error:', error)
     })
   }
+
   pubmedQueryOnIds = function(eventData){
     const keastIds = eventData.resource
     const source = eventData.feature.source
@@ -351,6 +355,7 @@ export class FlatmapQueries {
       })
     })
   }
+
   pubmedQueryOnModels = function(source){
     return new Promise(resolve=>{
       this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
@@ -363,6 +368,7 @@ export class FlatmapQueries {
       })
     })
   }
+  
   pubmedSearchUrl = function(ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
