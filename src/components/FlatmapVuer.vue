@@ -747,10 +747,18 @@ export default {
       }
     },
     mapResize: function() {
-      if (this.mapImp) {
-        this.mapImp.resize();
+      try {
+        if (this.mapImp) {
+          this.mapImp.resize();
+          this.showMinimap(this.displayMinimap);
+          if (this.mapImp._minimap) {
+              this.mapImp._minimap.resize();
+          }
+        }
+        this.computePathControlsMaximumHeight();
+      } catch {
+        console.error("Map resize error");
       }
-      this.computePathControlsMaximumHeight();
     },
     onFlatmapReady: function(){
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
@@ -771,6 +779,7 @@ export default {
       this.loading = false;
       this.computePathControlsMaximumHeight();
       this.drawerOpen = true;
+      this.mapResize();
       this.$emit("ready", this);
     },
     showMinimap: function(flag) {
