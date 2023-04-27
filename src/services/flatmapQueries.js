@@ -10,8 +10,9 @@ const inArray = function(ar1, ar2){
   return as1.indexOf(as2) !== -1
 }
 
-export class FlatmapQueries {
-  constructor(sparcApi, flatmapApi) {
+let FlatmapQueries = function(){
+
+  this.initialise  = function(sparcApi, flatmapApi){
     this.sparcApi = sparcApi
     this.flatmapApi = flatmapApi
     this.destinations = []
@@ -28,7 +29,7 @@ export class FlatmapQueries {
     })
   }
 
-  createTooltipData = function (eventData) {
+  this.createTooltipData = function (eventData) {
     let tooltipData = {
       destinations: this.destinations, 
       origins: this.origins,
@@ -43,7 +44,7 @@ export class FlatmapQueries {
     return tooltipData
   }
 
-  getOrganCuries = function(){
+  this.getOrganCuries = function(){
     return new Promise(resolve=> {
     fetch(`${this.sparcAPI}get-organ-curies/`)
       .then(response=>response.json())
@@ -53,7 +54,7 @@ export class FlatmapQueries {
     })
   }
 
-  createComponentsLabelList = function(components, lookUp){
+  this.createComponentsLabelList = function(components, lookUp){
     let labelList = []
     components.forEach(n=>{
       labelList.push(this.createLabelFromNeuralNode(n[0]), lookUp)
@@ -64,7 +65,7 @@ export class FlatmapQueries {
     return labelList
   }
 
-  createLabelLookup = function(uberons) {
+  this.createLabelLookup = function(uberons) {
     return new Promise(resolve=> {
       let uberonMap = {}
       const data = { sql: this.buildLabelSqlStatement(uberons)}
@@ -89,7 +90,7 @@ export class FlatmapQueries {
     })
   }
 
-  buildConnectivitySqlStatement = function (keastIds) {
+  this.buildConnectivitySqlStatement = function (keastIds) {
     let sql = 'select knowledge from knowledge where entity in ('
     if (keastIds.length === 1) {
       sql += `'${keastIds[0]}')`
@@ -100,7 +101,8 @@ export class FlatmapQueries {
     }
     return sql
   }
-  buildLabelSqlStatement = function (uberons) {
+
+  this.buildLabelSqlStatement = function (uberons) {
     let sql = 'select entity, label from labels where entity in ('
     if (uberons.length === 1) {
       sql += `'${uberons[0]}')`
@@ -112,7 +114,7 @@ export class FlatmapQueries {
     return sql
   }
 
-  findAllIdsFromConnectivity = function (connectivity) {
+  this.findAllIdsFromConnectivity = function (connectivity) {
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = [...new Set(dnodes)] // remove duplicates
     let found = []
@@ -126,7 +128,7 @@ export class FlatmapQueries {
     return [... new Set(found.flat())]
   }
 
-  flattenConntectivity = function (connectivity) {
+  this.flattenConntectivity = function (connectivity) {
     let dnodes = connectivity.flat() // get nodes from edgelist
     let nodes = [...new Set(dnodes)] // remove duplicates
     let found = []
@@ -140,7 +142,7 @@ export class FlatmapQueries {
     return found.flat()
   }
 
-  findComponents = function (connectivity) {
+  this.findComponents = function (connectivity) {
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -163,7 +165,7 @@ export class FlatmapQueries {
     return found
   }
 
-  retrieveFlatmapKnowledgeForEvent = async function(eventData){
+  this.retrieveFlatmapKnowledgeForEvent = async function(eventData){
       // check if there is an existing query
       if (this.controller) this.controller.abort();
 
@@ -208,7 +210,7 @@ export class FlatmapQueries {
     
   }
 
-  connectivityExists = function(data){
+  this.connectivityExists = function(data){
     if (data.values && data.values.length > 0 && JSON.parse(data.values[0][0]).connectivity && JSON.parse(data.values[0][0]).connectivity.length > 0) {
       return true
     } else {
@@ -216,7 +218,7 @@ export class FlatmapQueries {
     }
   }
 
-  createLabelFromNeuralNode = function(node, lookUp){
+  this.createLabelFromNeuralNode = function(node, lookUp){
     let label = lookUp[node[0]]
     if (node.length === 2 && node[1].length > 0){
       node[1].forEach(n=>{
@@ -230,7 +232,7 @@ export class FlatmapQueries {
     return label
   }
 
-  flattenAndFindDatasets(components, axons, dendrites){
+  this.flattenAndFindDatasets = function(components, axons, dendrites){
       
     // process the nodes for finding datasets (Note this is not critical to the tooltip, only for the 'search on components' button)
     let componentsFlat = this.flattenConntectivity(components)
@@ -243,7 +245,7 @@ export class FlatmapQueries {
     this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
   }
 
-  processConnectivity(connectivity){
+  this.processConnectivity = function(connectivity){
     return new Promise (resolve=>{
 
       // Filter the origin and destinations from components
@@ -267,7 +269,7 @@ export class FlatmapQueries {
     })
   }
 
-  flattenConntectivity(connectivity){
+  this.flattenConntectivity = function(connectivity){
     let dnodes = connectivity.flat() // get nodes from edgelist
     let nodes = [...new Set(dnodes)] // remove duplicates
     let found = []
@@ -281,7 +283,7 @@ export class FlatmapQueries {
     return found.flat()
   }
 
-  findComponents = function(connectivity){
+  this.findComponents = function(connectivity){
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -304,11 +306,11 @@ export class FlatmapQueries {
     return found
   }
 
-  stripPMIDPrefix = function (pubmedId){
+  this.stripPMIDPrefix = function (pubmedId){
     return pubmedId.split(':')[1]
   }
 
-  buildPubmedSqlStatement = function(keastIds) {
+  this.buildPubmedSqlStatement = function(keastIds) {
     let sql = 'select distinct publication from publications where entity in ('
     if (keastIds.length === 1) {
       sql += `'${keastIds[0]}')`
@@ -320,11 +322,11 @@ export class FlatmapQueries {
     return sql
   }
 
-  buildPubmedSqlStatementForModels = function(model) {
+  this.buildPubmedSqlStatementForModels = function(model) {
     return `select distinct publication from publications where entity = '${model}'`
   }
 
-  flatmapQuery = function(sql){
+  this.flatmapQuery = function(sql){
     const data = { sql: sql}
     return fetch(`${this.flatmapApi}knowledge/query/`, {
       method: 'POST',
@@ -339,7 +341,7 @@ export class FlatmapQueries {
     })
   }
 
-  pubmedQueryOnIds = function(eventData){
+  this.pubmedQueryOnIds = function(eventData){
     const keastIds = eventData.resource
     const source = eventData.feature.source
     if(!keastIds || keastIds.length === 0) return
@@ -355,7 +357,7 @@ export class FlatmapQueries {
     })
   }
 
-  pubmedQueryOnModels = function(source){
+  this.pubmedQueryOnModels = function(source){
     return this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
       if (Array.isArray(data.values) && data.values.length > 0){
         this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
@@ -366,7 +368,7 @@ export class FlatmapQueries {
     })
   }
 
-  pubmedSearchUrl = function(ids) {
+  this.pubmedSearchUrl = function(ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
     params.append('term', ids)
@@ -374,8 +376,4 @@ export class FlatmapQueries {
   }
 }
 
-
-
-
-
-export default FlatmapQueries
+export {FlatmapQueries}
