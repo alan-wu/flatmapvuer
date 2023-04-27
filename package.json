@@ -7,7 +7,6 @@
     "dist/*",
     "src/*",
     "public/*",
-    "services/*",
     "*.json",
     "*.js"
   ],
