@@ -46,6 +46,7 @@
       :minZoom="minZoom"
       :pathControls="pathControls"
       :searchable="searchable"
+      :layerControl="layerControl"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
@@ -346,6 +347,10 @@ export default {
       default: true
     },
     searchable: {
+      type: Boolean,
+      default: false
+    },
+    layerControl: {
       type: Boolean,
       default: false
     },

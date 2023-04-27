@@ -20,9 +20,10 @@
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
       @resource-selected="FlatmapSelected" :minZoom="minZoom"
       @pan-zoom-callback="panZoomcallback"
-      @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable" 
+      @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable"
+      :layerControl="layerControl"
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap=true :flatmapAPI="flatmapAPI"/>
+      :displayMinimap="true" :flatmapAPI="flatmapAPI"/>
   </div>
 </template>
 
@@ -53,10 +54,12 @@ export default {
         this.$refs.multi.setState(this.mapSettings.pop());
     },
     FlatmapSelected: function(resource) {
-      if (resource.eventType === "click")
+      if (resource.eventType === "click") {
         console.log('resource', resource);
+      }
     },
     FlatmapReady: function(component) {
+      console.log(component);
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948");
       component.enablePanZoomEvents(true);
@@ -73,6 +76,7 @@ export default {
       featureInfo: true,
       searchable: true,
       pathControls: true,
+      layerControl: true,
       minZoom: 4,
       availableSpecies : {
         "Human Female":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000383", iconClass:"mapicon-icon_human", displayWarning:true},
@@ -99,7 +103,6 @@ export default {
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/"
-      //flatmapAPI: "https://flatmaps.celldl.org/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }

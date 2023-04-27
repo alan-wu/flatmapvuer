@@ -272,7 +272,7 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
-        :content="tooltipContent"
+        :entry="tooltipEntry"
         @resource-selected="resourceSelected"
       />
     </div>
@@ -296,6 +296,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
+import {FlatmapQueries} from "../services/flatmapQueries";
 
 locale.use(lang);
 Vue.use(Col);
@@ -304,6 +305,18 @@ Vue.use(Radio);
 Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
+
+const createUnfilledTooltipData = function (){
+  return {
+    destinations: [],
+    origins: [],
+    components: [],
+    destinationsWithDatasets: [],
+    originsWithDatasets: [],
+    componentsWithDatasets: [],
+    resource: undefined
+  }
+}
 
 export default {
   name: "FlatmapVuer",
@@ -466,9 +479,9 @@ export default {
             userData: args,
             eventType: eventType
           };
-          // Disable the nueron pop up for now.
-          if (data && data.type !== "marker")
+          if (data && data.type !== "marker" && eventType === "click"){
             this.checkAndCreatePopups(payload);
+          }
           this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
@@ -476,18 +489,17 @@ export default {
       };
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
-    checkAndCreatePopups: function(data) {
-      if (
-        data.eventType == "click" &&
-        this.hasNeuronTooltip(data)
-      ) {
+    checkAndCreatePopups:  async function(data) {
+      // Call flatmap database to get the connection data
+      let connections = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+      if(!connections){
+        if(data.feature.hyperlinks){
+          this.resourceForTooltip =  data.resource[0];
+          this.createTooltipFromNeuronCuration(data);
+        }
+      } else {
+        this.resourceForTooltip =  data.resource[0];
         this.createTooltipFromNeuronCuration(data);
-        this.mapImp.showPopup(
-          this.mapImp.modelFeatureIds(data.resource[0])[0],
-          this.$refs.tooltip.$el,
-          { className: "flatmapvuer-popover", positionAtLastClick: true }
-        );
-        this.popUpCssHacks();
       }
     },
     popUpCssHacks: function() {
@@ -505,69 +517,9 @@ export default {
     resourceSelected: function(action) {
       this.$emit("resource-selected", action);
     },
-    hasNeuronTooltip: function(data) {
-
-      // neural data check
-      if (data.resource[0]){
-        if (data.resource[0].includes('ilxtr:neuron')){
-          return true
-        }
-      }
-      // annotated with datset check
-      if (data.dataset) {
-        return true
-      }
-
-      // if there is no cuff, neural data, or dataset we do not display neuron tooltip
-      return false
-
-    },
     createTooltipFromNeuronCuration: function(data) {
-      const feature = data.resource[0];
-      let content = {
-        title: undefined,
-        components: undefined,
-        start: undefined,
-        distribution: undefined,
-        actions: []
-      };
-
-      this.tooltipVisible = false;
-
-      // neural data check
-      if (feature){
-        if (feature.includes('ilxtr:neuron')){
-          this.tooltipVisible = true;
-          this.tooltipContent = content;
-          this.tooltipContent.uberon = feature;
-          this.tooltipContent.source = data.feature.source;
-          this.tooltipContent.title = data.label;
-          this.tooltipContent.featureIds = [feature];
-          this.tooltipContent.actions.push({
-            title: "Search for datasets",
-            label: "Neuron Datasets",
-            resource: feature.split(":")[1],
-            type: "Neuron Search",
-            feature: feature,
-            nervePath: true
-          });
-        }
-      }
-      // annotated with datset check
-      if (data.dataset) {
-        this.tooltipVisible = true;
-        this.tooltipContent = content;
-        this.tooltipContent.uberon = feature;
-        this.tooltipContent.source = data.feature.source;
-        this.tooltipContent.title = data.label;
-        this.tooltipContent.actions.push({
-          title: "View dataset",
-          resource: data.dataset,
-          type: "URL",
-          feature: feature,
-          nervePath: false
-        });
-      }
+      this.tooltipEntry = this.flatmapQueries.createTooltipData(data);
+      this.displayTooltip();
     },
     // Keeping this as an API
     showPopup: function(featureId, node, options) {
@@ -599,9 +551,11 @@ export default {
     },
     addResizeButtonToMinimap: function(){
       let minimapEl = this.$refs.flatmapContainer.querySelector('.maplibregl-ctrl-minimap');
-      this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
-      minimapEl.appendChild(this.$refs.minimapResize);
-      this.minimapResizeShow = true;
+      if (minimapEl){
+        this.$refs.minimapResize.parentNode.removeChild(this.$refs.minimapResize);
+        minimapEl.appendChild(this.$refs.minimapResize);
+        this.minimapResizeShow = true;
+      }
     },
     setHelpMode: function(helpMode) {
       if (helpMode) {
@@ -630,6 +584,14 @@ export default {
         this.hoverVisibilities[tooltipNumber].value = false;
         clearTimeout(this.tooltipWait);
       }
+    },
+    displayTooltip: function() {
+      this.mapImp.showPopup(
+        this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
+        this.$refs.tooltip.$el,
+        { className: "flatmapvuer-popover", positionAtLastClick: true }
+      );
+      this.popUpCssHacks();
     },
     openFlatmapHelpPopup: function() {
       if (this.mapImp) {
@@ -874,11 +836,15 @@ export default {
     },
     pathControls: {
       type: Boolean,
-      default: true
+      default: false
     },
     searchable: {
       type: Boolean,
       default: false
+    },
+    layerControl: {
+        type: Boolean,
+        default: false
     },
     tooltips: {
       type: Boolean,
@@ -975,12 +941,15 @@ export default {
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
       flatmapMarker: flatmapMarker,
+      tooltipEntry: createUnfilledTooltipData(),
+      connectivityTooltipVisible: false,
+      resourceForTooltip: undefined,
       drawerOpen: false,
-      tooltipContent: { featureIds: []},
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
-      minimapSmall: false
+      minimapSmall: false,
+      systems: undefined,
     };
   },
   watch: {
@@ -1002,6 +971,7 @@ export default {
     const flatmap = require("@abi-software/flatmap-viewer");
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted) this.createFlatmap();
+    this.flatmapQueries = new FlatmapQueries(this.sparcAPI, this.flatmapAPI);
   }
 };
 </script>
