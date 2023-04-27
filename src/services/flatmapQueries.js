@@ -178,33 +178,35 @@ export class FlatmapQueries {
       this.components = []
       if (!keastIds || keastIds.length == 0) return
       const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
-      let prom1 = fetch(`${this.flatmapApi}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        signal: signal
-      })
-      .then(response => response.json())
-      .then(data => {
-        if(this.connectivityExists(data)){
-          let connectivity = JSON.parse(data.values[0][0])
-          this.processConnectivity(connectivity).then(()=>{
-            return
-          })
-        } else {
-          console.log('No connectivity data found')
-          return
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        return
+      let prom1 = new Promise(resolve=>{
+        fetch(`${this.flatmapApi}knowledge/query/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+          signal: signal
+        })
+        .then(response => response.json())
+        .then(data => {
+          if(this.connectivityExists(data)){
+            let connectivity = JSON.parse(data.values[0][0])
+            this.processConnectivity(connectivity).then(()=>{
+              resolve(true)
+            })
+          } else {
+            console.log('No connectivity data found')
+            resolve(true)
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          resolve(false)
+        })
       })
       let prom2 = this.pubmedQueryOnIds(eventData)
-      let d = await Promise.all([prom1, prom2])
-      return d
+      return await Promise.all([prom1, prom2])
+    
   }
 
   connectivityExists = function(data){
@@ -341,34 +343,30 @@ export class FlatmapQueries {
   pubmedQueryOnIds = function(eventData){
     const keastIds = eventData.resource
     const source = eventData.feature.source
-    return new Promise(resolve=>{
-      if(!keastIds || keastIds.length === 0) return
-      const sql = this.buildPubmedSqlStatement(keastIds)
-      this.flatmapQuery(sql).then(data=>{
-        // Create pubmed url on paths if we have them
-        if (data.values.length > 0){
-          this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
-          resolve(true)
-        } else { // Create pubmed url on models
-          this.pubmedQueryOnModels(source).then(()=>resolve(true))
-        }
-      })
+    if(!keastIds || keastIds.length === 0) return
+    const sql = this.buildPubmedSqlStatement(keastIds)
+    return this.flatmapQuery(sql).then(data=>{
+      // Create pubmed url on paths if we have them
+      if (data.values.length > 0){
+        this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
+        return true
+      } else { // Create pubmed url on models
+        this.pubmedQueryOnModels(source).then(()=>{return true})
+      }
     })
   }
 
   pubmedQueryOnModels = function(source){
-    return new Promise(resolve=>{
-      this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
-        if (Array.isArray(data.values) && data.values.length > 0){
-          this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
-        } else {
-          this.urls = [] // Clears the pubmed search button 
-        } 
-        resolve(true)
-      })
+    return this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
+      if (Array.isArray(data.values) && data.values.length > 0){
+        this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
+      } else {
+        this.urls = [] // Clears the pubmed search button 
+      } 
+      return
     })
   }
-  
+
   pubmedSearchUrl = function(ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
