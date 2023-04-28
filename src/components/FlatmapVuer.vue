@@ -1071,6 +1071,8 @@ export default {
   border: 1px solid rgb(220, 223, 230);
   padding-bottom: 16px;
   background: #ffffff;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 
   &::-webkit-scrollbar {
     width: 4px;
