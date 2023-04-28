@@ -184,6 +184,7 @@
             ref="skcanSelection"
             key="skcanSelection"
           />
+          <!--
           <selections-group
             v-if="layers && layers.length > 0"
             title="Layers"
@@ -195,6 +196,7 @@
             ref="layersSelection"
             key="layersSelection"
           />
+          -->
           <selections-group
             v-if="pathways && pathways.length > 0"
             title="Pathways"
