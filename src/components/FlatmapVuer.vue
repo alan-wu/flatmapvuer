@@ -298,7 +298,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
-import {FlatmapQueries} from "../services/flatmapQueries";
+import {FlatmapQueries} from "../services/flatmapQueries.js";
 
 locale.use(lang);
 Vue.use(Col);
@@ -493,9 +493,9 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
-      let connections = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-      if(!connections){
-        if(data.feature.hyperlinks){
+      let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+      if(!results){
+        if(data.feature.hyperlinks && data.feature.hyperlinks.length > 0){
           this.resourceForTooltip =  data.resource[0];
           this.createTooltipFromNeuronCuration(data);
         }
@@ -981,7 +981,8 @@ export default {
     const flatmap = require("@abi-software/flatmap-viewer");
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     if (this.renderAtMounted) this.createFlatmap();
-    this.flatmapQueries = new FlatmapQueries(this.sparcAPI, this.flatmapAPI);
+    this.flatmapQueries = new FlatmapQueries();
+    this.flatmapQueries.initialise(this.sparcAPI, this.flatmapAPI);
   }
 };
 </script>
