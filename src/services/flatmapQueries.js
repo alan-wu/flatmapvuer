@@ -197,7 +197,7 @@ let FlatmapQueries = function(){
             })
           } else {
             console.log('No connectivity data found')
-            resolve(true)
+            resolve(false)
           }
         })
         .catch((error) => {
@@ -206,8 +206,8 @@ let FlatmapQueries = function(){
         })
       })
       let prom2 = this.pubmedQueryOnIds(eventData)
-      return await Promise.all([prom1, prom2])
-    
+      let results = await Promise.all([prom1, prom2])
+      return results.every(Boolean)
   }
 
   this.connectivityExists = function(data){
@@ -354,6 +354,7 @@ let FlatmapQueries = function(){
       } else { // Create pubmed url on models
         this.pubmedQueryOnModels(source).then(()=>{return true})
       }
+      return false
     })
   }
 

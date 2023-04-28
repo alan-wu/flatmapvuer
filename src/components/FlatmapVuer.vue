@@ -477,9 +477,9 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
-      let connections = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-      if(!connections){
-        if(data.feature.hyperlinks){
+      let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+      if(!results){
+        if(data.feature.hyperlinks && data.feature.hyperlinks.length > 0){
           this.resourceForTooltip =  data.resource[0];
           this.createTooltipFromNeuronCuration(data);
         }
