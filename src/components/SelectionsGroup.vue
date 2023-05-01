@@ -27,7 +27,7 @@
               class="my-checkbox"
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
-              :checked="!(('enable' in item) && item.enable === false)">
+              :checked="!('enabled' in item) || (item.enabled === true)">
               <el-row class="checkbox-row">
                 <el-col :span="4">
                 <div class="path-visual" :style="getLineStyles(item)"></div>
@@ -76,7 +76,7 @@ export default {
       this.checkAll = true;
       this.checkedItems = [];
       this.selections.forEach(item => {
-        if (!(('enable' in item) && item.enable === false)) {
+        if (!('enabled' in item) || item.enabled === true) {
           this.checkedItems.push(item[this.identifierKey]);
         } else {
           this.checkAll = false;

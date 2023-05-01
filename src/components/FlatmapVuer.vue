@@ -155,7 +155,7 @@
             v-if="isFC && systems && systems.length > 0"
             title="Systems"
             labelKey="name"
-            identifierKey="name"
+            identifierKey="id"
             :selections="systems"
             colourStyle="background"
             @changed="systemSelected"
@@ -775,7 +775,8 @@ export default {
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
       this.mapImp.enableCentrelines(false);
-      this.layers = this.mapImp.getLayers();
+      //Disable layers for now
+      //this.layers = this.mapImp.getLayers();
       this.systems = this.mapImp.getSystems();
       this.addResizeButtonToMinimap();
       this.loading = false;
@@ -931,7 +932,8 @@ export default {
       centreLines: [
         {
           label: "Display Nerves",
-          key: "centrelines"
+          key: "centrelines",
+          enabled: false
         }
       ],
       systems: [],
