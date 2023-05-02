@@ -173,6 +173,7 @@
             ref="centrelinesSelection"
             key="centrelinesSelection"
           />
+          <!--
           <selections-group
             v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
             title="SCKAN"
@@ -184,7 +185,6 @@
             ref="skcanSelection"
             key="skcanSelection"
           />
-          <!--
           <selections-group
             v-if="layers && layers.length > 0"
             title="Layers"
