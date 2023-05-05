@@ -12,6 +12,13 @@
           <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
           <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
           <el-button :disabled="mapSettings.length === 0" @click="restoreSettings()" size="mini">Restore Settings</el-button>
+          <el-autocomplete class="search-box" placeholder="Search"
+            v-model="searchText"
+            :fetch-suggestions="fetchSuggestions"
+            @keyup.enter.native="search"
+            @select="search"
+            popper-class="autocomplete-popper">
+          </el-autocomplete>
         </el-row>
       </div>
       <el-button class="options-button" icon="el-icon-setting" slot="reference">Options</el-button>
@@ -32,12 +39,14 @@
 import Vue from "vue";
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import {
+  Autocomplete,
   Button,
   Col,
   Popover,
   Row,
 } from 'element-ui';
 import "./icons/mapicon-species-style.css";
+Vue.use(Autocomplete);
 Vue.use(Button);
 Vue.use(Col);
 Vue.use(Popover);
@@ -65,14 +74,38 @@ export default {
       component.enablePanZoomEvents(true);
       //component.showPathwaysDrawer(false);
       console.log(taxon, id);
+      this.$refs.multi.getCurrentFlatmap().searchAndShowResult("vagus", true);
       //component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
       this.payload = payload
+    },
+    fetchSuggestions: function(term, cb) {
+      if (term === "") {
+        cb([]);
+      } else {
+        const suggestions = [];
+        const results = this.$refs.multi.getCurrentFlatmap().searchSuggestions(term);
+        results.__featureIds.forEach(id => {
+          const annotation = this.$refs.multi.getCurrentFlatmap().mapImp.annotation(id);
+          if (annotation && annotation.label)
+            suggestions.push(annotation.label);
+        });
+        const unique = new Set(suggestions);
+        suggestions.length = 0;
+        for (const item of unique) {
+          suggestions.push({"value": "\"" + item +"\""});
+        }
+        cb(suggestions);
+      }
+    },
+    search: function(term) {
+      this.$refs.multi.getCurrentFlatmap().searchAndShowResult(term.value, true);
     }
   },
   data: function(){
     return {
+      searchText: "",
       featureInfo: true,
       searchable: true,
       pathControls: true,
@@ -114,6 +147,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import "~element-ui/packages/theme-chalk/src/autocomplete";
 @import "~element-ui/packages/theme-chalk/src/button";
 @import "~element-ui/packages/theme-chalk/src/col";
 @import "~element-ui/packages/theme-chalk/src/popover";
@@ -132,6 +166,26 @@ export default {
 
 .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
   margin-top:120px;
+}
+
+.search-box {
+  margin-top: 2px;
+  height:28px;
+  ::v-deep .el-input__inner {
+    background-color: $background;
+    height:28px;
+    line-height:28px;
+    border: 1px solid rgb(144, 147, 153);
+    border-radius: 4px;
+    &:focus {
+      border-color: $app-primary-color;
+    }
+  }
+}
+
+::v-deep .autocomplete-popper {
+  min-width:137px!important;
+  width: auto!important;
 }
 
 body {
