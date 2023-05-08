@@ -812,7 +812,7 @@ export default {
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
                 searchResults.results[0].text,
-                {className: "custom-popup", positionAtLastClick: false }
+                {className: "custom-popup",positionAtLastClick: false, preserveSelection: true }
               )
             }
             return true;
