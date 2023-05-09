@@ -33,7 +33,6 @@
       :entry="item.taxo"
       :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
-      :warningMessage="warningMessage"
       :displayLatestChanges="item.displayLatestChanges"
       :latestChangesMessage="item.latestChangesMessage"
       :isLegacy="item.isLegacy"
@@ -377,10 +376,6 @@ export default {
     displayMinimap: {
       type: Boolean,
       default: false
-    },
-    warningMessage: {
-      type: String,
-      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
     },
     availableSpecies: {
       type: Object,

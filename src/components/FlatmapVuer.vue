@@ -13,7 +13,7 @@
       <div class="beta-popovers">
         <div>
           <el-popover
-            :content="isLegacy ? 'This is a legacy map, you may view the latest map instead.' : warningMessage"
+            :content="getWarningMessage"
             placement="right"
             :appendToBody="false"
             trigger="manual"
@@ -23,7 +23,7 @@
           ></el-popover>
           <i
             class="el-icon-warning warning-icon"
-            v-if="displayWarning && warningMessage"
+            v-if="displayWarning"
             @mouseover="showToolitip(6)"
             @mouseout="hideToolitip(6)"
             v-popover:warningPopover
@@ -151,14 +151,19 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
-          <dynamic-legends
+          <selections-group
             v-if="isFC && systems && systems.length > 0"
             title="Systems"
-            identifierKey="name"
-            :lists="systems"
-            key="systemslegends"
+            labelKey="name"
+            identifierKey="id"
+            :selections="systems"
+            colourStyle="background"
+            @changed="systemSelected"
+            @checkAll="checkAllSystems"
+            ref="systemsSelection"
+            key="systemsSelection"
           />
-          <!--
+                    <!--
           <selections-group
             v-if="!isFC && centreLines && centreLines.length > 0"
             title="Nerves"
@@ -169,7 +174,6 @@
             ref="centrelinesSelection"
             key="centrelinesSelection"
           />
-          -->
           <selections-group
             v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
             title="SCKAN"
@@ -192,11 +196,13 @@
             ref="layersSelection"
             key="layersSelection"
           />
+          -->
           <selections-group
             v-if="pathways && pathways.length > 0"
             title="Pathways"
             labelKey="label"
             identifierKey="type"
+            colourStyle="line"
             :selections="pathways"
             @changed="pathwaysSelected"
             @checkAll="checkAllPathways"
@@ -281,7 +287,6 @@ import Vue from "vue";
 import Tooltip from "./Tooltip";
 import SelectionsGroup from "./SelectionsGroup.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import DynamicLegends from "./legends/DynamicLegends.vue";
 import SvgLegends from "./legends/SvgLegends";
 import {
   Col,
@@ -318,7 +323,6 @@ const createUnfilledTooltipData = function (){
 export default {
   name: "FlatmapVuer",
   components: {
-    DynamicLegends,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
@@ -386,6 +390,9 @@ export default {
         if (this.$refs.layersSelection) {
           this.$refs.layersSelection.reset();
         }
+        if (this.$refs.systemsSelection) {
+          this.$refs.pathwaysSelection.reset();
+        }
         if (this.$refs.pathwaysSelection) {
           this.$refs.pathwaysSelection.reset();
         }
@@ -411,7 +418,6 @@ export default {
     },
     centreLinesSelected: function(payload) {
       if (this.mapImp) {
-        console.log(payload.value)
         this.mapImp.enableCentrelines(payload.value);
       }
     },
@@ -423,6 +429,16 @@ export default {
     checkAllSCKAN: function(payload) {
       if (this.mapImp) {
         payload.keys.forEach(key => this.mapImp.enableSckanPath(key, payload.value));
+      }
+    },
+    systemSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableSystem(payload.key, payload.value);
+      }
+    },
+    checkAllSystems: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableSystem(key, payload.value));
       }
     },
     layersSelected: function(payload) {
@@ -729,14 +745,22 @@ export default {
         const computed = getComputedStyle(elem);
         const padding = parseInt(computed.paddingTop) + parseInt(computed.paddingBottom);
         const height = elem.clientHeight - padding;
-        this.pathwaysMaxHeight = height - 150;
+        this.pathwaysMaxHeight = height - 170;
       }
     },
     mapResize: function() {
-      if (this.mapImp) {
-        this.mapImp.resize();
+      try {
+        this.computePathControlsMaximumHeight();
+        if (this.mapImp) {
+          this.mapImp.resize();
+          this.showMinimap(this.displayMinimap);
+          if (this.mapImp._minimap) {
+              this.mapImp._minimap.resize();
+          }
+        }
+      } catch {
+        console.error("Map resize error");
       }
-      this.computePathControlsMaximumHeight();
     },
     onFlatmapReady: function(){
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
@@ -751,12 +775,14 @@ export default {
       this.backgroundChangeCallback(this.currentBackground);
       this.pathways = this.mapImp.pathTypes();
       this.mapImp.enableCentrelines(false);
+      //Disable layers for now
       //this.layers = this.mapImp.getLayers();
-      //this.systems = this.mapImp.getSystems();
+      this.systems = this.mapImp.getSystems();
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
       this.drawerOpen = true;
+      this.mapResize();
       this.$emit("ready", this);
     },
     showMinimap: function(flag) {
@@ -786,7 +812,7 @@ export default {
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
                 searchResults.results[0].text,
-                {className: "custom-popup", positionAtLastClick: false }
+                { className: "custom-popup", positionAtLastClick: false, preserveSelection: true }
               )
             }
             return true;
@@ -852,10 +878,6 @@ export default {
       type: Boolean,
       default: false
     },
-    warningMessage: {
-      type: String,
-      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
-    },
     isLegacy: {
       type: Boolean,
       default: false
@@ -866,7 +888,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information",
+      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information.",
     },
     /**
      * State containing state of the flatmap.
@@ -906,9 +928,11 @@ export default {
       centreLines: [
         {
           label: "Display Nerves",
-          key: "centrelines"
+          key: "centrelines",
+          enabled: false
         }
       ],
+      systems: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },
@@ -934,7 +958,6 @@ export default {
       outlinesRadio: true,
       minimapResizeShow: false,
       minimapSmall: false,
-      systems: undefined,
     };
   },
   watch: {
@@ -951,6 +974,16 @@ export default {
       immediate: true,
       deep: true
     }
+  },
+  computed: {
+    getWarningMessage: function() {
+      if (this.isLegacy) {
+        return "This is a legacy map, you may view the latest map instead.";
+      } else if (this.isFC) {
+        return "Beta feature - The connectivity shown here is the subset of neurons from the neuron populations in ApiNATOMY models which are at the same spatial scale and level of granularity.";
+      }
+      return "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress.";
+    },
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
@@ -1046,6 +1079,8 @@ export default {
   border: 1px solid rgb(220, 223, 230);
   padding-bottom: 16px;
   background: #ffffff;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 
   &::-webkit-scrollbar {
     width: 4px;
