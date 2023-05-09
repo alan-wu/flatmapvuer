@@ -163,6 +163,7 @@
             ref="systemsSelection"
             key="systemsSelection"
           />
+                    <!--
           <selections-group
             v-if="!isFC && centreLines && centreLines.length > 0"
             title="Nerves"
@@ -173,7 +174,6 @@
             ref="centrelinesSelection"
             key="centrelinesSelection"
           />
-          <!--
           <selections-group
             v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
             title="SCKAN"
