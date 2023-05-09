@@ -1,15 +1,15 @@
 <template>
   <div class="tooltip-container">
-     <el-main v-if="content" class="main" v-loading="loading">
-      <div class="block" v-if="content.title">
-        <span class="title">{{capitalise(content.title)}}</span>
+     <el-main v-if="entry" class="main" v-loading="loading">
+      <div class="block" v-if="entry.title">
+        <span class="title">{{capitalise(entry.title)}}</span>
       </div>
       <div class="block" v-else>
-        <span class="title">{{content.featureId}}</span>
+        <span class="title">{{entry.featureId}}</span>
       </div>
       <div class="content-container scrollbar">
-        {{content.paths}}
-        <div v-if="origins && origins.length > 0" class="block">
+        {{entry.paths}}
+        <div v-if="entry.origins && entry.origins.length > 0" class="block">
           <div>
             <span class="attribute-title">Origin</span>
             <el-popover
@@ -24,22 +24,22 @@
             </span>
             </el-popover>
           </div>
-          <div v-for="(origin, i) in origins" class="attribute-content"  :key="origin">
+          <div v-for="(origin, i) in entry.origins" class="attribute-content"  :key="origin">
             {{ capitalise(origin) }}
-            <div v-if="i != origins.length - 1" class="seperator"></div>
+            <div v-if="i != entry.origins.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="originsWithDatasets.length > 0" class="button" @click="openDendrites">
+          <el-button v-show="entry.originsWithDatasets && entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
             Explore origin data
           </el-button>
         </div>
-        <div v-if="components && components.length > 0" class="block">
+        <div v-if="entry.components && entry.components.length > 0" class="block">
           <div class="attribute-title">Components</div>
-          <div v-for="(component, i) in components" class="attribute-content"  :key="component">
+          <div v-for="(component, i) in entry.components" class="attribute-content"  :key="component">
             {{ capitalise(component) }}
-            <div v-if="i != components.length - 1" class="seperator"></div>
+            <div v-if="i != entry.components.length - 1" class="seperator"></div>
           </div>
         </div>
-        <div v-if="destinations && destinations.length > 0" class="block">
+        <div v-if="entry.destinations && entry.destinations.length > 0" class="block">
           <div>
             <span class="attribute-title">Destination</span>
             <el-popover
@@ -54,24 +54,21 @@
             </span>
             </el-popover>
           </div>
-          <div v-for="(destination, i) in destinations" class="attribute-content"  :key="destination">
+          <div v-for="(destination, i) in entry.destinations" class="attribute-content"  :key="destination">
             {{ capitalise(destination) }}
-            <div v-if="i != destinations.length - 1" class="seperator"></div>
+            <div v-if="i != entry.destinations.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+          <el-button v-show="entry.destinationsWithDatasets && entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
             Explore destination data
           </el-button>
         </div>
 
-        <el-button v-show="componentsWithDatasets.length > 0" class="button" @click="openAll">
+        <el-button v-show="entry.componentsWithDatasets && entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
           Search for data on components
         </el-button>
 
-        <!-- pubmed-viewer is just used for processing pubmed requests (no display) -->
-        <pubmed-viewer v-if="content.featureIds" v-show="false" :entry="content" @pubmedSearchUrl="pubmedSearchUrlUpdate"/>
-        <el-button  v-if="pubmedSearchUrl != ''" class="button" icon="el-icon-notebook-2" @click="openUrl(pubmedSearchUrl)">
-          Open publications in pubmed
-        </el-button>
+        <external-resource-card :resources="resources"></external-resource-card>
+
       </div>
     </el-main>
   </div>
@@ -97,23 +94,11 @@ Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
-// pubmedviewer is currently not in use, but still under review so not ready to delete yet
-import PubmedViewer from './PubmedViewer.vue'
 import EventBus from './EventBus'
+import ExternalResourceCard from './ExternalResourceCard.vue';
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
-}
-
-const inArray = function(ar1, ar2){
-    let as1 = JSON.stringify(ar1)
-    let as2 = JSON.stringify(ar2)
-    return as1.indexOf(as2) !== -1
-}
-
-// remove duplicates by stringifying the objects
-const removeDuplicates = function(arrayOfAnything){
-  return [...new Set(arrayOfAnything.map(e => JSON.stringify(e)))].map(e => JSON.parse(e)) 
 }
 
 const capitalise = function(str){
@@ -123,24 +108,34 @@ const capitalise = function(str){
 }
 
 export default {
-  components: { PubmedViewer },
+  components: { ExternalResourceCard },
   name: "Tooltip",
   props: { 
     visible: {
       type: Boolean,
       default: false
     },
-    content: {
+    entry: {
       type: Object,
-      default: undefined
+      default: () => ({
+        destinations: [], 
+        origins: [],
+        components: [],
+        destinationsWithDatasets: [],
+        originsWithDatasets: [],
+        componentsWithDatasets: [],
+        resource: undefined
+      })
     },
   },
   data: function() {
     return {
+      controller: undefined,
       activeSpecies: undefined,
       appendToBody: false,
       pubmedSearchUrl: '',
       loading: false,
+      showToolip: false,
       destinations: [],
       origins: [],
       components: [],
@@ -154,20 +149,16 @@ export default {
       uberons: [{id: undefined, name: undefined}]
     };
   },
-  inject: ['sparcAPI', 'flatmapAPI'],
-  watch: {
-    'content.featureIds': {
-      handler: function(){
-        this.pathwayQuery(this.content.featureIds)
-      }
-    }
-  },
-  mounted: function(){
-    this.getOrganCuries()
-  },
   computed: {
+    resources: function(){
+      let resources = []
+      if(this.entry && this.entry.hyperlinks){
+        resources = this.entry.hyperlinks
+      }
+      return resources
+    },
     originDescription: function(){
-      if(this.content && this.content.title && this.content.title.toLowerCase().includes('motor')){
+      if(this.entry && this.entry.title && this.entry.title.toLowerCase().includes('motor')){
         return this.originDescriptions.motor
       } else {
         return this.originDescriptions.sensory
@@ -202,186 +193,6 @@ export default {
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
     },
-    findAllIdsFromConnectivity(connectivity){
-      let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-      let nodes = [...new Set(dnodes)] // remove duplicates
-      let found = []
-      nodes.forEach(n=>{
-        if (Array.isArray(n)){
-          found.push(n.flat())
-        } else {
-          found.push(n)
-        }
-      })
-      return [... new Set(found.flat())]
-    },
-    flattenConntectivity(connectivity){
-      let dnodes = connectivity.flat() // get nodes from edgelist
-      let nodes = [...new Set(dnodes)] // remove duplicates
-      let found = []
-      nodes.forEach(n=>{
-        if (Array.isArray(n)){
-          found.push(n.flat())
-        } else {
-          found.push(n)
-        }
-      })
-      return found.flat()
-    },
-    findComponents: function(connectivity){
-      let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-      let nodes = removeDuplicates(dnodes)
-
-      let found = []
-      let terminal = false
-      nodes.forEach(node=>{
-        terminal = false
-        // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-        if(inArray(connectivity.axons,node)){
-          terminal = true
-        }
-        if(inArray(connectivity.dendrites, node)){
-          terminal = true
-        }
-        if (!terminal){
-          found.push(node)
-        }
-      })
-
-      return found
-    },
-    getOrganCuries: function(){
-      fetch(`${this.sparcAPI}get-organ-curies/`)
-        .then(response=>response.json())
-        .then(data=>{
-          this.uberons = data.uberon.array
-        })
-    },
-    buildConnectivitySqlStatement: function(keastIds) {
-      let sql = 'select knowledge from knowledge where entity in ('
-      if (keastIds.length === 1) {
-        sql += `'${keastIds[0]}')`
-      } else if (keastIds.length > 1) {
-        for (let i in keastIds) {
-          sql += `'${keastIds[i]}'${i >= keastIds.length - 1 ? ')' : ','} `
-        }
-      }
-      return sql
-    },
-    buildLabelSqlStatement: function(uberons) {
-      let sql = 'select entity, label from labels where entity in ('
-      if (uberons.length === 1) {
-        sql += `'${uberons[0]}')`
-      } else if (uberons.length > 1) {
-        for (let i in uberons) {
-          sql += `'${uberons[i]}'${i >= uberons.length - 1 ? ')' : ','} `
-        }
-      }
-      return sql
-    },
-    createLabelLookup: function(uberons) {
-      return new Promise(resolve=> {
-        let uberonMap = {}
-        const data = { sql: this.buildLabelSqlStatement(uberons)}
-        fetch(`${this.flatmapAPI}knowledge/query/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          })
-          .then(response => response.json())
-          .then(payload => {
-            const entity = payload.keys.indexOf("entity");
-            const label = payload.keys.indexOf("label");
-            if (entity > -1 && label > -1) {
-              payload.values.forEach(pair => {
-                uberonMap[pair[entity]] = pair[label];
-              });
-            }
-            resolve(uberonMap)
-          })
-      })
-    },
-    createComponentsLabelList: function(components, lookUp){
-      let labelList = []
-      components.forEach(n=>{
-        labelList.push(this.createLabelFromNeuralNode(n[0]), lookUp)
-        if (n.length === 2){
-          labelList.push(this.createLabelFromNeuralNode(n[1]), lookUp)
-        }
-      })
-      return labelList
-    },
-    createLabelFromNeuralNode: function(node, lookUp){
-      let label = lookUp[node[0]]
-      if (node.length === 2 && node[1].length > 0){
-        node[1].forEach(n=>{
-          if (lookUp[n] == undefined){
-            label += `, ${n}` 
-          } else {
-            label += `, ${lookUp[n]}`
-          }
-        })
-      }
-      return label
-    },
-    processConnectivity(connectivity){
-      // Filter the origin and destinations from components
-      let components = this.findComponents(connectivity)
-
-      // Remove duplicates
-      let axons = removeDuplicates(connectivity.axons)
-      let dendrites = removeDuplicates(connectivity.dendrites)
-
-      // Create list of ids to get labels for
-      let conIds = this.findAllIdsFromConnectivity(connectivity)  
-
-      // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
-      this.createLabelLookup(conIds).then(lookUp=>{
-        this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
-        this.origins = dendrites.map(d=>this.createLabelFromNeuralNode(d,lookUp))
-        this.components = components.map(c=>this.createLabelFromNeuralNode(c, lookUp))
-      })
-
-      this.flattenAndFindDatasets(components, axons, dendrites)
-    },
-    flattenAndFindDatasets(components, axons, dendrites){
-      
-      // process the nodes for finding datasets (Note this is not critical to the tooltip, only for the 'search on components' button)
-      let componentsFlat = this.flattenConntectivity(components)
-      let axonsFlat = this.flattenConntectivity(axons)
-      let dendritesFlat = this.flattenConntectivity(dendrites)
-
-      // Filter for the anatomy which is annotated on datasets
-      this.destinationsWithDatasets = this.uberons.filter(ub => axonsFlat.indexOf(ub.id) !== -1)
-      this.originsWithDatasets = this.uberons.filter(ub => dendritesFlat.indexOf(ub.id) !== -1)
-      this.componentsWithDatasets = this.uberons.filter(ub => componentsFlat.indexOf(ub.id) !== -1)
-    },
-    pathwayQuery: function(keastIds){
-      this.destinations = []
-      this.origins = []
-      this.components = []
-      this.loading = true
-      if (!keastIds || keastIds.length == 0) return
-      const data = { sql: this.buildConnectivitySqlStatement(keastIds)};
-      fetch(`${this.flatmapAPI}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      .then(response => response.json())
-      .then(data => {
-        let connectivity = JSON.parse(data.values[0][0])
-        this.processConnectivity(connectivity)
-        this.loading = false
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      })
-    }
   }
 };
 </script>
@@ -566,7 +377,7 @@ export default {
 .content-container {
   overflow-y: scroll;
   scrollbar-width: thin !important;
-  height: 200px;
+  max-height: 240px;
 }
 
 .scrollbar::-webkit-scrollbar-track {

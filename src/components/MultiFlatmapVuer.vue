@@ -33,7 +33,6 @@
       :entry="item.taxo"
       :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
-      :warningMessage="warningMessage"
       :displayLatestChanges="item.displayLatestChanges"
       :latestChangesMessage="item.latestChangesMessage"
       :isLegacy="item.isLegacy"
@@ -46,6 +45,7 @@
       :minZoom="minZoom"
       :pathControls="pathControls"
       :searchable="searchable"
+      :layerControl="layerControl"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
@@ -349,6 +349,10 @@ export default {
       type: Boolean,
       default: false
     },
+    layerControl: {
+      type: Boolean,
+      default: false
+    },
     /**
      * Initial species for the flatmap.
      * This value will be ignored if a valid state object is provided.
@@ -372,10 +376,6 @@ export default {
     displayMinimap: {
       type: Boolean,
       default: false
-    },
-    warningMessage: {
-      type: String,
-      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
     },
     availableSpecies: {
       type: Object,
