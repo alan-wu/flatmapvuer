@@ -33,7 +33,6 @@
       :entry="item.taxo"
       :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
-      :warningMessage="item.warningMessage"
       :displayLatestChanges="item.displayLatestChanges"
       :latestChangesMessage="item.latestChangesMessage"
       :isLegacy="item.isLegacy"

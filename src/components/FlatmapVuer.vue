@@ -13,7 +13,7 @@
       <div class="beta-popovers">
         <div>
           <el-popover
-            :content="isLegacy ? 'This is a legacy map, you may view the latest map instead.' : warningMessage"
+            :content="getWarningMessage"
             placement="right"
             :appendToBody="false"
             trigger="manual"
@@ -23,7 +23,7 @@
           ></el-popover>
           <i
             class="el-icon-warning warning-icon"
-            v-if="displayWarning && warningMessage"
+            v-if="displayWarning"
             @mouseover="showToolitip(6)"
             @mouseout="hideToolitip(6)"
             v-popover:warningPopover
@@ -878,10 +878,6 @@ export default {
       type: Boolean,
       default: false
     },
-    warningMessage: {
-      type: String,
-      default: "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress."
-    },
     isLegacy: {
       type: Boolean,
       default: false
@@ -978,6 +974,16 @@ export default {
       immediate: true,
       deep: true
     }
+  },
+  computed: {
+    getWarningMessage: function() {
+      if (this.isLegacy) {
+        return "This is a legacy map, you may view the latest map instead.";
+      } else if (this.isFC) {
+        return "Beta feature - The connectivity shown here is the subset of neurons from the neuron populations in ApiNATOMY models which are at the same spatial scale and level of granularity.";
+      }
+      return "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress.";
+    },
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");

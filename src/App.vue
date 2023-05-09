@@ -120,7 +120,6 @@ export default {
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
         "Functional Connectivity": {taxo: "FunctionalConnectivity", displayWarning:true},
-        "digestive tract":{taxo: "digestive tract", displayWarning:true}
       },
       tooltipContent: undefined,
       tStyle: {
