@@ -745,11 +745,12 @@ export default {
         const computed = getComputedStyle(elem);
         const padding = parseInt(computed.paddingTop) + parseInt(computed.paddingBottom);
         const height = elem.clientHeight - padding;
-        this.pathwaysMaxHeight = height - 150;
+        this.pathwaysMaxHeight = height - 170;
       }
     },
     mapResize: function() {
       try {
+        this.computePathControlsMaximumHeight();
         if (this.mapImp) {
           this.mapImp.resize();
           this.showMinimap(this.displayMinimap);
@@ -757,7 +758,6 @@ export default {
               this.mapImp._minimap.resize();
           }
         }
-        this.computePathControlsMaximumHeight();
       } catch {
         console.error("Map resize error");
       }
@@ -812,7 +812,7 @@ export default {
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
                 searchResults.results[0].text,
-                {className: "custom-popup",positionAtLastClick: false, preserveSelection: true }
+                { className: "custom-popup", positionAtLastClick: false, preserveSelection: true }
               )
             }
             return true;
@@ -892,7 +892,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information",
+      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information.",
     },
     /**
      * State containing state of the flatmap.

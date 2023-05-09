@@ -74,7 +74,6 @@ export default {
       component.enablePanZoomEvents(true);
       //component.showPathwaysDrawer(false);
       console.log(taxon, id);
-      this.$refs.multi.getCurrentFlatmap().searchAndShowResult("vagus", true);
       //component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
@@ -99,8 +98,9 @@ export default {
         cb(suggestions);
       }
     },
-    search: function(term) {
-      this.$refs.multi.getCurrentFlatmap().searchAndShowResult(term.value, true);
+    search: function() {
+      console.log(this.searchText)
+      this.$refs.multi.getCurrentFlatmap().searchAndShowResult(this.searchText, true);
     }
   },
   data: function(){
