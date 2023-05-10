@@ -332,6 +332,10 @@ export default {
   beforeCreate: function() {
     this.mapManager = undefined;
     this.mapImp = undefined;
+    //The state watcher may triggered before
+    //created causing issue, This flag will
+    //resolve this issue.
+    this.setStateRequired = false;
   },
   methods: {
     viewLatestMap: function() {
@@ -651,6 +655,7 @@ export default {
         } else {
           this.createFlatmap(state);
         }
+        this.setStateRequired = false;
       }
     },
     restoreMapState: function(state) {
@@ -969,7 +974,12 @@ export default {
     },
     state: {
       handler: function(state) {
-        this.setState(state);
+        if (this.mapManager) {
+          this.setState(state);
+        } else {
+          //this component has not been mounted yet
+          this.setStateRequired = true;
+        }
       },
       immediate: true,
       deep: true
@@ -988,9 +998,16 @@ export default {
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
-    if (this.renderAtMounted) this.createFlatmap();
     this.flatmapQueries = new FlatmapQueries();
     this.flatmapQueries.initialise(this.sparcAPI, this.flatmapAPI);
+    if (this.state) {
+      //State is set and require to set the state
+      if (this.setStateRequired) {
+        this.setState(this.state);
+      }
+    } else if(this.renderAtMounted) {
+      this.createFlatmap();
+    }
   }
 };
 </script>
