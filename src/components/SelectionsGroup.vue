@@ -27,9 +27,17 @@
               class="my-checkbox"
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
-              :checked="!(('enable' in item) && item.enable === false)">
-              <div class="path-visual" :style="getVisualStyles(item)"></div>
-              {{item[labelKey]}}
+              :checked="!('enabled' in item) || (item.enabled === true)">
+              <el-row class="checkbox-row">
+                <el-col :span="4">
+                <div class="path-visual" :style="getLineStyles(item)"></div>
+                </el-col>
+                <el-col :span="20">
+                  <div class="label-text" :style="getBackgroundStyles(item)">
+                    {{item[labelKey]}}
+                  </div>
+                </el-col>
+              </el-row>
             </el-checkbox>
           </div>
         </el-row>
@@ -68,7 +76,7 @@ export default {
       this.checkAll = true;
       this.checkedItems = [];
       this.selections.forEach(item => {
-        if (!(('enable' in item) && item.enable === false)) {
+        if (!('enabled' in item) || item.enabled === true) {
           this.checkedItems.push(item[this.identifierKey]);
         } else {
           this.checkAll = false;
@@ -82,7 +90,7 @@ export default {
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.selections.length;
     },
-    handleCheckAllChange(val) {
+    handleCheckAllChange: function(val) {
       this.checkedItems = val ? this.selections.map(a => a[this.identifierKey]) : [];
       this.$emit("checkAll",
       {
@@ -90,21 +98,30 @@ export default {
         value: val
       });
     },
-    getVisualStyles(item) {
-      if ('colour' in item) {
-        if (('dashed' in item) && (item.dashed === true)) {
-          const background = `repeating-linear-gradient(90deg,${item.colour},${item.colour} 6px,transparent 0,transparent 9px)`;
-          return {'background':background};
-        }
-        else {
-          const background = item.colour;
-          return {background};
-        }
+    getBackgroundStyles: function(item) {
+      if ('colour' in item && this.colourStyle === "background") {
+        return { background: item.colour };
       }
       return {};
+    },
+    getLineStyles: function(item) {
+      if ('colour' in item && this.colourStyle === "line") {
+        if (('dashed' in item) && (item.dashed === true)) {
+          const background = `repeating-linear-gradient(90deg,${item.colour},${item.colour} 6px,transparent 0,transparent 9px)`;
+          return { background };
+        }
+        else {
+          return { background: item.colour };
+        }
+      }
+      return { display: "None"};
     }
   },
   props: {
+    colourStyle: {
+      type: String,
+      default: "line"   
+    },
     identifierKey: {
       type: String,
       default: "id"
@@ -151,16 +168,16 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/checkbox-group";
 @import "~element-ui/packages/theme-chalk/src/row";
 
-.selection-container {
-  margin-top:5px;
-}
-
 .path-visual {
   margin: 3px 0;
   height: 3px;
   width: 25px;
   margin-right: 5px;
   display: inline-block;
+}
+
+.selections-container {
+  padding-top: 5px;
 }
 
 .checkall-display-text {
@@ -205,6 +222,7 @@ export default {
   font-weight: 500;
   letter-spacing: 0px;
   line-height: 14px;
+  width: 100%;
 }
 
 ::v-deep .el-checkbox__input {
@@ -219,6 +237,11 @@ export default {
 
 ::v-deep .el-checkbox__label {
   color: $app-primary-color !important;
+}
+
+.checkbox-row {
+  width: 100%;
+  top: 2px;
 }
 
 </style>
