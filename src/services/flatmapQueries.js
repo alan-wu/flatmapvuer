@@ -47,7 +47,6 @@ let FlatmapQueries = function(){
       featureId: eventData.resource,
       hyperlinks: hyperlinks,
     }
-    console.log('tooltipData', tooltipData)
     return tooltipData
   }
 
@@ -150,7 +149,6 @@ let FlatmapQueries = function(){
   }
 
   this.findComponents = function (connectivity) {
-    console.log('con', connectivity)
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -201,11 +199,9 @@ let FlatmapQueries = function(){
           if(this.connectivityExists(data)){
             let connectivity = JSON.parse(data.values[0][0])
             this.processConnectivity(connectivity).then(()=>{
-              console.log('Connectivity data found')
               resolve(true)
             })
           } else {
-            console.log('No connectivity data found')
             resolve(false)
           }
         })
@@ -256,7 +252,6 @@ let FlatmapQueries = function(){
 
   this.processConnectivity = function(connectivity){
     return new Promise (resolve=>{
-      console.log('Processing connectivity')
       // Filter the origin and destinations from components
       let components = this.findComponents(connectivity)
 
@@ -267,7 +262,6 @@ let FlatmapQueries = function(){
       // Create list of ids to get labels for
       let conIds = this.findAllIdsFromConnectivity(connectivity)  
 
-      console.log('conIds', conIds)
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
       this.createLabelLookup(conIds).then(lookUp=>{
         this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
