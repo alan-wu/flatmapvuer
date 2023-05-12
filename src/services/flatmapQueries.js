@@ -30,6 +30,12 @@ let FlatmapQueries = function(){
   }
 
   this.createTooltipData = function (eventData) {
+    let hyperlinks = []
+    if (eventData.feature.hyperlinks && eventData.feature.hyperlinks.length > 0) {
+      hyperlinks = eventData.feature.hyperlinks
+    } else {
+      hyperlinks = this.urls.map(url=>({url: url, id: "pubmed"}))
+    }
     let tooltipData = {
       destinations: this.destinations, 
       origins: this.origins,
@@ -39,8 +45,9 @@ let FlatmapQueries = function(){
       componentsWithDatasets: this.componentsWithDatasets,
       title: eventData.label,
       featureId: eventData.resource,
-      hyperlinks: eventData.feature.hyperlinks ? eventData.feature.hyperlinks : this.urls.map(url=>({url: url, id: "pubmed"})),
+      hyperlinks: hyperlinks,
     }
+    console.log('tooltipData', tooltipData)
     return tooltipData
   }
 
@@ -143,6 +150,7 @@ let FlatmapQueries = function(){
   }
 
   this.findComponents = function (connectivity) {
+    console.log('con', connectivity)
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -193,6 +201,7 @@ let FlatmapQueries = function(){
           if(this.connectivityExists(data)){
             let connectivity = JSON.parse(data.values[0][0])
             this.processConnectivity(connectivity).then(()=>{
+              console.log('Connectivity data found')
               resolve(true)
             })
           } else {
@@ -247,7 +256,7 @@ let FlatmapQueries = function(){
 
   this.processConnectivity = function(connectivity){
     return new Promise (resolve=>{
-
+      console.log('Processing connectivity')
       // Filter the origin and destinations from components
       let components = this.findComponents(connectivity)
 
@@ -258,6 +267,7 @@ let FlatmapQueries = function(){
       // Create list of ids to get labels for
       let conIds = this.findAllIdsFromConnectivity(connectivity)  
 
+      console.log('conIds', conIds)
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
       this.createLabelLookup(conIds).then(lookUp=>{
         this.destinations = axons.map(a=>this.createLabelFromNeuralNode(a,lookUp))
