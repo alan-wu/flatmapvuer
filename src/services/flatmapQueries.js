@@ -30,6 +30,12 @@ let FlatmapQueries = function(){
   }
 
   this.createTooltipData = function (eventData) {
+    let hyperlinks = []
+    if (eventData.feature.hyperlinks && eventData.feature.hyperlinks.length > 0) {
+      hyperlinks = eventData.feature.hyperlinks
+    } else {
+      hyperlinks = this.urls.map(url=>({url: url, id: "pubmed"}))
+    }
     let tooltipData = {
       destinations: this.destinations, 
       origins: this.origins,
@@ -39,7 +45,7 @@ let FlatmapQueries = function(){
       componentsWithDatasets: this.componentsWithDatasets,
       title: eventData.label,
       featureId: eventData.resource,
-      hyperlinks: eventData.feature.hyperlinks ? eventData.feature.hyperlinks : this.urls.map(url=>({url: url, id: "pubmed"})),
+      hyperlinks: hyperlinks,
     }
     return tooltipData
   }
@@ -196,7 +202,6 @@ let FlatmapQueries = function(){
               resolve(true)
             })
           } else {
-            console.log('No connectivity data found')
             resolve(false)
           }
         })
@@ -247,7 +252,6 @@ let FlatmapQueries = function(){
 
   this.processConnectivity = function(connectivity){
     return new Promise (resolve=>{
-
       // Filter the origin and destinations from components
       let components = this.findComponents(connectivity)
 
