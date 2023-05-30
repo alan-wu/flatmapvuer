@@ -22,7 +22,9 @@
     "lint": "vue-cli-service lint",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
     "release:minor": "npm version minor; npm publish",
-    "release:patch": "npm version patch;  npm publish"
+    "release:patch": "npm version patch;  npm publish",
+    "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
+    "version": "npm run build-bundle;npm run changelog; git add CHANGELOG.md"
   },
   "dependencies": {
     "@abi-software/flatmap-viewer": "^2.3.2-b.4",
@@ -39,6 +41,7 @@
     "@vue/cli-plugin-babel": "^4.5.19",
     "@vue/cli-plugin-eslint": "^4.5.19",
     "@vue/cli-service": "^4.5.19",
+    "auto-changelog": "^2.4.0",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "base64-inline-loader": "^2.0.1",
