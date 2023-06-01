@@ -163,7 +163,7 @@ export default {
   position:absolute;
 }
 
-.mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+.maplibregl-ctrl-top-left .maplibregl-ctrl {
   margin-top:120px;
 }
 
@@ -191,7 +191,7 @@ body {
   margin: 0px;
 }
 
-.mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+.maplibregl-ctrl-top-left .maplibregl-ctrl {
   margin-top:120px;
 }
 

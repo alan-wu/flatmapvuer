@@ -539,10 +539,10 @@ export default {
       // Below is a hack to remove flatmap tooltips while popup is open
       let ftooltip = document.querySelector(".flatmap-tooltip-popup");
       if (ftooltip) ftooltip.style.display = "none";
-      document.querySelector(".mapboxgl-popup-close-button").style.display =
+      document.querySelector(".maplibregl-popup-close-button").style.display =
         "block";
       this.$refs.tooltip.$el.style.display = "flex";
-      document.querySelector(".mapboxgl-popup-close-button").onclick = () => {
+      document.querySelector(".maplibregl-popup-close-button").onclick = () => {
         document.querySelector(".flatmap-tooltip-popup").style.display =
           "block";
       };
@@ -641,7 +641,7 @@ export default {
     },
     closeFlatmapHelpPopup: function() {
       this.$el
-        .querySelectorAll(".mapboxgl-popup-close-button")
+        .querySelectorAll(".maplibregl-popup-close-button")
         .forEach(item => {
           item.click();
         });
@@ -1157,13 +1157,13 @@ export default {
   display: none;
 }
 
-::v-deep .mapboxgl-popup {
+::v-deep .maplibregl-popup {
   max-width: 300px !important;
 }
 
 ::v-deep .flatmap-tooltip-popup {
-  &.mapboxgl-popup-anchor-bottom {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-bottom {
+    .maplibregl-popup-content {
       margin-bottom: 12px;
       &::after,
       &::before {
@@ -1182,8 +1182,8 @@ export default {
       }
     }
   }
-  &.mapboxgl-popup-anchor-top {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-top {
+    .maplibregl-popup-content {
       margin-top: 18px;
       &::after,
       &::before {
@@ -1201,7 +1201,7 @@ export default {
       }
     }
   }
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: none;
@@ -1224,12 +1224,12 @@ export default {
       flex-shrink: 0;
     }
   }
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     display: none;
   }
 }
 
-::v-deep .mapboxgl-popup {
+::v-deep .maplibregl-popup {
   &.flatmap-marker-popup {
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
@@ -1240,25 +1240,25 @@ export default {
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
 .selector:not(*:root),
 ::v-deep.flatmap-tooltip-popup {
-  .mapboxgl-popup-content::after {
+  .maplibregl-popup-content::after {
     top: 99.9%;
   }
 }
 
 ::v-deep .flatmap-tooltip-dialog {
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     display: none;
   }
 }
 
 ::v-deep .flatmap-marker-popup {
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     padding: 0px;
   }
 }
 
 ::v-deep .flatmapvuer-popover {
-  .mapboxgl-popup-close-button {
+  .maplibregl-popup-close-button {
     position: absolute;
     right: 0.5em;
     top: 0;
@@ -1359,7 +1359,7 @@ export default {
   @media (max-width: 1250px) {
     height: 125px !important;// important is needed here as we are over-riding the style set by the flatmap
     width: 180px !important;
-    >>> .maplibregl-canvas .mapboxgl-canvas {
+    >>> .maplibregl-canvas .maplibregl-canvas {
       height: 125px !important;
       width: 180px !important;
     }
@@ -1367,7 +1367,7 @@ export default {
   @media (min-width: 1251px) {
     height: 190px !important;
     width: 300px !important;
-    >>> .maplibregl-canvas .mapboxgl-canvas {
+    >>> .maplibregl-canvas .maplibregl-canvas {
       height: 190px !important;
       width: 300px !important;
     }
@@ -1448,10 +1448,10 @@ export default {
 }
 
 ::v-deep .flatmap-popup-popper {
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     border-bottom-color: $app-primary-color;
   }
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     padding: 6px 4px;
     font-size: 12px;
     color: rgb(48, 49, 51);
@@ -1459,7 +1459,7 @@ export default {
     border: 1px solid $app-primary-color;
     white-space: nowrap;
     min-width: unset;
-    .mapboxgl-popup-close-button {
+    .maplibregl-popup-close-button {
       display: none;
     }
   }
@@ -1476,7 +1476,7 @@ export default {
   }
 }
 
-::v-deep .mapboxgl-popup-content {
+::v-deep .maplibregl-popup-content {
   padding: 0px;
 }
 
@@ -1539,7 +1539,7 @@ export default {
   }
 }
 
-::v-deep .mapboxgl-canvas-container {
+::v-deep .maplibregl-canvas-container {
   canvas {
     outline: none;
   }
@@ -1571,10 +1571,10 @@ export default {
 }
 
 ::v-deep .custom-popup {
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     display: none;
   }
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: none;
@@ -1601,12 +1601,12 @@ export default {
       border-style: solid;
       flex-shrink: 0;
     }
-    .mapboxgl-popup-close-button {
+    .maplibregl-popup-close-button {
       display: none;
     }
   }
-  &.mapboxgl-popup-anchor-bottom {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-bottom {
+    .maplibregl-popup-content {
       margin-bottom: 12px;
       &::after,
       &::before {
@@ -1625,8 +1625,8 @@ export default {
       }
     }
   }
-  &.mapboxgl-popup-anchor-top {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-top {
+    .maplibregl-popup-content {
       margin-top: 18px;
       &::after,
       &::before {

@@ -340,7 +340,7 @@ export default {
   }
 }
 
-.mapboxgl-popup-anchor-bottom {
+.maplibregl-popup-anchor-bottom {
   .tooltip-container {
     &::after, &::before {
       top: 100%;
@@ -357,7 +357,7 @@ export default {
   }
 }
 
-.mapboxgl-popup-anchor-top {
+.maplibregl-popup-anchor-top {
   .tooltip-container {
     &::after, &::before {
       top: -24px;
