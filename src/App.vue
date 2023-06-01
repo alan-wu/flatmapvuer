@@ -114,7 +114,7 @@ export default {
       availableSpecies : {
         "Human Female":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000383", iconClass:"mapicon-icon_human", displayWarning:true},
         "Human Male":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000384", iconClass:"mapicon-icon_human", displayWarning:true},
-        "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:false, displayLatestChanges:true},
+        "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:true, displayLatestChanges:true},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 

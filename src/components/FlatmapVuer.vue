@@ -13,14 +13,41 @@
       <div class="beta-popovers">
         <div>
           <el-popover
-            :content="getWarningMessage"
             placement="right"
             :appendToBody="false"
             trigger="manual"
             popper-class="warning-popper flatmap-popper right-popper"
             v-model="hoverVisibilities[6].value"
             ref="warningPopover"
-          ></el-popover>
+          >
+            <p v-if="isLegacy" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+              This is a legacy map, you may view the latest map instead. 
+            </p>
+            <p v-else-if="isFC" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+              This map displays the connectivity of individual neurons. 
+              Specifically, those which align with (parts of) the neuron 
+              populations from the 
+              <a href="https://sparc.science/resources/1ZUKXU2YmLcn2reCyXjlew" target="_blank" >
+                ApiNATOMY 
+              </a>
+              models available in 
+              <a href="https://sparc.science/resources/6eg3VpJbwQR4B84CjrvmyD" target="_blank" >
+                SCKAN
+              </a>.
+            </p>
+            <p v-else @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+              This map displays the connectivity of neuron populations. 
+              Specifically, those from the primarily rat-based 
+              <a href="https://sparc.science/resources/1ZUKXU2YmLcn2reCyXjlew" target="_blank" >
+              ApiNATOMY 
+              </a>
+              models available in 
+              <a href="https://sparc.science/resources/6eg3VpJbwQR4B84CjrvmyD" target="_blank" >
+                SCKAN
+              </a>. New connectivity and species 
+              specificity will be added as the SPARC program progresses.
+            </p>
+          </el-popover>
           <i
             class="el-icon-warning warning-icon"
             v-if="displayWarning"
@@ -580,6 +607,7 @@ export default {
     },
     showToolitip: function(tooltipNumber) {
       if (!this.inHelp) {
+        clearTimeout(this.tooltipWait);
         this.tooltipWait = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true;
         }, 500);
@@ -587,8 +615,10 @@ export default {
     },
     hideToolitip: function(tooltipNumber) {
       if (!this.inHelp) {
-        this.hoverVisibilities[tooltipNumber].value = false;
         clearTimeout(this.tooltipWait);
+        this.tooltipWait = setTimeout(() => {
+          this.hoverVisibilities[tooltipNumber].value = false;
+        }, 500);
       }
     },
     displayTooltip: function() {
@@ -984,16 +1014,6 @@ export default {
       immediate: true,
       deep: true
     }
-  },
-  computed: {
-    getWarningMessage: function() {
-      if (this.isLegacy) {
-        return "This is a legacy map, you may view the latest map instead.";
-      } else if (this.isFC) {
-        return "Beta feature - The connectivity shown here is the subset of neurons from the neuron populations in ApiNATOMY models which are at the same spatial scale and level of granularity.";
-      }
-      return "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress.";
-    },
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
