@@ -607,16 +607,16 @@ export default {
     },
     showToolitip: function(tooltipNumber) {
       if (!this.inHelp) {
-        clearTimeout(this.tooltipWait);
-        this.tooltipWait = setTimeout(() => {
+        clearTimeout(this.tooltipWait[tooltipNumber]);
+        this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true;
         }, 500);
       }
     },
     hideToolitip: function(tooltipNumber) {
       if (!this.inHelp) {
-        clearTimeout(this.tooltipWait);
-        this.tooltipWait = setTimeout(() => {
+        clearTimeout(this.tooltipWait[tooltipNumber]);
+        this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = false;
         }, 500);
       }
@@ -1017,6 +1017,8 @@ export default {
   },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
+    this.tooltipWait = [];
+    this.tooltipWait.length = this.hoverVisibilities.length;
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     this.flatmapQueries = new FlatmapQueries();
     this.flatmapQueries.initialise(this.sparcAPI, this.flatmapAPI);
