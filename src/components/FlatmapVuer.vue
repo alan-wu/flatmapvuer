@@ -844,9 +844,10 @@ export default {
             if (displayLabel && 
               searchResults.results[0].featureId && 
               searchResults.results[0].text) {
+              const annotation = this.mapImp.annotation(searchResults.results[0].featureId);
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
-                searchResults.results[0].text,
+                annotation.label,
                 { className: "custom-popup", positionAtLastClick: false, preserveSelection: true }
               )
             }
