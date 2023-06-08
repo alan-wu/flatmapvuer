@@ -353,7 +353,6 @@ let FlatmapQueries = function(){
       const sql = this.buildPubmedSqlStatement(keastIds)
       this.flatmapQuery(sql).then(data=>{
         // Create pubmed url on paths if we have them
-        console.log(data)
         if (data.values.length > 0){
           this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
           resolve(true)
