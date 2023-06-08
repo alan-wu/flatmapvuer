@@ -619,9 +619,6 @@ export default {
       }
     },
     displayTooltip: function() {
-      window.rt= this.resourceForTooltip;
-      window.mapImp = this.mapImp;
-      window.ell = this.$refs.tooltip.$el;
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
         this.$refs.tooltip.$el,
