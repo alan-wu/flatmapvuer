@@ -13,14 +13,41 @@
       <div class="beta-popovers">
         <div>
           <el-popover
-            :content="getWarningMessage"
             placement="right"
             :appendToBody="false"
             trigger="manual"
             popper-class="warning-popper flatmap-popper right-popper"
             v-model="hoverVisibilities[6].value"
             ref="warningPopover"
-          ></el-popover>
+          >
+            <p v-if="isLegacy" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+              This is a legacy map, you may view the latest map instead. 
+            </p>
+            <p v-else-if="isFC" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+              This map displays the connectivity of individual neurons. 
+              Specifically, those which align with (parts of) the neuron 
+              populations from the 
+              <a href="https://sparc.science/resources/1ZUKXU2YmLcn2reCyXjlew" target="_blank" >
+                ApiNATOMY 
+              </a>
+              models available in 
+              <a href="https://sparc.science/resources/6eg3VpJbwQR4B84CjrvmyD" target="_blank" >
+                SCKAN
+              </a>.
+            </p>
+            <p v-else @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+              This map displays the connectivity of neuron populations. 
+              Specifically, those from the primarily rat-based 
+              <a href="https://sparc.science/resources/1ZUKXU2YmLcn2reCyXjlew" target="_blank" >
+              ApiNATOMY 
+              </a>
+              models available in 
+              <a href="https://sparc.science/resources/6eg3VpJbwQR4B84CjrvmyD" target="_blank" >
+                SCKAN
+              </a>. New connectivity and species 
+              specificity will be added as the SPARC program progresses.
+            </p>
+          </el-popover>
           <i
             class="el-icon-warning warning-icon"
             v-if="displayWarning"
@@ -498,24 +525,21 @@ export default {
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
       let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-      if(!results){
-        if(data.feature.hyperlinks && data.feature.hyperlinks.length > 0){
-          this.resourceForTooltip =  data.resource[0];
-          this.createTooltipFromNeuronCuration(data);
-        }
-      } else {
+      // The line below only creates the tooltip if some data was found on the path 
+      // result 0 is the connection, result 1 is the pubmed results from flatmap
+      if(results[0] || results[1] ||( data.feature.hyperlinks && data.feature.hyperlinks.length > 0)){
         this.resourceForTooltip =  data.resource[0];
         this.createTooltipFromNeuronCuration(data);
-      }
+      } 
     },
     popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
       let ftooltip = document.querySelector(".flatmap-tooltip-popup");
       if (ftooltip) ftooltip.style.display = "none";
-      document.querySelector(".mapboxgl-popup-close-button").style.display =
+      document.querySelector(".maplibregl-popup-close-button").style.display =
         "block";
       this.$refs.tooltip.$el.style.display = "flex";
-      document.querySelector(".mapboxgl-popup-close-button").onclick = () => {
+      document.querySelector(".maplibregl-popup-close-button").onclick = () => {
         document.querySelector(".flatmap-tooltip-popup").style.display =
           "block";
       };
@@ -580,15 +604,18 @@ export default {
     },
     showToolitip: function(tooltipNumber) {
       if (!this.inHelp) {
-        this.tooltipWait = setTimeout(() => {
+        clearTimeout(this.tooltipWait[tooltipNumber]);
+        this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true;
         }, 500);
       }
     },
     hideToolitip: function(tooltipNumber) {
       if (!this.inHelp) {
-        this.hoverVisibilities[tooltipNumber].value = false;
-        clearTimeout(this.tooltipWait);
+        clearTimeout(this.tooltipWait[tooltipNumber]);
+        this.tooltipWait[tooltipNumber] = setTimeout(() => {
+          this.hoverVisibilities[tooltipNumber].value = false;
+        }, 500);
       }
     },
     displayTooltip: function() {
@@ -611,7 +638,7 @@ export default {
     },
     closeFlatmapHelpPopup: function() {
       this.$el
-        .querySelectorAll(".mapboxgl-popup-close-button")
+        .querySelectorAll(".maplibregl-popup-close-button")
         .forEach(item => {
           item.click();
         });
@@ -814,9 +841,10 @@ export default {
             if (displayLabel && 
               searchResults.results[0].featureId && 
               searchResults.results[0].text) {
+              const annotation = this.mapImp.annotation(searchResults.results[0].featureId);
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
-                searchResults.results[0].text,
+                annotation.label,
                 { className: "custom-popup", positionAtLastClick: false, preserveSelection: true }
               )
             }
@@ -985,18 +1013,10 @@ export default {
       deep: true
     }
   },
-  computed: {
-    getWarningMessage: function() {
-      if (this.isLegacy) {
-        return "This is a legacy map, you may view the latest map instead.";
-      } else if (this.isFC) {
-        return "Beta feature - The connectivity shown here is the subset of neurons from the neuron populations in ApiNATOMY models which are at the same spatial scale and level of granularity.";
-      }
-      return "Beta feature - This map is based on the connectivity of a rat. New connectivity and species specificity will be added as the SPARC program progress.";
-    },
-  },
   mounted: function() {
     const flatmap = require("@abi-software/flatmap-viewer");
+    this.tooltipWait = [];
+    this.tooltipWait.length = this.hoverVisibilities.length;
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     this.flatmapQueries = new FlatmapQueries();
     this.flatmapQueries.initialise(this.sparcAPI, this.flatmapAPI);
@@ -1135,13 +1155,13 @@ export default {
   display: none;
 }
 
-::v-deep .mapboxgl-popup {
+::v-deep .maplibregl-popup {
   max-width: 300px !important;
 }
 
 ::v-deep .flatmap-tooltip-popup {
-  &.mapboxgl-popup-anchor-bottom {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-bottom {
+    .maplibregl-popup-content {
       margin-bottom: 12px;
       &::after,
       &::before {
@@ -1160,8 +1180,8 @@ export default {
       }
     }
   }
-  &.mapboxgl-popup-anchor-top {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-top {
+    .maplibregl-popup-content {
       margin-top: 18px;
       &::after,
       &::before {
@@ -1179,7 +1199,7 @@ export default {
       }
     }
   }
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: none;
@@ -1202,12 +1222,12 @@ export default {
       flex-shrink: 0;
     }
   }
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     display: none;
   }
 }
 
-::v-deep .mapboxgl-popup {
+::v-deep .maplibregl-popup {
   &.flatmap-marker-popup {
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
@@ -1218,25 +1238,25 @@ export default {
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
 .selector:not(*:root),
 ::v-deep.flatmap-tooltip-popup {
-  .mapboxgl-popup-content::after {
+  .maplibregl-popup-content::after {
     top: 99.9%;
   }
 }
 
 ::v-deep .flatmap-tooltip-dialog {
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     display: none;
   }
 }
 
 ::v-deep .flatmap-marker-popup {
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     padding: 0px;
   }
 }
 
 ::v-deep .flatmapvuer-popover {
-  .mapboxgl-popup-close-button {
+  .maplibregl-popup-close-button {
     position: absolute;
     right: 0.5em;
     top: 0;
@@ -1337,7 +1357,7 @@ export default {
   @media (max-width: 1250px) {
     height: 125px !important;// important is needed here as we are over-riding the style set by the flatmap
     width: 180px !important;
-    >>> .maplibregl-canvas .mapboxgl-canvas {
+    >>> .maplibregl-canvas .maplibregl-canvas {
       height: 125px !important;
       width: 180px !important;
     }
@@ -1345,7 +1365,7 @@ export default {
   @media (min-width: 1251px) {
     height: 190px !important;
     width: 300px !important;
-    >>> .maplibregl-canvas .mapboxgl-canvas {
+    >>> .maplibregl-canvas .maplibregl-canvas {
       height: 190px !important;
       width: 300px !important;
     }
@@ -1426,10 +1446,10 @@ export default {
 }
 
 ::v-deep .flatmap-popup-popper {
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     border-bottom-color: $app-primary-color;
   }
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     padding: 6px 4px;
     font-size: 12px;
     color: rgb(48, 49, 51);
@@ -1437,7 +1457,7 @@ export default {
     border: 1px solid $app-primary-color;
     white-space: nowrap;
     min-width: unset;
-    .mapboxgl-popup-close-button {
+    .maplibregl-popup-close-button {
       display: none;
     }
   }
@@ -1454,7 +1474,7 @@ export default {
   }
 }
 
-::v-deep .mapboxgl-popup-content {
+::v-deep .maplibregl-popup-content {
   padding: 0px;
 }
 
@@ -1517,7 +1537,7 @@ export default {
   }
 }
 
-::v-deep .mapboxgl-canvas-container {
+::v-deep .maplibregl-canvas-container {
   canvas {
     outline: none;
   }
@@ -1549,10 +1569,10 @@ export default {
 }
 
 ::v-deep .custom-popup {
-  .mapboxgl-popup-tip {
+  .maplibregl-popup-tip {
     display: none;
   }
-  .mapboxgl-popup-content {
+  .maplibregl-popup-content {
     border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: none;
@@ -1579,12 +1599,12 @@ export default {
       border-style: solid;
       flex-shrink: 0;
     }
-    .mapboxgl-popup-close-button {
+    .maplibregl-popup-close-button {
       display: none;
     }
   }
-  &.mapboxgl-popup-anchor-bottom {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-bottom {
+    .maplibregl-popup-content {
       margin-bottom: 12px;
       &::after,
       &::before {
@@ -1603,8 +1623,8 @@ export default {
       }
     }
   }
-  &.mapboxgl-popup-anchor-top {
-    .mapboxgl-popup-content {
+  &.maplibregl-popup-anchor-top {
+    .maplibregl-popup-content {
       margin-top: 18px;
       &::after,
       &::before {
