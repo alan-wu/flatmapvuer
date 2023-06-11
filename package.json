@@ -19,23 +19,29 @@
     "serve": "vue-cli-service serve --port 8082",
     "build": "vue-cli-service build --dest test_html --mode staging",
     "build-bundle": "vue-cli-service build --target lib --name flatmapvuer ./src/components/index.js",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
+    "release:minor": "npm version minor; npm publish",
+    "release:patch": "npm version patch;  npm publish",
+    "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
+    "version": "npm run build-bundle;npm run changelog; git add CHANGELOG.md"
   },
   "dependencies": {
     "@abi-software/flatmap-viewer": "^2.3.3-b.4",
     "@abi-software/svg-sprite": "^0.1.14",
-    "core-js": "^3.3.2",
+    "core-js": "^3.30.1",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",
     "element-ui": "^2.13.0",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.21",
-    "vue": "^2.6.10"
+    "vue": "^2.7.14"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.0.0",
-    "@vue/cli-plugin-eslint": "^4.0.0",
-    "@vue/cli-service": "^4.5.13",
+    "@vue/cli-plugin-babel": "^4.5.19",
+    "@vue/cli-plugin-eslint": "^4.5.19",
+    "@vue/cli-service": "^4.5.19",
+    "auto-changelog": "^2.4.0",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "base64-inline-loader": "^2.0.1",
@@ -43,7 +49,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "node-sass": "^4.14.1",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.10",
+    "vue-template-compiler": "^2.7.14",
     "webpack-node-externals": "^2.5.2"
   },
   "eslintConfig": {
