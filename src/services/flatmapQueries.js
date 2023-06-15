@@ -12,8 +12,8 @@ const inArray = function(ar1, ar2){
 
 let FlatmapQueries = function(){
 
-  this.initialise  = function(sparcApi, flatmapApi){
-    this.sparcApi = sparcApi
+  this.initialise  = function(sparcAPI, flatmapApi){
+    this.sparcAPI = sparcAPI
     this.flatmapApi = flatmapApi
     this.destinations = []
     this.origins = []
@@ -210,9 +210,9 @@ let FlatmapQueries = function(){
           resolve(false)
         })
       })
-      let prom2 = this.pubmedQueryOnIds(eventData)
+      let prom2 = await this.pubmedQueryOnIds(eventData)
       let results = await Promise.all([prom1, prom2])
-      return results.every(Boolean)
+      return results
   }
 
   this.connectivityExists = function(data){
@@ -344,21 +344,24 @@ let FlatmapQueries = function(){
       console.error('Error:', error)
     })
   }
-
+  // Note that this functin WILL run to the end, as it doesn not catch the second level of promises
   this.pubmedQueryOnIds = function(eventData){
-    const keastIds = eventData.resource
-    const source = eventData.feature.source
-    if(!keastIds || keastIds.length === 0) return
-    const sql = this.buildPubmedSqlStatement(keastIds)
-    return this.flatmapQuery(sql).then(data=>{
-      // Create pubmed url on paths if we have them
-      if (data.values.length > 0){
-        this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
-        return true
-      } else { // Create pubmed url on models
-        this.pubmedQueryOnModels(source).then(()=>{return true})
-      }
-      return false
+    return new Promise(resolve=>{
+      const keastIds = eventData.resource
+      const source = eventData.feature.source
+      if(!keastIds || keastIds.length === 0) return
+      const sql = this.buildPubmedSqlStatement(keastIds)
+      this.flatmapQuery(sql).then(data=>{
+        // Create pubmed url on paths if we have them
+        if (data.values.length > 0){
+          this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
+          resolve(true)
+        } else { // Create pubmed url on models
+          this.pubmedQueryOnModels(source).then(result=>{
+            resolve(result)
+          })
+        }
+      })
     })
   }
 
@@ -366,10 +369,11 @@ let FlatmapQueries = function(){
     return this.flatmapQuery(this.buildPubmedSqlStatementForModels(source)).then(data=>{
       if (Array.isArray(data.values) && data.values.length > 0){
         this.urls = [this.pubmedSearchUrl(data.values.map(id=>this.stripPMIDPrefix(id[0])))]
+        return true
       } else {
         this.urls = [] // Clears the pubmed search button 
       } 
-      return
+      return false
     })
   }
 

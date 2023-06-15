@@ -580,15 +580,12 @@ export default {
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
       let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-      if(!results){
-        if(data.feature.hyperlinks && data.feature.hyperlinks.length > 0){
-          this.resourceForTooltip =  data.resource[0];
-          this.createTooltipFromNeuronCuration(data);
-        }
-      } else {
+      // The line below only creates the tooltip if some data was found on the path 
+      // result 0 is the connection, result 1 is the pubmed results from flatmap
+      if(results[0] || results[1] ||( data.feature.hyperlinks && data.feature.hyperlinks.length > 0)){
         this.resourceForTooltip =  data.resource[0];
         this.createTooltipFromNeuronCuration(data);
-      }
+      } 
     },
     popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
