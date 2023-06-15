@@ -510,7 +510,8 @@ export default {
             label: label,
             feature: data,
             userData: args,
-            eventType: eventType
+            eventType: eventType,
+            provenanceTaxonomy: data.taxons ? JSON.parse(data.taxons) : undefined
           };
           if (data && data.type !== "marker" && eventType === "click"){
             this.checkAndCreatePopups(payload);

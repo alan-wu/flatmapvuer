@@ -3,6 +3,9 @@
      <el-main v-if="entry" class="main" v-loading="loading">
       <div class="block" v-if="entry.title">
         <span class="title">{{capitalise(entry.title)}}</span>
+        <div v-if="entry.provenanceTaxonomyLabel && entry.provenanceTaxonomyLabel.length > 0" class="subtitle">
+          {{provSpeciesDescription}}
+        </div>
       </div>
       <div class="block" v-else>
         <span class="title">{{entry.featureId}}</span>
@@ -163,6 +166,13 @@ export default {
       } else {
         return this.originDescriptions.sensory
       }
+    },
+    provSpeciesDescription: function(){
+      let text = "Study species:"
+      this.entry.provenanceTaxonomyLabel.forEach(label => {
+        text += ` ${label},`
+      });
+      return text.slice(0,-1) // remove last comma
     }
   },
   methods: {
