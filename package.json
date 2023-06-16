@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "license": "Apache-2.0",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
@@ -29,18 +29,18 @@
   "dependencies": {
     "@abi-software/flatmap-viewer": "^2.4.1-b.1",
     "@abi-software/svg-sprite": "^0.1.14",
-    "core-js": "^3.30.1",
+    "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",
     "element-ui": "^2.13.0",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.21",
-    "vue": "2.6.14"
+    "vue": "^2.6.10"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.19",
-    "@vue/cli-plugin-eslint": "^4.5.19",
-    "@vue/cli-service": "^4.5.19",
+    "@vue/cli-plugin-babel": "^4.0.0",
+    "@vue/cli-plugin-eslint": "^4.0.0",
+    "@vue/cli-service": "^4.5.13",
     "auto-changelog": "^2.4.0",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
@@ -49,7 +49,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "node-sass": "^4.14.1",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "2.6.14",
+    "vue-template-compiler": "^2.6.10",
     "webpack-node-externals": "^2.5.2"
   },
   "eslintConfig": {
