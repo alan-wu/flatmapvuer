@@ -223,6 +223,17 @@
           />
           -->
           <selections-group
+            v-if="taxonConnectivity && taxonConnectivity.length > 0"
+            title="Observed in"
+            labelKey="label"
+            identifierKey="taxon"
+            :selections="taxonConnectivity"
+            @changed="taxonsSelected"
+            @checkAll="checkAllTaxons"
+            ref="taxonSelection"
+            key="taxonSelection"
+          />
+          <selections-group
             v-if="pathways && pathways.length > 0"
             title="Pathways"
             labelKey="label"
@@ -324,7 +335,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
-import {FlatmapQueries} from "../services/flatmapQueries.js";
+import {FlatmapQueries, findTaxonomyLabel} from "../services/flatmapQueries.js";
 
 locale.use(lang);
 Vue.use(Col);
@@ -333,6 +344,17 @@ Vue.use(Radio);
 Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
+
+const processTaxon = (taxonIdentifiers) => {
+  let processed = [];
+  taxonIdentifiers.forEach(taxon => {
+    processed.push({
+      taxon,
+      label: findTaxonomyLabel(taxon),
+    });
+  });
+  return processed;
+}
 
 const processFTUs = (parent, key) => {
   const ftus = [];
@@ -530,6 +552,16 @@ export default {
     checkAllLayers: function(payload) {
       if (this.mapImp) {
         payload.keys.forEach(key => this.mapImp.enableLayer(key, payload.value));
+      }
+    },
+    taxonsSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value);
+      }
+    },
+    checkAllTaxons: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableConnectivityByTaxonIds(key, payload.value));
       }
     },
     pathwaysSelected: function(payload) {
@@ -866,6 +898,7 @@ export default {
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.systems = processSystems(this.mapImp.getSystems());
+      this.taxonConnectivity = processTaxon(this.mapImp.taxonIdentifiers);
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
@@ -1022,6 +1055,7 @@ export default {
         }
       ],
       systems: [],
+      taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },

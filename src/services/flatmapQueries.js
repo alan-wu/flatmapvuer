@@ -6,6 +6,7 @@ const removeDuplicates = function(arrayOfAnything){
 
 const taxonLookup ={
   "NCBITaxon:10114": "Rat",
+  "NCBITaxon:10116": "Rat",
   "NCBITaxon:10090": "Mouse",
   "NCBITaxon:9606": "Human",
   "NCBITaxon:40674": "Mammalia"
@@ -398,4 +399,4 @@ let FlatmapQueries = function(){
   }
 }
 
-export {FlatmapQueries}
+export {FlatmapQueries, findTaxonomyLabel}
