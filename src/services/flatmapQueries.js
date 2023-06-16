@@ -21,12 +21,8 @@ let FlatmapQueries = function(){
     this.uberons = []
     this.urls = []
     this.controller = undefined
-    this.getOrganCuries().then(uberons=>{
-      this.uberons = uberons
-      this.createLabelLookup(uberons).then(lookUp=>{
-        this.lookUp = lookUp
-      })
-    })
+    this.uberons = []
+    this.lookUp = []
   }
 
   this.createTooltipData = function (eventData) {
@@ -48,16 +44,6 @@ let FlatmapQueries = function(){
       hyperlinks: hyperlinks,
     }
     return tooltipData
-  }
-
-  this.getOrganCuries = function(){
-    return new Promise(resolve=> {
-    fetch(`${this.sparcAPI}get-organ-curies/`)
-      .then(response=>response.json())
-      .then(data=>{
-        resolve(data.uberon.array)
-      })
-    })
   }
 
   this.createComponentsLabelList = function(components, lookUp){
