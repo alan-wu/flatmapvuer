@@ -128,7 +128,7 @@ export default {
         position: "absolute"
       },
       displayCloseButton: false,
-      initial: "Functional Connectivity",
+      initial: "Rat",
       helpMode: false,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"

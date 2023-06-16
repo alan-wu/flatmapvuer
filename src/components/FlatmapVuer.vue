@@ -560,7 +560,8 @@ export default {
             label: label,
             feature: data,
             userData: args,
-            eventType: eventType
+            eventType: eventType,
+            provenanceTaxonomy: data.taxons ? JSON.parse(data.taxons) : undefined
           };
           if (eventType === "click") {
             this.currentActive = data.models ? data.models : "";
