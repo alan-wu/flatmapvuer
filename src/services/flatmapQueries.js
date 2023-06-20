@@ -117,7 +117,8 @@ let FlatmapQueries = function(){
         found.push(n)
       }
     })
-    return [... new Set(found.flat())]
+    this.uberons = [... new Set(found.flat())]
+    return this.uberons
   }
 
   this.flattenConntectivity = function (connectivity) {
