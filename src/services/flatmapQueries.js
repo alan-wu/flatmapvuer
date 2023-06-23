@@ -32,12 +32,8 @@ let FlatmapQueries = function(){
     this.uberons = []
     this.urls = []
     this.controller = undefined
-    this.getOrganCuries().then(uberons=>{
-      this.uberons = uberons
-      this.createLabelLookup(uberons).then(lookUp=>{
-        this.lookUp = lookUp
-      })
-    })
+    this.uberons = []
+    this.lookUp = []
   }
 
   this.createTooltipData = function (eventData) {
@@ -61,16 +57,6 @@ let FlatmapQueries = function(){
       provenanceTaxonomyLabel: eventData.provenanceTaxonomy ? eventData.provenanceTaxonomy.map(taxo=>findTaxonomyLabel(taxo)) : undefined
     }
     return tooltipData
-  }
-
-  this.getOrganCuries = function(){
-    return new Promise(resolve=> {
-    fetch(`${this.sparcAPI}get-organ-curies/`)
-      .then(response=>response.json())
-      .then(data=>{
-        resolve(data.uberon.array)
-      })
-    })
   }
 
   this.createComponentsLabelList = function(components, lookUp){
@@ -144,7 +130,8 @@ let FlatmapQueries = function(){
         found.push(n)
       }
     })
-    return [... new Set(found.flat())]
+    this.uberons = [... new Set(found.flat())]
+    return this.uberons
   }
 
   this.flattenConntectivity = function (connectivity) {
