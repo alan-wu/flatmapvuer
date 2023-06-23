@@ -168,7 +168,7 @@ export default {
       }
     },
     provSpeciesDescription: function(){
-      let text = "Observed in:"
+      let text = "Observed in"
       this.entry.provenanceTaxonomyLabel.forEach(label => {
         text += ` ${label},`
       });
