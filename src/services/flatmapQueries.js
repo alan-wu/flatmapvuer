@@ -4,17 +4,28 @@ const removeDuplicates = function(arrayOfAnything){
   return [...new Set(arrayOfAnything.map(e => JSON.stringify(e)))].map(e => JSON.parse(e)) 
 }
 
-const taxonLookup ={
-  "NCBITaxon:10114": "Rat",
-  "NCBITaxon:10116": "Norway Rat",
-  "NCBITaxon:10090": "Mouse",
-  "NCBITaxon:9606": "Human",
-  "NCBITaxon:40674": "Mammalia",
-  "NCBITaxon:2787823": "Unclassified entries"
-}
+const cachedLabels = {};
 
-const findTaxonomyLabel = function(taxonomy){
-  return taxonLookup[taxonomy] ? taxonLookup[taxonomy] : taxonomy
+const findTaxonomyLabel = async function(flatmapAPI, taxonomy){
+  if (cachedLabels && cachedLabels.hasOwnProperty(taxonomy)) {
+    return cachedLabels[taxonomy];
+  }
+
+  return new Promise(resolve=>{
+    fetch(`${flatmapAPI}knowledge/label/${taxonomy}`, {
+      method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+      cachedLabels[taxonomy] = data.label;
+      resolve(data.label);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      cachedLabels[taxonomy] = taxonomy;
+      resolve(taxonomy);
+    })
+  });
 }
 
 const inArray = function(ar1, ar2){
@@ -38,13 +49,21 @@ let FlatmapQueries = function(){
     this.lookUp = []
   }
 
-  this.createTooltipData = function (eventData) {
+  this.createTooltipData = async function (eventData) {
     let hyperlinks = []
     if (eventData.feature.hyperlinks && eventData.feature.hyperlinks.length > 0) {
       hyperlinks = eventData.feature.hyperlinks
     } else {
       hyperlinks = this.urls.map(url=>({url: url, id: "pubmed"}))
     }
+    let taxonomyLabel = undefined;
+    if (eventData.provenanceTaxonomy) {
+      taxonomyLabel = [];
+      for (let i = 0; eventData.provenanceTaxonomy.length > i; i++) {
+        taxonomyLabel.push(await findTaxonomyLabel(this.flatmapAPI, eventData.provenanceTaxonomy[i]))
+      }
+    }
+
     let tooltipData = {
       destinations: this.destinations, 
       origins: this.origins,
@@ -56,7 +75,7 @@ let FlatmapQueries = function(){
       featureId: eventData.resource,
       hyperlinks: hyperlinks,
       provenanceTaxonomy: eventData.provenanceTaxonomy,
-      provenanceTaxonomyLabel: eventData.provenanceTaxonomy ? eventData.provenanceTaxonomy.map(taxo=>findTaxonomyLabel(taxo)) : undefined
+      provenanceTaxonomyLabel: taxonomyLabel
     }
     return tooltipData
   }

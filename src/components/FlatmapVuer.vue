@@ -311,7 +311,6 @@
         ref="tooltip"
         class="tooltip"
         :entry="tooltipEntry"
-        @resource-selected="resourceSelected"
       />
     </div>
   </div>
@@ -345,14 +344,15 @@ Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 
-const processTaxon = (taxonIdentifiers) => {
+const processTaxon = (flatmapAPI, taxonIdentifiers) => {
   let processed = [];
   taxonIdentifiers.forEach(taxon => {
-    processed.push({
-      taxon,
-      label: findTaxonomyLabel(taxon),
+    findTaxonomyLabel(flatmapAPI, taxon).then(value => {
+      const item = { taxon, label: value};
+      processed.push(item);
     });
   });
+
   return processed;
 }
 
@@ -603,7 +603,6 @@ export default {
           if (data && data.type !== "marker" && eventType === "click"){
             this.checkAndCreatePopups(payload);
           }
-          this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
         }
@@ -632,11 +631,8 @@ export default {
           "block";
       };
     },
-    resourceSelected: function(action) {
-      this.$emit("resource-selected", action);
-    },
-    createTooltipFromNeuronCuration: function(data) {
-      this.tooltipEntry = this.flatmapQueries.createTooltipData(data);
+    createTooltipFromNeuronCuration: async function(data) {
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data);
       this.displayTooltip();
     },
     // Keeping this as an API
@@ -898,7 +894,7 @@ export default {
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.systems = processSystems(this.mapImp.getSystems());
-      this.taxonConnectivity = processTaxon(this.mapImp.taxonIdentifiers);
+      this.taxonConnectivity = processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers);
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
