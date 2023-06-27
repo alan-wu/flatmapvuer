@@ -168,11 +168,13 @@ export default {
       }
     },
     provSpeciesDescription: function(){
-      let text = "Study species:"
+      let text = "Observed in"
       this.entry.provenanceTaxonomyLabel.forEach(label => {
         text += ` ${label},`
       });
-      return text.slice(0,-1) // remove last comma
+      text = text.slice(0,-1) // remove last comma
+      text += " species"
+      return text
     }
   },
   methods: {
