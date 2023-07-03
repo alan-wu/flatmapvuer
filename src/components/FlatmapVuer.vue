@@ -1019,7 +1019,7 @@ export default {
     this.tooltipWait.length = this.hoverVisibilities.length;
     this.mapManager = new flatmap.MapManager(this.flatmapAPI);
     this.flatmapQueries = new FlatmapQueries();
-    this.flatmapQueries.initialise(this.sparcAPI, this.flatmapAPI);
+    this.flatmapQueries.initialise(this.flatmapAPI);
     if (this.state) {
       //State is set and require to set the state
       if (this.setStateRequired) {
