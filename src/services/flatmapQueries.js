@@ -36,8 +36,7 @@ const inArray = function(ar1, ar2){
 
 let FlatmapQueries = function(){
 
-  this.initialise  = function(sparcAPI, flatmapApi){
-    this.sparcAPI = sparcAPI
+  this.initialise  = function(flatmapApi){
     this.flatmapApi = flatmapApi
     this.destinations = []
     this.origins = []

@@ -270,7 +270,7 @@ export default {
 
 .seperator {
   width:90%;
-  height:0.5px;
+  height:1px;
   background-color:#bfbec2;
 }
 
@@ -346,6 +346,14 @@ export default {
     height: 0;
     border-style: solid;
     flex-shrink: 0;
+  }
+  .tooltip {
+    &::after {
+      display: none;
+    }
+    &::before {
+      display: none;
+    }
   }
 }
 
