@@ -38,6 +38,7 @@
       :isLegacy="item.isLegacy"
       :ref="key"
       :enableOpenMapUI="enableOpenMapUI"
+      :openMapOptions="openMapOptions"
       @view-latest-map="viewLatestMap"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
@@ -386,6 +387,9 @@ export default {
     enableOpenMapUI: {
       type: Boolean,
       default: false,
+    },
+    openMapOptions: {
+      type: Array
     },
     availableSpecies: {
       type: Object,

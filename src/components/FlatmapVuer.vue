@@ -253,31 +253,13 @@
         trigger="click"
         popper-class="open-map-popper non-selectable"
       >
-        <el-row>
+        <el-row v-for="item in openMapOptions" :key="item.key">
           <el-button
             type="primary"
             plain
-            @click="$emit('open-map', 'AC')"
+            @click="$emit('open-map', item.key)"
           >
-            Open AC Map
-          </el-button>
-        </el-row>
-        <el-row>
-          <el-button
-            type="primary"
-            plain
-            @click="$emit('open-map', 'FC')"
-          >
-            Open FC Map
-          </el-button>
-        </el-row>
-        <el-row>
-          <el-button
-            type="primary"
-            plain
-            @click="$emit('open-map', '3D')"
-          >
-            Open 3D Map
+            {{item.display}}
           </el-button>
         </el-row>
       </el-popover>
@@ -329,7 +311,7 @@
             popper-class="flatmap-popper right-popper"
           >
             <map-svg-icon
-              v-if="enableOpenMapUI"
+              v-if="enableOpenMapUI && openMapOptions.length > 0"
               slot="reference"
               v-popover:open-map-popover
               icon="openMap"
@@ -982,6 +964,25 @@ export default {
       type: Boolean,
       default: false,
     },
+    openMapOptions: {
+      type: Array,
+      default: function () {
+        return [
+          {
+            display: "Open AC Map",
+            key: "AC"
+          },
+          {
+            display: "Open FC Map",
+            key: "FC"
+          },
+          {
+            display: "Open 3D Human Map",
+            key: "3D"
+          },
+        ]
+      },
+    },
     isLegacy: {
       type: Boolean,
       default: false
@@ -1386,8 +1387,8 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  width: 128px;
-  min-width: 128px;
+  width: 178px;
+  min-width: 178px;
 
   .el-row ~ .el-row {
     margin-top: 8px;
