@@ -71,6 +71,7 @@ export default {
       console.log(component);
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948");
+      window.flatmapImp =  component.mapImp;
       component.enablePanZoomEvents(true);
       //component.showPathwaysDrawer(false);
       console.log(taxon, id);
