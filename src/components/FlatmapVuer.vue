@@ -223,7 +223,7 @@
           />
           -->
           <selections-group
-            v-if="taxonConnectivity && taxonConnectivity.length > 0"
+            v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
             title="Observed in"
             labelKey="label"
             identifierKey="taxon"

@@ -17,8 +17,12 @@ const findTaxonomyLabel = async function(flatmapAPI, taxonomy){
     })
     .then(response => response.json())
     .then(data => {
-      cachedLabels[taxonomy] = data.label;
-      resolve(data.label);
+      let label = data.label;
+      if (label === "Mammalia") {
+        label = "Mammalia not otherwise specified";
+      }
+      cachedLabels[taxonomy] = label;
+      resolve(label);
     })
     .catch((error) => {
       console.error('Error:', error);
