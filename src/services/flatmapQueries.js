@@ -4,6 +4,17 @@ const removeDuplicates = function(arrayOfAnything){
   return [...new Set(arrayOfAnything.map(e => JSON.stringify(e)))].map(e => JSON.parse(e)) 
 }
 
+const taxonLookup ={
+  "NCBITaxon:10114": "Rat",
+  "NCBITaxon:10090": "Mouse",
+  "NCBITaxon:9606": "Human",
+  "NCBITaxon:40674": "Mammalia"
+}
+
+const findTaxonomyLabel = function(taxonomy){
+  return taxonLookup[taxonomy] ? taxonLookup[taxonomy] : taxonomy
+}
+
 const inArray = function(ar1, ar2){
   let as1 = JSON.stringify(ar1)
   let as2 = JSON.stringify(ar2)
@@ -41,6 +52,8 @@ let FlatmapQueries = function(){
       title: eventData.label,
       featureId: eventData.resource,
       hyperlinks: hyperlinks,
+      provenanceTaxonomy: eventData.provenanceTaxonomy,
+      provenanceTaxonomyLabel: eventData.provenanceTaxonomy ? eventData.provenanceTaxonomy.map(taxo=>findTaxonomyLabel(taxo)) : undefined
     }
     return tooltipData
   }
