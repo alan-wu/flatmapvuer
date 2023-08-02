@@ -15,7 +15,7 @@
       <text transform="matrix(0.9908 0 0 1 117.5474 171.7975)" class="st3 st4 st5" style="white-space: pre;">Specific anatomical structure</text>
       -->
       <text transform="matrix(0.9908 0 0 1 118.0903 345.5266)" class="st3 st4 st5" style="white-space: pre;">Ganglia</text>
-      <text transform="matrix(0.9908 0 0 1 118.0903 433.1613)" class="st3 st4 st5" style="white-space: pre;">Nerve plexus</text>
+      <text transform="matrix(0.9908 0 0 1 118.0903 433.1613)" class="st3 st4 st5" style="white-space: pre;">Ganglionated nerve plexus</text>
     </svg>
   </div>
 </template>
