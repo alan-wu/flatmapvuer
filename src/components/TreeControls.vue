@@ -138,7 +138,6 @@ export default {
 .container {
   text-align: left;
   overflow: none;
-  border: 1px solid rgb(220, 223, 230);
   padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
