@@ -178,9 +178,6 @@ export default {
     }
   },
   methods: {
-    resourceSelected: function(action) {
-      this.$emit("resource-selected", action); 
-    },
     titleCase: function(title){
       return titleCase(title)
     },

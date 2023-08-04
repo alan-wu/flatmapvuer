@@ -33,7 +33,7 @@
                 <div class="path-visual" :style="getLineStyles(item)"></div>
                 </el-col>
                 <el-col :span="20">
-                  <div class="label-text" :style="getBackgroundStyles(item)">
+                  <div :style="getBackgroundStyles(item)">
                     {{item[labelKey]}}
                   </div>
                 </el-col>
@@ -188,6 +188,7 @@ export default {
   font-weight: normal;
   line-height: 20px;
   margin-left: 8px;
+  white-space: nowrap;
 }
 
 .all-checkbox {
