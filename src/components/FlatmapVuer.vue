@@ -1006,7 +1006,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information.",
+      default: "'Observed In' controls and information are now included in AC maps. System control with FTU information has been added to the FC map.",
     },
     /**
      * State containing state of the flatmap.
