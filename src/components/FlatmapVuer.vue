@@ -178,17 +178,15 @@
             v-html="flatmapMarker"
             v-popover:markerPopover
           ></div>
-          <selections-group
+          <tree-controls
             v-if="isFC && systems && systems.length > 0"
-            title="Systems"
-            labelKey="name"
-            identifierKey="id"
-            :selections="systems"
-            colourStyle="background"
+            :active="currentActive"
+            :hover="currentHover"
+            :tree-data="systems"
+            ref="treeControls"
             @changed="systemSelected"
             @checkAll="checkAllSystems"
-            ref="systemsSelection"
-            key="systemsSelection"
+            @change-active="ftuSelected"
           />
                     <!--
           <selections-group
@@ -224,6 +222,17 @@
             key="layersSelection"
           />
           -->
+          <selections-group
+            v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+            title="Observed in"
+            labelKey="label"
+            identifierKey="taxon"
+            :selections="taxonConnectivity"
+            @changed="taxonsSelected"
+            @checkAll="checkAllTaxons"
+            ref="taxonSelection"
+            key="taxonSelection"
+          />
           <selections-group
             v-if="pathways && pathways.length > 0"
             title="Pathways"
@@ -345,7 +354,6 @@
         ref="tooltip"
         class="tooltip"
         :entry="tooltipEntry"
-        @resource-selected="resourceSelected"
       />
     </div>
   </div>
@@ -355,7 +363,8 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from "./Tooltip";
-import SelectionsGroup from "./SelectionsGroup.vue";
+import SelectionsGroup from "./SelectionsGroup";
+import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import SvgLegends from "./legends/SvgLegends";
 import {
@@ -369,7 +378,7 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
-import {FlatmapQueries} from "../services/flatmapQueries.js";
+import {FlatmapQueries, findTaxonomyLabel} from "../services/flatmapQueries.js";
 
 locale.use(lang);
 Vue.use(Button);
@@ -379,6 +388,65 @@ Vue.use(Radio);
 Vue.use(RadioGroup);
 Vue.use(Row);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
+
+const processTaxon = (flatmapAPI, taxonIdentifiers) => {
+  let processed = [];
+  taxonIdentifiers.forEach(taxon => {
+    findTaxonomyLabel(flatmapAPI, taxon).then(value => {
+      const item = { taxon, label: value};
+      processed.push(item);
+    });
+  });
+
+  return processed;
+}
+
+const processFTUs = (parent, key) => {
+  const ftus = [];
+  let items = parent.organs ? parent.organs : parent.ftus;
+  const children = items ? items.filter(
+    (obj, index) =>
+      items.findIndex((item) => item.label === obj.label) === index
+    ) : undefined
+  if (children) {
+    children.forEach(child => {
+      const data = {
+        label: child.label,
+        models: child.models,
+        key: `${key}.${child.label}`,
+      };
+      const grandChildren = processFTUs(child, data.key);
+      if (grandChildren.length > 0) {
+        data.children = grandChildren;
+      }
+      ftus.push(data);
+    })
+  }
+  return ftus;
+}
+
+const processSystems = systems => {
+  const allSystems = [];
+  if (systems && systems.length > 0) {
+    const data = { label: "All", key: "All", children: [] };
+    systems.forEach(system => {
+      const child = {
+        colour: system.colour,
+        enabled: system.enabled,
+        label: system.id,
+        key: system.id,
+      };
+      const children = processFTUs(system, child.key);
+      if (children.length > 0)
+        child.children = children;
+      data.children.push(child);
+    });
+
+    allSystems.push(data);
+  }
+  
+  return allSystems;
+}
 
 const createUnfilledTooltipData = function (){
   return {
@@ -398,6 +466,7 @@ export default {
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
+    TreeControls,
     SelectionsGroup,
     SvgLegends
   },
@@ -512,10 +581,13 @@ export default {
         this.mapImp.enableSystem(payload.key, payload.value);
       }
     },
-    checkAllSystems: function(payload) {
+    checkAllSystems: function(flag) {
       if (this.mapImp) {
-        payload.keys.forEach(key => this.mapImp.enableSystem(key, payload.value));
+        this.systems[0].children.forEach(key => this.mapImp.enableSystem(key.label, flag));
       }
+    },
+    ftuSelected: function(models) {
+      this.searchAndShowResult(models, true);
     },
     layersSelected: function(payload) {
       if (this.mapImp) {
@@ -525,6 +597,16 @@ export default {
     checkAllLayers: function(payload) {
       if (this.mapImp) {
         payload.keys.forEach(key => this.mapImp.enableLayer(key, payload.value));
+      }
+    },
+    taxonsSelected: function(payload) {
+      if (this.mapImp) {
+        this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value);
+      }
+    },
+    checkAllTaxons: function(payload) {
+      if (this.mapImp) {
+        payload.keys.forEach(key => this.mapImp.enableConnectivityByTaxonIds(key, payload.value));
       }
     },
     pathwaysSelected: function(payload) {
@@ -555,12 +637,17 @@ export default {
             label: label,
             feature: data,
             userData: args,
-            eventType: eventType
+            eventType: eventType,
+            provenanceTaxonomy: data.taxons ? JSON.parse(data.taxons) : undefined
           };
+          if (eventType === "click") {
+            this.currentActive = data.models ? data.models : "";
+          } else if (eventType === "mouseenter") {
+            this.currentHover = data.models ? data.models : "";
+          }
           if (data && data.type !== "marker" && eventType === "click"){
             this.checkAndCreatePopups(payload);
           }
-          this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
         }
@@ -589,11 +676,8 @@ export default {
           "block";
       };
     },
-    resourceSelected: function(action) {
-      this.$emit("resource-selected", action);
-    },
-    createTooltipFromNeuronCuration: function(data) {
-      this.tooltipEntry = this.flatmapQueries.createTooltipData(data);
+    createTooltipFromNeuronCuration: async function(data) {
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data);
       this.displayTooltip();
     },
     // Keeping this as an API
@@ -854,7 +938,8 @@ export default {
       this.mapImp.enableCentrelines(false);
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
-      this.systems = this.mapImp.getSystems();
+      this.systems = processSystems(this.mapImp.getSystems());
+      this.taxonConnectivity = processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers);
       this.addResizeButtonToMinimap();
       this.loading = false;
       this.computePathControlsMaximumHeight();
@@ -993,7 +1078,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "Search now provide suggested terms. Add new legends. New tilesets. New female map. Improve upstream downstream information.",
+      default: "'Observed In' controls and information are now included in AC maps. System control with FTU information has been added to the FC map.",
     },
     /**
      * State containing state of the flatmap.
@@ -1038,6 +1123,7 @@ export default {
         }
       ],
       systems: [],
+      taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
         { value: false },
@@ -1064,6 +1150,8 @@ export default {
       outlinesRadio: true,
       minimapResizeShow: false,
       minimapSmall: false,
+      currentActive: "",
+      currentHover: "",
     };
   },
   watch: {

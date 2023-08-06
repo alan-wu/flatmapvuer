@@ -71,6 +71,7 @@ export default {
       console.log(component);
       let taxon = component.mapImp.describes;
       let id = component.mapImp.addMarker("UBERON:0000948");
+      window.flatmapImp =  component.mapImp;
       component.enablePanZoomEvents(true);
       //component.showPathwaysDrawer(false);
       console.log(taxon, id);
@@ -138,6 +139,7 @@ export default {
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/"
+      //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
     }
