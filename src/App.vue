@@ -26,11 +26,11 @@
   
     <MultiFlatmapVuer ref="multi" :availableSpecies="availableSpecies" 
       @resource-selected="FlatmapSelected" :minZoom="minZoom"
-      @pan-zoom-callback="panZoomcallback"
+      @pan-zoom-callback="panZoomcallback" @open-map="openMap"
       @ready="FlatmapReady" :featureInfo="featureInfo" :searchable="searchable"
       :layerControl="layerControl"
       :initial="initial" :pathControls="pathControls" :helpMode="helpMode"
-      :displayMinimap="true" :flatmapAPI="flatmapAPI"/>
+      :displayMinimap="true" :enableOpenMapUI="true" :flatmapAPI="flatmapAPI"/>
   </div>
 </template>
 
@@ -79,6 +79,9 @@ export default {
     },
     panZoomcallback: function(payload) {
       this.payload = payload
+    },
+    openMap: function (map) {
+      console.log(map)
     },
     fetchSuggestions: function(term, cb) {
       if (term === "") {

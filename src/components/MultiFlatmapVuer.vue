@@ -37,10 +37,13 @@
       :latestChangesMessage="item.latestChangesMessage"
       :isLegacy="item.isLegacy"
       :ref="key"
+      :enableOpenMapUI="enableOpenMapUI"
+      :openMapOptions="openMapOptions"
       @view-latest-map="viewLatestMap"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
+      @open-map="$emit('open-map', $event)"
       :featureInfo="featureInfo"
       :minZoom="minZoom"
       :pathControls="pathControls"
@@ -376,6 +379,17 @@ export default {
     displayMinimap: {
       type: Boolean,
       default: false
+    },
+    /**
+     * Flag to determine rather open map UI should be
+     * presented or not.
+     */
+    enableOpenMapUI: {
+      type: Boolean,
+      default: false,
+    },
+    openMapOptions: {
+      type: Array
     },
     availableSpecies: {
       type: Object,

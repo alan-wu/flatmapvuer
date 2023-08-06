@@ -255,12 +255,29 @@
         </div>
       </div>
       <el-popover
+        ref="open-map-popover"
+        placement="top-start"
+        width="128"
+        :append-to-body="false"
+        trigger="click"
+        popper-class="open-map-popper non-selectable"
+      >
+        <el-row v-for="item in openMapOptions" :key="item.key">
+          <el-button
+            type="primary"
+            plain
+            @click="$emit('open-map', item.key)"
+          >
+            {{item.display}}
+          </el-button>
+        </el-row>
+      </el-popover>
+      <el-popover
         ref="backgroundPopover"
         placement="top-start"
         width="175"
         :appendToBody="false"
         trigger="click"
-
         popper-class="background-popper"
       >
         <el-row class="backgroundText">Organs display</el-row>
@@ -289,24 +306,50 @@
           />
         </el-row>
       </el-popover>
-      <el-popover
-        content="Change settings"
-        placement="right"
-        v-model="hoverVisibilities[3].value"
-        :appendToBody="false"
-        trigger="manual"
-        popper-class="flatmap-popper right-popper"
+      <div
+        class="settings-group"
+        :class="{ open: drawerOpen, close: !drawerOpen }"
       >
-        <map-svg-icon
-          v-popover:backgroundPopover
-          icon="changeBckgd"
-          class="icon-button background-colour"
-          :class="{ open: drawerOpen, close: !drawerOpen }"
-          slot="reference"
-          @mouseover.native="showToolitip(3)"
-          @mouseout.native="hideToolitip(3)"
-        />
-      </el-popover>
+        <el-row>
+          <el-popover
+            v-model="hoverVisibilities[8].value"
+            content="Open new map"
+            placement="right"
+            :append-to-body="false"
+            trigger="manual"
+            popper-class="flatmap-popper right-popper"
+          >
+            <map-svg-icon
+              v-if="enableOpenMapUI && openMapOptions.length > 0"
+              slot="reference"
+              v-popover:open-map-popover
+              icon="openMap"
+              class="icon-button"
+              @mouseover.native="showToolitip(8)"
+              @mouseout.native="hideToolitip(8)"
+            />
+          </el-popover>
+        </el-row>
+        <el-row>
+          <el-popover
+            content="Change settings"
+            placement="right"
+            v-model="hoverVisibilities[3].value"
+            :appendToBody="false"
+            trigger="manual"
+            popper-class="flatmap-popper right-popper"
+          >
+            <map-svg-icon
+              v-popover:backgroundPopover
+              icon="changeBckgd"
+              class="icon-button"
+              slot="reference"
+              @mouseover.native="showToolitip(3)"
+              @mouseout.native="hideToolitip(3)"
+            />
+          </el-popover>
+        </el-row>
+      </div>
       <Tooltip
         ref="tooltip"
         class="tooltip"
@@ -325,6 +368,7 @@ import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import SvgLegends from "./legends/SvgLegends";
 import {
+  Button,
   Col,
   Loading,
   Radio,
@@ -337,6 +381,7 @@ import flatmapMarker from "../icons/flatmap-marker";
 import {FlatmapQueries, findTaxonomyLabel} from "../services/flatmapQueries.js";
 
 locale.use(lang);
+Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Radio);
@@ -996,6 +1041,33 @@ export default {
       type: Boolean,
       default: false
     },
+    /**
+     * Flag to determine rather open map UI should be
+     * presented or not.
+     */
+    enableOpenMapUI: {
+      type: Boolean,
+      default: false,
+    },
+    openMapOptions: {
+      type: Array,
+      default: function () {
+        return [
+          {
+            display: "Open AC Map",
+            key: "AC"
+          },
+          {
+            display: "Open FC Map",
+            key: "FC"
+          },
+          {
+            display: "Open 3D Human Map",
+            key: "3D"
+          },
+        ]
+      },
+    },
     isLegacy: {
       type: Boolean,
       default: false
@@ -1061,7 +1133,8 @@ export default {
         { value: false },
         { value: false },
         { value: false },
-        { value: false }
+        { value: false },
+        { value: false },
       ],
       isFC: false,
       inHelp: false,
@@ -1366,16 +1439,16 @@ export default {
   padding-left: 8px;
 }
 
-.background-colour {
+.settings-group {
   bottom: 16px;
   position: absolute;
   transition: all 1s ease;
-}
-.background-colour.open {
-  left: 322px;
-}
-.background-colour.close {
-  left: 24px;
+  &.open {
+    left: 322px;
+  }
+  &.close {
+    left: 24px;
+  }
 }
 
 ::v-deep .background-popper {
@@ -1390,6 +1463,34 @@ export default {
     .popper__arrow {
       border-top-color: $app-primary-color !important;
       &::after {
+        border-top-color: #fff !important;
+      }
+    }
+  }
+}
+
+::v-deep .open-map-popper {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #ffffff;
+  border: 1px solid $app-primary-color;
+  box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+  width: 178px;
+  min-width: 178px;
+
+  .el-row ~ .el-row {
+    margin-top: 8px;
+  }
+
+  .el-button {
+    padding-top:5px;
+    padding-bottom:5px;
+  }
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
         border-top-color: #fff !important;
       }
     }
