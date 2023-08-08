@@ -648,6 +648,7 @@ export default {
           if (data && data.type !== "marker" && eventType === "click"){
             this.checkAndCreatePopups(payload);
           }
+          this.$emit("resource-selected", payload);
         } else {
           this.$emit("pan-zoom-callback", data);
         }
