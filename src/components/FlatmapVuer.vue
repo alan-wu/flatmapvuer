@@ -2,7 +2,7 @@
   <div
     class="flatmap-container"
     ref="flatmapContainer"
-    v-loading="loading"
+    v-loading="!flatmapReady"
     element-loading-text="Loading..."
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
@@ -90,6 +90,31 @@
 
       <div class="bottom-right-control">
         <el-popover
+          content="Reset"
+          placement="top"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="flatmap-popper"
+          v-model="hoverVisibilities[9].value"
+        >
+          <div>
+            Flatmap published on:
+            {{flatmapPublishedDisplay}}
+            <br>
+            SKAN version: <a :href="skanReleaseLink"> {{skanReleaseDisplay}} </a>
+            <br>
+            View dataset <a href="https://sparc.science">here</a>
+
+          </div>
+          <i
+            slot="reference"
+            class="el-icon-info icon-button info-icon"
+            @click="showToolitip(9)"
+            @mouseover="showToolitip(9)"
+            @mouseout="hideToolitip(9)"
+          />
+        </el-popover>
+        <el-popover
           content="Zoom in"
           placement="left"
           :appendToBody="false"
@@ -145,6 +170,7 @@
             @mouseout.native="hideToolitip(2)"
           />
         </el-popover>
+
       </div>
       <el-popover
         content="Change pathway visibility"
@@ -391,6 +417,9 @@ const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 
 const processTaxon = (flatmapAPI, taxonIdentifiers) => {
   let processed = [];
+  if (!taxonIdentifiers || taxonIdentifiers.length === 0) {
+    return processed;
+  }
   taxonIdentifiers.forEach(taxon => {
     findTaxonomyLabel(flatmapAPI, taxon).then(value => {
       const item = { taxon, label: value};
@@ -477,6 +506,39 @@ export default {
     //created causing issue, This flag will
     //resolve this issue.
     this.setStateRequired = false;
+  },
+  computed: {
+    flatmapPublishedDisplay: function() {
+      let flatmapPublished = "Unknown"
+      console.log(this.mapImp)
+      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
+        flatmapPublished = new Date(this.mapImp.provenance.created).toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        })
+      }
+      return flatmapPublished 
+    },
+    skanReleaseDisplay: function() {
+      let skanRelease = "Unknown"
+      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
+        let isoTime = this.mapImp.provenance.sckan.created.replace(',', '.') // Date time does not accept commas but Sckan uses them
+        skanRelease = new Date(isoTime).toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        })
+      }
+      return skanRelease 
+    },
+    skanReleaseLink: function() {
+      let skanRelease = "Unknown"
+      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
+        skanRelease = this.mapImp.provenance.sckan.release
+      }
+      return skanRelease 
+    },
   },
   methods: {
     viewLatestMap: function() {
@@ -824,8 +886,8 @@ export default {
       }
     },
     createFlatmap: function(state) {
-      if (!this.mapImp && !this.loading) {
-        this.loading = true;
+      if (!this.mapImp && !this.flatmapReady) {
+        this.flatmapReady = false;
         let minimap = false;
         if (this.displayMinimap) {
           minimap = { position: "top-right" };
@@ -897,7 +959,7 @@ export default {
         });
       } else if (state) {
         this._stateToBeSet = { viewport: state.viewport, searchTerm: state.searchTerm };
-        if (this.mapImp && !this.loading)
+        if (this.mapImp && this.flatmapReady)
           this.restoreMapState(this._stateToBeSet);
       }
     },
@@ -942,7 +1004,8 @@ export default {
       this.systems = processSystems(this.mapImp.getSystems());
       this.taxonConnectivity = processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers);
       this.addResizeButtonToMinimap();
-      this.loading = false;
+      this.flatmapReady = true;
+      this.onFlatmapReady = true;
       this.computePathControlsMaximumHeight();
       this.drawerOpen = true;
       this.mapResize();
@@ -1136,12 +1199,13 @@ export default {
         { value: false },
         { value: false },
         { value: false },
+        { value: false }
       ],
       isFC: false,
       inHelp: false,
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
-      loading: false,
+      flatmapReady: false,
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
@@ -1438,6 +1502,12 @@ export default {
 
 .fitWindow {
   padding-left: 8px;
+}
+
+.info-icon {
+  padding-right: 8px;
+  font-size: 27px;
+  margin-bottom: 3px;
 }
 
 .settings-group {
