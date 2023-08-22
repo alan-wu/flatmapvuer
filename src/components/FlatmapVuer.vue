@@ -97,26 +97,25 @@
           popper-class="flatmap-popper"
           v-model="hoverVisibilities[9].value"
         >
-          <div>
+          <div @mouseover="showToolitip(9)" @mouseout="hideToolitip(9)">
             Flatmap published on:
             {{flatmapPublishedDisplay}}
             <br>
             SKAN version: <a :href="skanReleaseLink"> {{skanReleaseDisplay}} </a>
             <br>
-            View dataset <a href="https://sparc.science">here</a>
+            View dataset <a :href="flatmapSource">here</a>
 
           </div>
-          <i
-            slot="reference"
-            class="el-icon-info icon-button info-icon"
-            @click="showToolitip(9)"
-            @mouseover="showToolitip(9)"
-            @mouseout="hideToolitip(9)"
-          />
+          <div class="el-icon-info icon-button info-icon"
+              slot="reference"
+              @click="showToolitip(9)"
+              @mouseover="showToolitip(9)"
+              @mouseout="hideToolitip(9)">
+          </div>
         </el-popover>
         <el-popover
           content="Zoom in"
-          placement="left"
+          placement="top"
           :appendToBody="false"
           trigger="manual"
           popper-class="flatmap-popper left-popper"
@@ -538,6 +537,13 @@ export default {
         skanRelease = this.mapImp.provenance.sckan.release
       }
       return skanRelease 
+    },
+    flatmapSource: function() {
+      let flatmapSource = "Unknown"
+      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
+        flatmapSource = this.mapImp.provenance.source
+      }
+      return flatmapSource
     },
   },
   methods: {
@@ -1507,7 +1513,9 @@ export default {
 .info-icon {
   padding-right: 8px;
   font-size: 27px;
-  margin-bottom: 3px;
+  position: relative;
+  // 'top: 4px' is needed because element ui icon is a text characeter instead of svg
+  top: 4px;
 }
 
 .settings-group {
