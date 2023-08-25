@@ -90,30 +90,6 @@
 
       <div class="bottom-right-control">
         <el-popover
-          content="Reset"
-          placement="top"
-          :appendToBody="false"
-          trigger="manual"
-          popper-class="flatmap-popper"
-          v-model="hoverVisibilities[9].value"
-        >
-          <div @mouseover="showToolitip(9)" @mouseout="hideToolitip(9)">
-            Flatmap published on:
-            {{flatmapPublishedDisplay}}
-            <br>
-            SKAN version: <a :href="skanReleaseLink"> {{skanReleaseDisplay}} </a>
-            <br>
-            View dataset <a :href="flatmapSource">here</a>
-
-          </div>
-          <div class="el-icon-info icon-button info-icon"
-              slot="reference"
-              @click="showToolitip(9)"
-              @mouseover="showToolitip(9)"
-              @mouseout="hideToolitip(9)">
-          </div>
-        </el-popover>
-        <el-popover
           content="Zoom in"
           placement="top"
           :appendToBody="false"
@@ -168,6 +144,24 @@
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
           />
+        </el-popover>
+        <el-popover
+          content="Reset"
+          placement="top"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="flatmap-popper"
+          v-model="hoverVisibilities[9].value"
+        >
+          <div @mouseover="showToolitip(9)" @mouseout="hideToolitip(9)">
+            <context-card :mapImp="mapImp" :banner="'https://sparc.science/_nuxt/img/ac-map.158478f.png'"></context-card>
+          </div>
+          <div class="el-icon-info icon-button info-icon"
+              slot="reference"
+              @click="showToolitip(9)"
+              @mouseover="showToolitip(9)"
+              @mouseout="hideToolitip(9)">
+          </div>
         </el-popover>
 
       </div>
@@ -388,6 +382,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from "./Tooltip";
+import ContextCard from "./ContextCard";
 import SelectionsGroup from "./SelectionsGroup";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
@@ -494,6 +489,7 @@ export default {
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
+    ContextCard,
     TreeControls,
     SelectionsGroup,
     SvgLegends
@@ -505,46 +501,6 @@ export default {
     //created causing issue, This flag will
     //resolve this issue.
     this.setStateRequired = false;
-  },
-  computed: {
-    flatmapPublishedDisplay: function() {
-      let flatmapPublished = "Unknown"
-      console.log(this.mapImp)
-      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
-        flatmapPublished = new Date(this.mapImp.provenance.created).toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-        })
-      }
-      return flatmapPublished 
-    },
-    skanReleaseDisplay: function() {
-      let skanRelease = "Unknown"
-      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
-        let isoTime = this.mapImp.provenance.sckan.created.replace(',', '.') // Date time does not accept commas but Sckan uses them
-        skanRelease = new Date(isoTime).toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-        })
-      }
-      return skanRelease 
-    },
-    skanReleaseLink: function() {
-      let skanRelease = "Unknown"
-      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
-        skanRelease = this.mapImp.provenance.sckan.release
-      }
-      return skanRelease 
-    },
-    flatmapSource: function() {
-      let flatmapSource = "Unknown"
-      if(this.flatmapReady && this.mapImp && this.mapImp.provenance){
-        flatmapSource = this.mapImp.provenance.source
-      }
-      return flatmapSource
-    },
   },
   methods: {
     viewLatestMap: function() {
@@ -1511,11 +1467,11 @@ export default {
 }
 
 .info-icon {
-  padding-right: 8px;
-  font-size: 27px;
+  padding-left: 8px;
+  font-size: 28px;
   position: relative;
-  // 'top: 4px' is needed because element ui icon is a text characeter instead of svg
-  top: 4px;
+  // 'top: 5x' is needed because element ui icon is a text characeter instead of svg
+  top: 5px;
 }
 
 .settings-group {
