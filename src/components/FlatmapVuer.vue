@@ -152,14 +152,14 @@
           trigger="manual"
           v-model="hoverVisibilities[9].value"
         >
-          <div @mouseover="showToolitip(9)" >
+          <div @mouseover="showToolitip(9)" @mouseout="hideToolitip(9)">
             <context-card v-if="flatmapReady" :mapImp="mapImp" class="context-card"></context-card>
           </div>
           <div class="el-icon-info icon-button info-icon"
               slot="reference"
               @click="showToolitip(9)"
               @mouseover="showToolitip(9)"
-              >
+              @mouseout="hideToolitip(9)">
           </div>
         </el-popover>
 
