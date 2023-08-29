@@ -146,7 +146,7 @@
           />
         </el-popover>
         <el-popover
-          content="Reset"
+          content="Info"
           placement="top"
           :appendToBody="false"
           trigger="manual"
