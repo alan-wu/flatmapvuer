@@ -68,13 +68,13 @@ export default {
       }
     },
     FlatmapReady: function(component) {
-      // console.log(component);
-      // let taxon = component.mapImp.describes;
-      // let id = component.mapImp.addMarker("UBERON:0000948");
+      console.log(component);
+      let taxon = component.mapImp.describes;
+      let id = component.mapImp.addMarker("UBERON:0000948");
       window.flatmapImp =  component.mapImp;
       component.enablePanZoomEvents(true);
       //component.showPathwaysDrawer(false);
-      // console.log(taxon, id);
+      console.log(taxon, id);
       //component.searchAndShowResult("heart");
     },
     panZoomcallback: function(payload) {
