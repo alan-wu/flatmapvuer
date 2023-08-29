@@ -150,17 +150,16 @@
           placement="top"
           :appendToBody="false"
           trigger="manual"
-          popper-class="flatmap-popper"
           v-model="hoverVisibilities[9].value"
         >
-          <div @mouseover="showToolitip(9)" @mouseout="hideToolitip(9)">
-            <context-card :mapImp="mapImp" :banner="'https://sparc.science/_nuxt/img/ac-map.158478f.png'"></context-card>
+          <div @mouseover="showToolitip(9)" >
+            <context-card v-if="flatmapReady" :mapImp="mapImp" class="context-card"></context-card>
           </div>
           <div class="el-icon-info icon-button info-icon"
               slot="reference"
               @click="showToolitip(9)"
               @mouseover="showToolitip(9)"
-              @mouseout="hideToolitip(9)">
+              >
           </div>
         </el-popover>
 
@@ -1341,6 +1340,10 @@ export default {
 
 .tooltip {
   display: none;
+}
+
+.context-card {
+  width: 300px;
 }
 
 ::v-deep .maplibregl-popup {

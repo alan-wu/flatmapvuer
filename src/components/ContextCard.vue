@@ -1,24 +1,20 @@
 <template>
-  <div class="context-card-container"  ref="container">
-    <div v-show="showContextCard">
-      <el-card v-loading="loading" class="context-card" >
+
+      <div v-loading="loading" class="context-card" >
         <div class="card-left">
-          <img :src="banner" class="context-image">
+          <img src="@/assets/flatmap_banner.png" class="context-image">
         </div>
         <div class="card-right scrollbar">
-          <div class="title">{{heading}}</div>
-          <div>{{description}}</div>
-            Flatmap published on:
-            {{flatmapPublishedDisplay}}
-            <br>
+          <div class="title">Flatmap Provenance</div>
             SKAN version: <a :href="skanReleaseLink" target="_blank"> {{skanReleaseDisplay}} </a>
             <br>
-            View dataset <a :href="flatmapSource" target="_blank">here</a>
+            Published on:
+            {{flatmapPublishedDisplay}}
+            <br>
+            View publication <a :href="flatmapSource" target="_blank">here</a>
           <br/>
         </div>
-      </el-card>
-    </div>
-  </div>
+      </div>
 </template>
 
 
@@ -40,26 +36,6 @@ Vue.use(Button);
 Vue.use(Select);
 Vue.use(Input);
 
-// const addFilesToPathIfMissing = function(path){
-//   if (!path.includes('files')){
-//     return 'files/' + path
-//   } else {
-//     return path
-//   }
-// }
-
-// const convertBackslashToForwardSlash = function(path){
-//   path = path.replaceAll('\\','/')
-//   path = path.replaceAll('\\\\', '/')
-//   return path
-// }
-
-// const switchPathToDirectory = function(path){
-//   let newPath = path.split('/')
-//   newPath.pop()
-//   return newPath.join('/')
-// }
-
 
 export default {
   name: "contextCard",
@@ -69,7 +45,6 @@ export default {
      * the required viewing.
      */
     mapImp: Object,
-    banner: String
   },
   data: function () {
     return {
@@ -139,13 +114,10 @@ export default {
 .context-card{
   background-color: white;
   max-height: 10  50px;
-  padding: 8px;
-  font-size: 14px;
-  margin-bottom: 18px;
+  font-size: 12px;
   position: relative;
-  border: solid 1px #e4e7ed;
   display: flex;
-  width: 500px;
+  width: 100%;
   max-height: 258px;
 }
 
@@ -169,11 +141,11 @@ export default {
 .context-card ::v-deep .el-card__body {
   padding: 0px;
   display: flex;
-  width: 516px;
+  width: 300px;
 }
 
 .context-image{
-  width: 250px;
+  width: 140px;
   height: auto;
 }
 
@@ -192,7 +164,7 @@ export default {
 .card-right {
   flex: 1.3;
   padding-left: 6px;
-  overflow-y: scroll;
+  // overflow-y: scroll;
   scrollbar-width: thin;
 }
 
