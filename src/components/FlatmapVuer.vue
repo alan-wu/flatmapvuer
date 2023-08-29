@@ -1343,7 +1343,7 @@ export default {
 }
 
 .context-card {
-  width: 300px;
+  width: 170px;
 }
 
 ::v-deep .maplibregl-popup {

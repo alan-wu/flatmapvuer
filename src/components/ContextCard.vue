@@ -1,9 +1,9 @@
 <template>
 
       <div v-loading="loading" class="context-card" >
-        <div class="card-left">
-          <img src="@/assets/flatmap_banner.png" class="context-image">
-        </div>
+        <!-- <div class="card-left">
+          <img :src="require('@/assets/flatmap_banner.png')" class="context-image">
+        </div> -->
         <div class="card-right scrollbar">
           <div class="title">Flatmap Provenance</div>
             SKAN version: <a :href="skanReleaseLink" target="_blank"> {{skanReleaseDisplay}} </a>
