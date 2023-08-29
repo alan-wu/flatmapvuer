@@ -1,9 +1,6 @@
 <template>
 
       <div v-loading="loading" class="context-card" >
-        <!-- <div class="card-left">
-          <img :src="require('@/assets/flatmap_banner.png')" class="context-image">
-        </div> -->
         <div class="card-right scrollbar">
           <div class="title">Flatmap Provenance</div>
             SKAN version: <a :href="skanReleaseLink" target="_blank"> {{skanReleaseDisplay}} </a>
@@ -121,44 +118,12 @@ export default {
   max-height: 258px;
 }
 
-.context-card-view{
-  cursor: pointer;
-  padding-bottom: 8px;
-  display: flex;
-}
-
-.view-image {
-  width: 34px;
-  height: 34px;
-  flex: 1;
-  margin-right: 4px;
-}
-
-.view-descriptions {
-  flex: 8;
-}
-
-.context-card ::v-deep .el-card__body {
-  padding: 0px;
-  display: flex;
-  width: 300px;
-}
-
-.context-image{
-  width: 140px;
-  height: auto;
-}
-
 .color-box {
   width: 16px;
   height: 16px;
   border: solid 1px $app-primary-color;
   border-radius: 2px;
   margin-right: 8px;
-}
-
-.card-left{
-  flex: 1
 }
 
 .card-right {
