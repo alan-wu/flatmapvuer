@@ -1475,6 +1475,10 @@ export default {
   position: relative;
   // 'top: 5x' is needed because element ui icon is a text characeter instead of svg
   top: 5px;
+  &::before {
+    border-radius: 15px;
+    background-color: #fff;
+  }
 }
 
 .settings-group {
