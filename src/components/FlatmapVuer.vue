@@ -2,7 +2,7 @@
   <div
     class="flatmap-container"
     ref="flatmapContainer"
-    v-loading="!flatmapReady"
+    v-loading="loading"
     element-loading-text="Loading..."
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
@@ -91,7 +91,7 @@
       <div class="bottom-right-control">
         <el-popover
           content="Zoom in"
-          placement="top"
+          placement="left"
           :appendToBody="false"
           trigger="manual"
           popper-class="flatmap-popper left-popper"
@@ -145,24 +145,6 @@
             @mouseout.native="hideToolitip(2)"
           />
         </el-popover>
-        <el-popover
-          content="Info"
-          placement="top"
-          :appendToBody="false"
-          trigger="manual"
-          v-model="hoverVisibilities[9].value"
-        >
-          <div @mouseover="showToolitip(9)" @mouseout="hideToolitip(9)">
-            <context-card v-if="flatmapReady" :mapImp="mapImp" class="context-card"></context-card>
-          </div>
-          <div class="el-icon-info icon-button info-icon"
-              slot="reference"
-              @click="showToolitip(9)"
-              @mouseover="showToolitip(9)"
-              @mouseout="hideToolitip(9)">
-          </div>
-        </el-popover>
-
       </div>
       <el-popover
         content="Change pathway visibility"
@@ -381,7 +363,6 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import Tooltip from "./Tooltip";
-import ContextCard from "./ContextCard";
 import SelectionsGroup from "./SelectionsGroup";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
@@ -410,9 +391,6 @@ const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 
 const processTaxon = (flatmapAPI, taxonIdentifiers) => {
   let processed = [];
-  if (!taxonIdentifiers || taxonIdentifiers.length === 0) {
-    return processed;
-  }
   taxonIdentifiers.forEach(taxon => {
     findTaxonomyLabel(flatmapAPI, taxon).then(value => {
       const item = { taxon, label: value};
@@ -488,7 +466,6 @@ export default {
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
-    ContextCard,
     TreeControls,
     SelectionsGroup,
     SvgLegends
@@ -847,8 +824,8 @@ export default {
       }
     },
     createFlatmap: function(state) {
-      if (!this.mapImp && !this.flatmapReady) {
-        this.flatmapReady = false;
+      if (!this.mapImp && !this.loading) {
+        this.loading = true;
         let minimap = false;
         if (this.displayMinimap) {
           minimap = { position: "top-right" };
@@ -920,7 +897,7 @@ export default {
         });
       } else if (state) {
         this._stateToBeSet = { viewport: state.viewport, searchTerm: state.searchTerm };
-        if (this.mapImp && this.flatmapReady)
+        if (this.mapImp && !this.loading)
           this.restoreMapState(this._stateToBeSet);
       }
     },
@@ -965,8 +942,7 @@ export default {
       this.systems = processSystems(this.mapImp.getSystems());
       this.taxonConnectivity = processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers);
       this.addResizeButtonToMinimap();
-      this.flatmapReady = true;
-      this.onFlatmapReady = true;
+      this.loading = false;
       this.computePathControlsMaximumHeight();
       this.drawerOpen = true;
       this.mapResize();
@@ -1160,13 +1136,12 @@ export default {
         { value: false },
         { value: false },
         { value: false },
-        { value: false }
       ],
       isFC: false,
       inHelp: false,
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
-      flatmapReady: false,
+      loading: false,
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
@@ -1342,10 +1317,6 @@ export default {
   display: none;
 }
 
-.context-card {
-  width: 170px;
-}
-
 ::v-deep .maplibregl-popup {
   max-width: 300px !important;
 }
@@ -1467,18 +1438,6 @@ export default {
 
 .fitWindow {
   padding-left: 8px;
-}
-
-.info-icon {
-  padding-left: 8px;
-  font-size: 28px;
-  position: relative;
-  // 'top: 5x' is needed because element ui icon is a text characeter instead of svg
-  top: 5px;
-  &::before {
-    border-radius: 15px;
-    background-color: #fff;
-  }
 }
 
 .settings-group {
