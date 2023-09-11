@@ -31,6 +31,7 @@
       :showLayer="showLayer"
       v-show="activeSpecies==key"
       :entry="item.taxo"
+      :uuid="item.uuid"
       :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
       :displayLatestChanges="item.displayLatestChanges"
@@ -110,19 +111,24 @@ export default {
           .then(response => response.json())
           .then(data => {
             //Check each key in the provided availableSpecies against the one 
-            //on the server, add them to the Select if the key is found
             Object.keys(this.availableSpecies).forEach(key => {
-              for (let i = 0; i < data.length; i++) {
-                if (this.availableSpecies[key].taxo === data[i].taxon) {
-                  if (this.availableSpecies[key].biologicalSex) {
-                    if (data[i].biologicalSex && 
-                      data[i].biologicalSex === this.availableSpecies[key].biologicalSex) {
-                        this.$set(this.speciesList, key, this.availableSpecies[key]);
-                        break;
-                      }
-                  } else {
-                    this.$set(this.speciesList, key, this.availableSpecies[key]);
-                    break;
+              // FIrst look through the uuid
+              const uuid = this.availableSpecies[key].uuid;
+              if (uuid && data.map(e => e.uuid).indexOf(uuid) > 0) {
+                this.$set(this.speciesList, key, this.availableSpecies[key]);
+              } else {
+                for (let i = 0; i < data.length; i++) {
+                  if (this.availableSpecies[key].taxo === data[i].taxon) {
+                    if (this.availableSpecies[key].biologicalSex) {
+                      if (data[i].biologicalSex && 
+                        data[i].biologicalSex === this.availableSpecies[key].biologicalSex) {
+                          this.$set(this.speciesList, key, this.availableSpecies[key]);
+                          break;
+                        }
+                    } else {
+                      this.$set(this.speciesList, key, this.availableSpecies[key]);
+                      break;
+                    }
                   }
                 }
               }

@@ -848,6 +848,9 @@ export default {
         //  be loaded, overriding ``taxon`` and ``biologicalSex``.
 
         let identifier = { taxon: this.entry };
+        if (this.uuid) {
+          identifier.uuid = this.uuid;
+        }
         //This now handle the uses of uuid when resuming states
         if (state) {
           if (state.uuid) {
@@ -998,6 +1001,7 @@ export default {
   },
   props: {
     entry: String,
+    uuid: String,
     biologicalSex: {
       type: String,
       default: ""
