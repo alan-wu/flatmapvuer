@@ -139,11 +139,6 @@ export default {
       pubmedSearchUrl: '',
       loading: false,
       showToolip: false,
-      destinations: [],
-      origins: [],
-      components: [],
-      destinationsWithDatasets: [],
-      originsWithDatasets: [],
       originDescriptions: {
         'motor': 'is the location of the initial cell body of the circuit',
         'sensory': 'is the location of the initial cell body in the PNS circuit'
@@ -191,13 +186,13 @@ export default {
       window.open(url, '_blank')
     },
     openAll: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.componentsWithDatasets.map(a=>a.name)})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.entry.componentsWithDatasets.map(a=>a.name)})
     },
     openAxons: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.destinationsWithDatasets.map(a=>a.name)})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.entry.destinationsWithDatasets.map(a=>a.name)})
     },
     openDendrites: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.originsWithDatasets.map(a=>a.name)})
+      EventBus.$emit('onActionClick', {type:'Facets', labels: this.entry.originsWithDatasets.map(a=>a.name)})
     },
     pubmedSearchUrlUpdate: function (val){
       this.pubmedSearchUrl = val
