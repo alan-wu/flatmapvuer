@@ -45,7 +45,6 @@ let FlatmapQueries = function(){
     this.destinations = []
     this.origins = []
     this.components = []
-    this.uberons = []
     this.urls = []
     this.controller = undefined
     this.uberons = []
@@ -97,6 +96,7 @@ let FlatmapQueries = function(){
   this.createLabelLookup = function(uberons) {
     return new Promise(resolve=> {
       let uberonMap = {}
+      this.uberons = []
       const data = { sql: this.buildLabelSqlStatement(uberons)}
       fetch(`${this.flatmapApi}knowledge/query/`, {
           method: 'POST',
@@ -112,6 +112,10 @@ let FlatmapQueries = function(){
           if (entity > -1 && label > -1) {
             payload.values.forEach(pair => {
               uberonMap[pair[entity]] = pair[label];
+              this.uberons.push({
+                id: pair[entity],
+                name: pair[label]
+              })
             });
           }
         resolve(uberonMap)
@@ -154,8 +158,7 @@ let FlatmapQueries = function(){
         found.push(n)
       }
     })
-    this.uberons = [... new Set(found.flat())]
-    return this.uberons
+    return [... new Set(found.flat())]
   }
 
   this.flattenConntectivity = function (connectivity) {
