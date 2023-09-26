@@ -749,6 +749,8 @@ export default {
       }
     },
     displayTooltip: function() {
+    console.log("displayTooltip", this.mapImp.modelFeatureIds(this.resourceForTooltip)[0])
+    window.mapImp = this.mapImp
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
         this.$refs.tooltip.$el,

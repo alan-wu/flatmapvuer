@@ -20,6 +20,7 @@
     "build": "vue-cli-service build --dest test_html --mode staging",
     "build-bundle": "vue-cli-service build --target lib --name flatmapvuer ./src/components/index.js",
     "lint": "vue-cli-service lint",
+    "cypress:open": "cypress open",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
     "release:minor": "npm version minor; npm publish",
     "release:patch": "npm version patch;  npm publish",
@@ -38,6 +39,7 @@
     "vue": "^2.6.10"
   },
   "devDependencies": {
+    "@cypress/webpack-dev-server": "^3.6.1",
     "@vue/cli-plugin-babel": "^4.0.0",
     "@vue/cli-plugin-eslint": "^4.0.0",
     "@vue/cli-service": "^4.5.13",
@@ -45,9 +47,12 @@
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "base64-inline-loader": "^2.0.1",
+    "cypress": "^13.2.0",
+    "cypress-wait-until": "^2.0.1",
     "eslint": "^5.16.0",
+    "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-vue": "^5.0.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^9.0.0",
     "sass-loader": "^8.0.2",
     "vue-template-compiler": "^2.6.10",
     "webpack-node-externals": "^2.5.2"
