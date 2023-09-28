@@ -12,35 +12,51 @@ describe('MultiFlatmapVuer', () => {
     cy.fixture('MultiFlatmapProps.json').as('props');
   })
 
-  cy.get('@props').then((props) => {
-    cy.mount(MultiFlatmapVuer, {
-      propsData: {
-        availableSpecies: props.availableSpecies,
-        minZoom: props.minZoom,
-        // @ready="FlatmapReady"
-        featureInfo: props.featureInfo,
-        searchable: props.searchable,
-        layerControl: props.layerControl,
-        initial: props.initial,
-        pathControls: props.pathControls,
-        helpMode: props.helpMode,
-        displayMinimap: props.displayMinimap,
-        enableOpenMapUI: props.enableOpenMapUI,
-        flatmapAPI: props.flatmapAPI,
-      }
-    });
+  it('Workflow testing', () => {
+
+    const readySpy = cy.spy().as('readySpy')
+    cy.get('@props').then((props) => {
+      cy.mount(MultiFlatmapVuer, {
+        propsData: {
+          availableSpecies: props.availableSpecies,
+          minZoom: props.minZoom,
+          ready: readySpy,
+          featureInfo: props.featureInfo,
+          searchable: props.searchable,
+          layerControl: props.layerControl,
+          initial: props.initial,
+          pathControls: props.pathControls,
+          helpMode: props.helpMode,
+          displayMinimap: props.displayMinimap,
+          enableOpenMapUI: props.enableOpenMapUI,
+          flatmapAPI: props.flatmapAPI,
+        }
+      }).then((vm) => {
+        cy.wrap(vm).as('vm')
+        window.vm = vm
+        
+      })
+
+    })
+
+    Cypress.on('uncaught:exception', (err) => {
+      // returning false here prevents Cypress from
+      // failing the test
+      if (err.message.includes("this.facets.at is not a function"))
+        return false
+      return true
+    })
+
+    //Check if multiflatmap is mounted correctly
+    cy.get('.content-container').should('exist');
+
+    //Check if the ready event is fired
+    cy.get('@readySpy').should('have.been.calledWith', true)
+
+    //Check if the minimap is visible
+    cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
   })
 
-  Cypress.on('uncaught:exception', (err) => {
-    // returning false here prevents Cypress from
-    // failing the test
-    if (err.message.includes("this.facets.at is not a function"))
-      return false
-    return true
-  })
-
-  //Check if multiflatmap is mounted correctly
-  cy.get('.content-container').should('exist');
 
 });
 
