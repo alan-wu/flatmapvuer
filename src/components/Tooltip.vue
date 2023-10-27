@@ -10,69 +10,79 @@
       <div class="block" v-else>
         <span class="title">{{entry.featureId}}</span>
       </div>
-      <div class="content-container scrollbar">
-        {{entry.paths}}
-        <div v-if="entry.origins && entry.origins.length > 0" class="block">
-          <div>
-            <span class="attribute-title">Origin</span>
-            <el-popover
-            width="250"
-            trigger="hover"
-            :append-to-body=false
-            popper-class="popover-origin-help"
-            >
-            <i slot="reference" class="el-icon-warning-outline info"/>
-            <span style="word-break: keep-all;">
-              <i>Origin</i> {{originDescription}}
-            </span>
-            </el-popover>
+      <div v-show="showDetails" class="hide" @click="showDetails = false">
+          Hide path information
+          <i class="el-icon-arrow-up"></i>
+        </div>
+        <div v-show="!showDetails" class="hide" @click="showDetails = true">
+          Show path information
+          <i class="el-icon-arrow-down"></i>
+        </div>
+      <transition name="slide-fade">
+        <div v-show="showDetails" class="content-container scrollbar">
+          {{entry.paths}}
+          <div v-if="entry.origins && entry.origins.length > 0" class="block">
+            <div>
+              <span class="attribute-title">Origin</span>
+              <el-popover
+              width="250"
+              trigger="hover"
+              :append-to-body=false
+              popper-class="popover-origin-help"
+              >
+              <i slot="reference" class="el-icon-warning-outline info"/>
+              <span style="word-break: keep-all;">
+                <i>Origin</i> {{originDescription}}
+              </span>
+              </el-popover>
+            </div>
+            <div v-for="(origin, i) in entry.origins" class="attribute-content"  :key="origin">
+              {{ capitalise(origin) }}
+              <div v-if="i != entry.origins.length - 1" class="seperator"></div>
+            </div>
+            <el-button v-show="entry.originsWithDatasets && entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
+              Explore origin data
+            </el-button>
           </div>
-          <div v-for="(origin, i) in entry.origins" class="attribute-content"  :key="origin">
-            {{ capitalise(origin) }}
-            <div v-if="i != entry.origins.length - 1" class="seperator"></div>
+          <div v-if="entry.components && entry.components.length > 0" class="block">
+            <div class="attribute-title">Components</div>
+            <div v-for="(component, i) in entry.components" class="attribute-content"  :key="component">
+              {{ capitalise(component) }}
+              <div v-if="i != entry.components.length - 1" class="seperator"></div>
+            </div>
           </div>
-          <el-button v-show="entry.originsWithDatasets && entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
-            Explore origin data
+          <div v-if="entry.destinations && entry.destinations.length > 0" class="block">
+            <div>
+              <span class="attribute-title">Destination</span>
+              <el-popover
+              width="250"
+              trigger="hover"
+              :append-to-body=false
+              popper-class="popover-origin-help"
+              >
+              <i slot="reference" class="el-icon-warning-outline info"/>
+              <span style="word-break: keep-all;">
+              <i>Destination</i> is where the axons terminate
+              </span>
+              </el-popover>
+            </div>
+            <div v-for="(destination, i) in entry.destinations" class="attribute-content"  :key="destination">
+              {{ capitalise(destination) }}
+              <div v-if="i != entry.destinations.length - 1" class="seperator"></div>
+            </div>
+            <el-button v-show="entry.destinationsWithDatasets && entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+              Explore destination data
+            </el-button>
+          </div>
+
+          <el-button v-show="entry.componentsWithDatasets && entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
+            Search for data on components
           </el-button>
-        </div>
-        <div v-if="entry.components && entry.components.length > 0" class="block">
-          <div class="attribute-title">Components</div>
-          <div v-for="(component, i) in entry.components" class="attribute-content"  :key="component">
-            {{ capitalise(component) }}
-            <div v-if="i != entry.components.length - 1" class="seperator"></div>
-          </div>
-        </div>
-        <div v-if="entry.destinations && entry.destinations.length > 0" class="block">
-          <div>
-            <span class="attribute-title">Destination</span>
-            <el-popover
-            width="250"
-            trigger="hover"
-            :append-to-body=false
-            popper-class="popover-origin-help"
-            >
-            <i slot="reference" class="el-icon-warning-outline info"/>
-            <span style="word-break: keep-all;">
-            <i>Destination</i> is where the axons terminate
-            </span>
-            </el-popover>
-          </div>
-          <div v-for="(destination, i) in entry.destinations" class="attribute-content"  :key="destination">
-            {{ capitalise(destination) }}
-            <div v-if="i != entry.destinations.length - 1" class="seperator"></div>
-          </div>
-          <el-button v-show="entry.destinationsWithDatasets && entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
-            Explore destination data
-          </el-button>
-        </div>
 
-        <el-button v-show="entry.componentsWithDatasets && entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
-          Search for data on components
-        </el-button>
+          <external-resource-card :resources="resources"></external-resource-card>
 
-        <external-resource-card :resources="resources"></external-resource-card>
-
-      </div>
+        </div>
+      </transition>
     </el-main>
   </div>
 </template>
@@ -139,6 +149,7 @@ export default {
       pubmedSearchUrl: '',
       loading: false,
       showToolip: false,
+      showDetails: false,
       originDescriptions: {
         'motor': 'is the location of the initial cell body of the circuit',
         'sensory': 'is the location of the initial cell body in the PNS circuit'
@@ -236,7 +247,7 @@ export default {
 }
 
 .block {
-  margin-bottom: 1.5em;
+  margin-bottom: 0.5em;
 }
 
 .pub {
@@ -269,6 +280,24 @@ export default {
   background-color:#bfbec2;
 }
 
+.hide{
+  color: $app-primary-color;
+  cursor: pointer;
+  margin-right: 6px;
+  margin-top: 3px;
+}
+
+.slide-fade-enter-active {
+  transition: opacity 0.5s, transform 0.5s;
+}
+.slide-fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+.slide-fade-enter, .slide-fade-leave-to /* .slide-fade-leave-active in <2.1.8 */ {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
 .main {
   font-size: 14px;
   text-align: left;
@@ -279,6 +308,7 @@ export default {
   padding: 1em !important;
   overflow: hidden;
   min-width: 16rem;
+
 }
 
 .title{
