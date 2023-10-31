@@ -280,6 +280,24 @@
         trigger="click"
         popper-class="background-popper"
       >
+        <el-row class="backgroundText">Viewing Mode</el-row>
+        
+        <el-row class="backgroundControl">
+          <el-select
+            :popper-append-to-body="false"
+            v-model="viewingMode"
+            placeholder="Select"
+            class="select-box"
+            popper-class="flatmap_dropdown"
+          >
+            <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
+              <el-row>
+                <el-col :span="12">{{ item }}</el-col>
+              </el-row>
+            </el-option>
+          </el-select>
+        </el-row>
+        <el-row class="backgroundSpacer"></el-row>
         <el-row class="backgroundText">Organs display</el-row>
         <el-row class="backgroundControl">
           <el-radio-group v-model="colourRadio" class="flatmap-radio" @change="setColour">
@@ -354,6 +372,7 @@
         ref="tooltip"
         class="tooltip"
         :entry="tooltipEntry"
+        :annotationDisplay="viewingMode === 'Annotation'"
       />
     </div>
   </div>
@@ -373,7 +392,8 @@ import {
   Loading,
   Radio,
   RadioGroup,
-  Row
+  Row,
+  Select,
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -387,6 +407,7 @@ Vue.use(Loading.directive);
 Vue.use(Radio);
 Vue.use(RadioGroup);
 Vue.use(Row);
+Vue.use(Select);
 const ResizeSensor = require("css-element-queries/src/ResizeSensor");
 
 const processTaxon = (flatmapAPI, taxonIdentifiers) => {
@@ -640,6 +661,7 @@ export default {
             eventType: eventType,
             provenanceTaxonomy: data.taxons ? JSON.parse(data.taxons) : undefined
           };
+          console.log(data, args)
           if (eventType === "click") {
             this.currentActive = data.models ? data.models : "";
           } else if (eventType === "mouseenter") {
@@ -658,6 +680,7 @@ export default {
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
       let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+            console.log(results)
       // The line below only creates the tooltip if some data was found on the path 
       // result 0 is the connection, result 1 is the pubmed results from flatmap
       if(results[0] || results[1] ||( data.feature.hyperlinks && data.feature.hyperlinks.length > 0)){
@@ -1151,12 +1174,18 @@ export default {
       connectivityTooltipVisible: false,
       resourceForTooltip: undefined,
       drawerOpen: false,
+      annotationRadio: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
       minimapSmall: false,
       currentActive: "",
       currentHover: "",
+      viewingMode: "Exploration",
+      viewingModes: [
+        "Annotation",
+        "Exploration",
+      ]
     };
   },
   watch: {
@@ -1203,6 +1232,7 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/button";
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
+@import "~element-ui/packages/theme-chalk/src/select";
 
 .beta-popovers {
   position: absolute;
@@ -1461,7 +1491,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 200px;
+  height: 270px;
   width: 175px;
   min-width: 175px;
   &.el-popper[x-placement^="top"] {
@@ -1511,7 +1541,7 @@ export default {
 
 .backgroundControl {
   display: flex;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .backgroundChoice {
@@ -1749,7 +1779,7 @@ export default {
       margin-right: 0px;
     }
   }
-  .el-radio__input {
+  ::v-deep .el-radio__input {
     &.is-checked {
       & + .el-radio__label {
         color: $app-primary-color;
@@ -1758,6 +1788,9 @@ export default {
         border-color: $app-primary-color;
         background: $app-primary-color;
       }
+    }
+    .el-radio__inner:hover {
+      border-color: $app-primary-color;
     }
   }
 }
@@ -1834,6 +1867,37 @@ export default {
         margin: 0 auto;
         border-color: transparent transparent $app-primary-color transparent;
       }
+    }
+  }
+}
+
+.select-box {
+  border-radius: 4px;
+  border: 1px solid rgb(144, 147, 153);
+  background-color: var(--white);
+  font-weight: 500;
+  color:rgb(48, 49, 51);;
+  ::v-deep .el-input__inner {
+    height:30px;
+    color: rgb(48, 49, 51);
+  }
+  ::v-deep .is-focus .el-input__inner {
+    border: 1px solid $app-primary-color;
+  }
+  ::v-deep .el-input__icon{
+    line-height:30px
+  }
+}
+
+
+::v-deep .flatmap_dropdown {
+  min-width: 160px!important;
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.selected {
+      color: $app-primary-color;
+      font-weight: normal;
     }
   }
 }
