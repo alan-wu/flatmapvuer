@@ -484,8 +484,10 @@ export default {
     color: rgb(48, 49, 51);
     padding-top: 0.25em;
   }
-  ::v-deep .is-focus .el-input__inner {
-    border: 1px solid $app-primary-color;
+  ::v-deep .el-input__inner {
+    &is-focus, &:focus {
+      border: 1px solid $app-primary-color;
+    }
   }
 } 
 

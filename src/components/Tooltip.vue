@@ -1,7 +1,7 @@
 <template>
   <div class="tooltip-container">
     <template v-if="annotationDisplay">
-      <annotation-tool :feature="feature"/>
+      <annotation-tool :annotationEntry="annotationEntry"/>
     </template>
     <template v-else>
       <provenance-popup :entry="entry" />
@@ -29,7 +29,7 @@ export default {
       type: Boolean,
       default: false
     },
-    feature: {
+    annotationEntry: {
       type: Object,
     }
   },

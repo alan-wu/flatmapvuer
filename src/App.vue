@@ -123,6 +123,7 @@ export default {
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
         "Cat":{taxo: "NCBITaxon:9685", iconClass:"mapicon-icon_cat", displayWarning:true},
+        "Sample":{taxo: "NCBITaxon:1",  displayWarning:true},
         "Functional Connectivity": {taxo: "FunctionalConnectivity", displayWarning:true},
       },
       tooltipContent: undefined,

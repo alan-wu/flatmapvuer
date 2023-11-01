@@ -92,7 +92,6 @@ import Vue from "vue";
 import {
   Button,
   Container,
-  Header,
   Icon,
   Main
 } from "element-ui";
@@ -101,7 +100,6 @@ import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Button);
 Vue.use(Container);
-Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
 
@@ -284,13 +282,12 @@ export default {
   font-size: 14px;
   text-align: left;
   line-height: 1.5em;
-  font-family: Helvetica;
+  font-family: Asap, sans-serif,Helvetica;
   font-weight: 400;
   /* outline: thin red solid; */
   padding: 1em !important;
   overflow: hidden;
   min-width: 16rem;
-
 }
 
 .title{
@@ -299,7 +296,6 @@ export default {
   font-weight: bold;
   padding-bottom: 8px;
   color: rgb(131, 0, 191);
-
 }
 
 .attribute-title{

@@ -371,6 +371,7 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
+        :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
       />
@@ -661,7 +662,6 @@ export default {
             eventType: eventType,
             provenanceTaxonomy: data.taxons ? JSON.parse(data.taxons) : undefined
           };
-          console.log(data, args)
           if (eventType === "click") {
             this.currentActive = data.models ? data.models : "";
           } else if (eventType === "mouseenter") {
@@ -679,14 +679,22 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
-      let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-            console.log(results)
-      // The line below only creates the tooltip if some data was found on the path 
-      // result 0 is the connection, result 1 is the pubmed results from flatmap
-      if(results[0] || results[1] ||( data.feature.hyperlinks && data.feature.hyperlinks.length > 0)){
-        this.resourceForTooltip =  data.resource[0];
-        this.createTooltipFromNeuronCuration(data);
-      } 
+      if (this.viewingMode  === "Annotation") {
+        const annotation = this.mapImp.annotation( this.mapImp.modelFeatureIds(data.resource[0]));
+        if (annotation) {
+          this.annotationEntry = {...annotation};
+          this.displayTooltip(data.resource[0]);
+        } else {
+          this.annotation = { };
+        }
+      } else {
+        let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+        // The line below only creates the tooltip if some data was found on the path 
+        // result 0 is the connection, result 1 is the pubmed results from flatmap
+        if(results[0] || results[1] ||( data.feature.hyperlinks && data.feature.hyperlinks.length > 0)){
+          this.createTooltipFromNeuronCuration(data);
+        }
+      }
     },
     popUpCssHacks: function() {
       // Below is a hack to remove flatmap tooltips while popup is open
@@ -702,7 +710,7 @@ export default {
     },
     createTooltipFromNeuronCuration: async function(data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(data);
-      this.displayTooltip();
+      this.displayTooltip(data.resource[0]);
     },
     // Keeping this as an API
     showPopup: function(featureId, node, options) {
@@ -771,9 +779,9 @@ export default {
         }, 500);
       }
     },
-    displayTooltip: function() {
+    displayTooltip: function(feature) {
       this.mapImp.showPopup(
-        this.mapImp.modelFeatureIds(this.resourceForTooltip)[0],
+        this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,
         { className: "flatmapvuer-popover", positionAtLastClick: true }
       );
@@ -1135,6 +1143,9 @@ export default {
   },
   data: function() {
     return {
+      annotationEntry: {
+
+      },
       layers: [],
       pathways: [],
       sckanDisplay: [
@@ -1172,7 +1183,6 @@ export default {
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
-      resourceForTooltip: undefined,
       drawerOpen: false,
       annotationRadio: false,
       colourRadio: true,
@@ -1257,7 +1267,7 @@ export default {
 }
 
 .latest-map-text {
-  color: $app-primary-color;;
+  color: $app-primary-color;
   font-family: Asap, sans-serif;
   font-size: 12px;
   margin-top: 5px;
@@ -1881,14 +1891,15 @@ export default {
     height:30px;
     color: rgb(48, 49, 51);
   }
-  ::v-deep .is-focus .el-input__inner {
-    border: 1px solid $app-primary-color;
+  ::v-deep .el-input__inner {
+    &is-focus, &:focus {
+      border: 1px solid $app-primary-color;
+    }
   }
-  ::v-deep .el-input__icon{
+  ::v-deep .el-input__icon {
     line-height:30px
   }
 }
-
 
 ::v-deep .flatmap_dropdown {
   min-width: 160px!important;
