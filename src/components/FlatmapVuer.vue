@@ -279,7 +279,14 @@
         :appendToBody="false"
         trigger="click"
         popper-class="background-popper"
-      >
+      > 
+        <el-row class="backgroundText">HighlightTool</el-row>
+        <el-row class="backgroundControl">
+          <el-radio-group v-model="highlightToolOn" class="flatmap-radio" @change="setHighlightTool">
+            <el-radio :label="true">On</el-radio>
+            <el-radio :label="false">Off</el-radio>
+          </el-radio-group>
+        </el-row>
         <el-row class="backgroundText">Organs display</el-row>
         <el-row class="backgroundControl">
           <el-radio-group v-model="colourRadio" class="flatmap-radio" @change="setColour">
@@ -353,6 +360,7 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
+        @highlightConnectedPaths="highlightConnectedPaths"
         :entry="tooltipEntry"
       />
     </div>
@@ -510,6 +518,9 @@ export default {
         this.mapImp.setColour({ colour: flag, outline: this.outlinesRadio });
       }
     },
+    setHighlightTool: function(flag) {
+      this.highlightToolOn = flag;
+    },
     /**
      * Function to toggle outlines f organs.
      */
@@ -573,7 +584,25 @@ export default {
     },
     checkAllSCKAN: function(payload) {
       if (this.mapImp) {
+        console.log('checkAllSCKAN', payload)
         payload.keys.forEach(key => this.mapImp.enableSckanPath(key, payload.value));
+      }
+    },
+    highlightConnectedPaths: function(payload) {
+      if (this.mapImp) {
+        console.log('pathnodemodels',this.mapImp.pathModelNodes(payload))
+        console.log('nodemodels',this.mapImp.nodePathModels(payload))
+        let paths = [...this.mapImp.pathModelNodes(payload)]
+        // The line below matches the paths to the annIdToFeatureId map to get the feature ids
+        let toHighlight = this.findExternalIdsFromInternalIds(paths)
+        console.log('toHighlight',toHighlight)
+        this.mapImp.highlightFeatures(toHighlight);
+      }
+    },
+    // findExternalIdsFromInternalIds takes an array of internal ids and returns an array of external ids
+    findExternalIdsFromInternalIds: function(paths) {
+      if (this.mapImp) {
+        return [...this.mapImp.__annIdToFeatureId].filter(arr=>paths.find(p=>p==arr[1])!=undefined).map(ar=>ar[0])
       }
     },
     systemSelected: function(payload) {
@@ -611,6 +640,7 @@ export default {
     },
     pathwaysSelected: function(payload) {
       if (this.mapImp) {
+        console.log('pathwaysSelected', payload)
         this.mapImp.enablePath(payload.key, payload.value);
       }
     },
@@ -642,10 +672,14 @@ export default {
           };
           if (eventType === "click") {
             this.currentActive = data.models ? data.models : "";
+            if (this.highlightToolOn) {
+              console.log(data)
+              this.mapImp.highlightFeatures([data.models]);
+            }
           } else if (eventType === "mouseenter") {
             this.currentHover = data.models ? data.models : "";
           }
-          if (data && data.type !== "marker" && eventType === "click"){
+          if (data && data.type !== "marker" && eventType === "click" && !this.highlightToolOn){
             this.checkAndCreatePopups(payload);
           }
           this.$emit("resource-selected", payload);
@@ -662,6 +696,7 @@ export default {
       // result 0 is the connection, result 1 is the pubmed results from flatmap
       if(results[0] || results[1] ||( data.feature.hyperlinks && data.feature.hyperlinks.length > 0)){
         this.resourceForTooltip =  data.resource[0];
+        data.resourceForTooltip = this.resourceForTooltip;
         this.createTooltipFromNeuronCuration(data);
       } 
     },
@@ -1146,6 +1181,7 @@ export default {
       currentBackground: "white",
       availableBackground: ["white", "lightskyblue", "black"],
       loading: false,
+      highlightToolOn: false,
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
