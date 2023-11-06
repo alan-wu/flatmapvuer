@@ -32,7 +32,7 @@
                 <strong>{{ sub.timestamp }}</strong> Anonoymous
               </el-row>
               <el-row class="dialog-text">
-                <strong>Features: </strong> {{ sub.features.join(', ') }}
+                <strong>Evidence: </strong> {{ sub.evidence.join(', ') }}
               </el-row>
               <el-row class="dialog-text">
                 <strong>Comment: </strong> {{ sub.comment }}
@@ -52,16 +52,16 @@
             <strong class="sub-title">Suggest changes:</strong>
           </el-row>
           <el-row class="dialog-text">
-            <strong>Feature Derived From:</strong>
+            <strong>Evidvence:</strong>
           </el-row>
-          <el-row v-for="(value, index) in features" :key="value">
+          <el-row v-for="(value, index) in evidence" :key="value">
             <el-col :span="20">   
-              {{ features[index] }}
+              {{ evidence[index] }}
             </el-col>
             <el-col :span="4">
               <i
                 class="el-icon-close standard-icon"
-                @click="removeFeature(index)"
+                @click="removeEvidence(index)"
               />
             </el-col>
           </el-row>
@@ -69,14 +69,30 @@
             <el-input
               size="mini"
               placeholder="Enter"
-              v-model="newFeature"
-              @change="featureEntered($event)"
-            />
+              v-model="newEvidence"
+              @change="evidenceEntered($event)"
+            >
+              <el-select
+                :popper-append-to-body="false"
+                v-model="evidencePrefix"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                slot="prepend"
+              >
+                <el-option v-for="item in evidencePrefixes" :key="item" :label="item" :value="item">
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-input>
           </el-row>
           <el-row>
             <strong>Comment:</strong>
           </el-row>
           <el-row class="dialog-text">
+            
             <el-input
               type="textarea"
               :autosize="{ minRows: 2, maxRows: 4}"
@@ -84,8 +100,15 @@
               v-model="comment"
             />
           </el-row>
-          <el-row class="dialog-text">
-            <i class="submit" @click="submit"> <strong> Submit </strong> </i>
+            <el-row class="dialog-text">
+              <el-button
+                class="button"
+                type="primary"
+                plain
+                @click="submit"
+              >
+                Submit
+              </el-button>
           </el-row>
         </template>
       </template>
@@ -98,14 +121,16 @@
 /* eslint-disable no-alert, no-console */
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { Col, Input, Main, Row } from "element-ui";
+import { Button, Col, Input, Main, Row, Select } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
+Vue.use(Button);
 Vue.use(Col);
 Vue.use(Input);
 Vue.use(Main);
 Vue.use(Row);
+Vue.use(Select);
 
 export default {
   name: "AnnotationTool",
@@ -124,11 +149,16 @@ export default {
         "Map layer": "layer",
       },
       editing: false,
-      features: [ ],
-      newFeature: '',
+      evidencePrefixes:  [
+        "DOI:",
+        "PMID:",
+      ],
+      evidencePrefix: "DOI:", 
+      evidence: [ ],
+      newEvidence: '',
       comment: '',
       submissions: [ ],
-      showSubmissions: false
+      showSubmissions: true
     }
   },
   computed: {
@@ -145,31 +175,31 @@ export default {
     }
   },
   methods: {
-    featureEntered: function(value) {
+    evidenceEntered: function(value) {
       if (value) {
-        this.features.push(value);
-        this.newFeature = "";
+        this.evidence.push(this.evidencePrefix + value);
+        this.newEvidence = "";
       }
     },
     submit: function() {
       const now = new Date();
-      if ((this.features.length > 0) || this.comment) {
+      if ((this.evidence.length > 0) || this.comment) {
         this.submissions.push( {
           id: this.annotationEntry['id'],
           layer: this.annotationEntry['layer'],
-          features: this.features,
+          evidence: this.evidence,
           comment: this.comment,
           timestamp: now.toLocaleString(),
         });
         this.resetSubmission();
       }
     },
-    removeFeature: function(index) {
-      this.features.splice(index, 1);
+    removeEvidence: function(index) {
+      this.evidence.splice(index, 1);
     },
     resetSubmission: function() {
       this.editing = false;
-      this.features = [];
+      this.evidence = [];
       this.newFeature = '';
       this.comment = '';
     },
@@ -187,10 +217,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
 @import "~element-ui/packages/theme-chalk/src/col";
 @import "~element-ui/packages/theme-chalk/src/input";
 @import "~element-ui/packages/theme-chalk/src/main";
 @import "~element-ui/packages/theme-chalk/src/row";
+@import "~element-ui/packages/theme-chalk/src/select";
 
 .info-field {
   display:flex;
@@ -198,6 +230,11 @@ export default {
 
 .block {
   margin-bottom: 0.5em;
+}
+
+.button {
+  padding-top:5px;
+  padding-bottom:5px;
 }
 
 .standard-icon {
@@ -277,5 +314,31 @@ export default {
 
 ::v-deep .el-input__inner, ::v-deep .el-textarea__inner{
   font-family: Asap, sans-serif;
+}
+
+.select-box {
+  width:80px;
+  background-color: var(--white);
+  font-weight: 500;
+  color:rgb(48, 49, 51);;
+  ::v-deep .el-input__inner {
+    height:30px;
+    color: rgb(48, 49, 51);
+  }
+  ::v-deep .el-input__icon {
+    line-height:30px
+  }
+}
+
+::v-deep .flatmap_dropdown {
+  min-width: 80px!important;
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.selected {
+      color: $app-primary-color;
+      font-weight: normal;
+    }
+  }
 }
 </style>
