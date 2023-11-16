@@ -6,6 +6,11 @@ import { FlatmapVuer, MultiFlatmapVuer } from '../../src/components/index.js';
 
 describe('MultiFlatmapVuer', () => {
 
+  beforeEach(() => {
+    cy.viewport(1920, 1080);
+  });
+
+
   //Load in some responses/assets before beginning the test
   //This should prevent any async behaviours.
   before(() => {
@@ -16,11 +21,13 @@ describe('MultiFlatmapVuer', () => {
 
     const readySpy = cy.spy().as('readySpy')
     cy.get('@props').then((props) => {
+      console.log('flatmapAPI', props)
       cy.mount(MultiFlatmapVuer, {
         propsData: {
           availableSpecies: props.availableSpecies,
           minZoom: props.minZoom,
           ready: readySpy,
+          onchange: readySpy,
           featureInfo: props.featureInfo,
           searchable: props.searchable,
           layerControl: props.layerControl,
@@ -30,8 +37,6 @@ describe('MultiFlatmapVuer', () => {
           displayMinimap: props.displayMinimap,
           enableOpenMapUI: props.enableOpenMapUI,
           flatmapAPI: props.flatmapAPI,
-          displayMinimap:true,
-          enableOpenMapUI:true, 
         }
       }).then((vm) => {
         cy.wrap(vm).as('vm')

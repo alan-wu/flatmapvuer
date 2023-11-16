@@ -169,6 +169,7 @@ export default {
       });
       text = text.slice(0,-1) // remove last comma
       text += " species"
+      console.log('tooltipentry',this.entry)
       return text
     }
   },

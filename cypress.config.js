@@ -1,10 +1,10 @@
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
-  viewportWidth: 1440,
-  viewportHeight: 900,
+  "viewportWidth": 1920,
+  "viewportHeight": 1080,
   defaultCommandTimeout: 30000,
-  reporter: "junit",
+  // reporter: "junit",
   experimentalMemoryManagement: true,
   numTestsKeptInMemory: 0,
   reporter: "cypress-multi-reporters",
@@ -22,9 +22,6 @@ module.exports = defineConfig({
   component: {
     setupNodeEvents(on, config) {},
     specPattern: "cypress/component/*.cy.js",
-  },
-
-  component: {
     devServer: {
       framework: "vue-cli",
       bundler: "webpack",
