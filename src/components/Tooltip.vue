@@ -31,7 +31,7 @@ export default {
     },
     annotationEntry: {
       type: Object,
-    }
+    },
   },
 };
 </script>

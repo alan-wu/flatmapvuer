@@ -281,7 +281,6 @@
         popper-class="background-popper"
       >
         <el-row class="backgroundText">Viewing Mode</el-row>
-        
         <el-row class="backgroundControl">
           <el-select
             :popper-append-to-body="false"
@@ -682,7 +681,7 @@ export default {
       if (this.viewingMode  === "Annotation") {
         const annotation = this.mapImp.annotation( this.mapImp.modelFeatureIds(data.resource[0]));
         if (annotation) {
-          this.annotationEntry = {...annotation};
+          this.annotationEntry = {...annotation, resourceId: this.serverUUID};
           this.displayTooltip(data.resource[0]);
         } else {
           this.annotation = { };
@@ -922,6 +921,7 @@ export default {
         );
         promise1.then(returnedObject => {
           this.mapImp = returnedObject;
+          this.serverUUID = this.mapImp.getIdentifier().uuid;
           this.onFlatmapReady();
           if (this._stateToBeSet)
             this.restoreMapState(this._stateToBeSet);
@@ -1137,8 +1137,8 @@ export default {
   },
   provide() {
     return {
+      flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      flatmapAPI: this.flatmapAPI
     }
   },
   data: function() {
@@ -1146,6 +1146,7 @@ export default {
       annotationEntry: {
 
       },
+      serverUUID: undefined,
       layers: [],
       pathways: [],
       sckanDisplay: [
