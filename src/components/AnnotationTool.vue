@@ -29,7 +29,7 @@
             </el-row>
             <div class="entry" v-for="(sub, index) in prevSubs" :key="index">
               <el-row class="dialog-text">
-                <strong>{{ formatTime(sub.created) }}</strong> {{ sub.creator.name }}
+                <strong>{{ formatTime(sub.created) }}</strong> Anonymous
               </el-row>
               <el-row class="dialog-text">
                 <strong>Evidence: </strong> 
@@ -131,7 +131,7 @@
 /* eslint-disable no-alert, no-console */
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { AnnotationService } from "@abi-software/sparc-annotation";
+//import { AnnotationService } from "@abi-software/sparc-annotation";
 import { Button, Col, Input, Main, Row, Select } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -171,12 +171,24 @@ export default {
       authenticated: false,
       newEvidence: '',
       comment: '',
-      prevSubs: [ ],
+      //prevSubs: [ ],
       showSubmissions: true,
-      errorMessage: ""
+      errorMessage: "",
+      submissions: [ ],
     }
   },
   computed: {
+    prevSubs: function() {
+      return this.submissions.filter(sub => {
+        if (this.annotationEntry) {
+          if (sub.resource === this.annotationEntry.resourceId && 
+            sub.item === this.annotationEntry.featureId) {
+              return true;
+            }
+        }
+        return false;
+      });
+    },
     isEditable: function() {
       return this.annotationEntry['resourceId'] && this.annotationEntry['featureId'];
     },
@@ -209,6 +221,7 @@ export default {
     },
     submit: function() {
       if ((this.evidence.length > 0) || this.comment) {
+        const now = new Date();
         if (this.annotationEntry['resourceId'] &&
           this.annotationEntry['featureId']) {
           const evidenceURLs = [];
@@ -218,7 +231,7 @@ export default {
               evidenceURLs.push(new URL(link));
             } else if (evidence.includes("PMID:")) {
               const link = evidence.replace("PMID:", "https://pubmed.ncbi.nlm.nih.gov/");
-              evidenceURLs.push(new URL(link));
+              evidenceURLs.push(link);
             }
           });
           const userAnnotation = {
@@ -226,7 +239,11 @@ export default {
             item: this.annotationEntry['featureId'],
             evidence: evidenceURLs,
             comment: this.comment,
+            created: now,
           }
+          this.submissions.push(userAnnotation);
+          this.resetSubmission();
+          /*
           this.$annotator.addAnnotation(userAnnotation).then(() => {
             this.errorMessage = "";
             this.resetSubmission();
@@ -235,6 +252,7 @@ export default {
           .catch(() => {
             this.errorMessage = "There is a problem with the submission, please try again later";
           });
+          */
         }
       }
     },
@@ -252,13 +270,15 @@ export default {
     annotationEntry: {
       handler: function() {
         this.resetSubmission();
-        this.updatePrevSubmissions();
+        //this.updatePrevSubmissions();
       },
       immediate: false,
       deep: false,
     }
   },
   mounted: function() {
+    this.authenticated = true;
+  /*
     if (!this.$annotator) {
       Vue.prototype.$annotator = new AnnotationService(
         `${this.flatmapAPI}annotator`);
@@ -270,6 +290,7 @@ export default {
         this.errorMessage = "You cannot view some of the information as you are not logged in or without the correct permission."
       }
     })
+    */
   }
 };
 </script>
