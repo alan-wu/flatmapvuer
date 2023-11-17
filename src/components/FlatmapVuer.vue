@@ -585,20 +585,15 @@ export default {
     },
     checkAllSCKAN: function(payload) {
       if (this.mapImp) {
-        console.log('checkAllSCKAN', payload)
         payload.keys.forEach(key => this.mapImp.enableSckanPath(key, payload.value));
       }
     },
     highlightConnectedPaths: function(payload) {
       if (this.mapImp) {
-        console.log('payload:', payload)
-        console.log('pathnodemodels',this.mapImp.pathModelNodes(payload))
-        console.log('nodemodels',this.mapImp.nodePathModels(payload))
         let paths = [...this.mapImp.pathModelNodes(payload)]
         // The line below matches the paths to the annIdToFeatureId map to get the feature ids
 
         let pathFeatures = paths.map(p=>this.mapImp.featureProperties(p))
-        window.pathFeatures = pathFeatures
         let toHighlight = []
         pathFeatures.forEach(p=>{
           this.mapImp.nodePathModels(p.featureId).forEach(f=>{
@@ -606,14 +601,7 @@ export default {
           })
         })
 
-        console.log('toHighlight',toHighlight)
         this.mapImp.highlightFeatures(toHighlight);
-      }
-    },
-    // findExternalIdsFromInternalIds takes an array of internal ids and returns an array of external ids
-    findExternalIdsFromInternalIds: function(paths) {
-      if (this.mapImp) {
-        return [...this.mapImp.__annIdToFeatureId].filter(arr=>paths.find(p=>p==arr[1])!=undefined).map(ar=>ar[0])
       }
     },
     systemSelected: function(payload) {
@@ -651,7 +639,6 @@ export default {
     },
     pathwaysSelected: function(payload) {
       if (this.mapImp) {
-        console.log('pathwaysSelected', payload)
         this.mapImp.enablePath(payload.key, payload.value);
       }
     },
@@ -684,7 +671,6 @@ export default {
           if (eventType === "click") {
             
             if (this.highlightToolOn) {
-              console.log(data)
               this.highlightConnectedPaths([data.models])
             } else {
               this.currentActive = data.models ? data.models : "";

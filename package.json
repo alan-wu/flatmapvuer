@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.5.8",
+  "version": "0.5.9-alpha-connected-paths.1",
   "license": "Apache-2.0",
   "main": "./dist/flatmapvuer.common.js",
   "files": [

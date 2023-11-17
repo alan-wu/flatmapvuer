@@ -191,8 +191,6 @@ export default {
       return titleCase(title)
     },
     showConnectedPaths(){
-      console.log('looking for connected paths:', this.entry.featureId)
-      console.log('components', this.entry.components)
       this.$emit('highlightConnectedPaths', this.entry.featureId)
       this.$emit('onClose')
     },
