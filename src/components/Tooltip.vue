@@ -194,6 +194,7 @@ export default {
       console.log('looking for connected paths:', this.entry.featureId)
       console.log('components', this.entry.components)
       this.$emit('highlightConnectedPaths', this.entry.featureId)
+      this.$emit('onClose')
     },
     capitalise: function(text){
       return capitalise(text)

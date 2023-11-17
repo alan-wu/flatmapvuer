@@ -361,6 +361,7 @@
         ref="tooltip"
         class="tooltip"
         @highlightConnectedPaths="highlightConnectedPaths"
+        @onClose="closeTooltip"
         :entry="tooltipEntry"
       />
     </div>
@@ -590,11 +591,21 @@ export default {
     },
     highlightConnectedPaths: function(payload) {
       if (this.mapImp) {
+        console.log('payload:', payload)
         console.log('pathnodemodels',this.mapImp.pathModelNodes(payload))
         console.log('nodemodels',this.mapImp.nodePathModels(payload))
         let paths = [...this.mapImp.pathModelNodes(payload)]
         // The line below matches the paths to the annIdToFeatureId map to get the feature ids
-        let toHighlight = this.findExternalIdsFromInternalIds(paths)
+
+        let pathFeatures = paths.map(p=>this.mapImp.featureProperties(p))
+        window.pathFeatures = pathFeatures
+        let toHighlight = []
+        pathFeatures.forEach(p=>{
+          this.mapImp.nodePathModels(p.featureId).forEach(f=>{
+            toHighlight.push(f)
+          })
+        })
+
         console.log('toHighlight',toHighlight)
         this.mapImp.highlightFeatures(toHighlight);
       }
@@ -671,12 +682,14 @@ export default {
             provenanceTaxonomy: data.taxons ? JSON.parse(data.taxons) : undefined
           };
           if (eventType === "click") {
-            this.currentActive = data.models ? data.models : "";
+            
             if (this.highlightToolOn) {
               console.log(data)
-              this.mapImp.highlightFeatures([data.models]);
+              this.highlightConnectedPaths([data.models])
+            } else {
+              this.currentActive = data.models ? data.models : "";
             }
-          } else if (eventType === "mouseenter") {
+          } else if (eventType === "mouseenter" && !this.highlightToolOn) {
             this.currentHover = data.models ? data.models : "";
           }
           if (data && data.type !== "marker" && eventType === "click" && !this.highlightToolOn){
@@ -711,6 +724,12 @@ export default {
         document.querySelector(".flatmap-tooltip-popup").style.display =
           "block";
       };
+    },
+    closeTooltip: function() {
+      this.$refs.tooltip.$el.style.display = "none";
+      document.querySelectorAll('.maplibregl-popup').forEach(item => {
+        item.style.display = "none";
+      });
     },
     createTooltipFromNeuronCuration: async function(data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(data);

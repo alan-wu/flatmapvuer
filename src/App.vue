@@ -119,6 +119,7 @@ export default {
         "Human Female":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000383", iconClass:"mapicon-icon_human", displayWarning:true},
         "Human Male":{taxo: "NCBITaxon:9606", biologicalSex: "PATO:0000384", iconClass:"mapicon-icon_human", displayWarning:true},
         "Rat":{taxo: "NCBITaxon:10114", iconClass:"mapicon-icon_rat", displayWarning:true, displayLatestChanges:true},
+        "Rat (NPO)":{taxo: "NCBITaxon:10116", iconClass:"mapicon-icon_rat", displayWarning:true, displayLatestChanges:true},
         "Mouse":{taxo: "NCBITaxon:10090", iconClass:"mapicon-icon_mouse", displayWarning:true},
         "Kember":{taxo: "ABI:1000001", displayWarning:true},
         "Pig":{taxo: "NCBITaxon:9823", iconClass:"mapicon-icon_pig", displayWarning:true}, 
@@ -132,7 +133,7 @@ export default {
         position: "absolute"
       },
       displayCloseButton: false,
-      initial: "Rat",
+      initial: "Rat (NPO)",
       helpMode: false,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
