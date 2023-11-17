@@ -19,7 +19,7 @@
             <i class="el-icon-arrow-up"></i>
           </div>
           <div v-show="!showSubmissions" class="hide" @click="showSubmissions = true">
-            Show previous {{ prevSubs.length }} submissions
+            Show previous {{ prevSubs.length }} submission(s)
             <i class="el-icon-arrow-down"></i>
           </div>
           <template v-if="showSubmissions">

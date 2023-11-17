@@ -5,6 +5,9 @@
       <div v-if="entry.provenanceTaxonomyLabel && entry.provenanceTaxonomyLabel.length > 0" class="subtitle">
         {{provSpeciesDescription}}
       </div>
+      <el-button @click="showConnectedPaths">
+        Show connected paths
+      </el-button>
     </div>
     <div class="block" v-else>
       <span class="title">{{entry.featureId}}</span>
@@ -178,6 +181,10 @@ export default {
   methods: {
     titleCase: function(title){
       return titleCase(title)
+    },
+    showConnectedPaths(){
+      this.$emit('highlightConnectedPaths', this.entry.featureId)
+      this.$emit('onClose')
     },
     capitalise: function(text){
       return capitalise(text)

@@ -4,7 +4,10 @@
       <annotation-tool :annotationEntry="annotationEntry"/>
     </template>
     <template v-else>
-      <provenance-popup :entry="entry" />
+      <provenance-popup :entry="entry"
+        @highlightConnectedPaths="$emit('highlightConnectedPaths', $event)"
+        @onClose="$emit('onClose')"
+      />
     </template>
   </div>
 </template>
