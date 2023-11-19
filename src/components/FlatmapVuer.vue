@@ -679,12 +679,11 @@ export default {
     checkAndCreatePopups:  async function(data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode  === "Annotation") {
-        const annotation = this.mapImp.annotation( this.mapImp.modelFeatureIds(data.resource[0]));
-        if (annotation) {
-          this.annotationEntry = {...annotation, resourceId: this.serverUUID};
-          this.displayTooltip(data.resource[0]);
+        if (data.feature && data.feature.featureId && data.feature.models) {
+          this.annotationEntry = { ...data.feature, resourceId: this.serverUUID };
+          this.displayTooltip(data.feature.models);
         } else {
-          this.annotation = { };
+          this.annotation = {};
         }
       } else {
         let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
