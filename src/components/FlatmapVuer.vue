@@ -782,6 +782,7 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
+<<<<<<< HEAD
       if (this.viewingMode === "Annotation") {
         const annotation = this.mapImp.annotation(
           this.mapImp.modelFeatureIds(data.resource[0])
@@ -789,6 +790,12 @@ export default {
         if (annotation) {
           this.annotationEntry = { ...annotation, resourceId: this.serverUUID };
           this.displayTooltip(data.resource[0]);
+=======
+      if (this.viewingMode  === "Annotation") {
+        if (data.feature && data.feature.featureId && data.feature.models) {
+          this.annotationEntry = { ...data.feature, resourceId: this.serverUUID };
+          this.displayTooltip(data.feature.models);
+>>>>>>> 158ab82927695979a5026195a3c4692d3478c2f8
         } else {
           this.annotation = {};
         }
