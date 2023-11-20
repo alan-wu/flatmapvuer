@@ -158,6 +158,7 @@
       <div class="pathway-location" :class="{ open: drawerOpen, close: !drawerOpen }">
         <div
           class="pathway-container"
+          :class="{ open: drawerOpen, close: !drawerOpen }"
           :style="{'max-height': pathwaysMaxHeight + 'px'}"
           v-if="pathControls"
           v-popover:checkBoxPopover
@@ -1284,6 +1285,14 @@ export default {
   background: #ffffff;
   overflow-x: hidden;
   scrollbar-width: thin;
+
+  transition: all 1s ease;
+  &.open {
+    opacity: 1;
+  }
+  &.close {
+    opacity: 0;
+  }
 
   &::-webkit-scrollbar {
     width: 4px;
