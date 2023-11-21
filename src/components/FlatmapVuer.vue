@@ -600,8 +600,8 @@ export default {
             toHighlight.push(f)
           })
         })
-
-        this.mapImp.highlightFeatures(toHighlight);
+        // display connected paths
+        this.mapImp.zoomToFeatures(toHighlight, {noZoomIn: true});
       }
     },
     systemSelected: function(payload) {
@@ -673,9 +673,11 @@ export default {
             if (this.highlightToolOn) {
               this.highlightConnectedPaths([data.models])
             } else {
+              console.log('active changed')
               this.currentActive = data.models ? data.models : "";
             }
           } else if (eventType === "mouseenter" && !this.highlightToolOn) {
+              console.log('active changed')
             this.currentHover = data.models ? data.models : "";
           }
           if (data && data.type !== "marker" && eventType === "click" && !this.highlightToolOn){
