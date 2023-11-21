@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.5.9-alpha-connected-paths.2",
+  "version": "0.5.9-fccb.2",
   "license": "Apache-2.0",
   "main": "./dist/flatmapvuer.common.js",
   "files": [
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@abi-software/flatmap-viewer": "^2.4.2-b.4",
+    "@abi-software/sparc-annotation": "0.0.4",
     "@abi-software/svg-sprite": "^0.3.0",
     "core-js": "^3.3.2",
     "css-element-queries": "^1.2.2",

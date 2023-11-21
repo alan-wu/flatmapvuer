@@ -476,14 +476,16 @@ export default {
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
-  color:rgb(48, 49, 51);;
+  color:rgb(48, 49, 51);
   left: 16px;
   top: 44px;
   position: absolute;
   ::v-deep .el-input__inner {
     color: rgb(48, 49, 51);
     padding-top: 0.25em;
-    .is-focus {
+  }
+  ::v-deep .el-input__inner {
+    &is-focus, &:focus {
       border: 1px solid $app-primary-color;
     }
   }
