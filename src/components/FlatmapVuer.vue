@@ -165,7 +165,7 @@
         >
           <svg-legends v-if="!isFC" class="svg-legends-container"/>
           <el-popover
-            content="Featured marker is a marker that has been curated by the SPARC team."
+            content="Location of the featured dataset"
             placement="right"
             :appendToBody="false"
             trigger="hover"
