@@ -165,6 +165,19 @@
         >
           <svg-legends v-if="!isFC" class="svg-legends-container"/>
           <el-popover
+            content="Featured marker is a marker that has been curated by the SPARC team."
+            placement="right"
+            :appendToBody="false"
+            trigger="hover"
+            popper-class="flatmap-popper popper-bump-right right-popper"
+            v-model="hoverVisibilities[9].value"
+            ref="featuredMarkerPopover"
+          >
+          </el-popover>
+          <div v-popover:featuredMarkerPopover class="yellow-star-legend" v-html="yellowstar"></div>
+          <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
+
+          <el-popover
             content="Find these markers for data"
             placement="right"
             :appendToBody="false"
@@ -380,6 +393,7 @@ import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import flatmapMarker from "../icons/flatmap-marker";
 import {FlatmapQueries, findTaxonomyLabel} from "../services/flatmapQueries.js";
+import yellowstar from "../icons/yellowstar";
 
 locale.use(lang);
 Vue.use(Button);
@@ -1141,7 +1155,9 @@ export default {
         { value: false },
         { value: false },
         { value: false },
+        { value: false },
       ],
+      yellowstar: yellowstar,
       isFC: false,
       inHelp: false,
       currentBackground: "white",
@@ -1451,6 +1467,11 @@ export default {
 
 .fitWindow {
   padding-left: 8px;
+}
+
+.yellow-star-legend {
+  width: 130px;
+  cursor: pointer;
 }
 
 .settings-group {
