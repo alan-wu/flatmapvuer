@@ -17,6 +17,7 @@
       <text transform="matrix(0.9908 0 0 1 118.0903 345.5266)" class="st3 st4 st5" style="white-space: pre;">Ganglia</text>
       <text transform="matrix(0.9908 0 0 1 118.0903 433.1613)" class="st3 st4 st5" style="white-space: pre;">Ganglionated nerve plexus</text>
     </svg>
+    <svg width="72px" height="72px" viewBox="0 0 24 24" fill="yellow"></svg>
   </div>
 </template>
 
