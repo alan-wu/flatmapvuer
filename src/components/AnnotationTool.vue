@@ -194,7 +194,7 @@ export default {
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
     updatePrevSubmissions: function() {
-      if (this.$annotator) {
+      if (this.$annotator && this.authenticated) {
         if (this.annotationEntry['resourceId'] &&
           this.annotationEntry['featureId']) {
           this.$annotator.itemAnnotations(this.annotationEntry['resourceId'],
@@ -266,6 +266,7 @@ export default {
     this.$annotator.authenticate().then((userData) => {
       if (userData.name && userData.email) {
         this.authenticated = true;
+        this.updatePrevSubmissions();
       } else {
         this.errorMessage = "";
       }

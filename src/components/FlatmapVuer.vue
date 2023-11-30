@@ -418,7 +418,6 @@
         ref="tooltip"
         class="tooltip"
         :annotationEntry="annotationEntry"
-        @highlightConnectedPaths="highlightConnectedPaths"
         @onClose="closeTooltip"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
