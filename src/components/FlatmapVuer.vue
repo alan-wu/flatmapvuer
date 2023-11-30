@@ -418,7 +418,6 @@
         ref="tooltip"
         class="tooltip"
         :annotationEntry="annotationEntry"
-        @onClose="closeTooltip"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
       />
