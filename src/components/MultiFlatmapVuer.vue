@@ -53,6 +53,7 @@
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
+      :showStarInLegend="showStarInLegend"
       style="height:100%"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
@@ -383,6 +384,10 @@ export default {
       default: false
     },
     displayMinimap: {
+      type: Boolean,
+      default: false
+    },
+    showStarInLegend: {
       type: Boolean,
       default: false
     },

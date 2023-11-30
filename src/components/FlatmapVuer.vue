@@ -174,7 +174,7 @@
             ref="featuredMarkerPopover"
           >
           </el-popover>
-          <div v-popover:featuredMarkerPopover class="yellow-star-legend" v-html="yellowstar"></div>
+          <div v-show="showStarInLegend" v-popover:featuredMarkerPopover class="yellow-star-legend" v-html="yellowstar"></div>
           <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
 
           <el-popover
@@ -1087,6 +1087,10 @@ export default {
           },
         ]
       },
+    },
+    showStarInLegend: {
+      type: Boolean,
+      default: false
     },
     isLegacy: {
       type: Boolean,
