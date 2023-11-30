@@ -43,9 +43,9 @@
             </div>
           </template>
         </template>
-        <el-row class="dialog-spacer"></el-row>
         <template v-if="authenticated">
           <template v-if="isEditable">
+            <el-row class="dialog-spacer"></el-row>
             <el-row v-if="!editing">
               <i
                 class="el-icon-edit standard-icon"
@@ -115,12 +115,12 @@
                   </el-button>
               </el-row>
             </template>
+            <el-row class="dialog-text" v-if="errorMessage">
+              <strong class="sub-title"> {{ errorMessage }}
+              </strong>
+            </el-row>
           </template>
         </template>
-        <el-row class="dialog-text" v-if="errorMessage">
-          <strong class="sub-title"> {{ errorMessage }}
-          </strong>
-        </el-row>
       </template>
     </div>
   </el-main>
@@ -267,7 +267,7 @@ export default {
       if (userData.name && userData.email) {
         this.authenticated = true;
       } else {
-        this.errorMessage = "You cannot view some of the information as you are not logged in or without the correct permission."
+        this.errorMessage = "";
       }
     })
   }
