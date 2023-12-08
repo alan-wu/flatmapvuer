@@ -53,6 +53,7 @@
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
+      :showStarInLegend="showStarInLegend"
       style="height:100%"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
@@ -386,6 +387,10 @@ export default {
       type: Boolean,
       default: false
     },
+    showStarInLegend: {
+      type: Boolean,
+      default: false
+    },
     /**
      * Flag to determine rather open map UI should be
      * presented or not.
@@ -476,14 +481,16 @@ export default {
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
-  color:rgb(48, 49, 51);;
+  color:rgb(48, 49, 51);
   left: 16px;
   top: 44px;
   position: absolute;
   ::v-deep .el-input__inner {
     color: rgb(48, 49, 51);
     padding-top: 0.25em;
-    .is-focus {
+  }
+  ::v-deep .el-input__inner {
+    &is-focus, &:focus {
       border: 1px solid $app-primary-color;
     }
   }
