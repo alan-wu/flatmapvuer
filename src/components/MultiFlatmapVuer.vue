@@ -35,7 +35,6 @@
       :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
       :displayLatestChanges="item.displayLatestChanges"
-      :latestChangesMessage="item.latestChangesMessage"
       :isLegacy="item.isLegacy"
       :ref="key"
       :enableOpenMapUI="enableOpenMapUI"
