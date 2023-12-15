@@ -89,7 +89,6 @@
           </i>
         </div>
         <el-popover
-          :content="latestChangesMessage"
           placement="right"
           v-if="displayLatestChanges"
           :appendToBody="false"
@@ -97,16 +96,33 @@
           popper-class="warning-popper flatmap-popper right-popper"
           v-model="hoverVisibilities[7].value"
           ref="latestChangesPopover"
-        ></el-popover>
-        <i
-          class="el-icon-warning latest-changesicon"
-          v-if="displayLatestChanges && latestChangesMessage"
-          @mouseover="showToolitip(7)"
-          @mouseout="hideToolitip(7)"
-          v-popover:latestChangesPopover
         >
-          <span class="warning-text">What's new?</span>
-        </i>
+          <template #reference> 
+            <i
+              class="el-icon-warning latest-changesicon"
+              v-if="displayLatestChanges"
+              @mouseover="showToolitip(7)"
+              @mouseout="hideToolitip(7)"
+              v-popover:latestChangesPopover
+            >
+              <span class="warning-text">What's new?</span>
+            </i>
+          </template>
+          <template #default>
+            <b>Network discovery mode</b>
+            <p>
+              You can now view the network of neurons connected to a selected
+              neuron. This mode is located in the settings at the bottom right.
+              Once discovery mode is on, click on a neuron to see its connections.
+            </p>
+            <b>Now can display up to 6 panes</b>
+            <p>
+              You can now display up to 6 panes in the flatmap. This allows you to
+              compare between different datasets and/or different views of the
+              same dataset.
+            </p>
+          </template>
+        </el-popover>
       </div>
 
       <!-- The element below is placed onto the flatmap when it is ready -->
@@ -1241,11 +1257,6 @@ export default {
     displayLatestChanges: {
       type: Boolean,
       default: false,
-    },
-    latestChangesMessage: {
-      type: String,
-      default:
-        "'Observed In' controls and information are now included in AC maps. System control with FTU information has been added to the FC map.",
     },
     /**
      * State containing state of the flatmap.
