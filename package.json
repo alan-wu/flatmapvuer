@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "vue-cli-service serve",
-    "serve": "vue-cli-service serve --port 8082",
+    "serve": "vite",
     "build": "vue-cli-service build --dest test_html --mode staging",
     "build-bundle": "vue-cli-service build --target lib --name flatmapvuer ./src/components/index.js",
     "lint": "vue-cli-service lint",
@@ -30,27 +30,26 @@
     "@abi-software/flatmap-viewer": "^2.4.3",
     "@abi-software/sparc-annotation": "0.0.5",
     "@abi-software/svg-sprite": "^0.3.0",
-    "core-js": "^3.3.2",
+    "@vue/compat": "^3.3.13",
+    "core-js": "^3.6.5",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",
-    "element-ui": "^2.13.0",
+    "element-plus": "^2.4.4",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.21",
-    "vue": "^2.6.10"
+    "vue": "^3.3.13"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.0.0",
-    "@vue/cli-plugin-eslint": "^4.0.0",
-    "@vue/cli-service": "^4.5.13",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "@vue/compiler-sfc": "^3.3.13",
     "auto-changelog": "^2.4.0",
-    "babel-eslint": "^10.0.3",
+    "babel-eslint": "^10.1.0",
     "babel-plugin-component": "^1.1.1",
     "base64-inline-loader": "^2.0.1",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "node-sass": "^4.14.1",
-    "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.10",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.19.2",
+    "sass": "^1.69.5",
+    "vite": "^5.0.10",
     "webpack-node-externals": "^2.5.2"
   },
   "eslintConfig": {
@@ -65,11 +64,6 @@
     "rules": {},
     "parserOptions": {
       "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
     }
   },
   "browserslist": [
