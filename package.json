@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "vue-cli-service serve",
-    "serve": "vite",
+    "serve": "vite --host",
     "build": "vue-cli-service build --dest test_html --mode staging",
     "build-bundle": "vue-cli-service build --target lib --name flatmapvuer ./src/components/index.js",
     "lint": "vue-cli-service lint",
@@ -30,6 +30,7 @@
     "@abi-software/flatmap-viewer": "^2.4.3",
     "@abi-software/sparc-annotation": "0.0.5",
     "@abi-software/svg-sprite": "^0.3.0",
+    "@element-plus/icons-vue": "^2.3.1",
     "@vue/compat": "^3.3.13",
     "core-js": "^3.6.5",
     "css-element-queries": "^1.2.2",
@@ -37,10 +38,12 @@
     "element-plus": "^2.4.4",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.21",
+    "unocss": "^0.58.0",
+    "unplugin-vue-components": "^0.26.0",
     "vue": "^3.3.13"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.5.2",
+    "@vitejs/plugin-vue": "^4.6.2",
     "@vue/compiler-sfc": "^3.3.13",
     "auto-changelog": "^2.4.0",
     "babel-eslint": "^10.1.0",

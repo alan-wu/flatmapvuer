@@ -70,23 +70,7 @@
               SPARC program progresses.
             </p>
           </el-popover>
-          <i
-            class="el-icon-warning warning-icon"
-            v-if="displayWarning"
-            @mouseover="showToolitip(6)"
-            @mouseout="hideToolitip(6)"
-            v-popover:warningPopover
-          >
-            <template v-if="isLegacy">
-              <span class="warning-text">Legacy Map</span>
-              <div class="latest-map-text" @click="viewLatestMap">
-                Click here for the latest map
-              </div>
-            </template>
-            <template v-else>
-              <span class="warning-text">Beta</span>
-            </template>
-          </i>
+          <el-icon class="warning-icon"><el-icon-warning /></el-icon>
         </div>
         <el-popover
           placement="right"
@@ -97,42 +81,29 @@
           v-model="hoverVisibilities[7].value"
           ref="latestChangesPopover"
         >
-          <template #reference> 
-            <i
-              class="el-icon-warning latest-changesicon"
-              v-if="displayLatestChanges"
-              @mouseover="showToolitip(7)"
-              @mouseout="hideToolitip(7)"
-              v-popover:latestChangesPopover
-            >
-              <span class="warning-text">What's new?</span>
-            </i>
+          <template #reference>
+            <el-icon class="latest-changesicon"><el-icon-warning /></el-icon>
           </template>
           <template #default>
             <b>Network discovery mode</b>
             <p>
               You can now view the network of neurons connected to a selected
               neuron. This mode is located in the settings at the bottom right.
-              Once discovery mode is on, click on a neuron to see its connections.
+              Once discovery mode is on, click on a neuron to see its
+              connections.
             </p>
             <b>Now can display up to 6 panes</b>
             <p>
-              You can now display up to 6 panes in the flatmap. This allows you to
-              compare between different datasets and/or different views of the
-              same dataset.
+              You can now display up to 6 panes in the flatmap. This allows you
+              to compare between different datasets and/or different views of
+              the same dataset.
             </p>
           </template>
         </el-popover>
       </div>
 
       <!-- The element below is placed onto the flatmap when it is ready -->
-      <i
-        class="el-icon-arrow-down minimap-resize"
-        :class="{ enlarge: minimapSmall, shrink: !minimapSmall }"
-        ref="minimapResize"
-        v-show="minimapResizeShow"
-        @click="closeMinimap"
-      ></i>
+      <el-icon class="minimap-resize"><el-icon-arrow-down /></el-icon>
 
       <div class="bottom-right-control">
         <el-popover
@@ -208,7 +179,7 @@
         <div
           class="pathway-container"
           :class="{ open: drawerOpen, close: !drawerOpen }"
-          :style="{ 'max-height' : pathwaysMaxHeight + 'px' }"
+          :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
           v-if="pathControls"
           v-popover:checkBoxPopover
         >
@@ -223,7 +194,12 @@
             ref="featuredMarkerPopover"
           >
           </el-popover>
-          <div v-show="showStarInLegend" v-popover:featuredMarkerPopover class="yellow-star-legend" v-html="yellowstar"></div>
+          <div
+            v-show="showStarInLegend"
+            v-popover:featuredMarkerPopover
+            class="yellow-star-legend"
+            v-html="yellowstar"
+          ></div>
           <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
 
           <el-popover
@@ -262,29 +238,29 @@
             key="centrelinesSelection"
           />
           <!--
-          <selections-group
-            v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
-            title="SCKAN"
-            labelKey="label"
-            identifierKey="key"
-            :selections="sckanDisplay"
-            @changed="sckanSelected"
-            @checkAll="checkAllSCKAN"
-            ref="skcanSelection"
-            key="skcanSelection"
-          />
-          <selections-group
-            v-if="layers && layers.length > 0"
-            title="Layers"
-            labelKey="description"
-            identifierKey="id"
-            :selections="layers"
-            @changed="layersSelected"
-            @checkAll="checkAllLayers"
-            ref="layersSelection"
-            key="layersSelection"
-          />
-          -->
+            <selections-group
+              v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
+              title="SCKAN"
+              labelKey="label"
+              identifierKey="key"
+              :selections="sckanDisplay"
+              @changed="sckanSelected"
+              @checkAll="checkAllSCKAN"
+              ref="skcanSelection"
+              key="skcanSelection"
+            />
+            <selections-group
+              v-if="layers && layers.length > 0"
+              title="Layers"
+              labelKey="description"
+              identifierKey="id"
+              :selections="layers"
+              @changed="layersSelected"
+              @checkAll="checkAllLayers"
+              ref="layersSelection"
+              key="layersSelection"
+            />
+            -->
           <selections-group
             v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
             title="Observed in"
@@ -314,7 +290,7 @@
           class="drawer-button"
           :class="{ open: drawerOpen, close: !drawerOpen }"
         >
-          <i class="el-icon-arrow-left"></i>
+          <el-icon><el-icon-arrow-left /></el-icon>
         </div>
       </div>
       <el-popover
@@ -455,97 +431,102 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import Tooltip from "./Tooltip";
-import SelectionsGroup from "./SelectionsGroup";
-import TreeControls from "./TreeControls";
-import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import SvgLegends from "./legends/SvgLegends";
 import {
-  Button,
-  Col,
-  Loading,
-  Radio,
-  RadioGroup,
-  Row,
-  Select,
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-import flatmapMarker from "../icons/flatmap-marker";
-import {FlatmapQueries, findTaxonomyLabel} from "../services/flatmapQueries.js";
-import yellowstar from "../icons/yellowstar";
+  Warning as ElIconWarning,
+  ArrowDown as ElIconArrowDown,
+  ArrowLeft as ElIconArrowLeft,
+} from '@element-plus/icons-vue'
+/* eslint-disable no-alert, no-console */
+import Vue from 'vue'
+import Tooltip from './Tooltip.vue'
+import SelectionsGroup from './SelectionsGroup.vue'
+import TreeControls from './TreeControls.vue'
+import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
+import SvgLegends from './legends/SvgLegends.vue'
+import {
+  ElButton as Button,
+  ElCol as Col,
+  ElLoading as Loading,
+  ElRadio as Radio,
+  ElRadioGroup as RadioGroup,
+  ElRow as Row,
+  ElSelect as Select,
+} from 'element-plus'
+import flatmapMarker from '../icons/flatmap-marker'
+import {
+  FlatmapQueries,
+  findTaxonomyLabel,
+} from '../services/flatmapQueries.js'
+import yellowstar from '../icons/yellowstar'
 
-locale.use(lang);
-Vue.use(Button);
-Vue.use(Col);
-Vue.use(Loading.directive);
-Vue.use(Radio);
-Vue.use(RadioGroup);
-Vue.use(Row);
-Vue.use(Select);
-const ResizeSensor = require("css-element-queries/src/ResizeSensor");
+Vue.use(Button)
+Vue.use(Col)
+Vue.use(Loading.directive)
+Vue.use(Radio)
+Vue.use(RadioGroup)
+Vue.use(Row)
+Vue.use(Select)
+const ResizeSensor = require('css-element-queries/src/ResizeSensor')
 
 const processTaxon = (flatmapAPI, taxonIdentifiers) => {
-  let processed = [];
+  let processed = []
   taxonIdentifiers.forEach((taxon) => {
     findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-      const item = { taxon, label: value };
-      processed.push(item);
-    });
-  });
+      const item = { taxon, label: value }
+      processed.push(item)
+    })
+  })
 
-  return processed;
-};
+  return processed
+}
 
 const processFTUs = (parent, key) => {
-  const ftus = [];
-  let items = parent.organs ? parent.organs : parent.ftus;
+  const ftus = []
+  let items = parent.organs ? parent.organs : parent.ftus
   const children = items
     ? items.filter(
         (obj, index) =>
           items.findIndex((item) => item.label === obj.label) === index
       )
-    : undefined;
+    : undefined
   if (children) {
     children.forEach((child) => {
       const data = {
         label: child.label,
         models: child.models,
         key: `${key}.${child.label}`,
-      };
-      const grandChildren = processFTUs(child, data.key);
-      if (grandChildren.length > 0) {
-        data.children = grandChildren;
       }
-      ftus.push(data);
-    });
+      const grandChildren = processFTUs(child, data.key)
+      if (grandChildren.length > 0) {
+        data.children = grandChildren
+      }
+      ftus.push(data)
+    })
   }
-  return ftus;
-};
+  return ftus
+}
 
 const processSystems = (systems) => {
-  const allSystems = [];
+  const allSystems = []
   if (systems && systems.length > 0) {
-    const data = { label: "All", key: "All", children: [] };
+    const data = { label: 'All', key: 'All', children: [] }
     systems.forEach((system) => {
       const child = {
         colour: system.colour,
         enabled: system.enabled,
         label: system.id,
         key: system.id,
-      };
-      const children = processFTUs(system, child.key);
-      if (children.length > 0) child.children = children;
-      data.children.push(child);
-    });
+      }
+      const children = processFTUs(system, child.key)
+      if (children.length > 0) child.children = children
+      data.children.push(child)
+    })
 
-    allSystems.push(data);
+    allSystems.push(data)
   }
 
-  return allSystems;
-};
+  return allSystems
+}
 
 const createUnfilledTooltipData = function () {
   return {
@@ -556,11 +537,10 @@ const createUnfilledTooltipData = function () {
     originsWithDatasets: [],
     componentsWithDatasets: [],
     resource: undefined,
-  };
-};
+  }
+}
 
 export default {
-  name: "FlatmapVuer",
   components: {
     MapSvgIcon,
     MapSvgSpriteColor,
@@ -568,54 +548,58 @@ export default {
     TreeControls,
     SelectionsGroup,
     SvgLegends,
+    ElIconWarning,
+    ElIconArrowDown,
+    ElIconArrowLeft,
   },
+  name: 'FlatmapVuer',
   beforeCreate: function () {
-    this.mapManager = undefined;
-    this.mapImp = undefined;
+    this.mapManager = undefined
+    this.mapImp = undefined
     //The state watcher may triggered before
     //created causing issue, This flag will
     //resolve this issue.
-    this.setStateRequired = false;
+    this.setStateRequired = false
   },
   methods: {
     viewLatestMap: function () {
-      let biologicalSex = this.biologicalSex ? this.biologicalSex : undefined;
+      let biologicalSex = this.biologicalSex ? this.biologicalSex : undefined
       //Human requires special handling
-      if (this.entry === "NCBITaxon:9606") {
-        biologicalSex = "PATO:0000384";
+      if (this.entry === 'NCBITaxon:9606') {
+        biologicalSex = 'PATO:0000384'
       }
       const state = {
         entry: this.entry,
         biologicalSex,
         viewport: this.mapImp.getState(),
-      };
-      this.$emit("view-latest-map", state);
+      }
+      this.$emit('view-latest-map', state)
     },
     backgroundChangeCallback: function (colour) {
-      this.currentBackground = colour;
+      this.currentBackground = colour
       if (this.mapImp) {
-        this.mapImp.setBackgroundColour(this.currentBackground, 1);
+        this.mapImp.setBackgroundColour(this.currentBackground, 1)
       }
     },
     toggleDrawer: function () {
-      this.drawerOpen = !this.drawerOpen;
+      this.drawerOpen = !this.drawerOpen
     },
     /**
      * Function to toggle colour/greyscale of organs.
      */
     setColour: function (flag) {
-      this.colourRadio = flag;
+      this.colourRadio = flag
       if (this.mapImp) {
-        this.mapImp.setColour({ colour: flag, outline: this.outlinesRadio });
+        this.mapImp.setColour({ colour: flag, outline: this.outlinesRadio })
       }
     },
     /**
      * Function to toggle outlines f organs.
      */
     setOutlines: function (flag) {
-      this.outlineRadio = flag;
+      this.outlineRadio = flag
       if (this.mapImp) {
-        this.mapImp.setColour({ colour: this.colourRadio, outline: flag });
+        this.mapImp.setColour({ colour: this.colourRadio, outline: flag })
       }
     },
     /**
@@ -624,21 +608,21 @@ export default {
      */
     resetView: function () {
       if (this.mapImp) {
-        this.mapImp.resetMap();
+        this.mapImp.resetMap()
         if (this.$refs.centrelinesSelection) {
-          this.$refs.centrelinesSelection.reset();
+          this.$refs.centrelinesSelection.reset()
         }
         if (this.$refs.skcanSelection) {
-          this.$refs.skcanSelection.reset();
+          this.$refs.skcanSelection.reset()
         }
         if (this.$refs.layersSelection) {
-          this.$refs.layersSelection.reset();
+          this.$refs.layersSelection.reset()
         }
         if (this.$refs.systemsSelection) {
-          this.$refs.pathwaysSelection.reset();
+          this.$refs.pathwaysSelection.reset()
         }
         if (this.$refs.pathwaysSelection) {
-          this.$refs.pathwaysSelection.reset();
+          this.$refs.pathwaysSelection.reset()
         }
       }
     },
@@ -648,7 +632,7 @@ export default {
      */
     zoomIn: function () {
       if (this.mapImp) {
-        this.mapImp.zoomIn();
+        this.mapImp.zoomIn()
       }
     },
     /**
@@ -657,102 +641,103 @@ export default {
      */
     zoomOut: function () {
       if (this.mapImp) {
-        this.mapImp.zoomOut();
+        this.mapImp.zoomOut()
       }
     },
     centreLinesSelected: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enableCentrelines(payload.value);
+        this.mapImp.enableCentrelines(payload.value)
       }
     },
     sckanSelected: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enableSckanPath(payload.key, payload.value);
+        this.mapImp.enableSckanPath(payload.key, payload.value)
       }
     },
     checkAllSCKAN: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
-          this.mapImp.enableSckanPath(key, payload.value));
+          this.mapImp.enableSckanPath(key, payload.value)
+        )
       }
     },
     highlightConnectedPaths: function (payload) {
       if (this.mapImp) {
-        let paths = [...this.mapImp.pathModelNodes(payload)];
+        let paths = [...this.mapImp.pathModelNodes(payload)]
         // The line below matches the paths to the annIdToFeatureId map to get the feature ids
 
-        let pathFeatures = paths.map(p=>this.mapImp.featureProperties(p));
-        let toHighlight = [];
-        pathFeatures.forEach(p=>{
-          this.mapImp.nodePathModels(p.featureId).forEach(f=>{
-            toHighlight.push(f);
+        let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
+        let toHighlight = []
+        pathFeatures.forEach((p) => {
+          this.mapImp.nodePathModels(p.featureId).forEach((f) => {
+            toHighlight.push(f)
           })
         })
         // display connected paths
-        this.mapImp.zoomToFeatures(toHighlight, {noZoomIn: true});
+        this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
     },
     systemSelected: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enableSystem(payload.key, payload.value);
+        this.mapImp.enableSystem(payload.key, payload.value)
       }
     },
     checkAllSystems: function (flag) {
       if (this.mapImp) {
         this.systems[0].children.forEach((key) =>
           this.mapImp.enableSystem(key.label, flag)
-        );
+        )
       }
     },
     ftuSelected: function (models) {
-      this.searchAndShowResult(models, true);
+      this.searchAndShowResult(models, true)
     },
     layersSelected: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enableLayer(payload.key, payload.value);
+        this.mapImp.enableLayer(payload.key, payload.value)
       }
     },
     checkAllLayers: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
           this.mapImp.enableLayer(key, payload.value)
-        );
+        )
       }
     },
     taxonsSelected: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value);
+        this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
       }
     },
     checkAllTaxons: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
           this.mapImp.enableConnectivityByTaxonIds(key, payload.value)
-        );
+        )
       }
     },
     pathwaysSelected: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enablePath(payload.key, payload.value);
+        this.mapImp.enablePath(payload.key, payload.value)
       }
     },
     checkAllPathways: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
           this.mapImp.enablePath(key, payload.value)
-        );
+        )
       }
     },
     enablePanZoomEvents: function (flag) {
-      this.mapImp.enablePanZoomEvents(flag);
+      this.mapImp.enablePanZoomEvents(flag)
     },
     eventCallback: function () {
       return (eventType, data, ...args) => {
-        if (eventType !== "pan-zoom") {
-          const label = data.label;
-          const resource = [data.models];
-          const taxonomy = this.entry;
-          const biologicalSex = this.biologicalSex;
+        if (eventType !== 'pan-zoom') {
+          const label = data.label
+          const resource = [data.models]
+          const taxonomy = this.entry
+          const biologicalSex = this.biologicalSex
           const payload = {
             dataset: data.dataset,
             biologicalSex: biologicalSex,
@@ -765,44 +750,49 @@ export default {
             provenanceTaxonomy: data.taxons
               ? JSON.parse(data.taxons)
               : undefined,
-          };
-          if (eventType === "click") {
-            if (this.viewingMode === "Network Discovery") {
-              this.highlightConnectedPaths([data.models]);
+          }
+          if (eventType === 'click') {
+            if (this.viewingMode === 'Network Discovery') {
+              this.highlightConnectedPaths([data.models])
             } else {
-              this.currentActive = data.models ? data.models : "";
+              this.currentActive = data.models ? data.models : ''
             }
-          } else if (eventType === "mouseenter" && 
-          !(this.viewingMode === "Network Discovery")) {
-            this.currentHover = data.models ? data.models : "";
+          } else if (
+            eventType === 'mouseenter' &&
+            !(this.viewingMode === 'Network Discovery')
+          ) {
+            this.currentHover = data.models ? data.models : ''
           }
           if (
             data &&
-            data.type !== "marker" &&
-            eventType === "click" &&
-            !(this.viewingMode === "Network Discovery")
+            data.type !== 'marker' &&
+            eventType === 'click' &&
+            !(this.viewingMode === 'Network Discovery')
           ) {
-            this.checkAndCreatePopups(payload);
+            this.checkAndCreatePopups(payload)
           }
-          this.$emit("resource-selected", payload);
+          this.$emit('resource-selected', payload)
         } else {
-          this.$emit("pan-zoom-callback", data);
+          this.$emit('pan-zoom-callback', data)
         }
-      };
+      }
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
-      if (this.viewingMode  === "Annotation") {
+      if (this.viewingMode === 'Annotation') {
         if (data.feature && data.feature.featureId && data.feature.models) {
-          this.annotationEntry = { ...data.feature, resourceId: this.serverUUID };
-          this.displayTooltip(data.feature.models);
+          this.annotationEntry = {
+            ...data.feature,
+            resourceId: this.serverUUID,
+          }
+          this.displayTooltip(data.feature.models)
         } else {
-          this.annotation = {};
+          this.annotation = {}
         }
       } else {
         let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data);
+          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
         // The line below only creates the tooltip if some data was found on the path
         // result 0 is the connection, result 1 is the pubmed results from flatmap
         if (
@@ -810,141 +800,140 @@ export default {
           results[1] ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
-          this.resourceForTooltip = data.resource[0];
-          data.resourceForTooltip = this.resourceForTooltip;
-          this.createTooltipFromNeuronCuration(data);
+          this.resourceForTooltip = data.resource[0]
+          data.resourceForTooltip = this.resourceForTooltip
+          this.createTooltipFromNeuronCuration(data)
         }
       }
     },
     popUpCssHacks: function () {
       // Below is a hack to remove flatmap tooltips while popup is open
-      let ftooltip = document.querySelector(".flatmap-tooltip-popup");
-      if (ftooltip) ftooltip.style.display = "none";
-      document.querySelector(".maplibregl-popup-close-button").style.display =
-        "block";
-      this.$refs.tooltip.$el.style.display = "flex";
-      document.querySelector(".maplibregl-popup-close-button").onclick = () => {
-        document.querySelector(".flatmap-tooltip-popup").style.display =
-          "block";
-      };
+      let ftooltip = document.querySelector('.flatmap-tooltip-popup')
+      if (ftooltip) ftooltip.style.display = 'none'
+      document.querySelector('.maplibregl-popup-close-button').style.display =
+        'block'
+      this.$refs.tooltip.$el.style.display = 'flex'
+      document.querySelector('.maplibregl-popup-close-button').onclick = () => {
+        document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
+      }
     },
     closeTooltip: function () {
-      this.$refs.tooltip.$el.style.display = "none";
-      document.querySelectorAll(".maplibregl-popup").forEach((item) => {
-        item.style.display = "none";
-      });
+      this.$refs.tooltip.$el.style.display = 'none'
+      document.querySelectorAll('.maplibregl-popup').forEach((item) => {
+        item.style.display = 'none'
+      })
     },
     createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data);
-      this.displayTooltip(data.resource[0]);
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
+      this.displayTooltip(data.resource[0])
     },
     // Keeping this as an API
     showPopup: function (featureId, node, options) {
-      let myOptions = options;
+      let myOptions = options
       if (this.mapImp) {
         if (myOptions) {
-          if (!myOptions.className) myOptions.className = "custom-popup";
+          if (!myOptions.className) myOptions.className = 'custom-popup'
         } else {
-          myOptions = { className: "custom-popup", positionAtLastClick: true };
+          myOptions = { className: 'custom-popup', positionAtLastClick: true }
         }
-        this.mapImp.showPopup(featureId, node, myOptions);
+        this.mapImp.showPopup(featureId, node, myOptions)
       }
     },
     showMarkerPopup: function (featureId, node, options) {
       if (this.mapImp) {
-        this.mapImp.showMarkerPopup(featureId, node, options);
+        this.mapImp.showMarkerPopup(featureId, node, options)
       }
     },
     closeMinimap: function () {
       let minimapEl = this.$refs.flatmapContainer.querySelector(
-        ".maplibregl-ctrl-minimap"
-      ); // find minimap
+        '.maplibregl-ctrl-minimap'
+      ) // find minimap
       if (this.minimapSmall) {
         //switch the classes on the minimap
-        minimapEl.classList.add("enlarge");
-        minimapEl.classList.remove("shrink");
+        minimapEl.classList.add('enlarge')
+        minimapEl.classList.remove('shrink')
       } else {
-        minimapEl.classList.add("shrink");
-        minimapEl.classList.remove("enlarge");
+        minimapEl.classList.add('shrink')
+        minimapEl.classList.remove('enlarge')
       }
-      this.minimapSmall = !this.minimapSmall;
+      this.minimapSmall = !this.minimapSmall
     },
     addResizeButtonToMinimap: function () {
       let minimapEl = this.$refs.flatmapContainer.querySelector(
-        ".maplibregl-ctrl-minimap"
-      );
+        '.maplibregl-ctrl-minimap'
+      )
       if (minimapEl) {
         this.$refs.minimapResize.parentNode.removeChild(
           this.$refs.minimapResize
-        );
-        minimapEl.appendChild(this.$refs.minimapResize);
-        this.minimapResizeShow = true;
+        )
+        minimapEl.appendChild(this.$refs.minimapResize)
+        this.minimapResizeShow = true
       }
     },
     setHelpMode: function (helpMode) {
       if (helpMode) {
-        this.inHelp = true;
+        this.inHelp = true
         this.hoverVisibilities.forEach((item) => {
-          item.value = true;
-        });
-        this.openFlatmapHelpPopup();
+          item.value = true
+        })
+        this.openFlatmapHelpPopup()
       } else {
-        this.inHelp = false;
+        this.inHelp = false
         this.hoverVisibilities.forEach((item) => {
-          item.value = false;
-        });
-        this.closeFlatmapHelpPopup();
+          item.value = false
+        })
+        this.closeFlatmapHelpPopup()
       }
     },
     showToolitip: function (tooltipNumber) {
       if (!this.inHelp) {
-        clearTimeout(this.tooltipWait[tooltipNumber]);
+        clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
-          this.hoverVisibilities[tooltipNumber].value = true;
-        }, 500);
+          this.hoverVisibilities[tooltipNumber].value = true
+        }, 500)
       }
     },
     hideToolitip: function (tooltipNumber) {
       if (!this.inHelp) {
-        clearTimeout(this.tooltipWait[tooltipNumber]);
+        clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
-          this.hoverVisibilities[tooltipNumber].value = false;
-        }, 500);
+          this.hoverVisibilities[tooltipNumber].value = false
+        }, 500)
       }
     },
     displayTooltip: function (feature) {
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,
-        { className: "flatmapvuer-popover", positionAtLastClick: true }
-      );
-      this.popUpCssHacks();
+        { className: 'flatmapvuer-popover', positionAtLastClick: true }
+      )
+      this.popUpCssHacks()
     },
     openFlatmapHelpPopup: function () {
       if (this.mapImp) {
-        let heartId = this.mapImp.featureIdsForModel("UBERON:0000948")[0];
-        const elm = "Click for more information";
+        let heartId = this.mapImp.featureIdsForModel('UBERON:0000948')[0]
+        const elm = 'Click for more information'
         this.mapImp.showPopup(heartId, elm, {
-          anchor: "top",
-          className: "flatmap-popup-popper",
-        });
+          anchor: 'top',
+          className: 'flatmap-popup-popper',
+        })
       }
     },
     closeFlatmapHelpPopup: function () {
       this.$el
-        .querySelectorAll(".maplibregl-popup-close-button")
+        .querySelectorAll('.maplibregl-popup-close-button')
         .forEach((item) => {
-          item.click();
-        });
+          item.click()
+        })
     },
     getLabels: function () {
-      let labels = [];
+      let labels = []
       if (this.mapImp) {
-        let annotations = this.mapImp.annotations;
+        let annotations = this.mapImp.annotations
         for (let value of annotations.values()) {
-          if (value.label) labels.push(value.label);
+          if (value.label) labels.push(value.label)
         }
-        return Array.from(new Set(labels));
+        return Array.from(new Set(labels))
       }
     },
     getState: function () {
@@ -952,15 +941,15 @@ export default {
         let state = {
           entry: this.entry,
           viewport: this.mapImp.getState(),
-        };
-        const identifier = this.mapImp.getIdentifier();
-        if (this.biologicalSex) state["biologicalSex"] = this.biologicalSex;
+        }
+        const identifier = this.mapImp.getIdentifier()
+        if (this.biologicalSex) state['biologicalSex'] = this.biologicalSex
         else if (identifier && identifier.biologicalSex)
-          state["biologicalSex"] = identifier.biologicalSex;
-        if (identifier && identifier.uuid) state["uuid"] = identifier.uuid;
-        return state;
+          state['biologicalSex'] = identifier.biologicalSex
+        if (identifier && identifier.uuid) state['uuid'] = identifier.uuid
+        return state
       }
-      return undefined;
+      return undefined
     },
     setState: function (state) {
       if (state) {
@@ -971,26 +960,26 @@ export default {
           (!state.biologicalSex || state.biologicalSex === this.biologicalSex)
         ) {
           if (state.viewport) {
-            this.mapImp.setState(state.viewport);
+            this.mapImp.setState(state.viewport)
           }
         } else {
-          this.createFlatmap(state);
+          this.createFlatmap(state)
         }
-        this.setStateRequired = false;
+        this.setStateRequired = false
       }
     },
     restoreMapState: function (state) {
       if (state) {
-        if (state.viewport) this.mapImp.setState(state.viewport);
-        if (state.searchTerm) this.searchAndShowResult(state.searchTerm, true);
+        if (state.viewport) this.mapImp.setState(state.viewport)
+        if (state.searchTerm) this.searchAndShowResult(state.searchTerm, true)
       }
     },
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
-        this.loading = true;
-        let minimap = false;
+        this.loading = true
+        let minimap = false
         if (this.displayMinimap) {
-          minimap = { position: "top-right" };
+          minimap = { position: 'top-right' }
         }
 
         //As for flatmap-viewer@2.2.7, see below for the documentation
@@ -1009,28 +998,28 @@ export default {
         // @arg identifier.uuid {string} The unique uuid the flatmap. If given then this exact map will
         //  be loaded, overriding ``taxon`` and ``biologicalSex``.
 
-        let identifier = { taxon: this.entry };
+        let identifier = { taxon: this.entry }
         if (this.uuid) {
-          identifier.uuid = this.uuid;
+          identifier.uuid = this.uuid
         }
         //This now handle the uses of uuid when resuming states
         if (state) {
           if (state.uuid) {
-            identifier = { uuid: state.uuid };
+            identifier = { uuid: state.uuid }
           } else if (state.entry) {
-            identifier.taxon = state.entry;
+            identifier.taxon = state.entry
             if (state.biologicalSex) {
-              identifier["biologicalSex"] = state.biologicalSex;
-            } else if (identifier.taxon === "NCBITaxon:9606") {
+              identifier['biologicalSex'] = state.biologicalSex
+            } else if (identifier.taxon === 'NCBITaxon:9606') {
               //For backward compatibility
-              identifier["biologicalSex"] = "PATO:0000384";
+              identifier['biologicalSex'] = 'PATO:0000384'
             }
           }
         } else {
           // Set the bioloicalSex now if map is not resumed from
           // a saved state
           if (this.biologicalSex) {
-            identifier["biologicalSex"] = this.biologicalSex;
+            identifier['biologicalSex'] = this.biologicalSex
           }
         }
 
@@ -1043,85 +1032,85 @@ export default {
             //annotatable: false,
             //debug: true,
             featureInfo: this.featureInfo,
-            "min-zoom": this.minZoom,
+            'min-zoom': this.minZoom,
             layerControl: true,
             pathControls: true,
             searchable: this.searchable,
             tooltips: this.tooltips,
             minimap: minimap,
           }
-        );
+        )
         promise1.then((returnedObject) => {
-          this.mapImp = returnedObject;
-          this.serverUUID = this.mapImp.getIdentifier().uuid;
-          this.onFlatmapReady();
-          if (this._stateToBeSet) this.restoreMapState(this._stateToBeSet);
+          this.mapImp = returnedObject
+          this.serverUUID = this.mapImp.getIdentifier().uuid
+          this.onFlatmapReady()
+          if (this._stateToBeSet) this.restoreMapState(this._stateToBeSet)
           else {
-            this.restoreMapState(state);
+            this.restoreMapState(state)
           }
-        });
+        })
       } else if (state) {
         this._stateToBeSet = {
           viewport: state.viewport,
           searchTerm: state.searchTerm,
-        };
+        }
         if (this.mapImp && !this.loading)
-          this.restoreMapState(this._stateToBeSet);
+          this.restoreMapState(this._stateToBeSet)
       }
     },
     computePathControlsMaximumHeight() {
-      const elem = this.$refs.display;
+      const elem = this.$refs.display
       if (elem) {
-        const computed = getComputedStyle(elem);
+        const computed = getComputedStyle(elem)
         const padding =
-          parseInt(computed.paddingTop) + parseInt(computed.paddingBottom);
-        const height = elem.clientHeight - padding;
-        this.pathwaysMaxHeight = height - 170;
+          parseInt(computed.paddingTop) + parseInt(computed.paddingBottom)
+        const height = elem.clientHeight - padding
+        this.pathwaysMaxHeight = height - 170
       }
     },
     mapResize: function () {
       try {
-        this.computePathControlsMaximumHeight();
+        this.computePathControlsMaximumHeight()
         if (this.mapImp) {
-          this.mapImp.resize();
-          this.showMinimap(this.displayMinimap);
+          this.mapImp.resize()
+          this.showMinimap(this.displayMinimap)
           if (this.mapImp._minimap) {
-            this.mapImp._minimap.resize();
+            this.mapImp._minimap.resize()
           }
         }
       } catch {
-        console.error("Map resize error");
+        console.error('Map resize error')
       }
     },
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-      this.sensor = new ResizeSensor(this.$refs.display, this.mapResize);
-      if (this.mapImp.options && this.mapImp.options.style === "functional") {
-        this.isFC = true;
+      this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
+      if (this.mapImp.options && this.mapImp.options.style === 'functional') {
+        this.isFC = true
       }
-      this.mapImp.setBackgroundOpacity(1);
-      this.backgroundChangeCallback(this.currentBackground);
-      this.pathways = this.mapImp.pathTypes();
-      this.mapImp.enableCentrelines(false);
+      this.mapImp.setBackgroundOpacity(1)
+      this.backgroundChangeCallback(this.currentBackground)
+      this.pathways = this.mapImp.pathTypes()
+      this.mapImp.enableCentrelines(false)
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
-      this.systems = processSystems(this.mapImp.getSystems());
+      this.systems = processSystems(this.mapImp.getSystems())
       this.taxonConnectivity = processTaxon(
         this.flatmapAPI,
         this.mapImp.taxonIdentifiers
-      );
-      this.addResizeButtonToMinimap();
-      this.loading = false;
-      this.computePathControlsMaximumHeight();
-      this.drawerOpen = true;
-      this.mapResize();
-      this.$emit("ready", this);
+      )
+      this.addResizeButtonToMinimap()
+      this.loading = false
+      this.computePathControlsMaximumHeight()
+      this.drawerOpen = true
+      this.mapResize()
+      this.$emit('ready', this)
     },
     showMinimap: function (flag) {
-      if (this.mapImp) this.mapImp.showMinimap(flag);
+      if (this.mapImp) this.mapImp.showMinimap(flag)
     },
     showPathwaysDrawer: function (flag) {
-      this.drawerOpen = flag;
+      this.drawerOpen = flag
     },
     /**
      * Function to display features with annotation matching the provided term,
@@ -1129,17 +1118,17 @@ export default {
      */
     searchAndShowResult: function (term, displayLabel) {
       if (this.mapImp) {
-        if (term === undefined || term === "") {
-          this.mapImp.clearSearchResults();
-          return true;
+        if (term === undefined || term === '') {
+          this.mapImp.clearSearchResults()
+          return true
         } else {
-          const searchResults = this.mapImp.search(term);
+          const searchResults = this.mapImp.search(term)
           if (
             searchResults &&
             searchResults.results &&
             searchResults.results.length > 0
           ) {
-            this.mapImp.showSearchResults(searchResults);
+            this.mapImp.showSearchResults(searchResults)
             if (
               displayLabel &&
               searchResults.results[0].featureId &&
@@ -1147,29 +1136,29 @@ export default {
             ) {
               const annotation = this.mapImp.annotation(
                 searchResults.results[0].featureId
-              );
+              )
               this.mapImp.showPopup(
                 searchResults.results[0].featureId,
                 annotation.label,
                 {
-                  className: "custom-popup",
+                  className: 'custom-popup',
                   positionAtLastClick: false,
                   preserveSelection: true,
                 }
-              );
+              )
             }
-            return true;
-          } else this.mapImp.clearSearchResults();
+            return true
+          } else this.mapImp.clearSearchResults()
         }
       }
-      return false;
+      return false
     },
     /**
      * Get the list of suggested terms
      */
     searchSuggestions: function (term) {
-      if (this.mapImp) return this.mapImp.search(term);
-      return [];
+      if (this.mapImp) return this.mapImp.search(term)
+      return []
     },
   },
   props: {
@@ -1177,7 +1166,7 @@ export default {
     uuid: String,
     biologicalSex: {
       type: String,
-      default: "",
+      default: '',
     },
     featureInfo: {
       type: Boolean,
@@ -1232,23 +1221,23 @@ export default {
       default: function () {
         return [
           {
-            display: "Open AC Map",
-            key: "AC",
+            display: 'Open AC Map',
+            key: 'AC',
           },
           {
-            display: "Open FC Map",
-            key: "FC",
+            display: 'Open FC Map',
+            key: 'FC',
           },
           {
-            display: "Open 3D Human Map",
-            key: "3D",
+            display: 'Open 3D Human Map',
+            key: '3D',
           },
-        ];
+        ]
       },
     },
     showStarInLegend: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isLegacy: {
       type: Boolean,
@@ -1270,18 +1259,18 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: "https://mapcore-demo.org/current/flatmap/v3/",
+      default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     sparcAPI: {
       type: String,
-      default: "https://api.sparc.science/",
+      default: 'https://api.sparc.science/',
     },
   },
   provide() {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-    };
+    }
   },
   data: function () {
     return {
@@ -1291,14 +1280,14 @@ export default {
       pathways: [],
       sckanDisplay: [
         {
-          label: "Display Path with SCKAN",
-          key: "VALID",
+          label: 'Display Path with SCKAN',
+          key: 'VALID',
         },
       ],
       centreLines: [
         {
-          label: "Display Nerves",
-          key: "centrelines",
+          label: 'Display Nerves',
+          key: 'centrelines',
           enabled: false,
         },
       ],
@@ -1320,8 +1309,8 @@ export default {
       yellowstar: yellowstar,
       isFC: false,
       inHelp: false,
-      currentBackground: "white",
-      availableBackground: ["white", "lightskyblue", "black"],
+      currentBackground: 'white',
+      availableBackground: ['white', 'lightskyblue', 'black'],
       loading: false,
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
@@ -1332,26 +1321,26 @@ export default {
       outlinesRadio: true,
       minimapResizeShow: false,
       minimapSmall: false,
-      currentActive: "",
-      currentHover: "",
-      viewingMode: "Exploration",
-      viewingModes: ["Annotation", "Exploration", "Network Discovery"],
-    };
+      currentActive: '',
+      currentHover: '',
+      viewingMode: 'Exploration',
+      viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
+    }
   },
   watch: {
     entry: function () {
-      if (!this.state) this.createFlatmap();
+      if (!this.state) this.createFlatmap()
     },
     helpMode: function (val) {
-      this.setHelpMode(val);
+      this.setHelpMode(val)
     },
     state: {
       handler: function (state) {
         if (this.mapManager) {
-          this.setState(state);
+          this.setState(state)
         } else {
           //this component has not been mounted yet
-          this.setStateRequired = true;
+          this.setStateRequired = true
         }
       },
       immediate: true,
@@ -1359,30 +1348,29 @@ export default {
     },
   },
   mounted: function () {
-    const flatmap = require("@abi-software/flatmap-viewer");
-    this.tooltipWait = [];
-    this.tooltipWait.length = this.hoverVisibilities.length;
-    this.mapManager = new flatmap.MapManager(this.flatmapAPI);
-    this.flatmapQueries = new FlatmapQueries();
-    this.flatmapQueries.initialise(this.flatmapAPI);
+    const flatmap = require('@abi-software/flatmap-viewer')
+    this.tooltipWait = []
+    this.tooltipWait.length = this.hoverVisibilities.length
+    this.mapManager = new flatmap.MapManager(this.flatmapAPI)
+    this.flatmapQueries = new FlatmapQueries()
+    this.flatmapQueries.initialise(this.flatmapAPI)
     if (this.state) {
       //State is set and require to set the state
       if (this.setStateRequired) {
-        this.setState(this.state);
+        this.setState(this.state)
       }
     } else if (this.renderAtMounted) {
-      this.createFlatmap();
+      this.createFlatmap()
     }
   },
-};
+}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/button";
-@import "~element-ui/packages/theme-chalk/src/loading";
-@import "~element-ui/packages/theme-chalk/src/row";
-@import "~element-ui/packages/theme-chalk/src/select";
+<style lang="scss" scoped>
+@use 'element-plus/theme-chalk/src/button';
+@use 'element-plus/theme-chalk/src/loading';
+@use 'element-plus/theme-chalk/src/row';
+@use 'element-plus/theme-chalk/src/select';
 
 .beta-popovers {
   position: absolute;
@@ -1487,7 +1475,7 @@ export default {
   display: inline-block;
 }
 
-::v-deep .popper-bump-right {
+:deep(.popper-bump-right) {
   left: 30px;
 }
 
@@ -1509,11 +1497,11 @@ export default {
   display: none;
 }
 
-::v-deep .maplibregl-popup {
+:deep(.maplibregl-popup) {
   max-width: 300px !important;
 }
 
-::v-deep .flatmap-tooltip-popup {
+:deep(.flatmap-tooltip-popup) {
   &.maplibregl-popup-anchor-bottom {
     .maplibregl-popup-content {
       margin-bottom: 12px;
@@ -1567,7 +1555,7 @@ export default {
     align-items: center;
     &::after,
     &::before {
-      content: "";
+      content: '';
       display: block;
       position: absolute;
       width: 0;
@@ -1581,7 +1569,7 @@ export default {
   }
 }
 
-::v-deep .maplibregl-popup {
+:deep(.maplibregl-popup) {
   &.flatmap-marker-popup {
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
@@ -1591,25 +1579,25 @@ export default {
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
 .selector:not(*:root),
-::v-deep.flatmap-tooltip-popup {
+:deep(.flatmap-tooltip-popup) {
   .maplibregl-popup-content::after {
     top: 99.9%;
   }
 }
 
-::v-deep .flatmap-tooltip-dialog {
+:deep(.flatmap-tooltip-dialog) {
   .maplibregl-popup-tip {
     display: none;
   }
 }
 
-::v-deep .flatmap-marker-popup {
+:deep(.flatmap-marker-popup){
   .maplibregl-popup-content {
     padding: 0px;
   }
 }
 
-::v-deep .flatmapvuer-popover {
+:deep( .flatmapvuer-popover) {
   .maplibregl-popup-close-button {
     position: absolute;
     right: 0.5em;
@@ -1649,7 +1637,7 @@ export default {
   }
 }
 
-::v-deep .background-popper {
+:deep(.background-popper) {
   padding: 5px 12px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
@@ -1657,7 +1645,7 @@ export default {
   height: 270px;
   width: 175px;
   min-width: 175px;
-  &.el-popper[x-placement^="top"] {
+  &.el-popper[x-placement^='top'] {
     .popper__arrow {
       border-top-color: $app-primary-color !important;
       &::after {
@@ -1667,7 +1655,7 @@ export default {
   }
 }
 
-::v-deep .open-map-popper {
+:deep(.open-map-popper) {
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #ffffff;
@@ -1685,7 +1673,7 @@ export default {
     padding-bottom: 5px;
   }
 
-  &.el-popper[x-placement^="top"] {
+  &.el-popper[x-placement^='top'] {
     .popper__arrow {
       border-top-color: $app-primary-color !important;
       &:after {
@@ -1739,12 +1727,12 @@ export default {
   }
 }
 
-::v-deep .maplibregl-ctrl-minimap {
+:deep(maplibregl-ctrl-minimap) {
   transform-origin: top right;
   @media (max-width: 1250px) {
     height: 125px !important; // important is needed here as we are over-riding the style set by the flatmap
     width: 180px !important;
-    >>> .maplibregl-canvas .maplibregl-canvas {
+    :deep(.maplibregl-canvas .maplibregl-canvas) {
       height: 125px !important;
       width: 180px !important;
     }
@@ -1752,7 +1740,7 @@ export default {
   @media (min-width: 1251px) {
     height: 190px !important;
     width: 300px !important;
-    >>> .maplibregl-canvas .maplibregl-canvas {
+    :deep(.maplibregl-canvas .maplibregl-canvas) {
       height: 190px !important;
       width: 300px !important;
     }
@@ -1785,7 +1773,7 @@ export default {
   }
 }
 
-::v-deep .flatmap-popper {
+:deep(.flatmap-popper) {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -1815,7 +1803,7 @@ export default {
       }
     }
   }
-  &.el-popper[x-placement^="top"] {
+  &.el-popper[x-placement^='top'] {
     .popper__arrow {
       border-top-color: $app-primary-color !important;
       &:after {
@@ -1825,14 +1813,14 @@ export default {
   }
 }
 
-::v-deep .el-loading-spinner {
+:deep(.el-loading-spinner) {
   i,
   .el-loading-text {
     color: $app-primary-color;
   }
 }
 
-::v-deep .flatmap-popup-popper {
+:deep(.flatmap-popup-popper) {
   .maplibregl-popup-tip {
     border-bottom-color: $app-primary-color;
   }
@@ -1850,18 +1838,18 @@ export default {
   }
 }
 
-::v-deep .popper-zoomout {
+:deep(.popper-zoomout) {
   padding-right: 13px !important;
   left: -21px !important;
 }
 
-::v-deep .popper-zoomout {
+:deep(.popper-zoomout) {
   .popper__arrow {
     left: 53px !important;
   }
 }
 
-::v-deep .maplibregl-popup-content {
+:deep(.maplibregl-popup-content) {
   padding: 0px;
 }
 
@@ -1871,13 +1859,13 @@ export default {
   bottom: 16px;
 }
 
-::v-deep .my-drawer {
+:deep(.my-drawer) {
   background: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
 
 .drawer {
-  ::v-deep .el-drawer:focus {
+  :deep(.el-drawer:focus) {
     outline: none;
   }
 }
@@ -1924,7 +1912,7 @@ export default {
   }
 }
 
-::v-deep .maplibregl-canvas-container {
+:deep(.maplibregl-canvas-container) {
   canvas {
     outline: none;
   }
@@ -1936,13 +1924,13 @@ export default {
 }
 
 .flatmap-radio {
-  ::v-deep label {
+  :deep(label) {
     margin-right: 20px;
     &:last-child {
       margin-right: 0px;
     }
   }
-  ::v-deep .el-radio__input {
+  :deep(.el-radio__input) {
     &.is-checked {
       & + .el-radio__label {
         color: $app-primary-color;
@@ -1958,7 +1946,7 @@ export default {
   }
 }
 
-::v-deep .custom-popup {
+:deep(.custom-popup) {
   .maplibregl-popup-tip {
     display: none;
   }
@@ -1968,7 +1956,7 @@ export default {
     pointer-events: none;
     display: none;
     background: #fff;
-    font-family: "Asap", sans-serif;
+    font-family: 'Asap', sans-serif;
     font-size: 12pt;
     color: $app-primary-color;
     border: 1px solid $app-primary-color;
@@ -1981,7 +1969,7 @@ export default {
     align-items: center;
     &::after,
     &::before {
-      content: "";
+      content: '';
       display: block;
       position: absolute;
       width: 0;
@@ -2040,22 +2028,24 @@ export default {
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  ::v-deep .el-input__inner {
+  :deep(.el-input__inner) {
     height: 30px;
     color: rgb(48, 49, 51);
   }
-  ::v-deep .el-input__inner {
-    &is-focus,
-    &:focus {
-      border: 1px solid $app-primary-color;
+  :deep() {
+    .el-input__inner {
+      &is-focus,
+      &:focus {
+        border: 1px solid $app-primary-color;
+      }
     }
   }
-  ::v-deep .el-input__icon {
+  :deep(.el-input__icon) {
     line-height: 30px;
   }
 }
 
-::v-deep .flatmap_dropdown {
+:deep(.flatmap_dropdown) {
   min-width: 160px !important;
   .el-select-dropdown__item {
     white-space: nowrap;
@@ -2067,4 +2057,3 @@ export default {
   }
 }
 </style>
-

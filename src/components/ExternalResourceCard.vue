@@ -1,8 +1,13 @@
 <template>
   <div class="resource-container">
-    <template v-for="resource in resources">
-      <div class="resource" :key="resource.id">
-        <el-button  v-if="resource.id === 'pubmed'" class="button" icon="el-icon-notebook-2" @click="openUrl(resource.url)">
+    <template v-for="resource in resources" :key="resource.id">
+      <div class="resource">
+        <el-button
+          v-if="resource.id === 'pubmed'"
+          class="button"
+          :icon="ElIconNotebook - 2"
+          @click="openUrl(resource.url)"
+        >
           Open publications in pubmed
         </el-button>
       </div>
@@ -10,50 +15,48 @@
   </div>
 </template>
 
-
-
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import { Button } from "element-ui";
-Vue.use(Button);
+import Vue from 'vue'
+import { ElButton as Button } from 'element-plus'
+Vue.use(Button)
 
 export default {
-  name: "ExternalResourceCard",
+  name: 'ExternalResourceCard',
   props: {
     resources: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
   },
-  data: function() {
+  data: function () {
     return {
       pubmeds: [],
       pubmedIds: [],
-    };
+    }
   },
   methods: {
-    capitalise: function(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
+    capitalise: function (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
     },
-    openUrl: function(url){
+    openUrl: function (url) {
       window.open(url, '_blank')
     },
-  }
-};
+  },
+}
 </script>
 
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/button";
+<style lang="scss" scoped>
+@use 'element-plus/theme-chalk/src/button';
 
-.attribute-title{
+.attribute-title {
   font-size: 16px;
   font-weight: 600;
   /* font-weight: bold; */
   text-transform: uppercase;
 }
 
-.attribute-content{
+.attribute-content {
   font-size: 14px;
   font-weight: 400;
 }
@@ -62,16 +65,17 @@ export default {
   color: $app-primary-color;
   text-decoration: none;
   word-wrap: break-word;
-  &:hover, &:focus{
+  &:hover,
+  &:focus {
     color: $app-primary-color;
   }
 }
 
-::v-deep .el-carousel__button {
-  background-color: $app-primary-color;  
+:deep(.el-carousel__button) {
+  background-color: $app-primary-color;
 }
 
-.attribute-title{
+.attribute-title {
   font-size: 16px;
   font-weight: 600;
   /* font-weight: bold; */
@@ -84,16 +88,15 @@ export default {
   font-size: 14px !important;
   background-color: $app-primary-color;
   color: #fff;
-  &:hover{
+  &:hover {
     color: #fff !important;
     background: #ac76c5 !important;
     border: 1px solid #ac76c5 !important;
   }
-  &+.button {
+  & + .button {
     margin-top: 10px !important;
     background-color: $app-primary-color;
-    color: #fff; 
+    color: #fff;
   }
 }
-
 </style>
