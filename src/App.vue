@@ -62,7 +62,6 @@
 <script>
 import { Setting as ElIconSetting } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import {
   ElAutocomplete as Autocomplete,
@@ -72,19 +71,21 @@ import {
   ElRow as Row,
 } from 'element-plus'
 import './icons/mapicon-species-style.css'
-Vue.use(Autocomplete)
-Vue.use(Button)
-Vue.use(Col)
-Vue.use(Popover)
-Vue.use(Row)
 
 export default {
+  name: 'app',
+  components: {
+    Autocomplete,
+    Button,
+    Col,
+    Popover,
+    Row,
+  },
   data() {
     return {
       ElIconSetting,
     }
   },
-  name: 'app',
   methods: {
     saveSettings: function () {
       this.mapSettings.push(this.$refs.multi.getState())

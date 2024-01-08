@@ -17,12 +17,13 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import { ElButton as Button } from 'element-plus'
-Vue.use(Button)
 
 export default {
   name: 'ExternalResourceCard',
+  components: {
+    Button,
+  },
   props: {
     resources: {
       type: Array,

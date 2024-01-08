@@ -38,6 +38,7 @@
     "element-plus": "^2.4.4",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.21",
+    "mitt": "^3.0.1",
     "unocss": "^0.58.0",
     "unplugin-vue-components": "^0.26.0",
     "vue": "^3.3.13"

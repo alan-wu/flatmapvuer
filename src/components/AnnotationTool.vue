@@ -141,7 +141,6 @@ import {
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import {
   ElButton as Button,
@@ -152,21 +151,20 @@ import {
   ElSelect as Select,
 } from 'element-plus'
 
-Vue.use(Button)
-Vue.use(Col)
-Vue.use(Input)
-Vue.use(Main)
-Vue.use(Row)
-Vue.use(Select)
-
 export default {
+  name: 'AnnotationTool',
   components: {
+    Button,
+    Col,
+    Input,
+    Main,
+    Row,
+    Select,
     ElIconArrowUp,
     ElIconArrowDown,
     ElIconEdit,
     ElIconClose,
   },
-  name: 'AnnotationTool',
   props: {
     annotationEntry: {
       type: Object,

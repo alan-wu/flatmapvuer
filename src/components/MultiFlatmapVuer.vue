@@ -73,7 +73,6 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import EventBus from './EventBus'
-import Vue from 'vue'
 import FlatmapVuer from './FlatmapVuer.vue'
 import {
   ElCol as Col,
@@ -82,11 +81,6 @@ import {
   ElRow as Row,
   ElPopover as Popover,
 } from 'element-plus'
-Vue.use(Col)
-Vue.use(Row)
-Vue.use(Option)
-Vue.use(Select)
-Vue.use(Popover)
 
 const TAXON_UUID = {
   'NCBITaxon:10114': '01fedbf9-d783-509c-a10c-827941ab13da',
@@ -99,6 +93,11 @@ const TAXON_UUID = {
 export default {
   name: 'MultiFlatmapVuer',
   components: {
+    Col,
+    Row,
+    Option,
+    Select,
+    Popover,
     FlatmapVuer,
   },
   beforeMount() {
@@ -109,7 +108,7 @@ export default {
   },
   mounted: function () {
     this.initialise()
-    EventBus.$on('onActionClick', (action) => {
+    EventBus.on('onActionClick', (action) => {
       this.FlatmapSelected(action)
     })
   },
@@ -127,7 +126,7 @@ export default {
                 // FIrst look through the uuid
                 const uuid = this.availableSpecies[key].uuid
                 if (uuid && data.map((e) => e.uuid).indexOf(uuid) > 0) {
-                  this.$set(this.speciesList, key, this.availableSpecies[key])
+                  this.speciesList[key] = this.availableSpecies[key]
                 } else {
                   for (let i = 0; i < data.length; i++) {
                     if (this.availableSpecies[key].taxo === data[i].taxon) {
@@ -137,19 +136,11 @@ export default {
                           data[i].biologicalSex ===
                             this.availableSpecies[key].biologicalSex
                         ) {
-                          this.$set(
-                            this.speciesList,
-                            key,
-                            this.availableSpecies[key]
-                          )
+                          this.speciesList[key] = this.availableSpecies[key]
                           break
                         }
                       } else {
-                        this.$set(
-                          this.speciesList,
-                          key,
-                          this.availableSpecies[key]
-                        )
+                        this.speciesList[key] = this.availableSpecies[key]
                         break
                       }
                     }
@@ -231,7 +222,7 @@ export default {
       } else if (numberOfRetry) {
         const retry = numberOfRetry - 1
         if (retry >= 0) {
-          Vue.nextTick(() => {
+          this.$nextTick(() => {
             this.setSpecies(species, state, retry)
           })
         }

@@ -7,7 +7,7 @@
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
-    <map-svg-sprite-color />
+    <!--<map-svg-sprite-color /> -->
     <div
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
@@ -70,7 +70,7 @@
               SPARC program progresses.
             </p>
           </el-popover>
-          <el-icon class="warning-icon"><el-icon-warning /></el-icon>
+          <el-icon class="warning-icon"><el-icon-warning-filled /></el-icon>
         </div>
         <el-popover
           placement="right"
@@ -82,7 +82,7 @@
           ref="latestChangesPopover"
         >
           <template #reference>
-            <el-icon class="latest-changesicon"><el-icon-warning /></el-icon>
+            <el-icon class="latest-changesicon"><el-icon-warning-filled /></el-icon>
           </template>
           <template #default>
             <b>Network discovery mode</b>
@@ -103,7 +103,15 @@
       </div>
 
       <!-- The element below is placed onto the flatmap when it is ready -->
-      <el-icon class="minimap-resize"><el-icon-arrow-down /></el-icon>
+      <el-icon
+        class="minimap-resize"
+        :class="{ enlarge: minimapSmall, shrink: !minimapSmall }"
+        ref="minimapResize"
+        v-show="minimapResizeShow"
+        @click="closeMinimap"
+      >
+        <el-icon-arrow-down />
+      </el-icon>
 
       <div class="bottom-right-control">
         <el-popover
@@ -114,6 +122,8 @@
           popper-class="flatmap-popper left-popper"
           v-model="hoverVisibilities[0].value"
         >
+        <el-icon><el-icon-arrow-left /></el-icon>
+          <!--
           <map-svg-icon
             icon="zoomIn"
             class="icon-button zoomIn"
@@ -122,6 +132,7 @@
             @mouseover.native="showToolitip(0)"
             @mouseout.native="hideToolitip(0)"
           />
+          -->
         </el-popover>
         <el-popover
           content="Zoom out"
@@ -131,6 +142,8 @@
           popper-class="flatmap-popper popper-zoomout"
           v-model="hoverVisibilities[1].value"
         >
+        <el-icon><el-icon-arrow-left /></el-icon>
+          <!--
           <map-svg-icon
             icon="zoomOut"
             class="icon-button zoomOut"
@@ -139,6 +152,7 @@
             @mouseover.native="showToolitip(1)"
             @mouseout.native="hideToolitip(1)"
           />
+          -->
         </el-popover>
         <el-popover
           content="Reset"
@@ -153,6 +167,8 @@
             <br />
             window
           </div>
+          <el-icon><el-icon-arrow-left /></el-icon>
+          <!--
           <map-svg-icon
             slot="reference"
             icon="fitWindow"
@@ -161,6 +177,7 @@
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
           />
+          -->
         </el-popover>
       </div>
       <el-popover
@@ -388,6 +405,8 @@
             trigger="manual"
             popper-class="flatmap-popper right-popper"
           >
+          <el-icon><el-icon-arrow-left /></el-icon>
+          <!--
             <map-svg-icon
               v-if="enableOpenMapUI && openMapOptions.length > 0"
               slot="reference"
@@ -397,6 +416,7 @@
               @mouseover.native="showToolitip(8)"
               @mouseout.native="hideToolitip(8)"
             />
+          -->
           </el-popover>
         </el-row>
         <el-row>
@@ -408,6 +428,8 @@
             trigger="manual"
             popper-class="flatmap-popper right-popper"
           >
+          <el-icon><el-icon-arrow-left /></el-icon>
+          <!--
             <map-svg-icon
               v-popover:backgroundPopover
               icon="changeBckgd"
@@ -416,6 +438,7 @@
               @mouseover.native="showToolitip(3)"
               @mouseout.native="hideToolitip(3)"
             />
+          -->
           </el-popover>
         </el-row>
       </div>
@@ -432,12 +455,11 @@
 
 <script>
 import {
-  Warning as ElIconWarning,
+  WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
@@ -458,15 +480,8 @@ import {
   findTaxonomyLabel,
 } from '../services/flatmapQueries.js'
 import yellowstar from '../icons/yellowstar'
-
-Vue.use(Button)
-Vue.use(Col)
-Vue.use(Loading.directive)
-Vue.use(Radio)
-Vue.use(RadioGroup)
-Vue.use(Row)
-Vue.use(Select)
-const ResizeSensor = require('css-element-queries/src/ResizeSensor')
+import ResizeSensor from 'css-element-queries/src/ResizeSensor'
+import * as flatmap from '@abi-software/flatmap-viewer'
 
 const processTaxon = (flatmapAPI, taxonIdentifiers) => {
   let processed = []
@@ -541,18 +556,25 @@ const createUnfilledTooltipData = function () {
 }
 
 export default {
+  name: 'FlatmapVuer',
   components: {
+    Button,
+    Col,
+    Loading,
+    Radio,
+    RadioGroup,
+    Row,
+    Select,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
     TreeControls,
     SelectionsGroup,
     SvgLegends,
-    ElIconWarning,
+    ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
   },
-  name: 'FlatmapVuer',
   beforeCreate: function () {
     this.mapManager = undefined
     this.mapImp = undefined
@@ -863,10 +885,12 @@ export default {
         '.maplibregl-ctrl-minimap'
       )
       if (minimapEl) {
-        this.$refs.minimapResize.parentNode.removeChild(
-          this.$refs.minimapResize
-        )
-        minimapEl.appendChild(this.$refs.minimapResize)
+        if (this.$refs.minimapResize &&
+        this.$refs.minimapResize.$el.parentNode) {
+          this.$refs.minimapResize.$el.parentNode.removeChild(
+            this.$refs.minimapResize.$el)
+        }
+        minimapEl.appendChild(this.$refs.minimapResize.$el)
         this.minimapResizeShow = true
       }
     },
@@ -1348,7 +1372,6 @@ export default {
     },
   },
   mounted: function () {
-    const flatmap = require('@abi-software/flatmap-viewer')
     this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
     this.mapManager = new flatmap.MapManager(this.flatmapAPI)

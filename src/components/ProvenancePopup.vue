@@ -35,7 +35,7 @@
               :append-to-body="false"
               popper-class="popover-origin-help"
             >
-              <el-icon class="info"><el-icon-warning-outline /></el-icon>
+              <el-icon class="info"><el-icon-warning /></el-icon>
               <span style="word-break: keep-all">
                 <i>Origin</i> {{ originDescription }}
               </span>
@@ -88,7 +88,7 @@
               :append-to-body="false"
               popper-class="popover-origin-help"
             >
-              <el-icon class="info"><el-icon-warning-outline /></el-icon>
+              <el-icon class="info"><el-icon-warning /></el-icon>
               <span style="word-break: keep-all">
                 <i>Destination</i> is where the axons terminate
               </span>
@@ -138,20 +138,15 @@
 import {
   ArrowUp as ElIconArrowUp,
   ArrowDown as ElIconArrowDown,
-  WarningOutline as ElIconWarningOutline,
+  Warning as ElIconWarning,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import {
   ElButton as Button,
   ElContainer as Container,
   ElIcon as Icon,
   ElMain as Main,
 } from 'element-plus'
-Vue.use(Button)
-Vue.use(Container)
-Vue.use(Icon)
-Vue.use(Main)
 
 import EventBus from './EventBus'
 import ExternalResourceCard from './ExternalResourceCard.vue'
@@ -168,13 +163,17 @@ const capitalise = function (str) {
 }
 
 export default {
+  name: 'ProvenancePopup',
   components: {
+    Button,
+    Container,
+    Icon,
+    Main,
     ExternalResourceCard,
     ElIconArrowUp,
     ElIconArrowDown,
-    ElIconWarningOutline,
+    ElIconWarning,
   },
-  name: 'ProvenancePopup',
   props: {
     entry: {
       type: Object,
@@ -246,19 +245,19 @@ export default {
       window.open(url, '_blank')
     },
     openAll: function () {
-      EventBus.$emit('onActionClick', {
+      EventBus.emit('onActionClick', {
         type: 'Facets',
         labels: this.entry.componentsWithDatasets.map((a) => a.name),
       })
     },
     openAxons: function () {
-      EventBus.$emit('onActionClick', {
+      EventBus.emit('onActionClick', {
         type: 'Facets',
         labels: this.entry.destinationsWithDatasets.map((a) => a.name),
       })
     },
     openDendrites: function () {
-      EventBus.$emit('onActionClick', {
+      EventBus.emit('onActionClick', {
         type: 'Facets',
         labels: this.entry.originsWithDatasets.map((a) => a.name),
       })

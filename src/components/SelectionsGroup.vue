@@ -54,20 +54,21 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import {
   ElCheckbox as Checkbox,
   ElCheckboxGroup as CheckboxGroup,
   ElCol as Col,
   ElRow as Row,
 } from 'element-plus'
-Vue.use(Checkbox)
-Vue.use(CheckboxGroup)
-Vue.use(Col)
-Vue.use(Row)
 
 export default {
   name: 'SelectionsGroup',
+  components: {
+    Checkbox,
+    CheckboxGroup,
+    Col,
+    Row,
+  },
   methods: {
     /**
      * Function to toggle paths to default.

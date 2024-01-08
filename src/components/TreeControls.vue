@@ -37,7 +37,6 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
 import {
   ElCheckbox as Checkbox,
   ElCheckboxGroup as CheckboxGroup,
@@ -45,17 +44,19 @@ import {
   ElRow as Row,
   ElTree as Tree,
 } from 'element-plus'
-Vue.use(Checkbox)
-Vue.use(CheckboxGroup)
-Vue.use(ColorPicker)
-Vue.use(Row)
-Vue.use(Tree)
 
 /**
  * A vue component for toggling visibility of various regions.
  */
 export default {
   name: 'TreeControls',
+  components: {
+    Checkbox,
+    CheckboxGroup,
+    ColorPicker,
+    Row,
+    Tree,
+  },
   props: {
     treeData: {
       type: Array,
