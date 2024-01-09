@@ -7,6 +7,7 @@ module.exports = {
     }
   },
   chainWebpack: config => {
+    config.resolve.alias.set('vue', '@vue/compat')
     const fontsRule = config.module.rule('fonts')
     fontsRule.uses.clear()
     config.module
@@ -19,6 +20,19 @@ module.exports = {
         return options
       })
       .end()
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap((options) => {
+        return {
+          ...options,
+          compilerOptions: {
+            compatConfig: {
+              MODE: 3
+            }
+          }
+        }
+      })
   },
   css: {
     //Import variables into all stylesheets.
