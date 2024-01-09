@@ -84,25 +84,26 @@
                   v-model="newEvidence"
                   @change="evidenceEntered($event)"
                 >
-                  <el-select
-                    :popper-append-to-body="false"
-                    v-model="evidencePrefix"
-                    placeholder="Select"
-                    class="select-box"
-                    popper-class="flatmap_dropdown"
-                    slot="prepend"
-                  >
-                    <el-option
-                      v-for="item in evidencePrefixes"
-                      :key="item"
-                      :label="item"
-                      :value="item"
+                  <template #prepend>
+                    <el-select
+                      :popper-append-to-body="false"
+                      v-model="evidencePrefix"
+                      placeholder="Select"
+                      class="select-box"
+                      popper-class="flatmap_dropdown"
                     >
-                      <el-row>
-                        <el-col :span="12">{{ item }}</el-col>
-                      </el-row>
-                    </el-option>
-                  </el-select>
+                      <el-option
+                        v-for="item in evidencePrefixes"
+                        :key="item"
+                        :label="item"
+                        :value="item"
+                      >
+                        <el-row>
+                          <el-col :span="12">{{ item }}</el-col>
+                        </el-row>
+                      </el-option>
+                    </el-select>
+                  </template>
                 </el-input>
               </el-row>
               <el-row>

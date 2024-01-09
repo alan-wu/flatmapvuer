@@ -16,20 +16,21 @@
         :default-expanded-keys="defaultExpandedKeys"
         @check="checkChanged"
       >
-        <span
-          slot-scope="{ node, data }"
-          class="region-tree-node"
-          :class="{
-            activeItem: nodeIsActive(data),
-            hoverItem: nodeIsHover(data),
-          }"
-          @click="changeActiveByNode(data)"
-          @mouseover="changeHoverByNode(data)"
-        >
-          <div :style="getBackgroundStyles(data)">
-            {{ node.label }}
-          </div>
-        </span>
+        <template #default="{ node, data }">
+          <span
+            class="region-tree-node"
+            :class="{
+              activeItem: nodeIsActive(data),
+              hoverItem: nodeIsHover(data),
+            }"
+            @click="changeActiveByNode(data)"
+            @mouseover="changeHoverByNode(data)"
+          >
+            <div :style="getBackgroundStyles(data)">
+              {{ node.label }}
+            </div>
+          </span>
+        </template>
       </el-tree>
     </div>
   </div>

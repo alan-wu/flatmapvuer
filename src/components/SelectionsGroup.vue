@@ -35,7 +35,7 @@
               :checked="!('enabled' in item) || item.enabled === true"
             >
               <el-row class="checkbox-row">
-                <el-col :span="4">
+                <el-col :span="4" v-if="hasLineStyles(item)">
                   <div class="path-visual" :style="getLineStyles(item)"></div>
                 </el-col>
                 <el-col :span="20">
@@ -106,6 +106,9 @@ export default {
         return { background: item.colour }
       }
       return {}
+    },
+    hasLineStyles: function(item) {
+      return 'colour' in item && this.colourStyle === 'line'
     },
     getLineStyles: function (item) {
       if ('colour' in item && this.colourStyle === 'line') {
@@ -193,12 +196,14 @@ export default {
 }
 
 .all-checkbox {
+  height:20px;
   float: right;
 }
 
 .checkbox-container {
   display: flex;
   cursor: pointer;
+  width: 100%;
 }
 
 .checkbox-group {
@@ -235,6 +240,10 @@ export default {
       border-color: $app-primary-color;
     }
   }
+}
+
+:deep(.el-row) {
+  height:20px;
 }
 
 :deep(.el-checkbox__label) {

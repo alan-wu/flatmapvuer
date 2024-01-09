@@ -7,7 +7,7 @@
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
-    <!--<map-svg-sprite-color /> -->
+    <map-svg-sprite-color />
     <div
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
@@ -16,8 +16,6 @@
         <div>
           <el-popover
             placement="right"
-            :appendToBody="false"
-            trigger="manual"
             popper-class="warning-popper flatmap-popper right-popper"
             v-model="hoverVisibilities[6].value"
             ref="warningPopover"
@@ -70,7 +68,24 @@
               SPARC program progresses.
             </p>
           </el-popover>
-          <el-icon class="warning-icon"><el-icon-warning-filled /></el-icon>
+          <div
+            class="el-icon-warning warning-icon"
+            v-if="displayWarning"
+            @mouseover="showToolitip(6)"
+            @mouseout="hideToolitip(6)"
+            v-popover:warningPopover
+          >
+            <el-icon><el-icon-warning-filled /></el-icon>
+            <template v-if="isLegacy">
+              <span class="warning-text">Legacy Map</span>
+              <div class="latest-map-text" @click="viewLatestMap">
+                Click here for the latest map
+              </div>
+            </template>
+            <template v-else>
+              <span class="warning-text">Beta</span>
+            </template>
+          </div>
         </div>
         <el-popover
           placement="right"
@@ -82,7 +97,16 @@
           ref="latestChangesPopover"
         >
           <template #reference>
-            <el-icon class="latest-changesicon"><el-icon-warning-filled /></el-icon>
+            <div
+              class="latest-changesicon"
+              v-if="displayLatestChanges"
+              @mouseover="showToolitip(7)"
+              @mouseout="hideToolitip(7)"
+              v-popover:latestChangesPopover
+            >
+              <el-icon><el-icon-warning-filled /></el-icon>
+              <span class="warning-text">What's new?</span>
+            </div>
           </template>
           <template #default>
             <b>Network discovery mode</b>
@@ -122,17 +146,15 @@
           popper-class="flatmap-popper left-popper"
           v-model="hoverVisibilities[0].value"
         >
-        <el-icon><el-icon-arrow-left /></el-icon>
-          <!--
-          <map-svg-icon
-            icon="zoomIn"
-            class="icon-button zoomIn"
-            slot="reference"
-            @click.native="zoomIn()"
-            @mouseover.native="showToolitip(0)"
-            @mouseout.native="hideToolitip(0)"
-          />
-          -->
+          <template #reference>
+            <map-svg-icon
+              icon="zoomIn"
+              class="icon-button zoomIn"
+              @click.native="zoomIn()"
+              @mouseover.native="showToolitip(0)"
+              @mouseout.native="hideToolitip(0)"
+            />
+          </template>
         </el-popover>
         <el-popover
           content="Zoom out"
@@ -143,16 +165,15 @@
           v-model="hoverVisibilities[1].value"
         >
         <el-icon><el-icon-arrow-left /></el-icon>
-          <!--
+        <template #reference>
           <map-svg-icon
             icon="zoomOut"
             class="icon-button zoomOut"
-            slot="reference"
             @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)"
             @mouseout.native="hideToolitip(1)"
           />
-          -->
+        </template>
         </el-popover>
         <el-popover
           content="Reset"
@@ -168,16 +189,15 @@
             window
           </div>
           <el-icon><el-icon-arrow-left /></el-icon>
-          <!--
-          <map-svg-icon
-            slot="reference"
-            icon="fitWindow"
-            class="icon-button fitWindow"
-            @click.native="resetView()"
-            @mouseover.native="showToolitip(2)"
-            @mouseout.native="hideToolitip(2)"
-          />
-          -->
+          <template #reference>
+            <map-svg-icon
+              icon="fitWindow"
+              class="icon-button fitWindow"
+              @click.native="resetView()"
+              @mouseover.native="showToolitip(2)"
+              @mouseout.native="hideToolitip(2)"
+            />
+          </template>
         </el-popover>
       </div>
       <el-popover
@@ -406,17 +426,16 @@
             popper-class="flatmap-popper right-popper"
           >
           <el-icon><el-icon-arrow-left /></el-icon>
-          <!--
+          <template #reference>
             <map-svg-icon
               v-if="enableOpenMapUI && openMapOptions.length > 0"
-              slot="reference"
               v-popover:open-map-popover
               icon="openMap"
               class="icon-button"
               @mouseover.native="showToolitip(8)"
               @mouseout.native="hideToolitip(8)"
             />
-          -->
+          </template>
           </el-popover>
         </el-row>
         <el-row>
@@ -429,16 +448,15 @@
             popper-class="flatmap-popper right-popper"
           >
           <el-icon><el-icon-arrow-left /></el-icon>
-          <!--
+          <template #reference>
             <map-svg-icon
               v-popover:backgroundPopover
               icon="changeBckgd"
               class="icon-button"
-              slot="reference"
               @mouseover.native="showToolitip(3)"
               @mouseout.native="hideToolitip(3)"
             />
-          -->
+          </template>
           </el-popover>
         </el-row>
       </div>
@@ -463,7 +481,8 @@ import {
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
-import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
+//import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
+import { MapSvgIcon, MapSvgSpriteColor } from 'vue3-component-svg-sprite'
 import SvgLegends from './legends/SvgLegends.vue'
 import {
   ElButton as Button,
@@ -870,6 +889,7 @@ export default {
       let minimapEl = this.$refs.flatmapContainer.querySelector(
         '.maplibregl-ctrl-minimap'
       ) // find minimap
+      console.log(minimapEl)
       if (this.minimapSmall) {
         //switch the classes on the minimap
         minimapEl.classList.add('enlarge')
@@ -1750,7 +1770,7 @@ export default {
   }
 }
 
-:deep(maplibregl-ctrl-minimap) {
+:deep(.maplibregl-ctrl-minimap) {
   transform-origin: top right;
   @media (max-width: 1250px) {
     height: 125px !important; // important is needed here as we are over-riding the style set by the flatmap

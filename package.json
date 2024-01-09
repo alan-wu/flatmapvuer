@@ -41,7 +41,8 @@
     "mitt": "^3.0.1",
     "unocss": "^0.58.0",
     "unplugin-vue-components": "^0.26.0",
-    "vue": "^3.3.13"
+    "vue": "^3.3.13",
+    "vue3-component-svg-sprite": "^0.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.6.2",
