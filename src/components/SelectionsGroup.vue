@@ -244,6 +244,7 @@ export default {
 
 :deep(.el-row) {
   height:20px;
+  margin-bottom: 0;
 }
 
 :deep(.el-checkbox__label) {

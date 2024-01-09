@@ -5,35 +5,36 @@
       <el-popover
         content="Select a species"
         placement="right"
-        :appendToBody="false"
         trigger="manual"
         popper-class="flatmap-popper right-popper"
         :visible="helpMode"
         ref="selectPopover"
       >
+        <template #reference>
+          <el-select
+            id="flatmap-select"
+            :popper-append-to-body="appendToBody"
+            v-model="activeSpecies"
+            placeholder="Select"
+            class="select-box"
+            popper-class="flatmap-dropdown"
+            @change="setSpecies"
+          >
+            <el-option
+              v-for="(item, key) in speciesList"
+              :key="key"
+              :label="key"
+              :value="key"
+            >
+              <el-row>
+                <el-col :span="8"><i :class="item.iconClass"></i></el-col>
+                <el-col :span="12">{{ key }}</el-col>
+              </el-row>
+            </el-option>
+          </el-select>
+        </template>
+
       </el-popover>
-      <el-select
-        id="flatmap-select"
-        :popper-append-to-body="appendToBody"
-        v-model="activeSpecies"
-        placeholder="Select"
-        class="select-box"
-        popper-class="flatmap_dropdown"
-        @change="setSpecies"
-        v-popover:selectPopover
-      >
-        <el-option
-          v-for="(item, key) in speciesList"
-          :key="key"
-          :label="key"
-          :value="key"
-        >
-          <el-row>
-            <el-col :span="8"><i :class="item.iconClass"></i></el-col>
-            <el-col :span="12">{{ key }}</el-col>
-          </el-row>
-        </el-option>
-      </el-select>
     </div>
     <FlatmapVuer
       v-for="(item, key) in speciesList"
@@ -72,6 +73,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import { reactive } from 'vue'
 import EventBus from './EventBus'
 import FlatmapVuer from './FlatmapVuer.vue'
 import {
@@ -126,7 +128,7 @@ export default {
                 // FIrst look through the uuid
                 const uuid = this.availableSpecies[key].uuid
                 if (uuid && data.map((e) => e.uuid).indexOf(uuid) > 0) {
-                  this.speciesList[key] = this.availableSpecies[key]
+                  this.speciesList[key] = reactive(this.availableSpecies[key])
                 } else {
                   for (let i = 0; i < data.length; i++) {
                     if (this.availableSpecies[key].taxo === data[i].taxon) {
@@ -136,11 +138,11 @@ export default {
                           data[i].biologicalSex ===
                             this.availableSpecies[key].biologicalSex
                         ) {
-                          this.speciesList[key] = this.availableSpecies[key]
+                          this.speciesList[key] = reactive(this.availableSpecies[key])
                           break
                         }
                       } else {
-                        this.speciesList[key] = this.availableSpecies[key]
+                        this.speciesList[key] = reactive(this.availableSpecies[key])
                         break
                       }
                     }
@@ -260,7 +262,7 @@ export default {
           if (state.species.slice(0, 6) === 'Legacy') name = state.species
           else name = name + ` ${state.species}`
         }
-        this.$set(this.speciesList, name, {
+        this.speciesList[name] = reactive({
           taxo: taxo,
           isLegacy: true,
           displayWarning: true,
@@ -553,16 +555,18 @@ export default {
     padding-top: 0.25em;
   }
   :deep() {
-    .el-input__inner {
-      &is-focus,
-      &:focus {
-        border: 1px solid $app-primary-color;
+    .el-input {
+      .el-input__wrapper{
+        &is-focus,
+        &:focus {
+          border: 1px solid $app-primary-color;
+        }
       }
     }
   }
 }
 
-:deep(.flatmap_dropdown) {
+.flatmap-dropdown {
   min-width: 160px !important;
   .el-select-dropdown__item {
     white-space: nowrap;
@@ -574,7 +578,7 @@ export default {
   }
 }
 
-:deep(.flatmap-popper) {
+.flatmap-popper {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);

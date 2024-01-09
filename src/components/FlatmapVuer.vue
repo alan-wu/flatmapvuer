@@ -4,7 +4,6 @@
     ref="flatmapContainer"
     v-loading="loading"
     element-loading-text="Loading..."
-    element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <map-svg-sprite-color />
@@ -17,7 +16,7 @@
           <el-popover
             placement="right"
             popper-class="warning-popper flatmap-popper right-popper"
-            v-model="hoverVisibilities[6].value"
+            :visible="hoverVisibilities[6].value"
             ref="warningPopover"
           >
             <p
@@ -93,7 +92,7 @@
           :appendToBody="false"
           trigger="manual"
           popper-class="warning-popper flatmap-popper right-popper"
-          v-model="hoverVisibilities[7].value"
+          :visible="hoverVisibilities[7].value"
           ref="latestChangesPopover"
         >
           <template #reference>
@@ -144,7 +143,7 @@
           :appendToBody="false"
           trigger="manual"
           popper-class="flatmap-popper left-popper"
-          v-model="hoverVisibilities[0].value"
+          :visible="hoverVisibilities[0].value"
         >
           <template #reference>
             <map-svg-icon
@@ -162,9 +161,8 @@
           :appendToBody="false"
           trigger="manual"
           popper-class="flatmap-popper popper-zoomout"
-          v-model="hoverVisibilities[1].value"
+          :visible="hoverVisibilities[1].value"
         >
-        <el-icon><el-icon-arrow-left /></el-icon>
         <template #reference>
           <map-svg-icon
             icon="zoomOut"
@@ -181,14 +179,13 @@
           :appendToBody="false"
           trigger="manual"
           popper-class="flatmap-popper"
-          v-model="hoverVisibilities[2].value"
+          :visible="hoverVisibilities[2].value"
         >
           <div>
             Fit to
             <br />
             window
           </div>
-          <el-icon><el-icon-arrow-left /></el-icon>
           <template #reference>
             <map-svg-icon
               icon="fitWindow"
@@ -206,7 +203,7 @@
         :appendToBody="false"
         trigger="manual"
         popper-class="flatmap-popper right-popper"
-        v-model="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
       />
       <div
@@ -227,7 +224,7 @@
             :appendToBody="false"
             trigger="hover"
             popper-class="flatmap-popper popper-bump-right right-popper"
-            v-model="hoverVisibilities[9].value"
+            :visible="hoverVisibilities[9].value"
             ref="featuredMarkerPopover"
           >
           </el-popover>
@@ -245,7 +242,7 @@
             :appendToBody="false"
             trigger="manual"
             popper-class="flatmap-popper popper-bump-right  right-popper"
-            v-model="hoverVisibilities[5].value"
+            :visible="hoverVisibilities[5].value"
             ref="markerPopover"
           ></el-popover>
           <div
@@ -418,14 +415,13 @@
       >
         <el-row>
           <el-popover
-            v-model="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[8].value"
             content="Open new map"
             placement="right"
             :append-to-body="false"
             trigger="manual"
             popper-class="flatmap-popper right-popper"
           >
-          <el-icon><el-icon-arrow-left /></el-icon>
           <template #reference>
             <map-svg-icon
               v-if="enableOpenMapUI && openMapOptions.length > 0"
@@ -442,12 +438,11 @@
           <el-popover
             content="Change settings"
             placement="right"
-            v-model="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[3].value"
             :appendToBody="false"
             trigger="manual"
             popper-class="flatmap-popper right-popper"
           >
-          <el-icon><el-icon-arrow-left /></el-icon>
           <template #reference>
             <map-svg-icon
               v-popover:backgroundPopover
@@ -502,17 +497,6 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 
-const processTaxon = (flatmapAPI, taxonIdentifiers) => {
-  let processed = []
-  taxonIdentifiers.forEach((taxon) => {
-    findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-      const item = { taxon, label: value }
-      processed.push(item)
-    })
-  })
-
-  return processed
-}
 
 const processFTUs = (parent, key) => {
   const ftus = []
@@ -621,6 +605,34 @@ export default {
       if (this.mapImp) {
         this.mapImp.setBackgroundColour(this.currentBackground, 1)
       }
+    },
+    processSystems: function (systems) {
+      this.systems.length = 0
+      if (systems && systems.length > 0) {
+        const data = { label: 'All', key: 'All', children: [] }
+        systems.forEach((system) => {
+          const child = {
+            colour: system.colour,
+            enabled: system.enabled,
+            label: system.id,
+            key: system.id,
+          }
+          const children = processFTUs(system, child.key)
+          if (children.length > 0) child.children = children
+          data.children.push(child)
+        })
+
+        this.systems.push(data)
+      }
+    },
+    processTaxon: function (flatmapAPI, taxonIdentifiers) {
+      this.taxonConnectivity.length = 0
+      taxonIdentifiers.forEach((taxon) => {
+        findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
+          const item = { taxon, label: value }
+          this.taxonConnectivity.push(item)
+        })
+      })
     },
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
@@ -955,7 +967,7 @@ export default {
     },
     openFlatmapHelpPopup: function () {
       if (this.mapImp) {
-        let heartId = this.mapImp.featureIdsForModel('UBERON:0000948')[0]
+        let heartId = this.mapImp._modelToFeatureIds['UBERON:0000948'][0]
         const elm = 'Click for more information'
         this.mapImp.showPopup(heartId, elm, {
           anchor: 'top',
@@ -1138,11 +1150,8 @@ export default {
       this.mapImp.enableCentrelines(false)
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
-      this.systems = processSystems(this.mapImp.getSystems())
-      this.taxonConnectivity = processTaxon(
-        this.flatmapAPI,
-        this.mapImp.taxonIdentifiers
-      )
+      this.processSystems(this.mapImp.getSystems())
+      this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
@@ -1857,7 +1866,9 @@ export default {
 }
 
 :deep(.el-loading-spinner) {
-  i,
+  .path {
+    stroke: $app-primary-color;
+  }
   .el-loading-text {
     color: $app-primary-color;
   }

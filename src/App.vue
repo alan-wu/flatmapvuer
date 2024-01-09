@@ -9,16 +9,16 @@
     >
       <div class="options-container">
         <el-row :gutter="20">
-          <el-button @click="helpMode = !helpMode" size="mini"
+          <el-button @click="helpMode = !helpMode" size="small"
             >Help Mode</el-button
           >
-          <el-button @click="saveSettings()" size="mini"
+          <el-button @click="saveSettings()" size="small"
             >Save Settings</el-button
           >
           <el-button
             :disabled="mapSettings.length === 0"
             @click="restoreSettings()"
-            size="mini"
+            size="small"
             >Restore Settings</el-button
           >
           <el-autocomplete
@@ -33,9 +33,10 @@
           </el-autocomplete>
         </el-row>
       </div>
-      <el-button class="options-button" :icon="ElIconSetting" slot="reference"
-        >Options</el-button
-      >
+      <template #reference>
+        <el-button class="options-button" :icon="ElIconSetting"
+          >Options</el-button>
+      </template>
     </el-popover>
 
     <MultiFlatmapVuer
@@ -78,13 +79,9 @@ export default {
     Autocomplete,
     Button,
     Col,
+    ElIconSetting,
     Popover,
     Row,
-  },
-  data() {
-    return {
-      ElIconSetting,
-    }
   },
   methods: {
     saveSettings: function () {
@@ -215,7 +212,8 @@ export default {
       flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
-      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/"
+      // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
+      ElIconSetting,
     }
   },
   components: {
@@ -286,6 +284,11 @@ body {
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+.options-button {
+  z-index:100;
+  position: absolute;
 }
 
 .options-container {
