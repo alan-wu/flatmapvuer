@@ -41,6 +41,21 @@ export default defineConfig(({ command, mode }) => {
         // https://github.com/antfu/unocss
         // see unocss.config.ts for config
     ],
+    build: {
+      lib: {
+        entry: path.resolve(__dirname, "./src/components/index.js"),
+        name: "FlatmapVuer",
+        fileName: 'flatmapvuer',
+      },
+      rollupOptions: {
+        external: ["vue"],
+        output: {
+          globals: {
+            vue: "Vue",
+          },
+        },
+      },
+    },
   };
 
   if (command === 'serve') {
