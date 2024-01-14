@@ -34,8 +34,9 @@
         </el-row>
       </div>
       <template #reference>
-        <el-button class="options-button" :icon="ElIconSetting"
-          >Options</el-button>
+        <!-- <el-button class="options-button" :icon="ElIconSetting"
+          >Options</el-button> -->
+        <el-button class="options-button">Options</el-button>
       </template>
     </el-popover>
 

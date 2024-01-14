@@ -24,7 +24,13 @@ export default defineConfig(({ command, mode }) => {
         },
     },
     plugins: [
-        vue(),
+        vue({
+          template: {
+            compilerOptions: {
+              isCustomElement: (tag) => ['bx:grid'].includes(tag),
+            }
+          }
+        }),
         Components({
           // allow auto load markdown components under `./src/components/`
           extensions: ['vue', 'md'],
@@ -41,6 +47,21 @@ export default defineConfig(({ command, mode }) => {
         // https://github.com/antfu/unocss
         // see unocss.config.ts for config
     ],
+    build: {
+      lib: {
+        entry: path.resolve(__dirname, "./src/components/index.js"),
+        name: "FlatmapVuer",
+        fileName: 'flatmapvuer',
+      },
+      rollupOptions: {
+        external: ["vue"],
+        output: {
+          globals: {
+            vue: "Vue",
+          },
+        },
+      },
+    },
   };
 
   if (command === 'serve') {
