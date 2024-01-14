@@ -24,7 +24,13 @@ export default defineConfig(({ command, mode }) => {
         },
     },
     plugins: [
-        vue(),
+        vue({
+          template: {
+            compilerOptions: {
+              isCustomElement: (tag) => ['bx:grid'].includes(tag),
+            }
+          }
+        }),
         Components({
           // allow auto load markdown components under `./src/components/`
           extensions: ['vue', 'md'],

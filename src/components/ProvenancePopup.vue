@@ -35,10 +35,12 @@
               :append-to-body="false"
               popper-class="popover-origin-help"
             >
-              <el-icon class="info"><el-icon-warning /></el-icon>
-              <span style="word-break: keep-all">
-                <i>Origin</i> {{ originDescription }}
-              </span>
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+                <span style="word-break: keep-all">
+                  <i>Origin</i> {{ originDescription }}
+                </span>
+              </template>
             </el-popover>
           </div>
           <div
@@ -88,10 +90,12 @@
               :append-to-body="false"
               popper-class="popover-origin-help"
             >
-              <el-icon class="info"><el-icon-warning /></el-icon>
-              <span style="word-break: keep-all">
-                <i>Destination</i> is where the axons terminate
-              </span>
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+                <span style="word-break: keep-all">
+                  <i>Destination</i> is where the axons terminate
+                </span>
+              </template>
             </el-popover>
           </div>
           <div

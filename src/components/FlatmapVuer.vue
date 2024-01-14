@@ -66,25 +66,27 @@
               >. New connectivity and species specificity will be added as the
               SPARC program progresses.
             </p>
-          </el-popover>
-          <div
-            class="el-icon-warning warning-icon"
-            v-if="displayWarning"
-            @mouseover="showToolitip(6)"
-            @mouseout="hideToolitip(6)"
-            v-popover:warningPopover
-          >
-            <el-icon><el-icon-warning-filled /></el-icon>
-            <template v-if="isLegacy">
-              <span class="warning-text">Legacy Map</span>
-              <div class="latest-map-text" @click="viewLatestMap">
-                Click here for the latest map
+            <template #reference>
+              <div
+                class="el-icon-warning warning-icon"
+                v-if="displayWarning"
+                @mouseover="showToolitip(6)"
+                @mouseout="hideToolitip(6)"
+                v-popover:warningPopover
+              >
+                <el-icon><el-icon-warning-filled /></el-icon>
+                <template v-if="isLegacy">
+                  <span class="warning-text">Legacy Map</span>
+                  <div class="latest-map-text" @click="viewLatestMap">
+                    Click here for the latest map
+                  </div>
+                </template>
+                <template v-else>
+                  <span class="warning-text">Beta</span>
+                </template>
               </div>
             </template>
-            <template v-else>
-              <span class="warning-text">Beta</span>
-            </template>
-          </div>
+          </el-popover>
         </div>
         <el-popover
           placement="right"
@@ -163,15 +165,15 @@
           popper-class="flatmap-popper popper-zoomout"
           :visible="hoverVisibilities[1].value"
         >
-        <template #reference>
-          <map-svg-icon
-            icon="zoomOut"
-            class="icon-button zoomOut"
-            @click.native="zoomOut()"
-            @mouseover.native="showToolitip(1)"
-            @mouseout.native="hideToolitip(1)"
-          />
-        </template>
+          <template #reference>
+            <map-svg-icon
+              icon="zoomOut"
+              class="icon-button zoomOut"
+              @click.native="zoomOut()"
+              @mouseover.native="showToolitip(1)"
+              @mouseout.native="hideToolitip(1)"
+            />
+          </template>
         </el-popover>
         <el-popover
           content="Reset"
@@ -205,128 +207,136 @@
         popper-class="flatmap-popper right-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
-      />
-      <div
-        class="pathway-location"
-        :class="{ open: drawerOpen, close: !drawerOpen }"
       >
-        <div
-          class="pathway-container"
-          :class="{ open: drawerOpen, close: !drawerOpen }"
-          :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
-          v-if="pathControls"
-          v-popover:checkBoxPopover
-        >
-          <svg-legends v-if="!isFC" class="svg-legends-container" />
-          <el-popover
-            content="Location of the featured dataset"
-            placement="right"
-            :appendToBody="false"
-            trigger="hover"
-            popper-class="flatmap-popper popper-bump-right right-popper"
-            :visible="hoverVisibilities[9].value"
-            ref="featuredMarkerPopover"
+        <template #reference>
+          <div
+            class="pathway-location"
+            :class="{ open: drawerOpen, close: !drawerOpen }"
           >
-          </el-popover>
-          <div
-            v-show="showStarInLegend"
-            v-popover:featuredMarkerPopover
-            class="yellow-star-legend"
-            v-html="yellowstar"
-          ></div>
-          <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
+            <div
+              class="pathway-container"
+              :class="{ open: drawerOpen, close: !drawerOpen }"
+              :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
+              v-if="pathControls"
+              v-popover:checkBoxPopover
+            >
+              <svg-legends v-if="!isFC" class="svg-legends-container" />
+              <el-popover
+                content="Location of the featured dataset"
+                placement="right"
+                :appendToBody="false"
+                trigger="hover"
+                popper-class="flatmap-popper popper-bump-right right-popper"
+                :visible="hoverVisibilities[9].value"
+                ref="featuredMarkerPopover"
+              >
+                <template #reference>
+                  <div
+                    v-show="showStarInLegend"
+                    v-popover:featuredMarkerPopover
+                    class="yellow-star-legend"
+                    v-html="yellowstar"
+                  ></div>
+                </template>
+              </el-popover>
+              <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
 
-          <el-popover
-            content="Find these markers for data"
-            placement="right"
-            :appendToBody="false"
-            trigger="manual"
-            popper-class="flatmap-popper popper-bump-right  right-popper"
-            :visible="hoverVisibilities[5].value"
-            ref="markerPopover"
-          ></el-popover>
-          <div
-            v-show="hoverVisibilities[5].value"
-            class="flatmap-marker-help"
-            v-html="flatmapMarker"
-            v-popover:markerPopover
-          ></div>
-          <tree-controls
-            v-if="isFC && systems && systems.length > 0"
-            :active="currentActive"
-            :hover="currentHover"
-            :tree-data="systems"
-            ref="treeControls"
-            @changed="systemSelected"
-            @checkAll="checkAllSystems"
-            @change-active="ftuSelected"
-          />
-          <selections-group
-            v-if="!isFC && centreLines && centreLines.length > 0"
-            title="Nerves"
-            labelKey="label"
-            identifierKey="key"
-            :selections="centreLines"
-            @changed="centreLinesSelected"
-            ref="centrelinesSelection"
-            key="centrelinesSelection"
-          />
-          <!--
-            <selections-group
-              v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
-              title="SCKAN"
-              labelKey="label"
-              identifierKey="key"
-              :selections="sckanDisplay"
-              @changed="sckanSelected"
-              @checkAll="checkAllSCKAN"
-              ref="skcanSelection"
-              key="skcanSelection"
-            />
-            <selections-group
-              v-if="layers && layers.length > 0"
-              title="Layers"
-              labelKey="description"
-              identifierKey="id"
-              :selections="layers"
-              @changed="layersSelected"
-              @checkAll="checkAllLayers"
-              ref="layersSelection"
-              key="layersSelection"
-            />
-            -->
-          <selections-group
-            v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
-            title="Observed in"
-            labelKey="label"
-            identifierKey="taxon"
-            :selections="taxonConnectivity"
-            @changed="taxonsSelected"
-            @checkAll="checkAllTaxons"
-            ref="taxonSelection"
-            key="taxonSelection"
-          />
-          <selections-group
-            v-if="pathways && pathways.length > 0"
-            title="Pathways"
-            labelKey="label"
-            identifierKey="type"
-            colourStyle="line"
-            :selections="pathways"
-            @changed="pathwaysSelected"
-            @checkAll="checkAllPathways"
-            ref="pathwaysSelection"
-            key="pathwaysSelection"
-          />
-        </div>
-        <div
-          @click="toggleDrawer"
-          class="drawer-button"
-          :class="{ open: drawerOpen, close: !drawerOpen }"
-        >
-          <el-icon><el-icon-arrow-left /></el-icon>
-        </div>
-      </div>
+              <el-popover
+                content="Find these markers for data"
+                placement="right"
+                :appendToBody="false"
+                trigger="manual"
+                popper-class="flatmap-popper popper-bump-right  right-popper"
+                :visible="hoverVisibilities[5].value"
+                ref="markerPopover"
+              >
+                <template #reference>
+                  <div
+                    v-show="hoverVisibilities[5].value"
+                    class="flatmap-marker-help"
+                    v-html="flatmapMarker"
+                    v-popover:markerPopover
+                  ></div>
+                </template>
+              </el-popover>
+              <tree-controls
+                v-if="isFC && systems && systems.length > 0"
+                :active="currentActive"
+                :hover="currentHover"
+                :tree-data="systems"
+                ref="treeControls"
+                @changed="systemSelected"
+                @checkAll="checkAllSystems"
+                @change-active="ftuSelected"
+              />
+              <selections-group
+                v-if="!isFC && centreLines && centreLines.length > 0"
+                title="Nerves"
+                labelKey="label"
+                identifierKey="key"
+                :selections="centreLines"
+                @changed="centreLinesSelected"
+                ref="centrelinesSelection"
+                key="centrelinesSelection"
+              />
+              <!--             
+                <selections-group
+                  v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
+                  title="SCKAN"
+                  labelKey="label"
+                  identifierKey="key"
+                  :selections="sckanDisplay"
+                  @changed="sckanSelected"
+                  @checkAll="checkAllSCKAN"
+                  ref="skcanSelection"
+                  key="skcanSelection"
+                />
+                <selections-group
+                  v-if="layers && layers.length > 0"
+                  title="Layers"
+                  labelKey="description"
+                  identifierKey="id"
+                  :selections="layers"
+                  @changed="layersSelected"
+                  @checkAll="checkAllLayers"
+                  ref="layersSelection"
+                  key="layersSelection"
+                />
+              -->
+              <selections-group
+                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+                title="Observed in"
+                labelKey="label"
+                identifierKey="taxon"
+                :selections="taxonConnectivity"
+                @changed="taxonsSelected"
+                @checkAll="checkAllTaxons"
+                ref="taxonSelection"
+                key="taxonSelection"
+              />
+              <selections-group
+                v-if="pathways && pathways.length > 0"
+                title="Pathways"
+                labelKey="label"
+                identifierKey="type"
+                colourStyle="line"
+                :selections="pathways"
+                @changed="pathwaysSelected"
+                @checkAll="checkAllPathways"
+                ref="pathwaysSelection"
+                key="pathwaysSelection"
+              />
+            </div>
+            <div
+              @click="toggleDrawer"
+              class="drawer-button"
+              :class="{ open: drawerOpen, close: !drawerOpen }"
+            >
+              <el-icon><el-icon-arrow-left /></el-icon>
+            </div>
+          </div>
+        </template>
+      </el-popover>
       <el-popover
         ref="open-map-popover"
         placement="top-start"
@@ -335,11 +345,15 @@
         trigger="click"
         popper-class="open-map-popper non-selectable"
       >
-        <el-row v-for="item in openMapOptions" :key="item.key">
-          <el-button type="primary" plain @click="$emit('open-map', item.key)">
-            {{ item.display }}
-          </el-button>
-        </el-row>
+        <template #reference>
+          <div>
+            <el-row v-for="item in openMapOptions" :key="item.key">
+              <el-button type="primary" plain @click="$emit('open-map', item.key)">
+                {{ item.display }}
+              </el-button>
+            </el-row>
+          </div>
+        </template>
       </el-popover>
       <el-popover
         ref="backgroundPopover"
@@ -349,65 +363,69 @@
         trigger="click"
         popper-class="background-popper"
       >
-        <el-row class="backgroundText">Viewing Mode</el-row>
-        <el-row class="backgroundControl">
-          <el-select
-            :popper-append-to-body="false"
-            v-model="viewingMode"
-            placeholder="Select"
-            class="select-box"
-            popper-class="flatmap_dropdown"
-          >
-            <el-option
-              v-for="item in viewingModes"
-              :key="item"
-              :label="item"
-              :value="item"
-            >
-              <el-row>
-                <el-col :span="12">{{ item }}</el-col>
-              </el-row>
-            </el-option>
-          </el-select>
-        </el-row>
-        <el-row class="backgroundSpacer"></el-row>
-        <el-row class="backgroundText">Organs display</el-row>
-        <el-row class="backgroundControl">
-          <el-radio-group
-            v-model="colourRadio"
-            class="flatmap-radio"
-            @change="setColour"
-          >
-            <el-radio :label="true">Colour</el-radio>
-            <el-radio :label="false">Greyscale</el-radio>
-          </el-radio-group>
-        </el-row>
-        <el-row class="backgroundSpacer"></el-row>
-        <el-row class="backgroundText">Outlines display</el-row>
-        <el-row class="backgroundControl">
-          <el-radio-group
-            v-model="outlinesRadio"
-            class="flatmap-radio"
-            @change="setOutlines"
-          >
-            <el-radio :label="true">Show</el-radio>
-            <el-radio :label="false">Hide</el-radio>
-          </el-radio-group>
-        </el-row>
-        <el-row class="backgroundSpacer"></el-row>
-        <el-row class="backgroundText">Change background</el-row>
-        <el-row class="backgroundControl">
-          <div
-            v-for="item in availableBackground"
-            :key="item"
-            :class="[
-              'backgroundChoice',
-              item,
-              item == currentBackground ? 'active' : '',
-            ]"
-            @click="backgroundChangeCallback(item)"
-          />
-        </el-row>
+        <template #reference>
+          <div>
+            <el-row class="backgroundText">Viewing Mode</el-row>
+            <el-row class="backgroundControl">
+              <el-select
+                :popper-append-to-body="false"
+                v-model="viewingMode"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+              >
+                <el-option
+                  v-for="item in viewingModes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-row>
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Organs display</el-row>
+            <el-row class="backgroundControl">
+              <el-radio-group
+                v-model="colourRadio"
+                class="flatmap-radio"
+                @change="setColour"
+              >
+                <el-radio :label="true">Colour</el-radio>
+                <el-radio :label="false">Greyscale</el-radio>
+              </el-radio-group>
+            </el-row>
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Outlines display</el-row>
+            <el-row class="backgroundControl">
+              <el-radio-group
+                v-model="outlinesRadio"
+                class="flatmap-radio"
+                @change="setOutlines"
+              >
+                <el-radio :label="true">Show</el-radio>
+                <el-radio :label="false">Hide</el-radio>
+              </el-radio-group>
+            </el-row>
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Change background</el-row>
+            <el-row class="backgroundControl">
+              <div
+                v-for="item in availableBackground"
+                :key="item"
+                :class="[
+                  'backgroundChoice',
+                  item,
+                  item == currentBackground ? 'active' : '',
+                ]"
+                @click="backgroundChangeCallback(item)"
+              />
+            </el-row>
+          </div>
+        </template>
       </el-popover>
       <div
         class="settings-group"
@@ -419,19 +437,18 @@
             content="Open new map"
             placement="right"
             :append-to-body="false"
-            trigger="manual"
             popper-class="flatmap-popper right-popper"
           >
-          <template #reference>
-            <map-svg-icon
-              v-if="enableOpenMapUI && openMapOptions.length > 0"
-              v-popover:open-map-popover
-              icon="openMap"
-              class="icon-button"
-              @mouseover.native="showToolitip(8)"
-              @mouseout.native="hideToolitip(8)"
-            />
-          </template>
+            <template #reference>
+              <map-svg-icon
+                v-if="enableOpenMapUI && openMapOptions.length > 0"
+                v-popover:open-map-popover
+                icon="openMap"
+                class="icon-button"
+                @mouseover.native="showToolitip(8)"
+                @mouseout.native="hideToolitip(8)"
+              />
+            </template>
           </el-popover>
         </el-row>
         <el-row>
@@ -443,15 +460,15 @@
             trigger="manual"
             popper-class="flatmap-popper right-popper"
           >
-          <template #reference>
-            <map-svg-icon
-              v-popover:backgroundPopover
-              icon="changeBckgd"
-              class="icon-button"
-              @mouseover.native="showToolitip(3)"
-              @mouseout.native="hideToolitip(3)"
-            />
-          </template>
+            <template #reference>
+              <map-svg-icon
+                v-popover:backgroundPopover
+                icon="changeBckgd"
+                class="icon-button"
+                @mouseover.native="showToolitip(3)"
+                @mouseout.native="hideToolitip(3)"
+              />
+            </template>
           </el-popover>
         </el-row>
       </div>
