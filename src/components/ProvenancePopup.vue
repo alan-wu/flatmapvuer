@@ -32,7 +32,7 @@
             <el-popover
               width="250"
               trigger="hover"
-              :append-to-body="false"
+              :teleported="false"
               popper-class="popover-origin-help"
             >
               <template #reference>
@@ -87,7 +87,7 @@
             <el-popover
               width="250"
               trigger="hover"
-              :append-to-body="false"
+              :teleported="false"
               popper-class="popover-origin-help"
             >
               <template #reference>
@@ -196,7 +196,6 @@ export default {
     return {
       controller: undefined,
       activeSpecies: undefined,
-      appendToBody: false,
       pubmedSearchUrl: '',
       loading: false,
       showToolip: false,

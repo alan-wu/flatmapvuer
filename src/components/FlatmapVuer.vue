@@ -15,7 +15,8 @@
         <div>
           <el-popover
             placement="right"
-            popper-class="warning-popper flatmap-popper right-popper"
+            popper-class="warning-popper flatmap-popper"
+            :teleported="false"
             :visible="hoverVisibilities[6].value"
             ref="warningPopover"
           >
@@ -91,9 +92,9 @@
         <el-popover
           placement="right"
           v-if="displayLatestChanges"
-          :appendToBody="false"
+          :teleported="false"
           trigger="manual"
-          popper-class="warning-popper flatmap-popper right-popper"
+          popper-class="warning-popper flatmap-popper"
           :visible="hoverVisibilities[7].value"
           ref="latestChangesPopover"
         >
@@ -142,9 +143,10 @@
         <el-popover
           content="Zoom in"
           placement="left"
-          :appendToBody="false"
+          :teleported="false"
           trigger="manual"
-          popper-class="flatmap-popper left-popper"
+          width="70"
+          popper-class="flatmap-popper"
           :visible="hoverVisibilities[0].value"
         >
           <template #reference>
@@ -160,8 +162,9 @@
         <el-popover
           content="Zoom out"
           placement="top-end"
-          :appendToBody="false"
+          :teleported="false"
           trigger="manual"
+          width="70"
           popper-class="flatmap-popper popper-zoomout"
           :visible="hoverVisibilities[1].value"
         >
@@ -178,8 +181,9 @@
         <el-popover
           content="Reset"
           placement="top"
-          :appendToBody="false"
+          :teleported="false"
           trigger="manual"
+          width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[2].value"
         >
@@ -202,9 +206,9 @@
       <el-popover
         content="Change pathway visibility"
         placement="right"
-        :appendToBody="false"
+        :teleported="false"
         trigger="manual"
-        popper-class="flatmap-popper right-popper"
+        popper-class="flatmap-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
       >
@@ -224,9 +228,9 @@
               <el-popover
                 content="Location of the featured dataset"
                 placement="right"
-                :appendToBody="false"
+                :teleported="false"
                 trigger="hover"
-                popper-class="flatmap-popper popper-bump-right right-popper"
+                popper-class="flatmap-popper popper-bump-right"
                 :visible="hoverVisibilities[9].value"
                 ref="featuredMarkerPopover"
               >
@@ -244,9 +248,9 @@
               <el-popover
                 content="Find these markers for data"
                 placement="right"
-                :appendToBody="false"
+                :teleported="false"
                 trigger="manual"
-                popper-class="flatmap-popper popper-bump-right  right-popper"
+                popper-class="flatmap-popper popper-bump-right"
                 :visible="hoverVisibilities[5].value"
                 ref="markerPopover"
               >
@@ -338,94 +342,95 @@
         </template>
       </el-popover>
       <el-popover
+        v-if="openMapRef"
         ref="open-map-popover"
+        :virtual-ref="openMapRef"
         placement="top-start"
-        width="128"
-        :append-to-body="false"
+        width="136"
+        :teleported="false"
         trigger="click"
         popper-class="open-map-popper non-selectable"
+        virtual-triggering
       >
-        <template #reference>
-          <div>
-            <el-row v-for="item in openMapOptions" :key="item.key">
-              <el-button type="primary" plain @click="$emit('open-map', item.key)">
-                {{ item.display }}
-              </el-button>
-            </el-row>
-          </div>
-        </template>
+        <div>
+          <el-row v-for="item in openMapOptions" :key="item.key">
+            <el-button type="primary" plain @click="$emit('open-map', item.key)">
+              {{ item.display }}
+            </el-button>
+          </el-row>
+        </div>
       </el-popover>
       <el-popover
         ref="backgroundPopover"
+        :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="175"
-        :appendToBody="false"
+        width="200"
+        :teleported="false"
         trigger="click"
         popper-class="background-popper"
+        virtual-triggering
       >
-        <template #reference>
-          <div>
-            <el-row class="backgroundText">Viewing Mode</el-row>
-            <el-row class="backgroundControl">
-              <el-select
-                :popper-append-to-body="false"
-                v-model="viewingMode"
-                placeholder="Select"
-                class="select-box"
-                popper-class="flatmap_dropdown"
-              >
-                <el-option
-                  v-for="item in viewingModes"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-                >
-                  <el-row>
-                    <el-col :span="12">{{ item }}</el-col>
-                  </el-row>
-                </el-option>
-              </el-select>
-            </el-row>
-            <el-row class="backgroundSpacer"></el-row>
-            <el-row class="backgroundText">Organs display</el-row>
-            <el-row class="backgroundControl">
-              <el-radio-group
-                v-model="colourRadio"
-                class="flatmap-radio"
-                @change="setColour"
-              >
-                <el-radio :label="true">Colour</el-radio>
-                <el-radio :label="false">Greyscale</el-radio>
-              </el-radio-group>
-            </el-row>
-            <el-row class="backgroundSpacer"></el-row>
-            <el-row class="backgroundText">Outlines display</el-row>
-            <el-row class="backgroundControl">
-              <el-radio-group
-                v-model="outlinesRadio"
-                class="flatmap-radio"
-                @change="setOutlines"
-              >
-                <el-radio :label="true">Show</el-radio>
-                <el-radio :label="false">Hide</el-radio>
-              </el-radio-group>
-            </el-row>
-            <el-row class="backgroundSpacer"></el-row>
-            <el-row class="backgroundText">Change background</el-row>
-            <el-row class="backgroundControl">
-              <div
-                v-for="item in availableBackground"
+        <div>
+          <el-row class="backgroundText">Viewing Mode</el-row>
+          <el-row class="backgroundControl">
+            <el-select
+              :teleported="false"
+              v-model="viewingMode"
+              placeholder="Select"
+              class="select-box"
+              popper-class="flatmap_dropdown"
+            >
+              <el-option
+                v-for="item in viewingModes"
                 :key="item"
-                :class="[
-                  'backgroundChoice',
-                  item,
-                  item == currentBackground ? 'active' : '',
-                ]"
-                @click="backgroundChangeCallback(item)"
-              />
-            </el-row>
-          </div>
-        </template>
+                :label="item"
+                :value="item"
+              >
+                <el-row>
+                  <el-col :span="12">{{ item }}</el-col>
+                </el-row>
+              </el-option>
+            </el-select>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Organs display</el-row>
+          <el-row class="backgroundControl">
+            <el-radio-group
+              v-model="colourRadio"
+              class="flatmap-radio"
+              @change="setColour"
+            >
+              <el-radio :label="true">Colour</el-radio>
+              <el-radio :label="false">Greyscale</el-radio>
+            </el-radio-group>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Outlines display</el-row>
+          <el-row class="backgroundControl">
+            <el-radio-group
+              v-model="outlinesRadio"
+              class="flatmap-radio"
+              @change="setOutlines"
+            >
+              <el-radio :label="true">Show</el-radio>
+              <el-radio :label="false">Hide</el-radio>
+            </el-radio-group>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Change background</el-row>
+          <el-row class="backgroundControl">
+            <div
+              v-for="item in availableBackground"
+              :key="item"
+              :class="[
+                'backgroundChoice',
+                item,
+                item == currentBackground ? 'active' : '',
+              ]"
+              @click="backgroundChangeCallback(item)"
+            />
+          </el-row>
+        </div>
       </el-popover>
       <div
         class="settings-group"
@@ -436,13 +441,13 @@
             :visible="hoverVisibilities[8].value"
             content="Open new map"
             placement="right"
-            :append-to-body="false"
-            popper-class="flatmap-popper right-popper"
+            :teleported="false"
+            popper-class="flatmap-popper"
           >
             <template #reference>
               <map-svg-icon
                 v-if="enableOpenMapUI && openMapOptions.length > 0"
-                v-popover:open-map-popover
+                ref="openMapRef"
                 icon="openMap"
                 class="icon-button"
                 @mouseover.native="showToolitip(8)"
@@ -456,13 +461,13 @@
             content="Change settings"
             placement="right"
             :visible="hoverVisibilities[3].value"
-            :appendToBody="false"
+            :teleported="false"
             trigger="manual"
-            popper-class="flatmap-popper right-popper"
+            popper-class="flatmap-popper"
           >
             <template #reference>
               <map-svg-icon
-                v-popover:backgroundPopover
+                ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
                 @mouseover.native="showToolitip(3)"
@@ -484,6 +489,7 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -918,7 +924,6 @@ export default {
       let minimapEl = this.$refs.flatmapContainer.querySelector(
         '.maplibregl-ctrl-minimap'
       ) // find minimap
-      console.log(minimapEl)
       if (this.minimapSmall) {
         //switch the classes on the minimap
         minimapEl.classList.add('enlarge')
@@ -984,12 +989,14 @@ export default {
     },
     openFlatmapHelpPopup: function () {
       if (this.mapImp) {
-        let heartId = this.mapImp._modelToFeatureIds['UBERON:0000948'][0]
-        const elm = 'Click for more information'
-        this.mapImp.showPopup(heartId, elm, {
-          anchor: 'top',
-          className: 'flatmap-popup-popper',
-        })
+        let heartId = this.mapImp.modelFeatureIds('UBERON:0000948')
+        if (heartId && heartId.length > 0) {
+          const elm = 'Click for more information'
+          this.mapImp.showPopup(heartId[0], elm, {
+            anchor: 'top',
+            className: 'flatmap-popup-popper',
+          })
+        }
       }
     },
     closeFlatmapHelpPopup: function () {
@@ -1148,7 +1155,7 @@ export default {
           this.mapImp.resize()
           this.showMinimap(this.displayMinimap)
           if (this.mapImp._minimap) {
-            this.mapImp._minimap.resize()
+            this.mapImp._minimap._miniMap.resize()
           }
         }
       } catch {
@@ -1395,6 +1402,8 @@ export default {
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
+      openMapRef: undefined,
+      backgroundIconRef: undefined,
     }
   },
   watch: {
@@ -1418,6 +1427,8 @@ export default {
     },
   },
   mounted: function () {
+    this.openMapRef = ref(this.$refs.openMapRef)
+    this.backgroundIconRef = ref(this.$refs.backgroundIconRef)
     this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
     this.mapManager = new flatmap.MapManager(this.flatmapAPI)
@@ -1666,7 +1677,7 @@ export default {
   }
 }
 
-:deep( .flatmapvuer-popover) {
+:deep(.flatmapvuer-popover) {
   .maplibregl-popup-close-button {
     position: absolute;
     right: 0.5em;
@@ -1706,32 +1717,27 @@ export default {
   }
 }
 
-:deep(.background-popper) {
+:deep(.background-popper.el-popover.el-popper) {
   padding: 5px 12px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 270px;
-  width: 175px;
-  min-width: 175px;
-  &.el-popper[x-placement^='top'] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &::after {
-        border-top-color: #fff !important;
-      }
+  height: 290px;
+  min-width: 200px;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
     }
   }
 }
 
-:deep(.open-map-popper) {
+:deep(.open-map-popper.el-popover.el-popper) {
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  width: 178px;
-  min-width: 178px;
+  min-width: 188px;
 
   .el-row ~ .el-row {
     margin-top: 8px;
@@ -1740,14 +1746,14 @@ export default {
   .el-button {
     padding-top: 5px;
     padding-bottom: 5px;
+    background: #f3e6f9;
+    border-color: $app-primary-color;
+    color: $app-primary-color;
   }
 
-  &.el-popper[x-placement^='top'] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #fff !important;
-      }
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
     }
   }
 }
@@ -1761,7 +1767,6 @@ export default {
 
 .backgroundControl {
   display: flex;
-  margin-top: 12px;
 }
 
 .backgroundChoice {
@@ -1842,7 +1847,7 @@ export default {
   }
 }
 
-:deep(.flatmap-popper) {
+:deep(.flatmap-popper.el-popper.el-popper) {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -1856,28 +1861,10 @@ export default {
     word-break: keep-all;
     white-space: unset;
   }
-  &.left-popper {
-    .popper__arrow {
-      border-left-color: $app-primary-color !important;
-      &::after {
-        border-left-color: #f3ecf6 !important;
-      }
-    }
-  }
-  &.right-popper {
-    .popper__arrow {
-      border-right-color: $app-primary-color !important;
-      &:after {
-        border-right-color: #f3ecf6 !important;
-      }
-    }
-  }
-  &.el-popper[x-placement^='top'] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #f3ecf6 !important;
-      }
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #f3ecf6;
     }
   }
 }

@@ -8,12 +8,13 @@
         trigger="manual"
         popper-class="flatmap-popper right-popper"
         :visible="helpMode"
+        :teleported="false"
         ref="selectPopover"
       >
         <template #reference>
           <el-select
             id="flatmap-select"
-            :popper-append-to-body="appendToBody"
+            :teleported="false"
             v-model="activeSpecies"
             placeholder="Select"
             class="select-box"
@@ -502,7 +503,6 @@ export default {
   data: function () {
     return {
       activeSpecies: undefined,
-      appendToBody: false,
       speciesList: {},
       requireInitialisation: true,
     }

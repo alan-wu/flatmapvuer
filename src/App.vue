@@ -5,7 +5,7 @@
       trigger="click"
       width="500"
       class="popover"
-      :appendToBody="false"
+      :teleported="false"
     >
       <div class="options-container">
         <el-row :gutter="20">
@@ -29,14 +29,14 @@
             @keyup.enter.native="search"
             @select="search"
             popper-class="autocomplete-popper"
+            :teleported="false"
           >
           </el-autocomplete>
         </el-row>
       </div>
       <template #reference>
-        <!-- <el-button class="options-button" :icon="ElIconSetting"
-          >Options</el-button> -->
-        <el-button class="options-button">Options</el-button>
+        <el-button class="options-button" :icon="ElIconSetting"
+          >Options</el-button>
       </template>
     </el-popover>
 
@@ -62,6 +62,7 @@
 </template>
 
 <script>
+import { shallowRef } from 'vue';
 import { Setting as ElIconSetting } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
@@ -214,7 +215,7 @@ export default {
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
-      ElIconSetting,
+      ElIconSetting: shallowRef(ElIconSetting)
     }
   },
   components: {

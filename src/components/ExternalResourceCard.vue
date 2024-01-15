@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { shallowRef } from 'vue'
 import {
   Notebook as ElIconNotebook,
 } from '@element-plus/icons-vue'
@@ -37,6 +38,7 @@ export default {
     return {
       pubmeds: [],
       pubmedIds: [],
+      ElIconNotebook: shallowRef(ElIconNotebook)
     }
   },
   methods: {
