@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.5.10",
+  "version": "0.6.0-vue3-0",
   "license": "Apache-2.0",
   "files": [
     "dist/*",
