@@ -69,11 +69,10 @@
             </p>
             <template #reference>
               <div
-                class="el-icon-warning warning-icon"
+                class="warning-icon"
                 v-if="displayWarning"
                 @mouseover="showToolitip(6)"
                 @mouseout="hideToolitip(6)"
-                v-popover:warningPopover
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
@@ -96,7 +95,6 @@
           trigger="manual"
           popper-class="warning-popper flatmap-popper"
           :visible="hoverVisibilities[7].value"
-          ref="latestChangesPopover"
         >
           <template #reference>
             <div
@@ -104,7 +102,6 @@
               v-if="displayLatestChanges"
               @mouseover="showToolitip(7)"
               @mouseout="hideToolitip(7)"
-              v-popover:latestChangesPopover
             >
               <el-icon><el-icon-warning-filled /></el-icon>
               <span class="warning-text">What's new?</span>
@@ -352,13 +349,11 @@
         popper-class="open-map-popper non-selectable"
         virtual-triggering
       >
-        <div>
-          <el-row v-for="item in openMapOptions" :key="item.key">
-            <el-button type="primary" plain @click="$emit('open-map', item.key)">
-              {{ item.display }}
-            </el-button>
-          </el-row>
-        </div>
+        <el-row v-for="item in openMapOptions" :key="item.key">
+          <el-button type="primary" plain @click="$emit('open-map', item.key)">
+            {{ item.display }}
+          </el-button>
+        </el-row>
       </el-popover>
       <el-popover
         ref="backgroundPopover"
@@ -489,7 +484,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { shallowRef } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -500,7 +495,7 @@ import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
 //import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
-import { MapSvgIcon, MapSvgSpriteColor } from 'vue3-component-svg-sprite'
+import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import SvgLegends from './legends/SvgLegends.vue'
 import {
   ElButton as Button,
@@ -1427,8 +1422,8 @@ export default {
     },
   },
   mounted: function () {
-    this.openMapRef = ref(this.$refs.openMapRef)
-    this.backgroundIconRef = ref(this.$refs.backgroundIconRef)
+    this.openMapRef = shallowRef(this.$refs.openMapRef)
+    this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
     this.mapManager = new flatmap.MapManager(this.flatmapAPI)
