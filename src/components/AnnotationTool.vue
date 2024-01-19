@@ -86,7 +86,7 @@
                 >
                   <template #prepend>
                     <el-select
-                      :popper-append-to-body="false"
+                      :teleported="false"
                       v-model="evidencePrefix"
                       placeholder="Select"
                       class="select-box"
@@ -299,7 +299,7 @@ export default {
   },
   mounted: function () {
     if (!this.$annotator) {
-      Vue.prototype.$annotator = new AnnotationService(
+      this.$annotator = new AnnotationService(
         `${this.flatmapAPI}annotator`
       )
     }

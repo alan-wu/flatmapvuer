@@ -4,14 +4,6 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import Unocss from 'unocss/vite'
-import {
-  presetAttributify,
-  presetIcons,
-  presetUno,
-  transformerDirectives,
-  transformerVariantGroup,
-} from 'unocss'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
@@ -24,7 +16,13 @@ export default defineConfig(({ command, mode }) => {
         },
     },
     plugins: [
-        vue(),
+        vue({
+          template: {
+            compilerOptions: {
+              isCustomElement: (tag) => ['bx:grid'].includes(tag),
+            }
+          }
+        }),
         Components({
           // allow auto load markdown components under `./src/components/`
           extensions: ['vue', 'md'],
@@ -62,9 +60,6 @@ export default defineConfig(({ command, mode }) => {
     config.server =  {
         port: 8082,
     };
-  } else if (command === "build-bundle") {
-
-
   }
   return config;
 })

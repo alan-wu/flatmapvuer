@@ -32,13 +32,15 @@
             <el-popover
               width="250"
               trigger="hover"
-              :append-to-body="false"
+              :teleported="false"
               popper-class="popover-origin-help"
             >
-              <el-icon class="info"><el-icon-warning /></el-icon>
-              <span style="word-break: keep-all">
-                <i>Origin</i> {{ originDescription }}
-              </span>
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+                <span style="word-break: keep-all">
+                  <i>Origin</i> {{ originDescription }}
+                </span>
+              </template>
             </el-popover>
           </div>
           <div
@@ -85,13 +87,15 @@
             <el-popover
               width="250"
               trigger="hover"
-              :append-to-body="false"
+              :teleported="false"
               popper-class="popover-origin-help"
             >
-              <el-icon class="info"><el-icon-warning /></el-icon>
-              <span style="word-break: keep-all">
-                <i>Destination</i> is where the axons terminate
-              </span>
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+                <span style="word-break: keep-all">
+                  <i>Destination</i> is where the axons terminate
+                </span>
+              </template>
             </el-popover>
           </div>
           <div
@@ -192,7 +196,6 @@ export default {
     return {
       controller: undefined,
       activeSpecies: undefined,
-      appendToBody: false,
       pubmedSearchUrl: '',
       loading: false,
       showToolip: false,

@@ -5,7 +5,7 @@
         <el-button
           v-if="resource.id === 'pubmed'"
           class="button"
-          :icon="ElIconNotebook - 2"
+          :icon="ElIconNotebook"
           @click="openUrl(resource.url)"
         >
           Open publications in pubmed
@@ -16,6 +16,10 @@
 </template>
 
 <script>
+import { shallowRef } from 'vue'
+import {
+  Notebook as ElIconNotebook,
+} from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import { ElButton as Button } from 'element-plus'
 
@@ -34,6 +38,7 @@ export default {
     return {
       pubmeds: [],
       pubmedIds: [],
+      ElIconNotebook: shallowRef(ElIconNotebook)
     }
   },
   methods: {
