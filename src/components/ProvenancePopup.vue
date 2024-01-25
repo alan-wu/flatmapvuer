@@ -273,10 +273,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/button';
-@use 'element-plus/theme-chalk/src/container';
-@use 'element-plus/theme-chalk/src/header';
-@use 'element-plus/theme-chalk/src/main';
 
 .display {
   width: 44px;

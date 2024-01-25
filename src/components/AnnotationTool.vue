@@ -316,12 +316,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/button';
-@use 'element-plus/theme-chalk/src/col';
-@use 'element-plus/theme-chalk/src/input';
-@use 'element-plus/theme-chalk/src/main';
-@use 'element-plus/theme-chalk/src/row';
-@use 'element-plus/theme-chalk/src/select';
 
 .info-field {
   display: flex;
