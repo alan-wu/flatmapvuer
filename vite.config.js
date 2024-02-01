@@ -46,7 +46,7 @@ export default defineConfig(({ command, mode }) => {
         fileName: 'flatmapvuer',
       },
       rollupOptions: {
-        external: ["vue"],
+        external: ["vue" ],
         output: {
           globals: {
             vue: "Vue",

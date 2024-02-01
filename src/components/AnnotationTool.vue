@@ -11,7 +11,7 @@
           class="dialog-text"
           :key="key"
         >
-          <strong>{{ label }}: </strong> {{ annotationEntry[key] }}
+          <strong>{{ label }}: </strong>&nbsp;{{ annotationEntry[key] }}
         </el-row>
         <template v-if="prevSubs.length > 0">
           <div

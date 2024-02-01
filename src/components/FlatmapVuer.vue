@@ -443,7 +443,7 @@
                 v-if="enableOpenMapUI && openMapOptions.length > 0"
                 ref="openMapRef"
                 icon="openMap"
-                class="icon-button"
+                class="icon-button open-map-button"
                 @mouseover.native="showToolitip(8)"
                 @mouseout.native="hideToolitip(8)"
               />
@@ -474,6 +474,7 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
+        v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
@@ -973,6 +974,7 @@ export default {
       }
     },
     displayTooltip: function (feature) {
+      this.tooltipDisplay = true
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,
@@ -1345,6 +1347,10 @@ export default {
   data: function () {
     return {
       annotationEntry: {},
+      //tooltip display has to be set to false until it is rendered
+      //for the first time, otherwise it may display an arrow at a
+      //undesired location.
+      tooltipDisplay: false,
       serverUUID: undefined,
       layers: [],
       pathways: [],
@@ -1785,6 +1791,11 @@ export default {
   height: 24px !important;
   width: 24px !important;
   color: $app-primary-color;
+
+  &.open-map-button {
+    margin-bottom:4px;
+  }
+
   &:hover {
     cursor: pointer;
   }
