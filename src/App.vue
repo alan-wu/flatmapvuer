@@ -26,7 +26,7 @@
             placeholder="Search"
             v-model="searchText"
             :fetch-suggestions="fetchSuggestions"
-            @keyup.enter.native="search"
+            @keyup.enter="search"
             @select="search"
             popper-class="autocomplete-popper"
             :teleported="false"
