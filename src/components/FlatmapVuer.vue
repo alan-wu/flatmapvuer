@@ -241,7 +241,6 @@
                 </template>
               </el-popover>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
-
               <el-popover
                 content="Find these markers for data"
                 placement="right"
@@ -444,7 +443,7 @@
                 v-if="enableOpenMapUI && openMapOptions.length > 0"
                 ref="openMapRef"
                 icon="openMap"
-                class="icon-button"
+                class="icon-button open-map-button"
                 @mouseover.native="showToolitip(8)"
                 @mouseout.native="hideToolitip(8)"
               />
@@ -475,6 +474,7 @@
       <Tooltip
         ref="tooltip"
         class="tooltip"
+        v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
@@ -494,7 +494,6 @@ import {
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
-//import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import SvgLegends from './legends/SvgLegends.vue'
 import {
@@ -975,6 +974,7 @@ export default {
       }
     },
     displayTooltip: function (feature) {
+      this.tooltipDisplay = true
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,
@@ -1347,6 +1347,10 @@ export default {
   data: function () {
     return {
       annotationEntry: {},
+      //tooltip display has to be set to false until it is rendered
+      //for the first time, otherwise it may display an arrow at a
+      //undesired location.
+      tooltipDisplay: false,
       serverUUID: undefined,
       layers: [],
       pathways: [],
@@ -1442,10 +1446,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/button';
-@use 'element-plus/theme-chalk/src/loading';
-@use 'element-plus/theme-chalk/src/row';
-@use 'element-plus/theme-chalk/src/select';
 
 .beta-popovers {
   position: absolute;
@@ -1791,6 +1791,11 @@ export default {
   height: 24px !important;
   width: 24px !important;
   color: $app-primary-color;
+
+  &.open-map-button {
+    margin-bottom:4px;
+  }
+
   &:hover {
     cursor: pointer;
   }
@@ -1842,7 +1847,7 @@ export default {
   }
 }
 
-:deep(.flatmap-popper.el-popper.el-popper) {
+:deep(.flatmap-popper.el-popper) {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -2103,10 +2108,18 @@ export default {
   .el-select-dropdown__item {
     white-space: nowrap;
     text-align: left;
-    &.selected {
+    &.is-selected {
       color: $app-primary-color;
       font-weight: normal;
     }
   }
 }
+</style>
+
+<style lang="scss">
+
+.flatmap-container {
+  --el-color-primary: #8300BF;
+}
+
 </style>

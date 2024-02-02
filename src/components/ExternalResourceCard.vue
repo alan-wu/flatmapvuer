@@ -53,8 +53,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/button';
-
 .attribute-title {
   font-size: 16px;
   font-weight: 600;

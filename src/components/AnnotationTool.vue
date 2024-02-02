@@ -11,7 +11,7 @@
           class="dialog-text"
           :key="key"
         >
-          <strong>{{ label }}: </strong> {{ annotationEntry[key] }}
+          <strong>{{ label }}: </strong>&nbsp;{{ annotationEntry[key] }}
         </el-row>
         <template v-if="prevSubs.length > 0">
           <div
@@ -316,12 +316,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/button';
-@use 'element-plus/theme-chalk/src/col';
-@use 'element-plus/theme-chalk/src/input';
-@use 'element-plus/theme-chalk/src/main';
-@use 'element-plus/theme-chalk/src/row';
-@use 'element-plus/theme-chalk/src/select';
 
 .info-field {
   display: flex;

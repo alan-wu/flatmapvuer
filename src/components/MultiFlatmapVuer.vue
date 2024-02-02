@@ -520,9 +520,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/select';
-@use 'element-plus/theme-chalk/src/option';
-
 .multi-container {
   height: 100%;
   width: 100%;
@@ -600,4 +597,12 @@ export default {
   background-color: #f0f0f000 !important;
   box-shadow: none !important;
 }
+</style>
+
+<style lang="scss">
+
+.multi-container {
+  --el-color-primary: #8300BF;
+}
+
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <el-main v-if="entry" class="main" v-loading="loading">
+  <div v-if="entry" class="main" v-loading="loading">
     <div class="block" v-if="entry.title">
       <span class="title">{{ capitalise(entry.title) }}</span>
       <div
@@ -135,7 +135,7 @@
         <external-resource-card :resources="resources"></external-resource-card>
       </div>
     </transition>
-  </el-main>
+  </div>
 </template>
 
 <script>
@@ -149,7 +149,6 @@ import {
   ElButton as Button,
   ElContainer as Container,
   ElIcon as Icon,
-  ElMain as Main,
 } from 'element-plus'
 
 import EventBus from './EventBus'
@@ -172,7 +171,6 @@ export default {
     Button,
     Container,
     Icon,
-    Main,
     ExternalResourceCard,
     ElIconArrowUp,
     ElIconArrowDown,
@@ -273,10 +271,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/button';
-@use 'element-plus/theme-chalk/src/container';
-@use 'element-plus/theme-chalk/src/header';
-@use 'element-plus/theme-chalk/src/main';
 
 .display {
   width: 44px;
