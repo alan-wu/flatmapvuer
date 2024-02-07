@@ -828,7 +828,7 @@ export default {
             //
             // else: // cancelled
             //
-            //    flatmap.modifyDrawnAnnotation('remove', feature.id)
+            //    flatmap.modifyDrawnAnnotation('remove', feature)
             //
             // see https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.modifyDrawnAnnotatorFeature
             //
@@ -845,7 +845,8 @@ export default {
             //
             // else: // cancelled
             //
-            //    WIP -- details to come.
+            //    flatmap.modifyDrawnAnnotation('add', feature)
+            //
             //
           } else if (data.type === 'updated') {
             //
@@ -857,11 +858,6 @@ export default {
             //
             //    with feature set in annotation (along with other fields
             //    obtained from dialog box)
-
-            // if OK then
-            //   service.updateDrawnFeature(mapid, feature)
-            //
-            //   just service.addAnnotation() with feature field set
             //
             // else: // cancelled
             //
