@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.6.0-vue3.3",
+  "version": "0.6.0-vue3.4",
   "license": "Apache-2.0",
   "files": [
     "dist/*",
@@ -15,9 +15,8 @@
   },
   "scripts": {
     "serve": "vite --host",
-    "build": "vue-cli-service build --dest test_html --mode staging",
     "build-bundle": "vite build",
-    "lint": "vue-cli-service lint",
+    "build-static": "vite build -c vite.static-build.js",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
     "release:minor": "npm version minor; npm publish",
     "release:patch": "npm version patch;  npm publish",

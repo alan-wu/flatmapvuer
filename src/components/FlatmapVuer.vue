@@ -150,9 +150,9 @@
             <map-svg-icon
               icon="zoomIn"
               class="icon-button zoomIn"
-              @click.native="zoomIn()"
-              @mouseover.native="showToolitip(0)"
-              @mouseout.native="hideToolitip(0)"
+              @click="zoomIn()"
+              @mouseover="showToolitip(0)"
+              @mouseout="hideToolitip(0)"
             />
           </template>
         </el-popover>
@@ -169,9 +169,9 @@
             <map-svg-icon
               icon="zoomOut"
               class="icon-button zoomOut"
-              @click.native="zoomOut()"
-              @mouseover.native="showToolitip(1)"
-              @mouseout.native="hideToolitip(1)"
+              @click="zoomOut()"
+              @mouseover="showToolitip(1)"
+              @mouseout="hideToolitip(1)"
             />
           </template>
         </el-popover>
@@ -193,9 +193,9 @@
             <map-svg-icon
               icon="fitWindow"
               class="icon-button fitWindow"
-              @click.native="resetView()"
-              @mouseover.native="showToolitip(2)"
-              @mouseout.native="hideToolitip(2)"
+              @click="resetView()"
+              @mouseover="showToolitip(2)"
+              @mouseout="hideToolitip(2)"
             />
           </template>
         </el-popover>
@@ -444,8 +444,8 @@
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover.native="showToolitip(8)"
-                @mouseout.native="hideToolitip(8)"
+                @mouseover="showToolitip(8)"
+                @mouseout="hideToolitip(8)"
               />
             </template>
           </el-popover>
@@ -464,8 +464,8 @@
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover.native="showToolitip(3)"
-                @mouseout.native="hideToolitip(3)"
+                @mouseover="showToolitip(3)"
+                @mouseout="hideToolitip(3)"
               />
             </template>
           </el-popover>
@@ -2086,6 +2086,7 @@ export default {
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
+  width: 150px!important;
   :deep(.el-input__inner) {
     height: 30px;
     color: rgb(48, 49, 51);
