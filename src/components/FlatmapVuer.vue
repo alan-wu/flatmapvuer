@@ -800,8 +800,76 @@ export default {
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
+
+// Enable 3D view with `enable3dPaths()`
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.enable3dPaths
+
     eventCallback: function () {
       return (eventType, data, ...args) => {
+//
+// Need to enable widget on flatmap using `showAnnotator()`
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.showAnnotator
+//
+// listen here for annotation-draw events...
+//
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.annotationDrawEvent
+//
+        if (eventType === 'annotation-draw') {
+          if (data.type === 'created') {
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    service.addAnnotation(annotation)
+            //
+            //    with feature set in annotation (along with other fields
+            //    obtained from dialog box)
+            //
+            // else: // cancelled
+            //
+            //    flatmap.modifyDrawnAnnotation('remove', feature.id)
+            //
+            // see https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.modifyDrawnAnnotatorFeature
+            //
+          } else if (data.type === 'deleted') {
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    service.addAnnotation(annotation)
+            //
+            //    with `annotation` containing fields obtained from
+            //    dialog box, but with no `feature` field set.
+            //
+            // else: // cancelled
+            //
+            //    WIP -- details to come.
+            //
+          } else if (data.type === 'updated') {
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    service.addAnnotation(annotation)
+            //
+            //    with feature set in annotation (along with other fields
+            //    obtained from dialog box)
+
+            // if OK then
+            //   service.updateDrawnFeature(mapid, feature)
+            //
+            //   just service.addAnnotation() with feature field set
+            //
+            // else: // cancelled
+            //
+            //    WIP -- details to come.
+            //
+          }
+        } else
+
         if (eventType !== 'pan-zoom') {
           const label = data.label
           const resource = [data.models]
