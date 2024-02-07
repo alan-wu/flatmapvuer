@@ -810,27 +810,30 @@ export default {
 // Need to enable widget on flatmap using `showAnnotator()`
 // See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.showAnnotator
 //
-// listen here for annotation-draw events...
+// listen here for annotation events...
 //
-// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.annotationDrawEvent
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.annotationEvent
 //
-        if (eventType === 'annotation-draw') {
+        if (eventType === 'annotation') {
           if (data.type === 'created') {
             //
             // dialog box to capture comment/evidence
             //
             // if submit button:
             //
-            //    service.addAnnotation(annotation)
+            //    flatmap.commitAnnotationEvent(data)
             //
-            //    with feature set in annotation (along with other fields
-            //    obtained from dialog box)
+            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
+            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            //    // so maybe then no `service.addAnnotation` ??
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with feature set in annotation (along with other fields
+            //      obtained from dialog box)
             //
             // else: // cancelled
             //
-            //    flatmap.modifyDrawnAnnotation('remove', feature)
-            //
-            // see https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.modifyDrawnAnnotatorFeature
+            //    flatmap.rollbackAnnotationEvent(data)
             //
           } else if (data.type === 'deleted') {
             //
@@ -838,15 +841,15 @@ export default {
             //
             // if submit button:
             //
-            //    service.addAnnotation(annotation)
+            //    flatmap.commitAnnotationEvent(data)
             //
-            //    with `annotation` containing fields obtained from
-            //    dialog box, but with no `feature` field set.
+            //    annotationService.addAnnotation(annotation)
+            //      with `annotation` containing fields obtained from
+            //      dialog box, but with no `feature` field set.
             //
             // else: // cancelled
             //
-            //    flatmap.modifyDrawnAnnotation('add', feature)
-            //
+            //    flatmap.rollbackAnnotationEvent(data)
             //
           } else if (data.type === 'updated') {
             //
@@ -854,14 +857,18 @@ export default {
             //
             // if submit button:
             //
-            //    service.addAnnotation(annotation)
+            //    flatmap.commitAnnotationEvent(data)
             //
-            //    with feature set in annotation (along with other fields
-            //    obtained from dialog box)
+            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
+            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with feature set in annotation (along with other fields
+            //      obtained from dialog box)
             //
             // else: // cancelled
             //
-            //    WIP -- details to come.
+            //    flatmap.rollbackAnnotationEvent(data)
             //
           }
         } else
@@ -1225,6 +1232,19 @@ export default {
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
+
+      // Now need to:
+      //
+      //      const annotatedItemIds = await annotatedItemIds(resourceId)
+      //      for (const id of annotatedItemIds) {
+      //        this.mapImp.setFeatureAnnotated(id)
+      //      }
+      //
+      //      const drawnFeatures = await annotationService.drawnFeatures(resourceId)
+      //      for (const feature of drawnFeatures) {
+      //        this.mapImp.addAnnotationFeature(feature)
+      //      }
+
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
