@@ -386,7 +386,7 @@
               </el-option>
             </el-select>
           </el-row>
-          <!-- <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Dimension display</el-row>
           <el-row class="backgroundControl">
             <el-radio-group
@@ -397,7 +397,7 @@
             <el-radio :label="true">2D</el-radio>
             <el-radio :label="false">3D</el-radio>
             </el-radio-group>
-          </el-row> -->
+          </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Organs display</el-row>
           <el-row class="backgroundControl">
@@ -1854,7 +1854,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 290px;
+  height: 360px;
   min-width: 200px;
   .el-popper__arrow {
     &:before {
