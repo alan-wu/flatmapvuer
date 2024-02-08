@@ -847,12 +847,24 @@ export default {
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
+
+// Enable 3D view with `enable3dPaths()`
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.enable3dPaths
+
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
           if (data.type === 'created') {
             console.log("🚀 ~ return ~ data created:", data)
             this.checkAndCreatePopups(data)
+//
+// Need to enable widget on flatmap using `showAnnotator()`
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.showAnnotator
+//
+// listen here for annotation events...
+//
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.annotationEvent
+//
             //
             // dialog box to capture comment/evidence
             //
