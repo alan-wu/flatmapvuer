@@ -386,6 +386,18 @@
               </el-option>
             </el-select>
           </el-row>
+          <!-- <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Dimension display</el-row>
+          <el-row class="backgroundControl">
+            <el-radio-group
+              v-model="dimensionRadio"
+              class="flatmap-radio"
+              @change="setDimension"
+            >
+            <el-radio :label="true">2D</el-radio>
+            <el-radio :label="false">3D</el-radio>
+            </el-radio-group>
+          </el-row> -->
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Organs display</el-row>
           <el-row class="backgroundControl">
@@ -480,6 +492,13 @@
         :annotationDisplay="viewingMode === 'Annotation'"
       />
     </div>
+    <el-dialog
+      v-model="tooltipDisplay"
+      :title="annotationEntry.type"
+      width="500"
+    >
+      <annotation-tool :annotationEntry="annotationEntry" @submitted="annotationEvent"/>
+    </el-dialog>
   </div>
 </template>
 
@@ -513,6 +532,8 @@ import {
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
+
+import AnnotationTool from './AnnotationTool.vue'
 
 
 const processFTUs = (parent, key) => {
@@ -604,6 +625,30 @@ export default {
     this.setStateRequired = false
   },
   methods: {
+    annotationEvent: function (submitted) {
+      console.log("🚀 ~ submitted:", submitted)
+      this.tooltipDisplay = false
+      if (this.mapImp) {
+        if (submitted) {
+          const feature = this.mapImp.refreshAnnotationFeatureGeometry(this.annotationEntry.feature)
+          console.log("🚀 ~ feature:", feature)
+          this.mapImp.commitAnnotationEvent(this.annotationEntry)
+        } else {
+          this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
+        }
+      }
+    },
+    showAnnotator: function (flag) {
+      if (this.mapImp) {
+        this.mapImp.showAnnotator(flag)
+      }
+    },
+    setDimension: function (flag) {
+      this.dimensionRadio = flag
+      if (this.mapImp) {
+        this.mapImp.enable3dPaths(!flag)
+      }
+    },
     viewLatestMap: function () {
       let biologicalSex = this.biologicalSex ? this.biologicalSex : undefined
       //Human requires special handling
@@ -803,47 +848,112 @@ export default {
     },
     eventCallback: function () {
       return (eventType, data, ...args) => {
-        if (eventType !== 'pan-zoom') {
-          const label = data.label
-          const resource = [data.models]
-          const taxonomy = this.entry
-          const biologicalSex = this.biologicalSex
-          const payload = {
-            dataset: data.dataset,
-            biologicalSex: biologicalSex,
-            taxonomy: taxonomy,
-            resource: resource,
-            label: label,
-            feature: data,
-            userData: args,
-            eventType: eventType,
-            provenanceTaxonomy: data.taxons
-              ? JSON.parse(data.taxons)
-              : undefined,
+        if (eventType === 'annotation') {
+          if (data.type === 'created') {
+            console.log("🚀 ~ return ~ data created:", data)
+            this.checkAndCreatePopups(data)
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    flatmap.commitAnnotationEvent(data)
+            //
+            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
+            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            //    // so maybe then no `service.addAnnotation` ??
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with feature set in annotation (along with other fields
+            //      obtained from dialog box)
+            //
+            // else: // cancelled
+            //
+            //    flatmap.rollbackAnnotationEvent(data)
+            //
+          } else if (data.type === 'deleted') {
+            console.log("🚀 ~ return ~ data deleted:", data)
+            this.checkAndCreatePopups(data)
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    flatmap.commitAnnotationEvent(data)
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with `annotation` containing fields obtained from
+            //      dialog box, but with no `feature` field set.
+            //
+            // else: // cancelled
+            //
+            //    flatmap.rollbackAnnotationEvent(data)
+            //
+          } else if (data.type === 'updated') {
+            console.log("🚀 ~ return ~ data updated:", data)
+            this.checkAndCreatePopups(data)
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    flatmap.commitAnnotationEvent(data)
+            //
+            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
+            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with feature set in annotation (along with other fields
+            //      obtained from dialog box)
+            //
+            // else: // cancelled
+            //
+            //    flatmap.rollbackAnnotationEvent(data)
+            //
           }
-          if (eventType === 'click') {
-            if (this.viewingMode === 'Network Discovery') {
-              this.highlightConnectedPaths([data.models])
-            } else {
-              this.currentActive = data.models ? data.models : ''
-            }
-          } else if (
-            eventType === 'mouseenter' &&
-            !(this.viewingMode === 'Network Discovery')
-          ) {
-            this.currentHover = data.models ? data.models : ''
-          }
-          if (
-            data &&
-            data.type !== 'marker' &&
-            eventType === 'click' &&
-            !(this.viewingMode === 'Network Discovery')
-          ) {
-            this.checkAndCreatePopups(payload)
-          }
-          this.$emit('resource-selected', payload)
         } else {
-          this.$emit('pan-zoom-callback', data)
+          if (eventType !== 'pan-zoom') {
+            const label = data.label
+            const resource = [data.models]
+            const taxonomy = this.entry
+            const biologicalSex = this.biologicalSex
+            const payload = {
+              dataset: data.dataset,
+              biologicalSex: biologicalSex,
+              taxonomy: taxonomy,
+              resource: resource,
+              label: label,
+              feature: data,
+              userData: args,
+              eventType: eventType,
+              provenanceTaxonomy: data.taxons
+                ? JSON.parse(data.taxons)
+                : undefined,
+            }
+            if (eventType === 'click') {
+              if (this.viewingMode === 'Network Discovery') {
+                this.highlightConnectedPaths([data.models])
+              } else {
+                this.currentActive = data.models ? data.models : ''
+              }
+            } else if (
+              eventType === 'mouseenter' &&
+              !(this.viewingMode === 'Network Discovery')
+            ) {
+              this.currentHover = data.models ? data.models : ''
+            }
+            if (
+              data &&
+              data.type !== 'marker' &&
+              eventType === 'click' &&
+              !(this.viewingMode === 'Network Discovery')
+            ) {
+              this.checkAndCreatePopups(payload)
+            }
+            this.$emit('resource-selected', payload)
+          } else {
+            this.$emit('pan-zoom-callback', data)
+          }
         }
       }
     },
@@ -851,12 +961,21 @@ export default {
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
-        if (data.feature && data.feature.featureId && data.feature.models) {
-          this.annotationEntry = {
-            ...data.feature,
-            resourceId: this.serverUUID,
+        if (data.feature) {
+          if (data.feature.featureId && data.feature.models) {
+            this.annotationEntry = {
+              ...data.feature,
+              resourceId: this.serverUUID,
+            }
+            this.displayTooltip(data.feature.models)
+          } else if (data.feature.geometry) {
+            console.log("🚀 ~ data.feature.geometry:", data.feature.geometry)
+            this.annotationEntry = {
+              ...data,
+              resourceId: this.serverUUID,
+            }
+            this.tooltipDisplay = true
           }
-          this.displayTooltip(data.feature.models)
         } else {
           this.annotation = {}
         }
@@ -1163,6 +1282,19 @@ export default {
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
+
+      // Now need to:
+      //
+      //      const annotatedItemIds = await annotatedItemIds(resourceId)
+      //      for (const id of annotatedItemIds) {
+      //        this.mapImp.setFeatureAnnotated(id)
+      //      }
+      //
+      //      const drawnFeatures = await annotationService.drawnFeatures(resourceId)
+      //      for (const feature of drawnFeatures) {
+      //        this.mapImp.addAnnotationFeature(feature)
+      //      }
+
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
@@ -1393,6 +1525,7 @@ export default {
       connectivityTooltipVisible: false,
       drawerOpen: false,
       annotationRadio: false,
+      dimensionRadio: true,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
@@ -1424,6 +1557,9 @@ export default {
       immediate: true,
       deep: true,
     },
+    viewingMode: function (val) {
+      this.showAnnotator(val === 'Annotation')
+    }
   },
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
@@ -2121,6 +2257,8 @@ export default {
 
 .flatmap-container {
   --el-color-primary: #8300BF;
+  --el-color-primary-light-5: #CD99E5;
+  --el-color-primary-light-9: #F3E6F9;
 }
 
 </style>

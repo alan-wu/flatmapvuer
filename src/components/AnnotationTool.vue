@@ -60,7 +60,9 @@
           <template v-if="isEditable">
             <el-row class="dialog-spacer"></el-row>
             <el-row v-if="!editing">
-              <el-icon class="standard-icon"><el-icon-edit /></el-icon>
+              <el-icon class="standard-icon">
+                <el-icon-edit @click="editing = true" />
+              </el-icon>
             </el-row>
             <template v-else>
               <el-row class="dialog-text">
@@ -74,12 +76,14 @@
                   {{ evidence[index] }}
                 </el-col>
                 <el-col :span="4">
-                  <el-icon class="standard-icon"><el-icon-close /></el-icon>
+                  <el-icon class="standard-icon">
+                    <el-icon-close @click="removeEvidence(index)" />
+                  </el-icon>
                 </el-col>
               </el-row>
               <el-row>
                 <el-input
-                  size="mini"
+                  size="small"
                   placeholder="Enter"
                   v-model="newEvidence"
                   @change="evidenceEntered($event)"
@@ -120,6 +124,9 @@
               <el-row class="dialog-text">
                 <el-button class="button" type="primary" plain @click="submit">
                   Submit
+                </el-button>
+                <el-button class="button" type="primary" plain @click="cancel">
+                  Cancel
                 </el-button>
               </el-row>
             </template>
@@ -195,8 +202,11 @@ export default {
   },
   computed: {
     isEditable: function () {
+      console.log("🚀 ~ this.annotationEntry:", this.annotationEntry)
       return (
-        this.annotationEntry['resourceId'] && this.annotationEntry['featureId']
+        this.annotationEntry['resourceId'] && (
+          this.annotationEntry['featureId'] || this.annotationEntry['feature']
+        )
       )
     },
   },
@@ -241,8 +251,9 @@ export default {
     submit: function () {
       if (this.evidence.length > 0 || this.comment) {
         if (
-          this.annotationEntry['resourceId'] &&
-          this.annotationEntry['featureId']
+          this.annotationEntry['resourceId'] && (
+            this.annotationEntry['featureId'] || this.annotationEntry['feature']
+          )
         ) {
           const evidenceURLs = []
           this.evidence.forEach((evidence) => {
@@ -259,23 +270,34 @@ export default {
           })
           const userAnnotation = {
             resource: this.annotationEntry['resourceId'],
-            item: this.annotationEntry['featureId'],
             evidence: evidenceURLs,
             comment: this.comment,
           }
-          this.$annotator
-            .addAnnotation(userAnnotation)
-            .then(() => {
-              this.errorMessage = ''
-              this.resetSubmission()
-              this.updatePrevSubmissions()
-            })
-            .catch(() => {
-              this.errorMessage =
-                'There is a problem with the submission, please try again later'
-            })
+          if (this.annotationEntry['featureId']) {
+            userAnnotation['item'] = this.annotationEntry['featureId']
+          } else if (
+            this.annotationEntry['feature'] && this.annotationEntry['type'] !== 'deleted'
+          ) {
+            userAnnotation['feature'] = this.annotationEntry['feature']
+          }
+          console.log("🚀 ~ userAnnotation:", userAnnotation)
+          this.$emit('submitted', true)
+          // this.$annotator
+          //   .addAnnotation(userAnnotation)
+          //   .then(() => {
+          //     this.errorMessage = ''
+          //     this.resetSubmission()
+          //     this.updatePrevSubmissions()
+          //   })
+          //   .catch(() => {
+          //     this.errorMessage =
+          //       'There is a problem with the submission, please try again later'
+          //   })
         }
       }
+    },
+    cancel: function () {
+      this.$emit('submitted', false)
     },
     removeEvidence: function (index) {
       this.evidence.splice(index, 1)
