@@ -631,8 +631,6 @@ export default {
       this.tooltipDisplay = false
       if (this.mapImp) {
         if (submitted) {
-          const feature = this.mapImp.refreshAnnotationFeatureGeometry(this.annotationEntry.feature)
-          console.log("🚀 ~ feature:", feature)
           this.mapImp.commitAnnotationEvent(this.annotationEntry)
         } else {
           this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
@@ -847,24 +845,13 @@ export default {
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
-
-// Enable 3D view with `enable3dPaths()`
-// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.enable3dPaths
-
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
-          if (data.type === 'created') {
-            console.log("🚀 ~ return ~ data created:", data)
-            this.checkAndCreatePopups(data)
-//
-// Need to enable widget on flatmap using `showAnnotator()`
-// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.showAnnotator
-//
-// listen here for annotation events...
-//
-// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.annotationEvent
-//
+          if (data.type === 'created' || data.type === 'updated') {
+            console.log("🚀 ~ return ~ data created or updated:", data)
+            const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
+            console.log("🚀 ~ feature:", feature)
             //
             // dialog box to capture comment/evidence
             //
@@ -880,13 +867,8 @@ export default {
             //      with feature set in annotation (along with other fields
             //      obtained from dialog box)
             //
-            // else: // cancelled
-            //
-            //    flatmap.rollbackAnnotationEvent(data)
-            //
           } else if (data.type === 'deleted') {
             console.log("🚀 ~ return ~ data deleted:", data)
-            this.checkAndCreatePopups(data)
             //
             // dialog box to capture comment/evidence
             //
@@ -898,32 +880,8 @@ export default {
             //      with `annotation` containing fields obtained from
             //      dialog box, but with no `feature` field set.
             //
-            // else: // cancelled
-            //
-            //    flatmap.rollbackAnnotationEvent(data)
-            //
-          } else if (data.type === 'updated') {
-            console.log("🚀 ~ return ~ data updated:", data)
-            this.checkAndCreatePopups(data)
-            //
-            // dialog box to capture comment/evidence
-            //
-            // if submit button:
-            //
-            //    flatmap.commitAnnotationEvent(data)
-            //
-            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
-            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
-            //
-            //    annotationService.addAnnotation(annotation)
-            //      with feature set in annotation (along with other fields
-            //      obtained from dialog box)
-            //
-            // else: // cancelled
-            //
-            //    flatmap.rollbackAnnotationEvent(data)
-            //
           }
+          this.checkAndCreatePopups(data)
         } else {
           if (eventType !== 'pan-zoom') {
             const label = data.label

@@ -234,20 +234,21 @@ export default {
     updatePrevSubmissions: function () {
       if (this.$annotator && this.authenticated) {
         if (
-          this.annotationEntry['resourceId'] &&
-          this.annotationEntry['featureId']
+          this.annotationEntry['resourceId'] && (
+            this.annotationEntry['featureId'] || this.annotationEntry['feature']
+          )
         ) {
-          this.$annotator
-            .itemAnnotations(
-              this.annotationEntry['resourceId'],
-              this.annotationEntry['featureId']
-            )
-            .then((value) => {
-              this.prevSubs = value
-            })
-            .catch((reason) => {
-              console.log(reason) // Error!
-            })
+          // this.$annotator
+          //   .itemAnnotations(
+          //     this.annotationEntry['resourceId'],
+          //     this.annotationEntry['featureId']
+          //   )
+          //   .then((value) => {
+          //     this.prevSubs = value
+          //   })
+          //   .catch((reason) => {
+          //     console.log(reason) // Error!
+          //   })
         }
       }
     },
@@ -273,14 +274,11 @@ export default {
           })
           const userAnnotation = {
             resource: this.annotationEntry['resourceId'],
+            item: this.annotationEntry['featureId'],
             evidence: evidenceURLs,
             comment: this.comment,
           }
-          if (this.annotationEntry['featureId']) {
-            userAnnotation['item'] = this.annotationEntry['featureId']
-          } else if (
-            this.annotationEntry['feature'] && this.annotationEntry['type'] !== 'deleted'
-          ) {
+          if (this.annotationEntry['type'] !== 'deleted') {
             userAnnotation['feature'] = this.annotationEntry['feature']
           }
           console.log("🚀 ~ userAnnotation:", userAnnotation)
