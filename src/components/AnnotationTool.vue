@@ -63,6 +63,9 @@
               <el-icon class="standard-icon">
                 <el-icon-edit @click="editing = true" />
               </el-icon>
+              <el-icon class="standard-icon">
+                <el-icon-close @click="cancel" />
+              </el-icon>
             </el-row>
             <template v-else>
               <el-row class="dialog-text">

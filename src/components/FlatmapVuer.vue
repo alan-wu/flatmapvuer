@@ -496,6 +496,7 @@
       v-model="tooltipDisplay"
       :title="annotationEntry.type"
       width="500"
+      :show-close="false"
     >
       <annotation-tool :annotationEntry="annotationEntry" @submitted="annotationEvent"/>
     </el-dialog>
