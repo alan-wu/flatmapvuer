@@ -801,8 +801,79 @@ export default {
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
+
+// Enable 3D view with `enable3dPaths()`
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.enable3dPaths
+
     eventCallback: function () {
       return (eventType, data, ...args) => {
+//
+// Need to enable widget on flatmap using `showAnnotator()`
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.showAnnotator
+//
+// listen here for annotation events...
+//
+// See https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/API.html#FlatMap.annotationEvent
+//
+        if (eventType === 'annotation') {
+          if (data.type === 'created') {
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    flatmap.commitAnnotationEvent(data)
+            //
+            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
+            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            //    // so maybe then no `service.addAnnotation` ??
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with feature set in annotation (along with other fields
+            //      obtained from dialog box)
+            //
+            // else: // cancelled
+            //
+            //    flatmap.rollbackAnnotationEvent(data)
+            //
+          } else if (data.type === 'deleted') {
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    flatmap.commitAnnotationEvent(data)
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with `annotation` containing fields obtained from
+            //      dialog box, but with no `feature` field set.
+            //
+            // else: // cancelled
+            //
+            //    flatmap.rollbackAnnotationEvent(data)
+            //
+          } else if (data.type === 'updated') {
+            //
+            // dialog box to capture comment/evidence
+            //
+            // if submit button:
+            //
+            //    flatmap.commitAnnotationEvent(data)
+            //
+            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
+            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            //
+            //    annotationService.addAnnotation(annotation)
+            //      with feature set in annotation (along with other fields
+            //      obtained from dialog box)
+            //
+            // else: // cancelled
+            //
+            //    flatmap.rollbackAnnotationEvent(data)
+            //
+          }
+        } else
+
         if (eventType !== 'pan-zoom') {
           const label = data.label
           const resource = [data.models]
@@ -1163,6 +1234,19 @@ export default {
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
+
+      // Now need to:
+      //
+      //      const annotatedItemIds = await annotatedItemIds(resourceId)
+      //      for (const id of annotatedItemIds) {
+      //        this.mapImp.setFeatureAnnotated(id)
+      //      }
+      //
+      //      const drawnFeatures = await annotationService.drawnFeatures(resourceId)
+      //      for (const feature of drawnFeatures) {
+      //        this.mapImp.addAnnotationFeature(feature)
+      //      }
+
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
