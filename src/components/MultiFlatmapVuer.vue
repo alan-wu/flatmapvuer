@@ -77,6 +77,7 @@
 import { reactive } from 'vue'
 import EventBus from './EventBus'
 import FlatmapVuer from './FlatmapVuer.vue'
+import * as flatmap from '@abi-software/flatmap-viewer'
 import {
   ElCol as Col,
   ElOption as Option,
@@ -307,10 +308,7 @@ export default {
             //uuid is in the state but should be checked if it is the latest map
             //for that taxon
             return new Promise(() => {
-              const mapManager =
-                new (require('@abi-software/flatmap-viewer').MapManager)(
-                  this.flatmapAPI
-                )
+              const mapManager = new flatmap.MapManager(this.flatmapAPI)
               //mapManager.findMap_ is an async function so we need to wrap this with a promise
               const identifier = { taxon: mapState.entry }
               if (mapState.biologicalSex)
