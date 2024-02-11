@@ -1,7 +1,7 @@
 <template>
   <div class="tooltip-container">
     <template v-if="annotationDisplay">
-      <annotation-tool :annotationEntry="annotationEntry" />
+      <annotation-tool :annotationEntry="annotationEntry" @submitted="$emit('submitted', $event)" />
     </template>
     <template v-else>
       <provenance-popup :entry="entry" />

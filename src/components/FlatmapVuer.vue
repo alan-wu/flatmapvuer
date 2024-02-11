@@ -498,7 +498,12 @@
       width="500"
       :show-close="false"
     >
-      <annotation-tool :annotationEntry="annotationEntry" @submitted="annotationEvent"/>
+      <tooltip 
+        :annotationEntry="annotationEntry"
+        :entry="tooltipEntry"
+        :annotationDisplay="viewingMode === 'Annotation'" 
+        @submitted="annotationEvent"
+      />
     </el-dialog>
   </div>
 </template>
@@ -534,8 +539,7 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 
-import AnnotationTool from './AnnotationTool.vue'
-
+import { AnnotationService } from '@abi-software/sparc-annotation'
 
 const processFTUs = (parent, key) => {
   const ftus = []
@@ -627,9 +631,11 @@ export default {
   },
   methods: {
     annotationEvent: function (submitted) {
-      console.log("🚀 ~ submitted:", submitted)
       this.tooltipDisplay = false
-      if (this.mapImp) {
+      if (
+        this.mapImp &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
+      ) {
         if (submitted) {
           this.mapImp.commitAnnotationEvent(this.annotationEntry)
         } else {
@@ -640,6 +646,46 @@ export default {
     showAnnotator: function (flag) {
       if (this.mapImp) {
         this.mapImp.showAnnotator(flag)
+        if (!this.$annotator) {
+          this.$annotator = new AnnotationService(
+            `${this.flatmapAPI}annotator`
+          )
+            this.$annotator.annotatedItemIds(this.serverUUID)
+              .then((annotatedItemIds) => {
+                console.log("🚀 ~ .then ~ annotatedItemIds:", annotatedItemIds)
+                // for (const id of annotatedItemIds) {
+                //   this.mapImp.setFeatureAnnotated(id)
+                // }
+              })
+          this.$annotator.drawnFeatures(this.serverUUID)
+            .then((drawnFeatures) => {
+              console.log("🚀 ~ .then ~ drawnFeatures:", drawnFeatures)
+              // for (const feature of drawnFeatures) {
+              //   this.mapImp.addAnnotationFeature(feature)
+              // }
+            })
+          this.$annotator.itemAnnotations(this.serverUUID, "4975")
+            .then((itemAnnotations) => {
+              console.log("🚀 ~ .then ~ itemAnnotations:", itemAnnotations)
+            })
+          this.$annotator.annotation('28')
+            .then((annotation) => {
+              console.log("🚀 ~ .then ~ annotation:", annotation)
+            })
+          this.$annotator.annotation('29')
+            .then((annotation) => {
+              this.mapImp.addAnnotationFeature(annotation.feature)
+            })
+          this.$annotator.annotation('30')
+            .then((annotation) => {
+              this.mapImp.addAnnotationFeature(annotation.feature)
+            })
+          this.$annotator.annotation('31')
+            .then((annotation) => {
+              this.mapImp.addAnnotationFeature(annotation.feature)
+            })
+            console.log("🚀 ~ this.serverUUID:", this.serverUUID)
+        }
       }
     },
     setDimension: function (flag) {
@@ -940,7 +986,6 @@ export default {
             }
             this.displayTooltip(data.feature.models)
           } else if (data.feature.geometry) {
-            console.log("🚀 ~ data.feature.geometry:", data.feature.geometry)
             this.annotationEntry = {
               ...data,
               resourceId: this.serverUUID,
@@ -1253,19 +1298,6 @@ export default {
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
-
-      // Now need to:
-      //
-      //      const annotatedItemIds = await annotatedItemIds(resourceId)
-      //      for (const id of annotatedItemIds) {
-      //        this.mapImp.setFeatureAnnotated(id)
-      //      }
-      //
-      //      const drawnFeatures = await annotationService.drawnFeatures(resourceId)
-      //      for (const feature of drawnFeatures) {
-      //        this.mapImp.addAnnotationFeature(feature)
-      //      }
-
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()

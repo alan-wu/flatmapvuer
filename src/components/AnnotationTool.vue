@@ -59,13 +59,29 @@
         <template v-if="authenticated">
           <template v-if="isEditable">
             <el-row class="dialog-spacer"></el-row>
-            <el-row v-if="!editing">
+            <el-row v-if="isDeleted">
+              <el-button class="button" type="primary" plain @click="deleted">
+                Delete
+              </el-button>
+
+              <!-- may need to remove when popup fixed -->
+              <el-button class="button" type="primary" plain @click="cancelled">
+                Cancel
+              </el-button>
+              <!-- may need to remove when popup fixed -->
+
+            </el-row>
+            <el-row v-else-if="!editing">
               <el-icon class="standard-icon">
                 <el-icon-edit @click="editing = true" />
               </el-icon>
+
+              <!-- may need to remove when popup fixed -->
               <el-icon class="standard-icon">
-                <el-icon-close @click="cancel" />
+                <el-icon-close @click="cancelled" />
               </el-icon>
+              <!-- may need to remove when popup fixed -->
+
             </el-row>
             <template v-else>
               <el-row class="dialog-text">
@@ -128,9 +144,13 @@
                 <el-button class="button" type="primary" plain @click="submit">
                   Submit
                 </el-button>
-                <el-button class="button" type="primary" plain @click="cancel">
+
+                <!-- may need to remove when popup fixed -->
+                <el-button class="button" type="primary" plain @click="cancelled">
                   Cancel
                 </el-button>
+                <!-- may need to remove when popup fixed -->
+
               </el-row>
             </template>
             <el-row class="dialog-text" v-if="errorMessage">
@@ -205,13 +225,19 @@ export default {
   },
   computed: {
     isEditable: function () {
-      console.log("🚀 ~ this.annotationEntry:", this.annotationEntry)
       return (
         this.annotationEntry['resourceId'] && (
           this.annotationEntry['featureId'] || this.annotationEntry['feature']
         )
       )
     },
+    isDeleted: function () {
+      return (
+        this.annotationEntry['resourceId'] &&
+        this.annotationEntry['feature'] &&
+        this.annotationEntry['type'] === 'deleted'
+      )
+    }
   },
   methods: {
     evidenceEntered: function (value) {
@@ -238,17 +264,19 @@ export default {
             this.annotationEntry['featureId'] || this.annotationEntry['feature']
           )
         ) {
-          // this.$annotator
-          //   .itemAnnotations(
-          //     this.annotationEntry['resourceId'],
-          //     this.annotationEntry['featureId']
-          //   )
-          //   .then((value) => {
-          //     this.prevSubs = value
-          //   })
-          //   .catch((reason) => {
-          //     console.log(reason) // Error!
-          //   })
+          this.$annotator
+            .itemAnnotations(
+              this.annotationEntry['resourceId'],
+              this.annotationEntry['featureId'] ?
+                this.annotationEntry['featureId'] :
+                this.annotationEntry['feature']['id']
+            )
+            .then((value) => {
+              this.prevSubs = value
+            })
+            .catch((reason) => {
+              console.log(reason) // Error!
+            })
         }
       }
     },
@@ -277,27 +305,50 @@ export default {
             item: this.annotationEntry['featureId'],
             evidence: evidenceURLs,
             comment: this.comment,
+            feature: this.annotationEntry['feature']
           }
-          if (this.annotationEntry['type'] !== 'deleted') {
-            userAnnotation['feature'] = this.annotationEntry['feature']
+          if (this.annotationEntry['feature']) {
+            userAnnotation.item = this.annotationEntry['feature']['id']
           }
-          console.log("🚀 ~ userAnnotation:", userAnnotation)
-          this.$emit('submitted', true)
-          // this.$annotator
-          //   .addAnnotation(userAnnotation)
-          //   .then(() => {
-          //     this.errorMessage = ''
-          //     this.resetSubmission()
-          //     this.updatePrevSubmissions()
-          //   })
-          //   .catch(() => {
-          //     this.errorMessage =
-          //       'There is a problem with the submission, please try again later'
-          //   })
+          this.$annotator
+            .addAnnotation(userAnnotation)
+            .then(() => {
+              this.errorMessage = ''
+              this.resetSubmission()
+              this.updatePrevSubmissions()
+            })
+            .catch(() => {
+              this.errorMessage =
+                'There is a problem with the submission, please try again later'
+            })
         }
       }
     },
-    cancel: function () {
+    deleted: function () {
+      if (this.annotationEntry['resourceId'] && this.annotationEntry['feature']) {
+        const userAnnotation = {
+          resource: this.annotationEntry['resourceId'],
+          item: this.annotationEntry['feature']['id'],
+          evidence: [],
+          comment: this.comment,
+          feature: undefined
+        }
+        console.log("🚀 ~ userAnnotation:", userAnnotation)
+        this.$emit('submitted', true)
+        // this.$annotator
+        //   .addAnnotation(userAnnotation)
+        //   .then(() => {
+        //     this.errorMessage = ''
+        //     this.resetSubmission()
+        //     this.updatePrevSubmissions()
+        //   })
+        //   .catch(() => {
+        //     this.errorMessage =
+        //       'There is a problem with the submission, please try again later'
+        //   })
+      }
+    },
+    cancelled: function () {
       this.$emit('submitted', false)
     },
     removeEvidence: function (index) {
