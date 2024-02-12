@@ -634,10 +634,9 @@ export default {
       if (this.mapImp && this.$annotator) {
         this.$annotator.annotatedItemIds(this.serverUUID)
           .then((annotatedItemIds) => {
-            console.log("🚀 ~ .then ~ annotatedItemIds:", annotatedItemIds)
-            // for (const id of annotatedItemIds) {
-            //   this.mapImp.setFeatureAnnotated(id)
-            // }
+            for (const id of annotatedItemIds) {
+              this.mapImp.setFeatureAnnotated(id)
+            }
           })
       }
     },
@@ -645,7 +644,6 @@ export default {
       if (this.mapImp && this.$annotator) {
         this.$annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
-            console.log("🚀 ~ .then ~ drawnFeatures:", drawnFeatures)
             for (const feature of drawnFeatures) {
               this.mapImp.addAnnotationFeature(feature)
             }
@@ -880,13 +878,18 @@ export default {
             console.log("🚀 ~ return ~ data created or updated:", data)
             const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
             console.log("🚀 ~ feature:", feature)
-            //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
-            //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
-            //    // so maybe then no `service.addAnnotation` ??
+            data.feature = feature
+            // NB. this might now be `null` if user has deleted it (before OK/Submit)
+            // so maybe then no `service.addAnnotation` ??
           } else if (data.type === 'deleted') {
             console.log("🚀 ~ return ~ data deleted:", data)
           }
-          this.checkAndCreatePopups(data)
+          const payload = {
+            feature: data,
+            userData: args,
+            eventType: eventType,
+          }
+          this.checkAndCreatePopups(payload)
         } else {
           if (eventType !== 'pan-zoom') {
             const label = data.label
@@ -938,17 +941,13 @@ export default {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         if (data.feature) {
+          this.annotationEntry = {
+            ...data.feature,
+            resourceId: this.serverUUID,
+          }
           if (data.feature.featureId && data.feature.models) {
-            this.annotationEntry = {
-              ...data.feature,
-              resourceId: this.serverUUID,
-            }
             this.displayTooltip(data.feature.models)
-          } else if (data.feature.geometry) {
-            this.annotationEntry = {
-              ...data,
-              resourceId: this.serverUUID,
-            }
+          } else if (data.feature.feature) {
             this.tooltipDisplay = true
           }
         } else {
