@@ -310,17 +310,18 @@ export default {
           if (this.annotationEntry['feature']) {
             userAnnotation.item = this.annotationEntry['feature']['id']
           }
-          this.$annotator
-            .addAnnotation(userAnnotation)
-            .then(() => {
-              this.errorMessage = ''
-              this.resetSubmission()
-              this.updatePrevSubmissions()
-            })
-            .catch(() => {
-              this.errorMessage =
-                'There is a problem with the submission, please try again later'
-            })
+          this.$emit('submitted', true)
+          // this.$annotator
+          //   .addAnnotation(userAnnotation)
+          //   .then(() => {
+          //     this.errorMessage = ''
+          //     this.resetSubmission()
+          //     this.updatePrevSubmissions()
+          //   })
+          //   .catch(() => {
+          //     this.errorMessage =
+          //       'There is a problem with the submission, please try again later'
+          //   })
         }
       }
     },

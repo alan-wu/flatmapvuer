@@ -646,45 +646,21 @@ export default {
     showAnnotator: function (flag) {
       if (this.mapImp) {
         this.mapImp.showAnnotator(flag)
-        if (!this.$annotator) {
-          this.$annotator = new AnnotationService(
-            `${this.flatmapAPI}annotator`
-          )
-            this.$annotator.annotatedItemIds(this.serverUUID)
-              .then((annotatedItemIds) => {
-                console.log("🚀 ~ .then ~ annotatedItemIds:", annotatedItemIds)
-                // for (const id of annotatedItemIds) {
-                //   this.mapImp.setFeatureAnnotated(id)
-                // }
-              })
+        if (this.$annotator) {
+          this.$annotator.annotatedItemIds(this.serverUUID)
+            .then((annotatedItemIds) => {
+              console.log("🚀 ~ .then ~ annotatedItemIds:", annotatedItemIds)
+              // for (const id of annotatedItemIds) {
+              //   this.mapImp.setFeatureAnnotated(id)
+              // }
+            })
           this.$annotator.drawnFeatures(this.serverUUID)
             .then((drawnFeatures) => {
               console.log("🚀 ~ .then ~ drawnFeatures:", drawnFeatures)
-              // for (const feature of drawnFeatures) {
-              //   this.mapImp.addAnnotationFeature(feature)
-              // }
+              for (const feature of drawnFeatures) {
+                this.mapImp.addAnnotationFeature(feature)
+              }
             })
-          this.$annotator.itemAnnotations(this.serverUUID, "4975")
-            .then((itemAnnotations) => {
-              console.log("🚀 ~ .then ~ itemAnnotations:", itemAnnotations)
-            })
-          this.$annotator.annotation('28')
-            .then((annotation) => {
-              console.log("🚀 ~ .then ~ annotation:", annotation)
-            })
-          this.$annotator.annotation('29')
-            .then((annotation) => {
-              this.mapImp.addAnnotationFeature(annotation.feature)
-            })
-          this.$annotator.annotation('30')
-            .then((annotation) => {
-              this.mapImp.addAnnotationFeature(annotation.feature)
-            })
-          this.$annotator.annotation('31')
-            .then((annotation) => {
-              this.mapImp.addAnnotationFeature(annotation.feature)
-            })
-            console.log("🚀 ~ this.serverUUID:", this.serverUUID)
         }
       }
     },
@@ -1298,6 +1274,13 @@ export default {
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
+
+      if (!this.$annotator) {
+        this.$annotator = new AnnotationService(
+          `${this.flatmapAPI}annotator`
+        )
+      }
+
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
