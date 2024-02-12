@@ -630,6 +630,28 @@ export default {
     this.setStateRequired = false
   },
   methods: {
+    setFeatureAnnotated: function () {
+      if (this.mapImp && this.$annotator) {
+        this.$annotator.annotatedItemIds(this.serverUUID)
+          .then((annotatedItemIds) => {
+            console.log("🚀 ~ .then ~ annotatedItemIds:", annotatedItemIds)
+            // for (const id of annotatedItemIds) {
+            //   this.mapImp.setFeatureAnnotated(id)
+            // }
+          })
+      }
+    },
+    addAnnotationFeature: function () {
+      if (this.mapImp && this.$annotator) {
+        this.$annotator.drawnFeatures(this.serverUUID)
+          .then((drawnFeatures) => {
+            console.log("🚀 ~ .then ~ drawnFeatures:", drawnFeatures)
+            for (const feature of drawnFeatures) {
+              this.mapImp.addAnnotationFeature(feature)
+            }
+          })
+      }
+    },
     annotationEvent: function (submitted) {
       this.tooltipDisplay = false
       if (
@@ -646,22 +668,6 @@ export default {
     showAnnotator: function (flag) {
       if (this.mapImp) {
         this.mapImp.showAnnotator(flag)
-        if (this.$annotator) {
-          this.$annotator.annotatedItemIds(this.serverUUID)
-            .then((annotatedItemIds) => {
-              console.log("🚀 ~ .then ~ annotatedItemIds:", annotatedItemIds)
-              // for (const id of annotatedItemIds) {
-              //   this.mapImp.setFeatureAnnotated(id)
-              // }
-            })
-          this.$annotator.drawnFeatures(this.serverUUID)
-            .then((drawnFeatures) => {
-              console.log("🚀 ~ .then ~ drawnFeatures:", drawnFeatures)
-              for (const feature of drawnFeatures) {
-                this.mapImp.addAnnotationFeature(feature)
-              }
-            })
-        }
       }
     },
     setDimension: function (flag) {
@@ -874,34 +880,11 @@ export default {
             console.log("🚀 ~ return ~ data created or updated:", data)
             const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
             console.log("🚀 ~ feature:", feature)
-            //
-            // dialog box to capture comment/evidence
-            //
-            // if submit button:
-            //
-            //    flatmap.commitAnnotationEvent(data)
-            //
             //    const feature = flatmap.refreshAnnotationFeatureGeometry(data.feature)
             //    // NB. this might now be `null` if user has deleted it (before OK/Submit)
             //    // so maybe then no `service.addAnnotation` ??
-            //
-            //    annotationService.addAnnotation(annotation)
-            //      with feature set in annotation (along with other fields
-            //      obtained from dialog box)
-            //
           } else if (data.type === 'deleted') {
             console.log("🚀 ~ return ~ data deleted:", data)
-            //
-            // dialog box to capture comment/evidence
-            //
-            // if submit button:
-            //
-            //    flatmap.commitAnnotationEvent(data)
-            //
-            //    annotationService.addAnnotation(annotation)
-            //      with `annotation` containing fields obtained from
-            //      dialog box, but with no `feature` field set.
-            //
           }
           this.checkAndCreatePopups(data)
         } else {
@@ -1545,6 +1528,8 @@ export default {
     },
     viewingMode: function (val) {
       this.showAnnotator(val === 'Annotation')
+      this.setFeatureAnnotated()
+      this.addAnnotationFeature()
     }
   },
   mounted: function () {

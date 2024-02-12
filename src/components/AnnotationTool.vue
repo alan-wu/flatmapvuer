@@ -334,7 +334,6 @@ export default {
           comment: this.comment,
           feature: undefined
         }
-        console.log("🚀 ~ userAnnotation:", userAnnotation)
         this.$emit('submitted', true)
         // this.$annotator
         //   .addAnnotation(userAnnotation)
