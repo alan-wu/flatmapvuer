@@ -310,6 +310,7 @@
                 identifierKey="taxon"
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
+                @checkboxMouseEnter="checkboxMouseEnterEmitted"
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
@@ -777,6 +778,17 @@ export default {
     taxonsSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
+      }
+    },
+    checkboxMouseEnterEmitted: function (payload) {
+      console.log('taxonsSelected', payload)
+      if (this.mapImp) {
+        if (payload.value) {
+          let gid = this.mapImp.taxonFeatureIds(payload.key)
+          this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
+        } else {
+          this.mapImp.zoomToGeoJSONFeatures([], {noZoomIn: true})
+        }
       }
     },
     checkAllTaxons: function (payload) {

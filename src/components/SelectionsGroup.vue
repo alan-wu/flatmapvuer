@@ -27,7 +27,10 @@
           :key="item[identifierKey]"
           :label="item[identifierKey]"
         >
-          <div class="checkbox-container">
+          <div class="checkbox-container" 
+            @mouseenter="checkboxMouseEnterEmit(item[identifierKey], true)"
+            @mouseleave="checkboxMouseEnterEmit(item[identifierKey], false)"
+            >
             <el-checkbox
               class="my-checkbox"
               :label="item[identifierKey]"
@@ -88,6 +91,10 @@ export default {
     visibilityToggle: function (key, value) {
       this.$emit('changed', { key, value })
     },
+    checkboxMouseEnterEmit: function (key, value) {
+      this.$emit('checkboxMouseEnter', { key, value })
+    },
+
     handleCheckedItemsChange: function (value) {
       let checkedCount = value.length
       this.checkAll = checkedCount === this.selections.length
