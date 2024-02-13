@@ -311,17 +311,17 @@ export default {
             userAnnotation.item = this.annotationEntry['feature']['id']
           }
           this.$emit('submitted', true)
-          // this.$annotator
-          //   .addAnnotation(userAnnotation)
-          //   .then(() => {
-          //     this.errorMessage = ''
-          //     this.resetSubmission()
-          //     this.updatePrevSubmissions()
-          //   })
-          //   .catch(() => {
-          //     this.errorMessage =
-          //       'There is a problem with the submission, please try again later'
-          //   })
+          this.$annotator
+            .addAnnotation(userAnnotation)
+            .then(() => {
+              this.errorMessage = ''
+              this.resetSubmission()
+              this.updatePrevSubmissions()
+            })
+            .catch(() => {
+              this.errorMessage =
+                'There is a problem with the submission, please try again later'
+            })
         }
       }
     },
@@ -335,17 +335,17 @@ export default {
           feature: undefined
         }
         this.$emit('submitted', true)
-        // this.$annotator
-        //   .addAnnotation(userAnnotation)
-        //   .then(() => {
-        //     this.errorMessage = ''
-        //     this.resetSubmission()
-        //     this.updatePrevSubmissions()
-        //   })
-        //   .catch(() => {
-        //     this.errorMessage =
-        //       'There is a problem with the submission, please try again later'
-        //   })
+        this.$annotator
+          .addAnnotation(userAnnotation)
+          .then(() => {
+            this.errorMessage = ''
+            this.resetSubmission()
+            this.updatePrevSubmissions()
+          })
+          .catch(() => {
+            this.errorMessage =
+              'There is a problem with the submission, please try again later'
+          })
       }
     },
     cancelled: function () {
