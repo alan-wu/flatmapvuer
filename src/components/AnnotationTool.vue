@@ -60,28 +60,14 @@
           <template v-if="isEditable">
             <el-row class="dialog-spacer"></el-row>
             <el-row v-if="isDeleted">
-              <el-button class="button" type="primary" plain @click="deleted">
-                Delete
-              </el-button>
-
-              <!-- may need to remove when popup fixed -->
-              <el-button class="button" type="primary" plain @click="cancelled">
-                Cancel
-              </el-button>
-              <!-- may need to remove when popup fixed -->
-
+              <el-icon class="standard-icon">
+                <el-icon-delete @click="submit"/>
+              </el-icon>
             </el-row>
             <el-row v-else-if="!editing">
               <el-icon class="standard-icon">
                 <el-icon-edit @click="editing = true" />
               </el-icon>
-
-              <!-- may need to remove when popup fixed -->
-              <el-icon class="standard-icon">
-                <el-icon-close @click="cancelled" />
-              </el-icon>
-              <!-- may need to remove when popup fixed -->
-
             </el-row>
             <template v-else>
               <el-row class="dialog-text">
@@ -144,13 +130,6 @@
                 <el-button class="button" type="primary" plain @click="submit">
                   Submit
                 </el-button>
-
-                <!-- may need to remove when popup fixed -->
-                <el-button class="button" type="primary" plain @click="cancelled">
-                  Cancel
-                </el-button>
-                <!-- may need to remove when popup fixed -->
-
               </el-row>
             </template>
             <el-row class="dialog-text" v-if="errorMessage">
@@ -169,6 +148,7 @@ import {
   ArrowDown as ElIconArrowDown,
   Edit as ElIconEdit,
   Close as ElIconClose,
+  Delete as ElIconDelete,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import {

@@ -494,9 +494,8 @@
     </div>
     <el-dialog
       v-model="tooltipDisplay"
-      :title="annotationEntry.type"
       width="500"
-      :show-close="false"
+      draggable
     >
       <tooltip 
         :annotationEntry="annotationEntry"
@@ -2228,6 +2227,7 @@ export default {
   --el-color-primary: #8300BF;
   --el-color-primary-light-5: #CD99E5;
   --el-color-primary-light-9: #F3E6F9;
+  --el-color-primary-dark-2: var(--el-color-primary);
 }
 
 </style>
