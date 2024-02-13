@@ -259,7 +259,11 @@ export default {
       }
     },
     submit: function () {
-      if (this.evidence.length > 0 || this.comment) {
+      if (
+        this.evidence.length > 0 ||
+        this.comment ||
+        this.annotationEntry['type'] === 'deleted'
+      ) {
         if (
           this.annotationEntry['resourceId'] && (
             this.annotationEntry['featureId'] || this.annotationEntry['feature']
@@ -288,7 +292,10 @@ export default {
           if (this.annotationEntry['feature']) {
             userAnnotation.item = this.annotationEntry['feature']['id']
           }
-          this.$emit('submitted', true)
+          if (this.annotationEntry['type'] === 'deleted') {
+            userAnnotation.feature = undefined
+          }
+          this.$emit('annotation', userAnnotation)
           this.$annotator
             .addAnnotation(userAnnotation)
             .then(() => {
@@ -302,32 +309,6 @@ export default {
             })
         }
       }
-    },
-    deleted: function () {
-      if (this.annotationEntry['resourceId'] && this.annotationEntry['feature']) {
-        const userAnnotation = {
-          resource: this.annotationEntry['resourceId'],
-          item: this.annotationEntry['feature']['id'],
-          evidence: [],
-          comment: this.comment,
-          feature: undefined
-        }
-        this.$emit('submitted', true)
-        this.$annotator
-          .addAnnotation(userAnnotation)
-          .then(() => {
-            this.errorMessage = ''
-            this.resetSubmission()
-            this.updatePrevSubmissions()
-          })
-          .catch(() => {
-            this.errorMessage =
-              'There is a problem with the submission, please try again later'
-          })
-      }
-    },
-    cancelled: function () {
-      this.$emit('submitted', false)
     },
     removeEvidence: function (index) {
       this.evidence.splice(index, 1)

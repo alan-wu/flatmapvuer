@@ -501,7 +501,7 @@
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'" 
-        @submitted="annotationEvent"
+        @annotation="annotationEvent"
       />
     </el-dialog>
   </div>
@@ -653,16 +653,14 @@ export default {
           })
       }
     },
-    annotationEvent: function (submitted) {
+    annotationEvent: function (annotation) {
       this.tooltipDisplay = false
-      if (
-        this.mapImp &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
-      ) {
-        if (submitted) {
+      if (this.mapImp) {
+        const drawnEvent = [
+          'created', 'updated', 'deleted'
+        ].includes(this.annotationEntry.type)
+        if (drawnEvent && annotation) {
           this.mapImp.commitAnnotationEvent(this.annotationEntry)
-        } else {
-          this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
         }
       }
     },
@@ -878,14 +876,10 @@ export default {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
           if (data.type === 'created' || data.type === 'updated') {
-            console.log("🚀 ~ return ~ data created or updated:", data)
             const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
-            console.log("🚀 ~ feature:", feature)
             data.feature = feature
             // NB. this might now be `null` if user has deleted it (before OK/Submit)
             // so maybe then no `service.addAnnotation` ??
-          } else if (data.type === 'deleted') {
-            console.log("🚀 ~ return ~ data deleted:", data)
           }
           const payload = {
             feature: data,
