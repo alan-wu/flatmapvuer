@@ -2087,21 +2087,6 @@ export default {
   font-weight: 500;
   color: rgb(48, 49, 51);
   width: 150px!important;
-  :deep(.el-input__inner) {
-    height: 30px;
-    color: rgb(48, 49, 51);
-  }
-  :deep() {
-    .el-input__inner {
-      &is-focus,
-      &:focus {
-        border: 1px solid $app-primary-color;
-      }
-    }
-  }
-  :deep(.el-input__icon) {
-    line-height: 30px;
-  }
 }
 
 :deep(.flatmap_dropdown) {
