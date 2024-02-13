@@ -495,6 +495,7 @@
     <el-dialog
       v-model="tooltipDisplay"
       width="500"
+      :before-close="dialogClosed"
       draggable
     >
       <tooltip 
@@ -633,6 +634,22 @@ export default {
     return { annotator }
   },
   methods: {
+    /**
+     * Temporary function
+     * Current dialog is an alternative solution for tooltip
+     * Will modify once the showPopup function is fixed in flatmap-viewer
+     */
+    dialogClosed: function () {
+      this.tooltipDisplay = false
+      if (this.mapImp) {
+        const drawnEvent = [
+          'created', 'updated', 'deleted'
+        ].includes(this.annotationEntry.type)
+        if (drawnEvent && !this.annotationSubmit) {
+          this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
+        }
+      }
+    },
     setFeatureAnnotated: function () {
       if (this.mapImp && this.annotator) {
         this.annotator.annotatedItemIds(this.serverUUID)
@@ -660,6 +677,7 @@ export default {
           'created', 'updated', 'deleted'
         ].includes(this.annotationEntry.type)
         if (drawnEvent && annotation) {
+          this.annotationSubmit = true
           this.mapImp.commitAnnotationEvent(this.annotationEntry)
         }
       }
@@ -946,6 +964,7 @@ export default {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
             this.tooltipDisplay = true
+            this.annotationSubmit = false
           }
         } else {
           this.annotation = {}
@@ -1495,6 +1514,7 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      annotationSubmit: false,
       annotator: undefined,
     }
   },
