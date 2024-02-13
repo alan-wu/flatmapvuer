@@ -171,8 +171,6 @@ import {
   Close as ElIconClose,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
-/* eslint-disable no-alert, no-console */
-import { AnnotationService } from '@abi-software/sparc-annotation'
 import {
   ElButton as Button,
   ElCol as Col,
@@ -201,7 +199,7 @@ export default {
       type: Object,
     },
   },
-  inject: ['flatmapAPI'],
+  inject: ['flatmapAPI', '$annotator'],
   data: function () {
     return {
       displayPair: {
@@ -372,11 +370,6 @@ export default {
     },
   },
   mounted: function () {
-    if (!this.$annotator) {
-      this.$annotator = new AnnotationService(
-        `${this.flatmapAPI}annotator`
-      )
-    }
     this.$annotator.authenticate().then((userData) => {
       if (userData.name && userData.email) {
         this.authenticated = true

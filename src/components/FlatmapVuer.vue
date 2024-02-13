@@ -509,7 +509,7 @@
 </template>
 
 <script>
-import { shallowRef } from 'vue'
+import { shallowRef, markRaw } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -629,10 +629,14 @@ export default {
     //resolve this issue.
     this.setStateRequired = false
   },
+  setup(props) {
+    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+    return { annotator }
+  },
   methods: {
     setFeatureAnnotated: function () {
-      if (this.mapImp && this.$annotator) {
-        this.$annotator.annotatedItemIds(this.serverUUID)
+      if (this.mapImp && this.annotator) {
+        this.annotator.annotatedItemIds(this.serverUUID)
           .then((annotatedItemIds) => {
             for (const id of annotatedItemIds) {
               this.mapImp.setFeatureAnnotated(id)
@@ -641,8 +645,8 @@ export default {
       }
     },
     addAnnotationFeature: function () {
-      if (this.mapImp && this.$annotator) {
-        this.$annotator.drawnFeatures(this.serverUUID)
+      if (this.mapImp && this.annotator) {
+        this.annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
             for (const feature of drawnFeatures) {
               this.mapImp.addAnnotationFeature(feature)
@@ -1256,13 +1260,6 @@ export default {
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
-
-      if (!this.$annotator) {
-        this.$annotator = new AnnotationService(
-          `${this.flatmapAPI}annotator`
-        )
-      }
-
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
@@ -1442,6 +1439,7 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
+      $annotator: this.annotator
     }
   },
   data: function () {
@@ -1504,6 +1502,7 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      annotator: undefined,
     }
   },
   watch: {
