@@ -483,28 +483,30 @@
           </el-popover>
         </el-row>
       </div>
-      <Tooltip
+      <tooltip
         ref="tooltip"
         class="tooltip"
-        v-show="tooltipDisplay"
+        v-show="isTooltip"
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
       />
+      <el-dialog
+        v-model="isDialog"
+        width="300"
+        :modal="false"
+        :before-close="dialogClosed"
+        :lock-scroll="false"
+        draggable
+      >
+        <tooltip
+          :annotationEntry="annotationEntry"
+          :entry="tooltipEntry"
+          :annotationDisplay="viewingMode === 'Annotation'" 
+          @annotation="annotationEvent"
+        />
+      </el-dialog>
     </div>
-    <el-dialog
-      v-model="tooltipDisplay"
-      width="500"
-      :before-close="dialogClosed"
-      draggable
-    >
-      <tooltip 
-        :annotationEntry="annotationEntry"
-        :entry="tooltipEntry"
-        :annotationDisplay="viewingMode === 'Annotation'" 
-        @annotation="annotationEvent"
-      />
-    </el-dialog>
   </div>
 </template>
 
@@ -1514,8 +1516,22 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
-      annotationSubmit: false,
       annotator: undefined,
+      annotationSubmit: false,
+    }
+  },
+  computed: {
+    isTooltip: function () {
+      return (
+        this.annotationEntry.featureId &&
+        this.annotationEntry.models &&
+        this.tooltipDisplay
+      )
+    },
+    isDialog: function () {
+      return (
+        this.annotationEntry.feature && this.tooltipDisplay
+      )
     }
   },
   watch: {
