@@ -491,26 +491,28 @@
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
       />
-      <el-dialog
-        v-model="isDialog"
-        width="300"
-        :modal="false"
-        :before-close="dialogClosed"
-        :lock-scroll="false"
-        draggable
-      >
-        <template #header>
-          Drag
-          <el-icon><el-icon-rank /></el-icon>
-          Drag
-        </template>
-        <tooltip
-          :annotationEntry="annotationEntry"
-          :entry="tooltipEntry"
-          :annotationDisplay="viewingMode === 'Annotation'" 
-          @annotation="annotationEvent"
-        />
-      </el-dialog>
+      <div v-show="isDialog">
+        <el-dialog
+          v-model="this.tooltipDisplay"
+          width="300"
+          :modal="false"
+          :before-close="dialogClosed"
+          :lock-scroll="false"
+          draggable
+        >
+          <template #header>
+            Drag
+            <el-icon><el-icon-rank /></el-icon>
+            Drag
+          </template>
+          <tooltip
+            :annotationEntry="annotationEntry"
+            :entry="tooltipEntry"
+            :annotationDisplay="viewingMode === 'Annotation'" 
+            @annotation="annotationEvent"
+          />
+        </el-dialog>
+      </div>
     </div>
   </div>
 </template>
