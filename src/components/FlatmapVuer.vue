@@ -499,6 +499,11 @@
         :lock-scroll="false"
         draggable
       >
+        <template #header>
+          Drag
+          <el-icon><el-icon-rank /></el-icon>
+          Drag
+        </template>
         <tooltip
           :annotationEntry="annotationEntry"
           :entry="tooltipEntry"
@@ -516,6 +521,7 @@ import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
+  Rank as ElIconRank,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import Tooltip from './Tooltip.vue'
@@ -2247,6 +2253,29 @@ export default {
       color: $app-primary-color;
       font-weight: normal;
     }
+  }
+}
+
+:deep(.el-dialog) {
+  max-height: 400px;
+  border-radius: 4px;
+  background: var(--el-color-primary-light-9);
+}
+:deep(.el-dialog__header) {
+  padding: 0;
+}
+:deep(.el-dialog__body) {
+  padding: 0;
+}
+:deep(.el-dialog__headerbtn) {
+  z-index: 1;
+  width: fit-content;
+  height: fit-content;
+  top: 40px;
+  right: 20px;
+  .el-icon svg{
+    stroke:gray; 
+    stroke-width: 88;
   }
 }
 </style>
