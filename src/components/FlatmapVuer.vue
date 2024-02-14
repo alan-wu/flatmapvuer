@@ -137,6 +137,84 @@
       </el-icon>
 
       <div class="bottom-right-control">
+        <template v-if="viewingMode === 'Annotation'">
+          <el-popover
+            content="Draw Line"
+            placement="left"
+            :teleported="false"
+            trigger="manual"
+            width="80"
+            popper-class="flatmap-popper"
+            :visible="hoverVisibilities[10].value"
+          >
+            <template #reference>
+              <map-svg-icon
+                icon="drawLine"
+                class="icon-button drawLine"
+                @click="drawnEvent('line')"
+                @mouseover="showToolitip(10)"
+                @mouseout="hideToolitip(10)"
+              />
+            </template>
+          </el-popover>
+          <el-popover
+            content="Draw Polygon"
+            placement="left"
+            :teleported="false"
+            trigger="manual"
+            width="80"
+            popper-class="flatmap-popper"
+            :visible="hoverVisibilities[11].value"
+          >
+            <template #reference>
+              <map-svg-icon
+                icon="drawPolygon"
+                class="icon-button drawPolygon"
+                @click="drawnEvent('polygon')"
+                @mouseover="showToolitip(11)"
+                @mouseout="hideToolitip(11)"
+              />
+            </template>
+          </el-popover>
+          <el-popover
+            content="Draw Point"
+            placement="left"
+            :teleported="false"
+            trigger="manual"
+            width="80"
+            popper-class="flatmap-popper"
+            :visible="hoverVisibilities[12].value"
+          >
+            <template #reference>
+              <map-svg-icon
+                icon="drawPoint"
+                class="icon-button drawPoint"
+                @click="drawnEvent('point')"
+                @mouseover="showToolitip(12)"
+                @mouseout="hideToolitip(12)"
+              />
+            </template>
+          </el-popover>
+          <el-popover
+            content="Draw Trash"
+            placement="left"
+            :teleported="false"
+            trigger="manual"
+            width="80"
+            popper-class="flatmap-popper"
+            :visible="hoverVisibilities[13].value"
+          >
+            <template #reference>
+              <map-svg-icon
+                icon="drawTrash"
+                class="icon-button drawTrash"
+                @click="drawnEvent('trash')"
+                @mouseover="showToolitip(13)"
+                @mouseout="hideToolitip(13)"
+              />
+            </template>
+          </el-popover>
+        </template>
         <el-popover
           content="Zoom in"
           placement="left"
@@ -162,7 +240,7 @@
           :teleported="false"
           trigger="manual"
           width="70"
-          popper-class="flatmap-popper popper-zoomout"
+          popper-class="flatmap-popper"
           :visible="hoverVisibilities[1].value"
         >
           <template #reference>
@@ -530,6 +608,7 @@ import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
+import '@abi-software/svg-sprite/dist/style.css'
 import SvgLegends from './legends/SvgLegends.vue'
 import {
   ElButton as Button,
@@ -548,7 +627,6 @@ import {
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
-
 import { AnnotationService } from '@abi-software/sparc-annotation'
 
 const processFTUs = (parent, key) => {
@@ -644,6 +722,17 @@ export default {
     return { annotator }
   },
   methods: {
+    drawnEvent: function (type) {
+      if (type === 'line') {
+        document.querySelector('.mapbox-gl-draw_line').click()
+      } else if (type === 'polygon') {
+        document.querySelector('.mapbox-gl-draw_polygon').click()
+      } else if (type === 'point') {
+        document.querySelector('.mapbox-gl-draw_point').click()
+      } else if (type === 'trash') {
+        document.querySelector('.mapbox-gl-draw_trash').click()
+      }
+    },
     /**
      * Temporary function
      * Current dialog is an alternative solution for tooltip
@@ -652,10 +741,10 @@ export default {
     dialogClosed: function () {
       this.tooltipDisplay = false
       if (this.mapImp) {
-        const drawnEvent = [
+        const drawnAnnotationEvent = [
           'created', 'updated', 'deleted'
         ].includes(this.annotationEntry.type)
-        if (drawnEvent && !this.annotationSubmit) {
+        if (drawnAnnotationEvent && !this.annotationSubmit) {
           this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
         }
       }
@@ -689,10 +778,10 @@ export default {
     annotationEvent: function (annotation) {
       this.tooltipDisplay = false
       if (this.mapImp) {
-        const drawnEvent = [
+        const drawnAnnotationEvent = [
           'created', 'updated', 'deleted'
         ].includes(this.annotationEntry.type)
-        if (drawnEvent && annotation) {
+        if (drawnAnnotationEvent && annotation) {
           this.annotationSubmit = true
           this.mapImp.commitAnnotationEvent(this.annotationEntry)
         }
@@ -701,6 +790,7 @@ export default {
     showAnnotator: function (flag) {
       if (this.mapImp) {
         this.mapImp.showAnnotator(flag)
+        document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
     setDimension: function (flag) {
@@ -1507,6 +1597,10 @@ export default {
         { value: false },
         { value: false },
         { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
       ],
       yellowstar: yellowstar,
       isFC: false,
@@ -1835,11 +1929,7 @@ export default {
   }
 }
 
-.zoomOut {
-  padding-left: 8px;
-}
-
-.fitWindow {
+.drawLine, .drawPolygon, .drawPoint, .drawTrash, .zoomIn, .zoomOut, .fitWindow {
   padding-left: 8px;
 }
 
@@ -2041,17 +2131,6 @@ export default {
     .maplibregl-popup-close-button {
       display: none;
     }
-  }
-}
-
-:deep(.popper-zoomout) {
-  padding-right: 13px !important;
-  left: -21px !important;
-}
-
-:deep(.popper-zoomout) {
-  .popper__arrow {
-    left: 53px !important;
   }
 }
 
