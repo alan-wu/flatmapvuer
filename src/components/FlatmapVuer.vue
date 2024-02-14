@@ -668,6 +668,9 @@ export default {
               this.mapImp.setFeatureAnnotated(id)
             }
           })
+          .catch((reason) => {
+            console.log(reason) // Error!
+          })
       }
     },
     addAnnotationFeature: function () {
@@ -677,6 +680,9 @@ export default {
             for (const feature of drawnFeatures) {
               this.mapImp.addAnnotationFeature(feature)
             }
+          })
+          .catch((reason) => {
+            console.log(reason) // Error!
           })
       }
     },
