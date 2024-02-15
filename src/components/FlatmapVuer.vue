@@ -781,13 +781,17 @@ export default {
       }
     },
     checkboxMouseEnterEmitted: function (payload) {
-      console.log('taxonsSelected', payload)
       if (this.mapImp) {
         if (payload.value) {
-          let gid = this.mapImp.taxonFeatureIds(payload.key)
+          let gid = this.mapImp.taxonFeatureIds(payload.key)  
+          this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
           this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
-          this.mapImp.zoomToGeoJSONFeatures([], {noZoomIn: true})
+          // reset visibility of paths 
+          this.mapImp.selectGeoJSONFeatures("-1")
+          payload.state.forEach((stateItem) => {
+            this.mapImp.enableConnectivityByTaxonIds(stateItem.taxon, stateItem.value)
+          })
         }
       }
     },
