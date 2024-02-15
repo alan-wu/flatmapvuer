@@ -27,48 +27,43 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import { Col, Row } from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-
-locale.use(lang);
-Vue.use(Col);
-Vue.use(Row);
+import Vue from 'vue'
+import { ElCol as Col, ElRow as Row } from 'element-plus'
+Vue.use(Col)
+Vue.use(Row)
 
 export default {
-  name: "DynamicLegends",
+  name: 'DynamicLegends',
   props: {
     identifierKey: {
       type: String,
-      default: "id",
+      default: 'id',
     },
     colourKey: {
       type: String,
-      default: "colour",
+      default: 'colour',
     },
     title: {
       type: String,
-      default: "",
+      default: '',
     },
     lists: {
       type: Array,
       default: function () {
-        return [];
+        return []
       },
     },
   },
   methods: {
     capitalise: function (label) {
-      return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+      return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()
     },
   },
-};
+}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/row";
+<style lang="scss" scoped>
+@use 'element-plus/theme-chalk/src/row';
 
 .legends-visual {
   margin: 2px;
@@ -109,4 +104,3 @@ export default {
   padding: 18px;
 }
 </style>
-

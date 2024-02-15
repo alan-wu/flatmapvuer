@@ -2,9 +2,7 @@
   <div class="container">
     <el-row>
       <el-col :span="12">
-        <div class="title-text">
-          Systems
-        </div>
+        <div class="title-text">Systems</div>
       </el-col>
     </el-row>
     <div class="tree-container">
@@ -18,20 +16,21 @@
         :default-expanded-keys="defaultExpandedKeys"
         @check="checkChanged"
       >
-        <span
-          slot-scope="{ node, data }"
-          class="region-tree-node"
-          :class="{
-            activeItem: nodeIsActive(data),
-            hoverItem: nodeIsHover(data),
-          }"
-          @click="changeActiveByNode(data)"
-          @mouseover="changeHoverByNode(data)"
-        >
-          <div :style="getBackgroundStyles(data)">
-            {{ node.label }}
-          </div>
-        </span>
+        <template #default="{ node, data }">
+          <span
+            class="region-tree-node"
+            :class="{
+              activeItem: nodeIsActive(data),
+              hoverItem: nodeIsHover(data),
+            }"
+            @click="changeActiveByNode(data)"
+            @mouseover="changeHoverByNode(data)"
+          >
+            <div :style="getBackgroundStyles(data)">
+              {{ node.label }}
+            </div>
+          </span>
+        </template>
       </el-tree>
     </div>
   </div>
@@ -39,86 +38,86 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import { Checkbox, CheckboxGroup, ColorPicker, Row, Tree } from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-locale.use(lang);
-Vue.use(Checkbox);
-Vue.use(CheckboxGroup);
-Vue.use(ColorPicker);
-Vue.use(Row);
-Vue.use(Tree);
+import {
+  ElCheckbox as Checkbox,
+  ElCheckboxGroup as CheckboxGroup,
+  ElColorPicker as ColorPicker,
+  ElRow as Row,
+  ElTree as Tree,
+} from 'element-plus'
 
 /**
  * A vue component for toggling visibility of various regions.
  */
 export default {
-  name: "TreeControls",
+  name: 'TreeControls',
+  components: {
+    Checkbox,
+    CheckboxGroup,
+    ColorPicker,
+    Row,
+    Tree,
+  },
   props: {
     treeData: {
       type: Array,
       default: function () {
-        return [];
-      }
+        return []
+      },
     },
     active: {
       type: String,
-      default: ""
+      default: '',
     },
     hover: {
       type: String,
-      default: ""
-    }
+      default: '',
+    },
   },
   data: function () {
     return {
-      defaultExpandedKeys: ["All"],
-    };
+      defaultExpandedKeys: ['All'],
+    }
   },
-  destroyed: function () {
-    this.sortedPrimitiveGroups = undefined;
+  unmounted: function () {
+    this.sortedPrimitiveGroups = undefined
   },
   methods: {
-    nodeIsActive: function(data) {
-      return this.active === data.models;
+    nodeIsActive: function (data) {
+      return this.active === data.models
     },
-    nodeIsHover: function(data) {
-      return this.hover === data.models;
+    nodeIsHover: function (data) {
+      return this.hover === data.models
     },
-    changeActiveByNode: function(data) {
+    changeActiveByNode: function (data) {
       if (data.models) {
-        this.$emit("change-active", data.models);
+        this.$emit('change-active', data.models)
       }
     },
-    changeHoverByNode: function() {
+    changeHoverByNode: function () {
       //if (data.models) {
       //  this.$emit("change-active", data.models);
       //}
     },
     checkChanged: function (node, data) {
-      const isChecked = data.checkedKeys.includes(node.key);
-      if (node.key === "All") {
-        this.$emit("checkAll", isChecked);
+      const isChecked = data.checkedKeys.includes(node.key)
+      if (node.key === 'All') {
+        this.$emit('checkAll', isChecked)
       } else {
-        this.$emit("changed", {key: node.key, value: isChecked});
+        this.$emit('changed', { key: node.key, value: isChecked })
       }
     },
-    getBackgroundStyles: function(node) {
+    getBackgroundStyles: function (node) {
       if ('colour' in node) {
-        return { background: node.colour };
+        return { background: node.colour }
       }
-      return {};
+      return {}
     },
   },
-};
+}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/checkbox";
-@import "~element-ui/packages/theme-chalk/src/row";
-@import "~element-ui/packages/theme-chalk/src/tree";
+<style lang="scss" scoped>
 
 .checkbox-container {
   display: flex;
@@ -165,7 +164,7 @@ export default {
   margin-top: 6px;
   scrollbar-width: thin;
 
-  ::v-deep .el-tree {
+  :deep(.el-tree) {
     max-height: 240px;
     min-height: 130px;
     overflow: auto;
@@ -179,12 +178,12 @@ export default {
     }
   }
 
-  ::v-deep .el-tree-node__content {
+  :deep(.el-tree-node__content) {
     height: 22px;
   }
 }
 
-::v-deep .el-checkbox__input {
+:deep(.el-checkbox__input) {
   &.is-indeterminate,
   &.is-checked {
     .el-checkbox__inner {
@@ -194,11 +193,15 @@ export default {
   }
 }
 
-::v-deep .el-tree-node__children .el-tree-node__children .el-tree-node__content > label.el-checkbox {
+:deep(
+  .el-tree-node__children
+  .el-tree-node__children
+  .el-tree-node__content
+  > label.el-checkbox) {
   display: none;
 }
 
-::v-deep .el-checkbox__label {
+:deep(.el-checkbox__label) {
   padding-left: 5px;
   color: $app-primary-color !important;
   font-size: 12px;
@@ -220,12 +223,9 @@ export default {
   padding-left: 0px;
   background-color: #fff;
   width: 100%;
-
 }
 
 .hoverItem {
   background-color: #eee !important;
 }
-
 </style>
-

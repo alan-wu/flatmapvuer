@@ -1,211 +1,276 @@
 <template>
-  <el-main v-if="entry" class="main" v-loading="loading">
+  <div v-if="entry" class="main" v-loading="loading">
     <div class="block" v-if="entry.title">
-      <span class="title">{{capitalise(entry.title)}}</span>
-      <div v-if="entry.provenanceTaxonomyLabel && entry.provenanceTaxonomyLabel.length > 0" class="subtitle">
-        {{provSpeciesDescription}}
+      <span class="title">{{ capitalise(entry.title) }}</span>
+      <div
+        v-if="
+          entry.provenanceTaxonomyLabel &&
+          entry.provenanceTaxonomyLabel.length > 0
+        "
+        class="subtitle"
+      >
+        {{ provSpeciesDescription }}
       </div>
     </div>
     <div class="block" v-else>
-      <span class="title">{{entry.featureId}}</span>
+      <span class="title">{{ entry.featureId }}</span>
     </div>
     <div v-show="showDetails" class="hide" @click="showDetails = false">
-        Hide path information
-        <i class="el-icon-arrow-up"></i>
-      </div>
-      <div v-show="!showDetails" class="hide" @click="showDetails = true">
-        Show path information
-        <i class="el-icon-arrow-down"></i>
-      </div>
+      Hide path information
+      <el-icon><el-icon-arrow-up /></el-icon>
+    </div>
+    <div v-show="!showDetails" class="hide" @click="showDetails = true">
+      Show path information
+      <el-icon><el-icon-arrow-down /></el-icon>
+    </div>
     <transition name="slide-fade">
       <div v-show="showDetails" class="content-container scrollbar">
-        {{entry.paths}}
+        {{ entry.paths }}
         <div v-if="entry.origins && entry.origins.length > 0" class="block">
           <div>
             <span class="attribute-title">Origin</span>
             <el-popover
-            width="250"
-            trigger="hover"
-            :append-to-body=false
-            popper-class="popover-origin-help"
+              width="250"
+              trigger="hover"
+              :teleported="false"
+              popper-class="popover-origin-help"
             >
-            <i slot="reference" class="el-icon-warning-outline info"/>
-            <span style="word-break: keep-all;">
-              <i>Origin</i> {{originDescription}}
-            </span>
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+                <span style="word-break: keep-all">
+                  <i>Origin</i> {{ originDescription }}
+                </span>
+              </template>
             </el-popover>
           </div>
-          <div v-for="(origin, i) in entry.origins" class="attribute-content"  :key="origin">
+          <div
+            v-for="(origin, i) in entry.origins"
+            class="attribute-content"
+            :key="origin"
+          >
             {{ capitalise(origin) }}
             <div v-if="i != entry.origins.length - 1" class="seperator"></div>
           </div>
-          <el-button v-show="entry.originsWithDatasets && entry.originsWithDatasets.length > 0" class="button" @click="openDendrites">
+          <el-button
+            v-show="
+              entry.originsWithDatasets && entry.originsWithDatasets.length > 0
+            "
+            class="button"
+            @click="openDendrites"
+          >
             Explore origin data
           </el-button>
         </div>
-        <div v-if="entry.components && entry.components.length > 0" class="block">
+        <div
+          v-if="entry.components && entry.components.length > 0"
+          class="block"
+        >
           <div class="attribute-title">Components</div>
-          <div v-for="(component, i) in entry.components" class="attribute-content"  :key="component">
+          <div
+            v-for="(component, i) in entry.components"
+            class="attribute-content"
+            :key="component"
+          >
             {{ capitalise(component) }}
-            <div v-if="i != entry.components.length - 1" class="seperator"></div>
+            <div
+              v-if="i != entry.components.length - 1"
+              class="seperator"
+            ></div>
           </div>
         </div>
-        <div v-if="entry.destinations && entry.destinations.length > 0" class="block">
+        <div
+          v-if="entry.destinations && entry.destinations.length > 0"
+          class="block"
+        >
           <div>
             <span class="attribute-title">Destination</span>
             <el-popover
-            width="250"
-            trigger="hover"
-            :append-to-body=false
-            popper-class="popover-origin-help"
+              width="250"
+              trigger="hover"
+              :teleported="false"
+              popper-class="popover-origin-help"
             >
-            <i slot="reference" class="el-icon-warning-outline info"/>
-            <span style="word-break: keep-all;">
-            <i>Destination</i> is where the axons terminate
-            </span>
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+                <span style="word-break: keep-all">
+                  <i>Destination</i> is where the axons terminate
+                </span>
+              </template>
             </el-popover>
           </div>
-          <div v-for="(destination, i) in entry.destinations" class="attribute-content"  :key="destination">
+          <div
+            v-for="(destination, i) in entry.destinations"
+            class="attribute-content"
+            :key="destination"
+          >
             {{ capitalise(destination) }}
-            <div v-if="i != entry.destinations.length - 1" class="seperator"></div>
+            <div
+              v-if="i != entry.destinations.length - 1"
+              class="seperator"
+            ></div>
           </div>
-          <el-button v-show="entry.destinationsWithDatasets && entry.destinationsWithDatasets.length > 0" class="button" @click="openAxons">
+          <el-button
+            v-show="
+              entry.destinationsWithDatasets &&
+              entry.destinationsWithDatasets.length > 0
+            "
+            class="button"
+            @click="openAxons"
+          >
             Explore destination data
           </el-button>
         </div>
 
-        <el-button v-show="entry.componentsWithDatasets && entry.componentsWithDatasets.length > 0" class="button" @click="openAll">
+        <el-button
+          v-show="
+            entry.componentsWithDatasets &&
+            entry.componentsWithDatasets.length > 0
+          "
+          class="button"
+          @click="openAll"
+        >
           Search for data on components
         </el-button>
 
         <external-resource-card :resources="resources"></external-resource-card>
-
       </div>
     </transition>
-  </el-main>
+  </div>
 </template>
 
-
 <script>
-/* eslint-disable no-alert, no-console */
-import Vue from "vue";
 import {
-  Button,
-  Container,
-  Icon,
-  Main
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-locale.use(lang);
-Vue.use(Button);
-Vue.use(Container);
-Vue.use(Icon);
-Vue.use(Main);
+  ArrowUp as ElIconArrowUp,
+  ArrowDown as ElIconArrowDown,
+  Warning as ElIconWarning,
+} from '@element-plus/icons-vue'
+/* eslint-disable no-alert, no-console */
+import {
+  ElButton as Button,
+  ElContainer as Container,
+  ElIcon as Icon,
+} from 'element-plus'
 
 import EventBus from './EventBus'
-import ExternalResourceCard from './ExternalResourceCard.vue';
+import ExternalResourceCard from './ExternalResourceCard.vue'
 
 const titleCase = (str) => {
-  return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+  return str.replace(/\w\S*/g, (t) => {
+    return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase()
+  })
 }
 
-const capitalise = function(str){
-  if (str)
-    return str.charAt(0).toUpperCase() + str.slice(1)
-  return ""
+const capitalise = function (str) {
+  if (str) return str.charAt(0).toUpperCase() + str.slice(1)
+  return ''
 }
 
 export default {
-  components: { ExternalResourceCard },
-  name: "ProvenancePopup",
-  props: { 
+  name: 'ProvenancePopup',
+  components: {
+    Button,
+    Container,
+    Icon,
+    ExternalResourceCard,
+    ElIconArrowUp,
+    ElIconArrowDown,
+    ElIconWarning,
+  },
+  props: {
     entry: {
       type: Object,
       default: () => ({
-        destinations: [], 
+        destinations: [],
         origins: [],
         components: [],
         destinationsWithDatasets: [],
         originsWithDatasets: [],
         componentsWithDatasets: [],
-        resource: undefined
-      })
+        resource: undefined,
+      }),
     },
   },
-  data: function() {
+  data: function () {
     return {
       controller: undefined,
       activeSpecies: undefined,
-      appendToBody: false,
       pubmedSearchUrl: '',
       loading: false,
       showToolip: false,
       showDetails: false,
       originDescriptions: {
-        'motor': 'is the location of the initial cell body of the circuit',
-        'sensory': 'is the location of the initial cell body in the PNS circuit'
+        motor: 'is the location of the initial cell body of the circuit',
+        sensory: 'is the location of the initial cell body in the PNS circuit',
       },
       componentsWithDatasets: [],
-      uberons: [{id: undefined, name: undefined}]
-    };
+      uberons: [{ id: undefined, name: undefined }],
+    }
   },
   computed: {
-    resources: function(){
+    resources: function () {
       let resources = []
-      if(this.entry && this.entry.hyperlinks){
+      if (this.entry && this.entry.hyperlinks) {
         resources = this.entry.hyperlinks
       }
       return resources
     },
-    originDescription: function(){
-      if(this.entry && this.entry.title && this.entry.title.toLowerCase().includes('motor')){
+    originDescription: function () {
+      if (
+        this.entry &&
+        this.entry.title &&
+        this.entry.title.toLowerCase().includes('motor')
+      ) {
         return this.originDescriptions.motor
       } else {
         return this.originDescriptions.sensory
       }
     },
-    provSpeciesDescription: function(){
-      let text = "Observed in"
-      this.entry.provenanceTaxonomyLabel.forEach(label => {
+    provSpeciesDescription: function () {
+      let text = 'Observed in'
+      this.entry.provenanceTaxonomyLabel.forEach((label) => {
         text += ` ${label},`
-      });
-      text = text.slice(0,-1) // remove last comma
-      text += " species"
+      })
+      text = text.slice(0, -1) // remove last comma
+      text += ' species'
       return text
-    }
+    },
   },
   methods: {
-    titleCase: function(title){
+    titleCase: function (title) {
       return titleCase(title)
     },
-    capitalise: function(text){
+    capitalise: function (text) {
       return capitalise(text)
     },
-    openUrl: function(url){
+    openUrl: function (url) {
       window.open(url, '_blank')
     },
-    openAll: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.entry.componentsWithDatasets.map(a=>a.name)})
+    openAll: function () {
+      EventBus.emit('onActionClick', {
+        type: 'Facets',
+        labels: this.entry.componentsWithDatasets.map((a) => a.name),
+      })
     },
-    openAxons: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.entry.destinationsWithDatasets.map(a=>a.name)})
+    openAxons: function () {
+      EventBus.emit('onActionClick', {
+        type: 'Facets',
+        labels: this.entry.destinationsWithDatasets.map((a) => a.name),
+      })
     },
-    openDendrites: function(){
-      EventBus.$emit('onActionClick', {type:'Facets', labels: this.entry.originsWithDatasets.map(a=>a.name)})
+    openDendrites: function () {
+      EventBus.emit('onActionClick', {
+        type: 'Facets',
+        labels: this.entry.originsWithDatasets.map((a) => a.name),
+      })
     },
-    pubmedSearchUrlUpdate: function (val){
+    pubmedSearchUrlUpdate: function (val) {
       this.pubmedSearchUrl = val
     },
-  }
-};
+  },
+}
 </script>
 
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/button";
-@import "~element-ui/packages/theme-chalk/src/container";
-@import "~element-ui/packages/theme-chalk/src/header";
-@import "~element-ui/packages/theme-chalk/src/main";
+<style lang="scss" scoped>
 
 .display {
   width: 44px;
@@ -245,19 +310,19 @@ export default {
   text-transform: none !important; // need to overide the tooltip text transform
 }
 
-.info{
+.info {
   transform: rotate(180deg);
   color: #8300bf;
   margin-left: 8px;
 }
 
 .seperator {
-  width:90%;
-  height:1px;
-  background-color:#bfbec2;
+  width: 90%;
+  height: 1px;
+  background-color: #bfbec2;
 }
 
-.hide{
+.hide {
   color: $app-primary-color;
   cursor: pointer;
   margin-right: 6px;
@@ -279,7 +344,7 @@ export default {
   font-size: 14px;
   text-align: left;
   line-height: 1.5em;
-  font-family: Asap, sans-serif,Helvetica;
+  font-family: Asap, sans-serif, Helvetica;
   font-weight: 400;
   /* outline: thin red solid; */
   padding: 1em !important;
@@ -287,7 +352,7 @@ export default {
   min-width: 16rem;
 }
 
-.title{
+.title {
   font-size: 18px;
   font-weight: 500;
   font-weight: bold;
@@ -295,14 +360,14 @@ export default {
   color: rgb(131, 0, 191);
 }
 
-.attribute-title{
+.attribute-title {
   font-size: 16px;
   font-weight: 600;
   /* font-weight: bold; */
   text-transform: uppercase;
 }
 
-.attribute-content{
+.attribute-content {
   font-size: 14px;
   font-weight: 500;
 }
@@ -313,7 +378,7 @@ export default {
 }
 
 .main {
-  .el-button.is-round{
+  .el-button.is-round {
     border-radius: 4px;
     padding: 9px 20px 10px 20px;
     display: flex;
@@ -327,7 +392,7 @@ export default {
   font-size: 14px !important;
   background-color: $app-primary-color;
   color: #fff;
-  &+.button {
+  & + .button {
     margin-top: 10px !important;
   }
   &:hover {
@@ -337,8 +402,9 @@ export default {
   }
 }
 
-.tooltip-container{
-  &::after, &::before {
+.tooltip-container {
+  &::after,
+  &::before {
     content: '';
     display: block;
     position: absolute;
@@ -359,34 +425,36 @@ export default {
 
 .maplibregl-popup-anchor-bottom {
   .tooltip-container {
-    &::after, &::before {
+    &::after,
+    &::before {
       top: 100%;
       border-width: 12px;
     }
     &::after {
-      margin-top:-1px;
-      border-color: rgb(255, 255, 255) transparent transparent  transparent ;
+      margin-top: -1px;
+      border-color: rgb(255, 255, 255) transparent transparent transparent;
     }
     &::before {
       margin: 0 auto;
-      border-color: $app-primary-color  transparent  transparent transparent ;
+      border-color: $app-primary-color transparent transparent transparent;
     }
   }
 }
 
 .maplibregl-popup-anchor-top {
   .tooltip-container {
-    &::after, &::before {
+    &::after,
+    &::before {
       top: -24px;
       border-width: 12px;
     }
     &::after {
       margin-top: 1px;
-      border-color: transparent transparent rgb(255, 255, 255) transparent ;
+      border-color: transparent transparent rgb(255, 255, 255) transparent;
     }
     &::before {
       margin: 0 auto;
-      border-color: transparent transparent $app-primary-color transparent ;
+      border-color: transparent transparent $app-primary-color transparent;
     }
   }
 }
@@ -414,9 +482,9 @@ export default {
   background-color: #979797;
 }
 
-
 /* Fix for chrome bug where under triangle pops up above one on top of it  */
-.selector:not(*:root), .tooltip-container::after{
+.selector:not(*:root),
+.tooltip-container::after {
   top: 99.4%;
 }
 </style>
