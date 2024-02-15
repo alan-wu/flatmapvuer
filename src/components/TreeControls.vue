@@ -79,7 +79,7 @@ export default {
       defaultExpandedKeys: ['All'],
     }
   },
-  destroyed: function () {
+  unmounted: function () {
     this.sortedPrimitiveGroups = undefined
   },
   methods: {
