@@ -994,18 +994,22 @@ export default {
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
-          if (data.type === 'created' || data.type === 'updated') {
-            const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
-            data.feature = feature
-            // NB. this might now be `null` if user has deleted it (before OK/Submit)
-            // so maybe then no `service.addAnnotation` ??
+          if (data.type === 'aborted') {
+            this.rollbackAnnotationEvent()
+          } else {
+            if (data.type === 'created' || data.type === 'updated') {
+              const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
+              data.feature = feature
+              // NB. this might now be `null` if user has deleted it (before OK/Submit)
+              // so maybe then no `service.addAnnotation` ??
+            }
+            const payload = {
+              feature: data,
+              userData: args,
+              eventType: eventType,
+            }
+            this.checkAndCreatePopups(payload)
           }
-          const payload = {
-            feature: data,
-            userData: args,
-            eventType: eventType,
-          }
-          this.checkAndCreatePopups(payload)
         } else {
           if (eventType !== 'pan-zoom') {
             const label = data.label
@@ -1098,7 +1102,6 @@ export default {
       this.$refs.tooltip.$el.style.display = 'flex'
       document.querySelector('.maplibregl-popup-close-button').onclick = () => {
         if (ftooltip) ftooltip.style.display = 'block'
-        this.rollbackAnnotationEvent()
       }
     },
     closeTooltip: function () {
