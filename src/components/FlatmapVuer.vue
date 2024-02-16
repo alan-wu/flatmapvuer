@@ -564,33 +564,12 @@
       <tooltip
         ref="tooltip"
         class="tooltip"
-        v-show="isTooltip"
+        v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
+        @annotation="commitAnnotationEvent"
       />
-      <div v-show="isDialog">
-        <el-dialog
-          v-model="this.tooltipDisplay"
-          width="300"
-          :modal="false"
-          :before-close="dialogClosed"
-          :lock-scroll="false"
-          draggable
-        >
-          <template #header>
-            Drag
-            <el-icon><el-icon-rank /></el-icon>
-            Drag
-          </template>
-          <tooltip
-            :annotationEntry="annotationEntry"
-            :entry="tooltipEntry"
-            :annotationDisplay="viewingMode === 'Annotation'" 
-            @annotation="annotationEvent"
-          />
-        </el-dialog>
-      </div>
     </div>
   </div>
 </template>
@@ -628,6 +607,31 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
+
+const centroid = (geometry) => {
+  let featureGeometry = {
+    lng: 0,
+    lat: 0,
+  }
+  let coordinates
+  if (geometry.type === "Polygon") {
+    coordinates = geometry.coordinates[0]
+  } else {
+    coordinates = geometry.coordinates
+  }
+  if (!(geometry.type === 'Point')) {
+    coordinates.map((coor) => {
+      featureGeometry.lng += parseFloat(coor[0])
+      featureGeometry.lat += parseFloat(coor[1])
+    })
+    featureGeometry.lng = featureGeometry.lng / coordinates.length
+    featureGeometry.lat = featureGeometry.lat / coordinates.length
+  } else {
+    featureGeometry.lng += parseFloat(coordinates[0])
+    featureGeometry.lat += parseFloat(coordinates[1])
+  }
+  return featureGeometry
+}
 
 const processFTUs = (parent, key) => {
   const ftus = []
@@ -733,22 +737,6 @@ export default {
         document.querySelector('.mapbox-gl-draw_trash').click()
       }
     },
-    /**
-     * Temporary function
-     * Current dialog is an alternative solution for tooltip
-     * Will modify once the showPopup function is fixed in flatmap-viewer
-     */
-    dialogClosed: function () {
-      this.tooltipDisplay = false
-      if (this.mapImp) {
-        const drawnAnnotationEvent = [
-          'created', 'updated', 'deleted'
-        ].includes(this.annotationEntry.type)
-        if (drawnAnnotationEvent && !this.annotationSubmit) {
-          this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
-        }
-      }
-    },
     setFeatureAnnotated: function () {
       if (this.mapImp && this.annotator) {
         this.annotator.annotatedItemIds(this.serverUUID)
@@ -775,16 +763,23 @@ export default {
           })
       }
     },
-    annotationEvent: function (annotation) {
-      this.tooltipDisplay = false
-      if (this.mapImp) {
-        const drawnAnnotationEvent = [
-          'created', 'updated', 'deleted'
-        ].includes(this.annotationEntry.type)
-        if (drawnAnnotationEvent && annotation) {
-          this.annotationSubmit = true
-          this.mapImp.commitAnnotationEvent(this.annotationEntry)
-        }
+    rollbackAnnotationEvent: function () {
+      if (
+        this.mapImp &&
+        this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
+        !this.annotationSubmit
+      ) {
+        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
+      }
+    },
+    commitAnnotationEvent: function (annotation) {
+      if (
+        this.mapImp &&
+        this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
+        annotation
+      ) {
+        this.annotationSubmit = true
+        this.mapImp.commitAnnotationEvent(this.annotationEntry)
       }
     },
     showAnnotator: function (flag) {
@@ -1069,8 +1064,11 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            this.tooltipDisplay = true
             this.annotationSubmit = false
+            let featureGeometry = centroid(data.feature.feature.geometry)
+            setTimeout(() => {
+              this.displayTooltip(data.feature.feature.id, featureGeometry)
+            }, 0);
           }
         } else {
           this.annotation = {}
@@ -1099,7 +1097,8 @@ export default {
         'block'
       this.$refs.tooltip.$el.style.display = 'flex'
       document.querySelector('.maplibregl-popup-close-button').onclick = () => {
-        document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
+        if (ftooltip) ftooltip.style.display = 'block'
+        this.rollbackAnnotationEvent()
       }
     },
     closeTooltip: function () {
@@ -1188,13 +1187,17 @@ export default {
         }, 500)
       }
     },
-    displayTooltip: function (feature) {
+    displayTooltip: function (feature, geometry = undefined) {
       this.tooltipDisplay = true
-      this.mapImp.showPopup(
-        this.mapImp.modelFeatureIds(feature)[0],
-        this.$refs.tooltip.$el,
-        { className: 'flatmapvuer-popover', positionAtLastClick: true }
-      )
+      let featureId = undefined
+      let options = { className: 'flatmapvuer-popover', positionAtLastClick: true }
+      if (geometry) {
+        featureId = feature
+        options.annotationFeatureGeometry = geometry
+      } else {
+        featureId = this.mapImp.modelFeatureIds(feature)[0]
+      }
+      this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
       this.popUpCssHacks()
     },
     openFlatmapHelpPopup: function () {
@@ -1625,21 +1628,8 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
+      drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       annotationSubmit: false,
-    }
-  },
-  computed: {
-    isTooltip: function () {
-      return (
-        this.annotationEntry.featureId &&
-        this.annotationEntry.models &&
-        this.tooltipDisplay
-      )
-    },
-    isDialog: function () {
-      return (
-        this.annotationEntry.feature && this.tooltipDisplay
-      )
     }
   },
   watch: {
