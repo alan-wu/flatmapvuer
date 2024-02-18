@@ -1193,12 +1193,13 @@ export default {
     displayTooltip: function (feature, geometry = undefined) {
       this.tooltipDisplay = true
       let featureId = undefined
-      let options = { className: 'flatmapvuer-popover', positionAtLastClick: true }
+      let options = { className: 'flatmapvuer-popover' }
       if (geometry) {
         featureId = feature
         options.annotationFeatureGeometry = geometry
       } else {
         featureId = this.mapImp.modelFeatureIds(feature)[0]
+        options.positionAtLastClick = true
       }
       this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
       this.popUpCssHacks()
