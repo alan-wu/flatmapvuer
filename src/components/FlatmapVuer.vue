@@ -766,8 +766,7 @@ export default {
     rollbackAnnotationEvent: function () {
       if (
         this.mapImp &&
-        this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
-        !this.annotationSubmit
+        this.drawnAnnotationEvent.includes(this.annotationEntry.type)
       ) {
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
@@ -778,7 +777,7 @@ export default {
         this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
         annotation
       ) {
-        this.annotationSubmit = true
+        this.annotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
       }
     },
@@ -994,8 +993,16 @@ export default {
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
+          // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
-            this.rollbackAnnotationEvent()
+            // Rollback when no annotation added
+            if (!this.annotationSubmitted) {
+              this.rollbackAnnotationEvent()
+            }
+          } else if (data.type === 'modeChanged') {
+            if (data.feature.mode === 'direct_select') {
+              this.doubleClickedFeature = true
+            }
           } else {
             if (data.type === 'created' || data.type === 'updated') {
               const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
@@ -1065,10 +1072,15 @@ export default {
             ...data.feature,
             resourceId: this.serverUUID,
           }
+          // Trigger 'updated' event
+          if (this.doubleClickedFeature) {
+            this.drawnEvent('trash')
+            this.doubleClickedFeature = false
+          }
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            this.annotationSubmit = false
+            this.annotationSubmitted = false
             let featureGeometry = centroid(data.feature.feature.geometry)
             setTimeout(() => {
               this.displayTooltip(data.feature.feature.id, featureGeometry)
@@ -1633,7 +1645,8 @@ export default {
       backgroundIconRef: undefined,
       annotator: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
-      annotationSubmit: false,
+      annotationSubmitted: false,
+      doubleClickedFeature: false,
     }
   },
   watch: {
