@@ -570,6 +570,23 @@
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
+      <el-dialog
+          v-model="isDrawn"
+          width="300"
+          :modal="false"
+          :lock-scroll="false"
+          :show-close="false"
+          :close-on-click-modal="false"
+          :close-on-press-escape="false"
+          draggable
+        >
+          <template #header>
+            <el-button @click="confirmDrawnFeature">Confirm</el-button>
+          </template>
+          <div v-for="info in relevantInformation">
+            <p>{{ info.feature }}</p>
+          </div>
+        </el-dialog>
     </div>
   </div>
 </template>
@@ -725,6 +742,13 @@ export default {
     return { annotator }
   },
   methods: {
+    confirmDrawnFeature: function () {
+      if (this.lastEvent) {
+        this.isDrawn = false
+        this.checkAndCreatePopups(this.lastEvent)
+        this.lastEvent = undefined
+      }
+    },
     drawnEvent: function (type) {
       if (type === 'line') {
         document.querySelector('.mapbox-gl-draw_line').click()
@@ -767,6 +791,7 @@ export default {
         this.mapImp &&
         this.drawnAnnotationEvent.includes(this.annotationEntry.type)
         ) {
+        this.isDrawn = false
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
     },
@@ -995,14 +1020,17 @@ export default {
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
             // Rollback when no annotation added
-            if (!this.annotationSubmitted) {
+            if (!this.isDrawn && !this.annotationSubmitted) {
               this.rollbackAnnotationEvent()
             }
           } else if (data.type === 'modeChanged') {
             if (data.feature.mode.startsWith('draw_')) {
+              this.relevantInformation = []
+              this.isDrawn = false
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               this.inDrawing = false
+              this.isDrawn = true
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1018,7 +1046,11 @@ export default {
               userData: args,
               eventType: eventType,
             }
-            this.checkAndCreatePopups(payload)
+            if (data.type === 'created') {              
+              this.lastEvent = payload
+            } else {
+              this.checkAndCreatePopups(payload)
+            }
           }
         } else {
           if (eventType !== 'pan-zoom') {
@@ -1044,12 +1076,20 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
+                let relevantFeatureId = this.currentRelevant.feature.featureId
+                if (!(relevantFeatureId in this.relevantFeatureIds)) {
+                  this.relevantFeatureIds.push(relevantFeatureId)
+                  this.relevantInformation.push(this.currentRelevant)
+                }
               }
             } else if (
               eventType === 'mouseenter' &&
               !(this.viewingMode === 'Network Discovery')
             ) {
               this.currentHover = data.models ? data.models : ''
+              if (data.featureId) {
+                this.currentRelevant = payload
+              }
             }
             if (
               data &&
@@ -1085,9 +1125,7 @@ export default {
           } else if (data.feature.feature) {
             this.annotationSubmitted = false
             let featureGeometry = centroid(data.feature.feature.geometry)
-            setTimeout(() => {
-              this.displayTooltip(data.feature.feature.id, featureGeometry)
-            }, 0);
+            this.displayTooltip(data.feature.feature.id, featureGeometry)
           }
         } else {
           this.annotation = {}
@@ -1648,9 +1686,14 @@ export default {
       backgroundIconRef: undefined,
       annotator: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
+      lastEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
+      isDrawn: false,
       doubleClickedFeature: false,
+      currentRelevant: {},
+      relevantFeatureIds: [],
+      relevantInformation: []
     }
   },
   watch: {
@@ -2351,29 +2394,6 @@ export default {
       color: $app-primary-color;
       font-weight: normal;
     }
-  }
-}
-
-:deep(.el-dialog) {
-  max-height: 400px;
-  border-radius: 4px;
-  background: var(--el-color-primary-light-9);
-}
-:deep(.el-dialog__header) {
-  padding: 0;
-}
-:deep(.el-dialog__body) {
-  padding: 0;
-}
-:deep(.el-dialog__headerbtn) {
-  z-index: 1;
-  width: fit-content;
-  height: fit-content;
-  top: 40px;
-  right: 20px;
-  .el-icon svg{
-    stroke:gray; 
-    stroke-width: 88;
   }
 }
 </style>
