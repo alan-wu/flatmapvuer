@@ -561,7 +561,7 @@
           </el-popover>
         </el-row>
       </div>
-      <tooltip
+      <Tooltip
         ref="tooltip"
         class="tooltip"
         v-show="tooltipDisplay"
@@ -571,34 +571,37 @@
         @annotation="commitAnnotationEvent"
       />
       <el-dialog
-          v-model="isDrawn"
-          width="300"
-          :modal="false"
-          :lock-scroll="false"
-          :show-close="false"
-          :close-on-click-modal="false"
-          :close-on-press-escape="false"
-          draggable
-        >
-          <template #header>
-            <el-button @click="confirmDrawnFeature">Confirm</el-button>
-          </template>
-          <div v-for="info in relevantInformation">
-            <p>{{ info.feature }}</p>
-          </div>
-        </el-dialog>
+        v-model="relevantDisplay"
+        width="200"
+        :modal="false"
+        :show-close="false"
+        :lock-scroll="false"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        draggable
+      >
+        <template #header>
+          <h4>Finalise drawing</h4>
+          <el-button @click="confirmDrawnFeature">Confirm</el-button>
+          <el-button @click="rollbackAnnotationEvent">Cancel</el-button>
+        </template>
+        <h4>Related Feature</h4>
+        <el-card v-for="(value, key) in relevantEntry" :key="key">
+          <span @click="checkAndCreatePopups(value)">{{ key }}</span>
+        </el-card>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
+/* eslint-disable no-alert, no-console */
 import { shallowRef, markRaw } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
-/* eslint-disable no-alert, no-console */
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
@@ -744,7 +747,8 @@ export default {
   methods: {
     confirmDrawnFeature: function () {
       if (this.lastEvent) {
-        this.isDrawn = false
+        this.inDrawing = false
+        this.relevantDisplay = false
         this.checkAndCreatePopups(this.lastEvent)
         this.lastEvent = undefined
       }
@@ -758,6 +762,33 @@ export default {
         document.querySelector('.mapbox-gl-draw_point').click()
       } else if (type === 'trash') {
         document.querySelector('.mapbox-gl-draw_trash').click()
+      }
+    },
+    rollbackAnnotationEvent: function () {
+      if (this.mapImp) {
+        let annotationEvent = undefined
+        if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
+          annotationEvent = this.annotationEntry
+        } else if (this.lastEvent) {
+          this.inDrawing = false
+          this.relevantDisplay = false
+          annotationEvent = {
+            ...this.lastEvent.feature,
+            resourceId: this.serverUUID,
+          }
+          this.lastEvent = undefined
+        }
+        this.mapImp.rollbackAnnotationEvent(annotationEvent)
+      }
+    },
+    commitAnnotationEvent: function (annotation) {
+      if (
+        this.mapImp &&
+        this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
+        annotation
+      ) {
+        this.annotationSubmitted = true
+        this.mapImp.commitAnnotationEvent(this.annotationEntry)
       }
     },
     setFeatureAnnotated: function () {
@@ -786,28 +817,10 @@ export default {
           })
       }
     },
-    rollbackAnnotationEvent: function () {
-      if (
-        this.mapImp &&
-        this.drawnAnnotationEvent.includes(this.annotationEntry.type)
-        ) {
-        this.isDrawn = false
-        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
-      }
-    },
-    commitAnnotationEvent: function (annotation) {
-      if (
-        this.mapImp &&
-        this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
-        annotation
-      ) {
-        this.annotationSubmitted = true
-        this.mapImp.commitAnnotationEvent(this.annotationEntry)
-      }
-    },
     showAnnotator: function (flag) {
       if (this.mapImp) {
         this.mapImp.showAnnotator(flag)
+        // Hide default toolbar
         document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
@@ -1019,18 +1032,17 @@ export default {
         if (eventType === 'annotation') {
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
-            // Rollback when no annotation added
-            if (!this.isDrawn && !this.annotationSubmitted) {
+            // Rollback drawing when no new annotation submitted
+            if (!this.annotationSubmitted) {
               this.rollbackAnnotationEvent()
             }
           } else if (data.type === 'modeChanged') {
             if (data.feature.mode.startsWith('draw_')) {
-              this.relevantInformation = []
-              this.isDrawn = false
+              this.relevantEntry = {}
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              this.inDrawing = false
-              this.isDrawn = true
+              this.relevantDisplay = true
+              console.log(this.relevantEntry);
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1046,6 +1058,7 @@ export default {
               userData: args,
               eventType: eventType,
             }
+            // Disable direct popup during create, a dialog will be used instead
             if (data.type === 'created') {              
               this.lastEvent = payload
             } else {
@@ -1076,10 +1089,12 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                let relevantFeatureModel = this.currentRelevant.feature.models
-                if (!(relevantFeatureModel in this.relevantIds)) {
-                  this.relevantIds.push(relevantFeatureModel)
-                  this.relevantInformation.push(this.currentRelevant)
+                // Only clicked relevant data will be added 
+                let relevantId = this.currentRelevant.feature.models ?
+                  this.currentRelevant.feature.models :
+                  this.currentRelevant.feature.featureId
+                if (!(relevantId in this.relevantEntry)) {
+                  this.relevantEntry[relevantId] = this.currentRelevant
                 }
               }
             } else if (
@@ -1087,6 +1102,7 @@ export default {
               !(this.viewingMode === 'Network Discovery')
             ) {
               this.currentHover = data.models ? data.models : ''
+              // The draw is in different layer, deeper layer will be used
               if (data.featureId) {
                 this.currentRelevant = payload
               }
@@ -1095,7 +1111,9 @@ export default {
               data &&
               data.type !== 'marker' &&
               eventType === 'click' &&
-              !(this.viewingMode === 'Network Discovery')
+              !(this.viewingMode === 'Network Discovery') &&
+              // Disable popup when drawing
+              !this.inDrawing
             ) {
               this.checkAndCreatePopups(payload)
             }
@@ -1689,11 +1707,10 @@ export default {
       lastEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
-      isDrawn: false,
+      relevantDisplay: false,
       doubleClickedFeature: false,
       currentRelevant: {},
-      relevantIds: [],
-      relevantInformation: []
+      relevantEntry: {}
     }
   },
   watch: {
