@@ -1040,7 +1040,11 @@ export default {
             if (data.feature.mode.startsWith('draw_')) {
               this.relevantEntry = {}
               this.inDrawing = true
-            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
+            } else if (
+              data.feature.mode === 'simple_select' &&
+              this.inDrawing &&
+              this.lastEvent
+            ) {
               this.relevantDisplay = true
               console.log(this.relevantEntry);
             } else if (data.feature.mode === 'direct_select') {
@@ -1090,11 +1094,13 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Only clicked relevant data will be added 
-                let relevantId = this.currentRelevant.feature.models ?
-                  this.currentRelevant.feature.models :
-                  this.currentRelevant.feature.featureId
-                if (!(relevantId in this.relevantEntry)) {
-                  this.relevantEntry[relevantId] = this.currentRelevant
+                if (this.currentRelevant) {
+                  let relevantId = this.currentRelevant.feature.models ?
+                    this.currentRelevant.feature.models :
+                    this.currentRelevant.feature.featureId
+                  if (!(relevantId in this.relevantEntry)) {
+                    this.relevantEntry[relevantId] = this.currentRelevant
+                  }
                 }
               }
             } else if (
