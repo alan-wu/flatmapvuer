@@ -1076,9 +1076,9 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                let relevantFeatureId = this.currentRelevant.feature.featureId
-                if (!(relevantFeatureId in this.relevantFeatureIds)) {
-                  this.relevantFeatureIds.push(relevantFeatureId)
+                let relevantFeatureModel = this.currentRelevant.feature.models
+                if (!(relevantFeatureModel in this.relevantIds)) {
+                  this.relevantIds.push(relevantFeatureModel)
                   this.relevantInformation.push(this.currentRelevant)
                 }
               }
@@ -1692,7 +1692,7 @@ export default {
       isDrawn: false,
       doubleClickedFeature: false,
       currentRelevant: {},
-      relevantFeatureIds: [],
+      relevantIds: [],
       relevantInformation: []
     }
   },
