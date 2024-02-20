@@ -580,7 +580,6 @@ import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
-  Rank as ElIconRank,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import Tooltip from './Tooltip.vue'
@@ -767,7 +766,7 @@ export default {
       if (
         this.mapImp &&
         this.drawnAnnotationEvent.includes(this.annotationEntry.type)
-      ) {
+        ) {
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
     },
@@ -1000,7 +999,11 @@ export default {
               this.rollbackAnnotationEvent()
             }
           } else if (data.type === 'modeChanged') {
-            if (data.feature.mode === 'direct_select') {
+            if (data.feature.mode.startsWith('draw_')) {
+              this.inDrawing = true
+            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
+              this.inDrawing = false
+            } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
           } else {
@@ -1072,10 +1075,10 @@ export default {
             ...data.feature,
             resourceId: this.serverUUID,
           }
-          // Trigger 'updated' event
+          // Trigger 'updated' event if double clicked on drawn area ('direct-select')
           if (this.doubleClickedFeature) {
-            this.drawnEvent('trash')
             this.doubleClickedFeature = false
+            this.drawnEvent('trash')
           }
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
@@ -1646,6 +1649,7 @@ export default {
       annotator: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       annotationSubmitted: false,
+      inDrawing: false,
       doubleClickedFeature: false,
     }
   },
