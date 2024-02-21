@@ -581,13 +581,29 @@
         draggable
       >
         <template #header>
-          <h4>Finalise drawing</h4>
-          <el-button @click="confirmDrawnFeature">Confirm</el-button>
-          <el-button @click="rollbackAnnotationEvent">Cancel</el-button>
+          <span class="dialog-title">Finalise drawing</span>
+          <el-row>
+            <el-col :span="14">
+              <el-button type="primary" plain @click="confirmDrawnFeature">
+                Confirm
+              </el-button>
+            </el-col>
+            <el-col :span="10">
+              <el-button type="primary" plain @click="rollbackAnnotationEvent">
+                Cancel
+              </el-button>
+            </el-col>
+          </el-row>
         </template>
-        <h4>Related Feature</h4>
-        <el-card v-for="(value, key) in relevantEntry" :key="key">
-          <span @click="checkAndCreatePopups(value)">{{ key }}</span>
+        <b v-if="isRelevant">Possible Related Features</b>
+        <el-card
+          class="relevant-card" 
+          shadow="hover"
+          v-for="(value, key) in relevantEntry" 
+          :key="key"
+          @click="checkAndCreatePopups(value)"
+        >
+          {{ key }}
         </el-card>
       </el-dialog>
     </div>
@@ -772,6 +788,8 @@ export default {
         } else if (this.lastEvent) {
           this.inDrawing = false
           this.relevantDisplay = false
+          let cbutton = document.querySelector('.maplibregl-popup-close-button')
+          if (cbutton) cbutton.click()
           annotationEvent = {
             ...this.lastEvent.feature,
             resourceId: this.serverUUID,
@@ -1094,7 +1112,7 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Only clicked relevant data will be added 
-                if (this.currentRelevant) {
+                if (this.currentRelevant.feature) {
                   let relevantId = this.currentRelevant.feature.models ?
                     this.currentRelevant.feature.models :
                     this.currentRelevant.feature.featureId
@@ -1276,7 +1294,9 @@ export default {
         options.annotationFeatureGeometry = geometry
       } else {
         featureId = this.mapImp.modelFeatureIds(feature)[0]
-        options.positionAtLastClick = true
+        if (!this.inDrawing) {
+          options.positionAtLastClick = true
+        }
       }
       this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
       this.popUpCssHacks()
@@ -1717,6 +1737,11 @@ export default {
       doubleClickedFeature: false,
       currentRelevant: {},
       relevantEntry: {}
+    }
+  },
+  computed: {
+    isRelevant: function () {
+      return Object.keys(this.relevantEntry).length > 0
     }
   },
   watch: {
@@ -2418,6 +2443,28 @@ export default {
       font-weight: normal;
     }
   }
+}
+
+:deep(.el-dialog) {
+  text-align: justify;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
+  background: #fff;
+  border: 1px solid $app-primary-color;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: rgb(131, 0, 191);
+}
+
+:deep(.el-card) {
+  --el-card-padding: 12px;
+  border: 0;
 }
 </style>
 
