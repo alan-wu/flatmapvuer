@@ -600,7 +600,6 @@
         </template>
         <b v-if="isRelevant">Possible Related Features</b>
         <el-card
-          class="relevant-card" 
           shadow="hover"
           v-for="(value, key) in relevantEntry" 
           :key="key"
@@ -635,6 +634,7 @@ import {
   ElRadioGroup as RadioGroup,
   ElRow as Row,
   ElSelect as Select,
+  ElDialog as Dialog,
 } from 'element-plus'
 import flatmapMarker from '../icons/flatmap-marker'
 import {
@@ -741,6 +741,7 @@ export default {
     RadioGroup,
     Row,
     Select,
+    Dialog,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
@@ -773,14 +774,13 @@ export default {
       }
     },
     setActiveDrawTool: function (tool = undefined) {
+      if (document.querySelector('.toolSelected')) {
+        this.drawTools.map((t) => {
+          document.querySelector(`.draw${t}`).classList.remove('toolSelected');
+        })
+      }
       if (tool) {
         document.querySelector(`.draw${tool}`).classList.add('toolSelected');
-      } else {
-        if (document.querySelector('.toolSelected')) {
-          this.drawTools.map((t) => {
-            document.querySelector(`.draw${t}`).classList.remove('toolSelected');
-          })
-        }
       }
     },
     drawnEvent: function (type) {
@@ -1079,7 +1079,7 @@ export default {
               this.annotationEntry = {}
               this.relevantEntry = {}
               this.inDrawing = true
-              let drawTool = ''
+              let drawTool = undefined
               if (data.feature.mode === 'draw_line_string') drawTool = 'Line'
               else if (data.feature.mode === 'draw_polygon') drawTool = 'Polygon'
               else if (data.feature.mode === 'draw_point') drawTool = 'Point'
