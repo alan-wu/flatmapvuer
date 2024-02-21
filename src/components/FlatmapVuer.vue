@@ -136,7 +136,7 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-right-control">
+      <div class="bottom-draw-control">
         <template v-if="viewingMode === 'Annotation'">
           <el-popover
             content="Draw Line"
@@ -215,6 +215,9 @@
             </template>
           </el-popover>
         </template>
+      </div>
+
+      <div class="bottom-right-control">
         <el-popover
           content="Zoom in"
           placement="left"
@@ -762,11 +765,22 @@ export default {
   },
   methods: {
     confirmDrawnFeature: function () {
-      if (this.lastEvent) {
+      if (this.createdEvent) {
         this.inDrawing = false
         this.relevantDisplay = false
-        this.checkAndCreatePopups(this.lastEvent)
-        this.lastEvent = undefined
+        this.checkAndCreatePopups(this.createdEvent)
+        this.createdEvent = undefined
+      }
+    },
+    setActiveDrawTool: function (tool = undefined) {
+      if (tool) {
+        document.querySelector(`.draw${tool}`).classList.add('toolSelected');
+      } else {
+        if (document.querySelector('.toolSelected')) {
+          this.drawTools.map((t) => {
+            document.querySelector(`.draw${t}`).classList.remove('toolSelected');
+          })
+        }
       }
     },
     drawnEvent: function (type) {
@@ -778,6 +792,7 @@ export default {
         document.querySelector('.mapbox-gl-draw_point').click()
       } else if (type === 'trash') {
         document.querySelector('.mapbox-gl-draw_trash').click()
+        this.setActiveDrawTool()
       }
     },
     rollbackAnnotationEvent: function () {
@@ -785,16 +800,16 @@ export default {
         let annotationEvent = undefined
         if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
           annotationEvent = this.annotationEntry
-        } else if (this.lastEvent) {
+        } else if (this.createdEvent) {
           this.inDrawing = false
           this.relevantDisplay = false
           let cbutton = document.querySelector('.maplibregl-popup-close-button')
           if (cbutton) cbutton.click()
           annotationEvent = {
-            ...this.lastEvent.feature,
+            ...this.createdEvent.feature,
             resourceId: this.serverUUID,
           }
-          this.lastEvent = undefined
+          this.createdEvent = undefined
         }
         this.mapImp.rollbackAnnotationEvent(annotationEvent)
       }
@@ -806,6 +821,10 @@ export default {
         annotation
       ) {
         this.annotationSubmitted = true
+        if (this.annotationEntry.type === 'deleted') {
+          let cbutton = document.querySelector('.maplibregl-popup-close-button')
+          if (cbutton) cbutton.click()
+        }
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
       }
     },
@@ -1055,16 +1074,26 @@ export default {
               this.rollbackAnnotationEvent()
             }
           } else if (data.type === 'modeChanged') {
+            // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
+              this.annotationEntry = {}
               this.relevantEntry = {}
               this.inDrawing = true
+              let drawTool = ''
+              if (data.feature.mode === 'draw_line_string') drawTool = 'Line'
+              else if (data.feature.mode === 'draw_polygon') drawTool = 'Polygon'
+              else if (data.feature.mode === 'draw_point') drawTool = 'Point'
+              this.setActiveDrawTool(drawTool)
             } else if (
               data.feature.mode === 'simple_select' &&
               this.inDrawing &&
-              this.lastEvent
+              this.createdEvent
             ) {
               this.relevantDisplay = true
-              console.log(this.relevantEntry);
+              // Change back to the initial window size
+              // For a better view of the relevant popup
+              this.resetView()
+              this.setActiveDrawTool()
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1080,9 +1109,9 @@ export default {
               userData: args,
               eventType: eventType,
             }
-            // Disable direct popup during create, a dialog will be used instead
+            // Disable direct popup if 'created' event, dialog will be used instead
             if (data.type === 'created') {              
-              this.lastEvent = payload
+              this.createdEvent = payload
             } else {
               this.checkAndCreatePopups(payload)
             }
@@ -1729,8 +1758,9 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
+      drawTools: ['Line', 'Polygon', 'Point'],
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
-      lastEvent: undefined,
+      createdEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
       relevantDisplay: false,
@@ -2035,6 +2065,10 @@ export default {
   padding-left: 8px;
 }
 
+.toolSelected {
+  color: var(--el-color-primary-light-5) !important;
+}
+
 .yellow-star-legend {
   width: 130px;
   cursor: pointer;
@@ -2238,6 +2272,12 @@ export default {
 
 :deep(.maplibregl-popup-content) {
   padding: 0px;
+}
+
+.bottom-draw-control {
+  position: absolute;
+  right: 40%;
+  bottom: 16px;
 }
 
 .bottom-right-control {
