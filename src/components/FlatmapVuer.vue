@@ -829,7 +829,7 @@ export default {
       }
     },
     setFeatureAnnotated: function () {
-      if (this.mapImp && this.annotator) {
+      if (this.mapImp) {
         this.annotator.annotatedItemIds(this.serverUUID)
           .then((annotatedItemIds) => {
             for (const id of annotatedItemIds) {
@@ -842,7 +842,7 @@ export default {
       }
     },
     addAnnotationFeature: function () {
-      if (this.mapImp && this.annotator) {
+      if (this.mapImp) {
         this.annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
             for (const feature of drawnFeatures) {
@@ -854,13 +854,13 @@ export default {
           })
       }
     },
-    showAnnotator: function (flag) {
-      if (this.mapImp) {
-        this.mapImp.showAnnotator(flag)
-        // Hide default toolbar
-        document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
-      }
-    },
+    // showAnnotator: function (flag) {
+    //   // The toolbar is already exist in map
+    //   // As we are not using it, so no need to call
+    //   if (this.mapImp) {
+    //     this.mapImp.showAnnotator(flag)
+    //   }
+    // },
     setDimension: function (flag) {
       this.dimensionRadio = flag
       if (this.mapImp) {
@@ -1793,10 +1793,13 @@ export default {
       immediate: true,
       deep: true,
     },
-    viewingMode: function (val) {
-      this.showAnnotator(val === 'Annotation')
-      this.setFeatureAnnotated()
-      this.addAnnotationFeature()
+    viewingMode: function () {
+      this.annotator.authenticate().then((userData) => {
+        if (userData.name && userData.email) {
+          this.setFeatureAnnotated()
+          this.addAnnotationFeature()
+        }
+      })
     }
   },
   mounted: function () {
