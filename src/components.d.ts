@@ -9,7 +9,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
-    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']

@@ -3,6 +3,8 @@
 This project aims to wrap the flatmap viewer project into a vue component.
 There are currently two components available. FlatmapVuer and MultiFlatmapVuer. FlatmapVuer is used for displaying a single flatmap whereas MultiFlatmapVuer takes in an array of flatmaps and provide a chooser for selecting the flatmap on display.
 
+This project is now built with Vue3 frameworks, Vue 2 version of Scaffoldvuer is no longer in development.
+
 ## Flatmapvuer on NPM
 
 Flatmapvuer is available on npm and can be installed into your project with the following command:
