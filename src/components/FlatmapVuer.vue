@@ -1086,13 +1086,14 @@ export default {
               this.setActiveDrawTool(drawTool)
             } else if (
               data.feature.mode === 'simple_select' &&
-              this.inDrawing &&
-              this.createdEvent
+              this.inDrawing
             ) {
-              this.relevantDisplay = true
-              // Change back to the initial window size
-              // For a better view of the relevant popup
-              this.resetView()
+              if (this.createdEvent) {
+                this.relevantDisplay = true
+                // Change back to the initial window size
+                // For a better view of the relevant popup
+                this.resetView()
+              }
               this.setActiveDrawTool()
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
@@ -1141,13 +1142,9 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Only clicked relevant data will be added 
-                if (this.currentRelevant.feature) {
-                  let relevantId = this.currentRelevant.feature.models ?
-                    this.currentRelevant.feature.models :
-                    this.currentRelevant.feature.featureId
-                  if (!(relevantId in this.relevantEntry)) {
-                    this.relevantEntry[relevantId] = this.currentRelevant
-                  }
+                let relevantId = data.models ? data.models : data.featureId
+                if (!(relevantId in this.relevantEntry)) {
+                  this.relevantEntry[relevantId] = payload
                 }
               }
             } else if (
@@ -1156,9 +1153,6 @@ export default {
             ) {
               this.currentHover = data.models ? data.models : ''
               // The draw is in different layer, deeper layer will be used
-              if (data.featureId) {
-                this.currentRelevant = payload
-              }
             }
             if (
               data &&
@@ -1765,7 +1759,6 @@ export default {
       inDrawing: false,
       relevantDisplay: false,
       doubleClickedFeature: false,
-      currentRelevant: {},
       relevantEntry: {}
     }
   },
