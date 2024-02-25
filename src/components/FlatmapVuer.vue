@@ -585,28 +585,35 @@
       >
         <template #header>
           <span class="dialog-title">Finalise drawing</span>
-          <el-row>
-            <el-col :span="14">
-              <el-button type="primary" plain @click="confirmDrawnFeature">
-                Confirm
-              </el-button>
-            </el-col>
-            <el-col :span="10">
-              <el-button type="primary" plain @click="rollbackAnnotationEvent">
-                Cancel
-              </el-button>
-            </el-col>
-          </el-row>
         </template>
-        <b v-if="isRelevant">Possible Related Features</b>
-        <el-card
-          shadow="hover"
-          v-for="(value, key) in relevantEntry" 
-          :key="key"
-          @click="checkAndCreatePopups(value)"
-        >
-          {{ key }}
-        </el-card>
+        <el-row>
+          <el-col :span="13">
+            <el-button type="primary" plain @click="confirmDrawnFeature">
+              Confirm
+            </el-button>
+          </el-col>
+          <el-col :span="11">
+            <el-button type="primary" plain @click="rollbackAnnotationEvent">
+              Cancel
+            </el-button>
+          </el-col>
+        </el-row>
+        <el-row v-if="isRelevant">
+          <el-col :span="20">
+            <b><span>Related Features</span></b>
+          </el-col>
+          <el-col :span="4">
+            <el-icon><el-icon-circle-close @click="closePopup()"/></el-icon>
+          </el-col>
+          <el-card
+            shadow="hover"
+            v-for="(value, key) in relevantEntry" 
+            :key="key"
+            @click="checkAndCreatePopups(value)"
+          >
+            <span>{{ key }}</span>
+          </el-card>
+        </el-row>
       </el-dialog>
     </div>
   </div>
@@ -619,6 +626,7 @@ import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
+  CircleClose as ElIconCircleClose,
 } from '@element-plus/icons-vue'
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
@@ -2478,6 +2486,11 @@ export default {
   border: 1px solid $app-primary-color;
   display: flex;
   flex-direction: column;
+}
+
+:deep(.el-dialog__body, .el-dialog__header) {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .dialog-title {
