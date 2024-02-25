@@ -769,31 +769,37 @@ export default {
       if (this.createdEvent) {
         this.inDrawing = false
         this.relevantDisplay = false
+        this.setActiveDrawTool(false)
         this.checkAndCreatePopups(this.createdEvent)
         this.createdEvent = undefined
       }
     },
-    setActiveDrawTool: function (tool = undefined) {
+    setActiveDrawTool: function (active = true) {
       if (document.querySelector('.toolSelected')) {
         this.drawTools.map((t) => {
           document.querySelector(`.draw${t}`).classList.remove('toolSelected');
         })
       }
-      if (tool) {
-        document.querySelector(`.draw${tool}`).classList.add('toolSelected');
+      if (!active) this.activeDrawTool = undefined
+      if (this.activeDrawTool) {
+        document.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
       }
     },
     drawnEvent: function (type) {
       if (type === 'line') {
         document.querySelector('.mapbox-gl-draw_line').click()
+        this.activeDrawTool = 'Line'
       } else if (type === 'polygon') {
         document.querySelector('.mapbox-gl-draw_polygon').click()
+        this.activeDrawTool = 'Polygon'
       } else if (type === 'point') {
         document.querySelector('.mapbox-gl-draw_point').click()
+        this.activeDrawTool = 'Point'
       } else if (type === 'trash') {
         document.querySelector('.mapbox-gl-draw_trash').click()
-        this.setActiveDrawTool()
+        this.activeDrawTool = undefined
       }
+      this.setActiveDrawTool()
     },
     rollbackAnnotationEvent: function () {
       if (this.mapImp) {
@@ -803,8 +809,8 @@ export default {
         } else if (this.createdEvent) {
           this.inDrawing = false
           this.relevantDisplay = false
-          let cbutton = document.querySelector('.maplibregl-popup-close-button')
-          if (cbutton) cbutton.click()
+          this.setActiveDrawTool(false)
+          this.closePopup()
           annotationEvent = {
             ...this.createdEvent.feature,
             resourceId: this.serverUUID,
@@ -821,10 +827,7 @@ export default {
         annotation
       ) {
         this.annotationSubmitted = true
-        if (this.annotationEntry.type === 'deleted') {
-          let cbutton = document.querySelector('.maplibregl-popup-close-button')
-          if (cbutton) cbutton.click()
-        }
+        if (this.annotationEntry.type === 'deleted') this.closePopup()
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
       }
     },
@@ -1079,22 +1082,13 @@ export default {
               this.annotationEntry = {}
               this.relevantEntry = {}
               this.inDrawing = true
-              let drawTool = undefined
-              if (data.feature.mode === 'draw_line_string') drawTool = 'Line'
-              else if (data.feature.mode === 'draw_polygon') drawTool = 'Polygon'
-              else if (data.feature.mode === 'draw_point') drawTool = 'Point'
-              this.setActiveDrawTool(drawTool)
-            } else if (
-              data.feature.mode === 'simple_select' &&
-              this.inDrawing
-            ) {
+            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               if (this.createdEvent) {
                 this.relevantDisplay = true
                 // Change back to the initial window size
                 // For a better view of the relevant popup
                 this.resetView()
               }
-              this.setActiveDrawTool()
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1221,6 +1215,10 @@ export default {
       document.querySelector('.maplibregl-popup-close-button').onclick = () => {
         if (ftooltip) ftooltip.style.display = 'block'
       }
+    },
+    closePopup: function () {
+      let cbutton = document.querySelector('.maplibregl-popup-close-button')
+      if (cbutton) cbutton.click()
     },
     closeTooltip: function () {
       this.$refs.tooltip.$el.style.display = 'none'
@@ -1753,6 +1751,7 @@ export default {
       backgroundIconRef: undefined,
       annotator: undefined,
       drawTools: ['Line', 'Polygon', 'Point'],
+      activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       createdEvent: undefined,
       annotationSubmitted: false,
@@ -1764,7 +1763,11 @@ export default {
   },
   computed: {
     isRelevant: function () {
-      return Object.keys(this.relevantEntry).length > 0
+      return (
+        Object.keys(this.relevantEntry).length > 0 &&
+        this.activeDrawTool &&
+        this.activeDrawTool !== 'Polygon'
+      )
     }
   },
   watch: {
