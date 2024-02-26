@@ -137,7 +137,7 @@
       </el-icon>
 
       <div class="bottom-draw-control">
-        <template v-if="viewingMode === 'Annotation'">
+        <template v-if="viewingMode === 'Annotation' && drawingRadio === 3">
           <el-popover
             content="Draw Point"
             placement="left"
