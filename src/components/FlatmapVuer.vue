@@ -137,7 +137,7 @@
       </el-icon>
 
       <div class="bottom-draw-control">
-        <template v-if="viewingMode === 'Annotation' && drawingRadio === 3">
+        <template v-if="viewingMode === 'Annotation'">
           <el-popover
             content="Draw Point"
             placement="left"
@@ -146,6 +146,7 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[12].value"
+            v-if="drawingType === 'Point' || drawingType === 'All'"
           >
             <template #reference>
               <map-svg-icon
@@ -165,11 +166,12 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[10].value"
+            v-if="drawingType === 'LineString' || drawingType === 'All'"
           >
             <template #reference>
               <map-svg-icon
                 icon="drawLine"
-                class="icon-button drawLineString"
+                class="icon-button drawLine"
                 @click="drawnEvent('line')"
                 @mouseover="showToolitip(11)"
                 @mouseout="hideToolitip(11)"
@@ -184,6 +186,7 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[11].value"
+            v-if="drawingType === 'Polygon' || drawingType === 'All'"
           >
             <template #reference>
               <map-svg-icon
@@ -467,22 +470,30 @@
               </el-option>
             </el-select>
           </el-row>
-          <div v-if="viewingMode === 'Annotation'">
-            <el-row class="backgroundSpacer"></el-row>
-            <el-row class="backgroundText">Drawings display</el-row>
+          <template v-if="viewingMode === 'Annotation'">
+            <el-row class="backgroundText">Drawing Type</el-row>
             <el-row class="backgroundControl">
-              <el-radio-group
-                v-model="drawingRadio"
-                class="flatmap-radio"
-                @change="setDrawing"
+              <el-select
+                :teleported="false"
+                v-model="drawingType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setDrawingType"
               >
-              <el-radio :label="3">All</el-radio>
-              <el-radio :label="0">Point</el-radio>
-              <el-radio :label="1">Line</el-radio>
-              <el-radio :label="2">Polygon</el-radio>
-              </el-radio-group>
+                <el-option
+                  v-for="item in drawingTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
             </el-row>
-          </div>
+          </template>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Dimension display</el-row>
           <el-row class="backgroundControl">
@@ -812,7 +823,7 @@ export default {
     drawnEvent: function (type) {
       if (type === 'line') {
         document.querySelector('.mapbox-gl-draw_line').click()
-        this.activeDrawTool = 'LineString'
+        this.activeDrawTool = 'Line'
       } else if (type === 'polygon') {
         document.querySelector('.mapbox-gl-draw_polygon').click()
         this.activeDrawTool = 'Polygon'
@@ -873,11 +884,11 @@ export default {
           })
       }
     },
-    addAnnotationFeature: function (type = undefined) {
+    addAnnotationFeature: function (type) {
       if (this.mapImp) {
         this.annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
-            if (type) {
+            if (type !== 'All') {
               drawnFeatures = drawnFeatures.filter((feature) => {
                 return feature.geometry.type === type
               })
@@ -899,13 +910,11 @@ export default {
         document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
-    setDrawing: function (flag) {
-      // '0'-point, '1'-line, '2'-polygon
-      // '3' is for displaying all drawn annotations
-      this.drawingRadio = flag
+    setDrawingType: function (flag) {
+      this.drawingType = flag
       if (this.mapImp) {
         this.clearAnnotationEvent()
-        this.addAnnotationFeature(this.drawTools[flag])
+        this.addAnnotationFeature(this.drawingType)
       }
     },
     setDimension: function (flag) {
@@ -1781,7 +1790,6 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      drawingRadio: 3,
       dimensionRadio: true,
       colourRadio: true,
       outlinesRadio: true,
@@ -1791,10 +1799,12 @@ export default {
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
+      drawingType: 'All',
+      drawingTypes: ['All', 'Point', 'LineString', 'Polygon'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
-      drawTools: ['Point', 'LineString', 'Polygon'],
+      drawTools: ['Point', 'Line', 'Polygon'],
       activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       createdEvent: undefined,
@@ -1839,7 +1849,7 @@ export default {
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
             this.setFeatureAnnotated()
-            this.addAnnotationFeature(this.drawTools[this.drawingRadio])
+            this.addAnnotationFeature(this.drawingType)
           }
         })
       } else this.showAnnotator(false)
@@ -2107,7 +2117,7 @@ export default {
   }
 }
 
-.drawPoint, .drawLineString, .drawPolygon, .drawTrash, .zoomIn, .zoomOut, .fitWindow {
+.drawPoint, .drawLine, .drawPolygon, .drawTrash, .zoomIn, .zoomOut, .fitWindow {
   padding-left: 8px;
 }
 
