@@ -139,6 +139,25 @@
       <div class="bottom-draw-control">
         <template v-if="viewingMode === 'Annotation'">
           <el-popover
+            content="Draw Point"
+            placement="left"
+            :teleported="false"
+            trigger="manual"
+            width="80"
+            popper-class="flatmap-popper"
+            :visible="hoverVisibilities[12].value"
+          >
+            <template #reference>
+              <map-svg-icon
+                icon="drawPoint"
+                class="icon-button drawPoint"
+                @click="drawnEvent('point')"
+                @mouseover="showToolitip(10)"
+                @mouseout="hideToolitip(10)"
+              />
+            </template>
+          </el-popover>
+          <el-popover
             content="Draw Line"
             placement="left"
             :teleported="false"
@@ -150,10 +169,10 @@
             <template #reference>
               <map-svg-icon
                 icon="drawLine"
-                class="icon-button drawLine"
+                class="icon-button drawLineString"
                 @click="drawnEvent('line')"
-                @mouseover="showToolitip(10)"
-                @mouseout="hideToolitip(10)"
+                @mouseover="showToolitip(11)"
+                @mouseout="hideToolitip(11)"
               />
             </template>
           </el-popover>
@@ -171,25 +190,6 @@
                 icon="drawPolygon"
                 class="icon-button drawPolygon"
                 @click="drawnEvent('polygon')"
-                @mouseover="showToolitip(11)"
-                @mouseout="hideToolitip(11)"
-              />
-            </template>
-          </el-popover>
-          <el-popover
-            content="Draw Point"
-            placement="left"
-            :teleported="false"
-            trigger="manual"
-            width="80"
-            popper-class="flatmap-popper"
-            :visible="hoverVisibilities[12].value"
-          >
-            <template #reference>
-              <map-svg-icon
-                icon="drawPoint"
-                class="icon-button drawPoint"
-                @click="drawnEvent('point')"
                 @mouseover="showToolitip(12)"
                 @mouseout="hideToolitip(12)"
               />
@@ -467,6 +467,22 @@
               </el-option>
             </el-select>
           </el-row>
+          <div v-if="viewingMode === 'Annotation'">
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Drawings display</el-row>
+            <el-row class="backgroundControl">
+              <el-radio-group
+                v-model="drawingRadio"
+                class="flatmap-radio"
+                @change="setDrawing"
+              >
+              <el-radio :label="3">All</el-radio>
+              <el-radio :label="0">Point</el-radio>
+              <el-radio :label="1">Line</el-radio>
+              <el-radio :label="2">Polygon</el-radio>
+              </el-radio-group>
+            </el-row>
+          </div>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Dimension display</el-row>
           <el-row class="backgroundControl">
@@ -796,7 +812,7 @@ export default {
     drawnEvent: function (type) {
       if (type === 'line') {
         document.querySelector('.mapbox-gl-draw_line').click()
-        this.activeDrawTool = 'Line'
+        this.activeDrawTool = 'LineString'
       } else if (type === 'polygon') {
         document.querySelector('.mapbox-gl-draw_polygon').click()
         this.activeDrawTool = 'Polygon'
@@ -808,6 +824,11 @@ export default {
         this.activeDrawTool = undefined
       }
       this.setActiveDrawTool()
+    },
+    clearAnnotationEvent: function () {
+      if (this.mapImp) {
+        this.mapImp.clearAnnotationEvent()
+      }
     },
     rollbackAnnotationEvent: function () {
       if (this.mapImp) {
@@ -852,10 +873,15 @@ export default {
           })
       }
     },
-    addAnnotationFeature: function () {
+    addAnnotationFeature: function (type = undefined) {
       if (this.mapImp) {
         this.annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
+            if (type) {
+              drawnFeatures = drawnFeatures.filter((feature) => {
+                return feature.geometry.type === type
+              })
+            }
             for (const feature of drawnFeatures) {
               this.mapImp.addAnnotationFeature(feature)
             }
@@ -865,13 +891,23 @@ export default {
           })
       }
     },
-    // showAnnotator: function (flag) {
-    //   // The toolbar is already exist in map
-    //   // As we are not using it, so no need to call
-    //   if (this.mapImp) {
-    //     this.mapImp.showAnnotator(flag)
-    //   }
-    // },
+    showAnnotator: function (flag) {
+      if (this.mapImp) {
+        this.mapImp.showAnnotator(flag)
+        // Hide default toolbar
+        // Control the show/hide of the drawn annotations
+        document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
+      }
+    },
+    setDrawing: function (flag) {
+      // '0'-point, '1'-line, '2'-polygon
+      // '3' is for displaying all drawn annotations
+      this.drawingRadio = flag
+      if (this.mapImp) {
+        this.clearAnnotationEvent()
+        this.addAnnotationFeature(this.drawTools[flag])
+      }
+    },
     setDimension: function (flag) {
       this.dimensionRadio = flag
       if (this.mapImp) {
@@ -1745,7 +1781,7 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      annotationRadio: false,
+      drawingRadio: 3,
       dimensionRadio: true,
       colourRadio: true,
       outlinesRadio: true,
@@ -1758,7 +1794,7 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
-      drawTools: ['Line', 'Polygon', 'Point'],
+      drawTools: ['Point', 'LineString', 'Polygon'],
       activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       createdEvent: undefined,
@@ -1797,13 +1833,16 @@ export default {
       immediate: true,
       deep: true,
     },
-    viewingMode: function () {
-      this.annotator.authenticate().then((userData) => {
-        if (userData.name && userData.email) {
-          this.setFeatureAnnotated()
-          this.addAnnotationFeature()
-        }
-      })
+    viewingMode: function (mode) {
+      if (mode === 'Annotation') {
+        this.showAnnotator(true)
+        this.annotator.authenticate().then((userData) => {
+          if (userData.name && userData.email) {
+            this.setFeatureAnnotated()
+            this.addAnnotationFeature(this.drawTools[this.drawingRadio])
+          }
+        })
+      } else this.showAnnotator(false)
     }
   },
   mounted: function () {
@@ -2068,7 +2107,7 @@ export default {
   }
 }
 
-.drawLine, .drawPolygon, .drawPoint, .drawTrash, .zoomIn, .zoomOut, .fitWindow {
+.drawPoint, .drawLineString, .drawPolygon, .drawTrash, .zoomIn, .zoomOut, .fitWindow {
   padding-left: 8px;
 }
 
@@ -2098,7 +2137,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 360px;
+  height: fit-content;
   min-width: 200px;
   .el-popper__arrow {
     &:before {
