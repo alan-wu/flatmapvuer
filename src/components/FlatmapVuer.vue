@@ -11,7 +11,7 @@
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
       <div style="height: 100%; width: 100%" ref="display"></div>
-      <div class="beta-popovers">
+      <div class="beta-popovers" v-if="!disableUI">
         <div>
           <el-popover
             placement="right"
@@ -136,7 +136,7 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-right-control">
+      <div class="bottom-right-control" v-if="!disableUI">
         <el-popover
           content="Zoom in"
           placement="left"
@@ -208,6 +208,7 @@
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
+        v-if="!disableUI"
       >
         <template #reference>
           <div
@@ -279,7 +280,7 @@
                 ref="centrelinesSelection"
                 key="centrelinesSelection"
               />
-              <!--             
+              <!--
                 <selections-group
                   v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
                   title="SCKAN"
@@ -429,6 +430,7 @@
       <div
         class="settings-group"
         :class="{ open: drawerOpen, close: !drawerOpen }"
+        v-if="!disableUI"
       >
         <el-row>
           <el-popover
@@ -975,6 +977,11 @@ export default {
     },
     displayTooltip: function (feature) {
       this.tooltipDisplay = true
+      if (!this.disableUI) {
+        this.displayPopup(feature)
+      }
+    },
+    displayPopup: function (feature) {
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,
@@ -1337,6 +1344,13 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
+    /**
+     * Flag to disable UIs on Map
+     */
+     disableUI: {
+      type: Boolean,
+      default: false,
+    }
   },
   provide() {
     return {
@@ -1424,6 +1438,14 @@ export default {
       immediate: true,
       deep: true,
     },
+    disableUI: function (isUIDisabled) {
+      if (isUIDisabled) {
+        this.closeTooltip()
+        // TODO:
+        // to reset the map
+        // to reset the props of disabled components
+      }
+    }
   },
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
