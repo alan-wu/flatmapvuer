@@ -836,9 +836,9 @@ export default {
       }
       this.setActiveDrawTool()
     },
-    clearAnnotationEvent: function () {
+    clearAnnotationFeature: function () {
       if (this.mapImp) {
-        this.mapImp.clearAnnotationEvent()
+        this.mapImp.clearAnnotationFeature()
       }
     },
     rollbackAnnotationEvent: function () {
@@ -913,7 +913,7 @@ export default {
     setDrawingType: function (flag) {
       this.drawingType = flag
       if (this.mapImp) {
-        this.clearAnnotationEvent()
+        this.clearAnnotationFeature()
         this.addAnnotationFeature(this.drawingType)
       }
     },
