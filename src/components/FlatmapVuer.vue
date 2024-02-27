@@ -146,7 +146,7 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[12].value"
-            v-if="drawingType === 'Point' || drawingType === 'All'"
+            v-if="drawingType !== 'LineString' && drawingType !== 'Polygon'"
           >
             <template #reference>
               <map-svg-icon
@@ -166,7 +166,7 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[10].value"
-            v-if="drawingType === 'LineString' || drawingType === 'All'"
+            v-if="drawingType !== 'Point' && drawingType !== 'Polygon'"
           >
             <template #reference>
               <map-svg-icon
@@ -186,7 +186,7 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[11].value"
-            v-if="drawingType === 'Polygon' || drawingType === 'All'"
+            v-if="drawingType !== 'Point' && drawingType !== 'LineString'"
           >
             <template #reference>
               <map-svg-icon
@@ -914,7 +914,9 @@ export default {
       this.drawingType = flag
       if (this.mapImp) {
         this.clearAnnotationFeature()
-        this.addAnnotationFeature(this.drawingType)
+        if (flag !== 'None') {
+          this.addAnnotationFeature(this.drawingType)
+        }
       }
     },
     setDimension: function (flag) {
@@ -1800,7 +1802,7 @@ export default {
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       drawingType: 'All',
-      drawingTypes: ['All', 'Point', 'LineString', 'Polygon'],
+      drawingTypes: ['All', 'Point', 'LineString', 'Polygon', 'None'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
