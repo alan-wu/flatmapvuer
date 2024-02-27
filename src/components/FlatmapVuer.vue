@@ -11,7 +11,7 @@
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
       <div style="height: 100%; width: 100%" ref="display"></div>
-      <div class="beta-popovers" v-if="!disableUI">
+      <div class="beta-popovers" v-show="!disableUI">
         <div>
           <el-popover
             placement="right"
@@ -136,7 +136,7 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-right-control" v-if="!disableUI">
+      <div class="bottom-right-control" v-show="!disableUI">
         <el-popover
           content="Zoom in"
           placement="left"
@@ -208,12 +208,12 @@
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
-        v-if="!disableUI"
       >
         <template #reference>
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
+            v-show="!disableUI"
           >
             <div
               class="pathway-container"
@@ -430,7 +430,7 @@
       <div
         class="settings-group"
         :class="{ open: drawerOpen, close: !drawerOpen }"
-        v-if="!disableUI"
+        v-show="!disableUI"
       >
         <el-row>
           <el-popover
@@ -1441,9 +1441,6 @@ export default {
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
         this.closeTooltip()
-        // TODO:
-        // to reset the map
-        // to reset the props of disabled components
       }
     }
   },
