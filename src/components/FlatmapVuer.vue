@@ -152,7 +152,7 @@
               <map-svg-icon
                 icon="connection"
                 class="icon-button connection"
-                @click="showRelevantDialog"
+                @click="showRelevantDialog(true)"
                 @mouseover="showToolitip(14)"
                 @mouseout="hideToolitip(14)"
               />
@@ -634,7 +634,7 @@
           <span class="dialog-title">Finalise drawing</span>
         </template>
         <template #header v-else>
-          <el-button type="primary" plain @click="showRelevantDialog">
+          <el-button type="primary" plain @click="showRelevantDialog(false)">
             Close
           </el-button>
         </template>
@@ -825,13 +825,11 @@ export default {
     return { annotator }
   },
   methods: {
-    showRelevantDialog: function () {
+    showRelevantDialog: function (show) {
       if (this.currentDrawn && Object.keys(this.relevantEntry).length > 0) {
-        if (this.relevantDisplay) {
-          this.relevantDisplay = false
-          this.closePopup()
-        }
-        else this.relevantDisplay = true
+        if (show) this.relevantDisplay = true
+        else this.relevantDisplay = false
+        this.closePopup()
       }
     },
     displayRelevantTooltip: function (value) {
