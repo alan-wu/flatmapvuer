@@ -11,7 +11,7 @@
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
       <div style="height: 100%; width: 100%" ref="display"></div>
-      <div class="beta-popovers">
+      <div class="beta-popovers" v-show="!disableUI">
         <div>
           <el-popover
             placement="right"
@@ -136,7 +136,7 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-draw-control">
+      <div class="bottom-draw-control"  v-show="!disableUI">
         <template v-if="viewingMode === 'Annotation'">
           <el-popover
             content="Relevance"
@@ -240,7 +240,7 @@
         </template>
       </div>
 
-      <div class="bottom-right-control">
+      <div class="bottom-right-control" v-show="!disableUI">
         <el-popover
           content="Zoom in"
           placement="left"
@@ -317,6 +317,7 @@
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
+            v-show="!disableUI"
           >
             <div
               class="pathway-container"
@@ -383,7 +384,7 @@
                 ref="centrelinesSelection"
                 key="centrelinesSelection"
               />
-              <!--             
+              <!--
                 <selections-group
                   v-if="isFC && sckanDisplay && sckanDisplay.length > 0"
                   title="SCKAN"
@@ -569,6 +570,7 @@
       <div
         class="settings-group"
         :class="{ open: drawerOpen, close: !drawerOpen }"
+        v-show="!disableUI"
       >
         <el-row>
           <el-popover
@@ -1435,7 +1437,9 @@ export default {
           options.positionAtLastClick = true
         }
       }
-      this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
+      if (!this.disableUI) {
+        this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
+      }
       this.popUpCssHacks()
     },
     openFlatmapHelpPopup: function () {
@@ -1793,6 +1797,13 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
+    /**
+     * Flag to disable UIs on Map
+     */
+     disableUI: {
+      type: Boolean,
+      default: false,
+    }
   },
   provide() {
     return {
@@ -1924,6 +1935,11 @@ export default {
         if (relevance) {
           this.relevanceEntry = relevance
         }
+      }
+    },
+    disableUI: function (isUIDisabled) {
+      if (isUIDisabled) {
+        this.closeTooltip()
       }
     }
   },

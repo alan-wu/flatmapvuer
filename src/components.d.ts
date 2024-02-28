@@ -34,6 +34,7 @@ declare module 'vue' {
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
+    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTree: typeof import('element-plus/es')['ElTree']
     ExternalResourceCard: typeof import('./components/ExternalResourceCard.vue')['default']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']

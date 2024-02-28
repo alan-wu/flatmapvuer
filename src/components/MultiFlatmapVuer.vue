@@ -1,6 +1,6 @@
 <template>
   <div class="multi-container" ref="multiContainer">
-    <div style="position: absolute; z-index: 10">
+    <div style="position: absolute; z-index: 10" v-if="!disableUI">
       <div class="species-display-text">Species</div>
       <el-popover
         content="Select a species"
@@ -51,6 +51,7 @@
       :ref="key"
       :enableOpenMapUI="enableOpenMapUI"
       :openMapOptions="openMapOptions"
+      :disableUI="disableUI"
       @view-latest-map="viewLatestMap"
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
@@ -497,6 +498,13 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
+    /**
+     * Flag to disable UIs on Map
+     */
+    disableUI: {
+      type: Boolean,
+      default: false,
+    }
   },
   data: function () {
     return {
