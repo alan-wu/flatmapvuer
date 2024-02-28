@@ -1236,8 +1236,13 @@ export default {
                 let relevance = data.models ? data.models : data.featureId
                 if (relevance) {
                   this.currentDrawn = undefined
-                  if (this.inDrawing && !(relevant in this.relevantEntry)) {
-                    this.relevantEntry[relevant] = payload
+                  if (
+                    this.inDrawing &&
+                    // Currently only draw line will show relevance
+                    this.activeDrawTool === 'Line' &&
+                    !(relevance in this.relevanceEntry)
+                  ) {
+                    this.relevanceEntry[relevance] = payload
                   }
                 } else this.currentDrawn = data.id
               }
@@ -1865,13 +1870,8 @@ export default {
     }
   },
   computed: {
-    isRelevant: function () {
-      return (
-        Object.keys(this.relevantEntry).length > 0 &&
-        this.activeDrawTool &&
-        // Currently only draw line will show relevant feature
-        this.activeDrawTool === 'Line'
-      )
+    isRelevance: function () {
+      return Object.keys(this.relevanceEntry).length > 0
     }
   },
   watch: {
