@@ -839,6 +839,10 @@ export default {
         this.inDrawing = false
         this.relevantDisplay = false
         this.setActiveDrawTool(false)
+        // Add relevance if exist to annotationEntry
+        if (Object.keys(this.relevantEntry).length > 0) {
+          this.annotationEntry.feature.relevance = this.relevantEntry
+        }
         this.checkAndCreatePopups(this.createdEvent)
         this.createdEvent = undefined
       }
@@ -927,6 +931,7 @@ export default {
                 return feature.geometry.type === type
               })
             }
+            this.drawnAnnotationFeatures = drawnFeatures
             for (const feature of drawnFeatures) {
               this.mapImp.addAnnotationFeature(feature)
             }
@@ -1238,7 +1243,6 @@ export default {
               !(this.viewingMode === 'Network Discovery')
             ) {
               this.currentHover = data.models ? data.models : ''
-              // The draw is in different layer, deeper layer will be used
             }
             if (
               data &&
@@ -1848,12 +1852,14 @@ export default {
       drawTools: ['Point', 'Line', 'Polygon'],
       activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
+      drawnAnnotationFeatures: undefined,
       createdEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
+      relevantExist: false,
       relevantDisplay: false,
+      relevantEntry: {},
       doubleClickedFeature: false,
-      relevantEntry: {}
     }
   },
   computed: {
@@ -1894,6 +1900,19 @@ export default {
           }
         })
       } else this.showAnnotator(false)
+    },
+    currentDrawn: function (id) {
+      this.relevantEntry = {}
+      this.relevantExist = false
+      if (id && this.drawnAnnotationFeatures) {
+        let relevance = this.drawnAnnotationFeatures.filter((feature) => {
+          return feature.id === id
+        })[0].relevance
+        if (relevance) {
+          this.relevantEntry = relevance
+          this.relevantExist = true
+        }
+      }
     }
   },
   mounted: function () {
