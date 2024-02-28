@@ -146,7 +146,6 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[14].value"
-            v-if="relevantExist"
           >
             <template #reference>
               <map-svg-icon
@@ -650,7 +649,6 @@
             </el-button>
           </el-col>
         </el-row>
-        <el-row v-if="isRelevant || relevantExist">
           <el-col :span="20">
             <b><span>Related Features</span></b>
           </el-col>
@@ -1859,7 +1857,6 @@ export default {
       createdEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
-      relevantExist: false,
       relevantDisplay: false,
       relevantEntry: {},
       doubleClickedFeature: false,
@@ -1907,14 +1904,12 @@ export default {
     },
     currentDrawn: function (id) {
       this.relevantEntry = {}
-      this.relevantExist = false
       if (id && this.drawnAnnotationFeatures) {
         let relevance = this.drawnAnnotationFeatures.filter((feature) => {
           return feature.id === id
         })[0].relevance
         if (relevance) {
           this.relevantEntry = relevance
-          this.relevantExist = true
         }
       }
     }
