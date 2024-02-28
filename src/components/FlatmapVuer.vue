@@ -577,6 +577,9 @@ const createUnfilledTooltipData = function () {
   }
 }
 
+/**
+ * A vue component of the flatmap viewer.
+ */
 export default {
   name: 'FlatmapVuer',
   components: {
@@ -606,6 +609,10 @@ export default {
     this.setStateRequired = false
   },
   methods: {
+    /**
+     * @vuese
+     * Description of view latest map method
+     */
     viewLatestMap: function () {
       let biologicalSex = this.biologicalSex ? this.biologicalSex : undefined
       //Human requires special handling
@@ -617,14 +624,26 @@ export default {
         biologicalSex,
         viewport: this.mapImp.getState(),
       }
+      /**
+       * Description of view-latest-map event
+       */
       this.$emit('view-latest-map', state)
     },
+    /**
+     * @vuese
+     * Description of background change callback method
+     * @param {*} colour
+     */
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour
       if (this.mapImp) {
         this.mapImp.setBackgroundColour(this.currentBackground, 1)
       }
     },
+    /**
+     * Description of processSystems
+     * @param {@} systems
+     */
     processSystems: function (systems) {
       this.systems.length = 0
       if (systems && systems.length > 0) {
@@ -644,6 +663,11 @@ export default {
         this.systems.push(data)
       }
     },
+    /**
+     * Description of process Taxon
+     * @param {*} flatmapAPI
+     * @param {*} taxonIdentifiers
+     */
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
       taxonIdentifiers.forEach((taxon) => {
@@ -716,16 +740,28 @@ export default {
         this.mapImp.zoomOut()
       }
     },
+    /**
+     * Description of centre lines selected method
+     * @param {*} payload
+     */
     centreLinesSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableCentrelines(payload.value)
       }
     },
+    /**
+     * Description of sckan selected method
+     * @param {*} payload
+     */
     sckanSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableSckanPath(payload.key, payload.value)
       }
     },
+    /**
+     * Description of check all sckan method
+     * @param {*} payload
+     */
     checkAllSCKAN: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
@@ -733,6 +769,10 @@ export default {
         )
       }
     },
+    /**
+     * Description of highlight connected paths method
+     * @param {*} payload
+     */
     highlightConnectedPaths: function (payload) {
       if (this.mapImp) {
         let paths = [...this.mapImp.pathModelNodes(payload)]
@@ -749,11 +789,19 @@ export default {
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
     },
+    /**
+     * Description of system selected method
+     * @param {*} payload
+     */
     systemSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableSystem(payload.key, payload.value)
       }
     },
+    /**
+     * Description of check all systems method
+     * @param {*} flag
+     */
     checkAllSystems: function (flag) {
       if (this.mapImp) {
         this.systems[0].children.forEach((key) =>
@@ -761,14 +809,26 @@ export default {
         )
       }
     },
+    /**
+     * Description of ftu selected method
+     * @param {*} models
+     */
     ftuSelected: function (models) {
       this.searchAndShowResult(models, true)
     },
+    /**
+     * Description of layers selected method
+     * @param {*} payload
+     */
     layersSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableLayer(payload.key, payload.value)
       }
     },
+    /**
+     * Description of check all layers method
+     * @param {*} payload
+     */
     checkAllLayers: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
@@ -776,11 +836,19 @@ export default {
         )
       }
     },
+    /**
+     * Description of taxon selected method
+     * @param {*} payload
+     */
     taxonsSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
       }
     },
+    /**
+     * Description of check all taxons method
+     * @param {*} payload
+     */
     checkAllTaxons: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
@@ -788,11 +856,19 @@ export default {
         )
       }
     },
+    /**
+     * Description of pathways selected method
+     * @param {*} payload
+     */
     pathwaysSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enablePath(payload.key, payload.value)
       }
     },
+    /**
+     * Description of check all pathways method
+     * @param {*} payload
+     */
     checkAllPathways: function (payload) {
       if (this.mapImp) {
         payload.keys.forEach((key) =>
@@ -800,9 +876,16 @@ export default {
         )
       }
     },
+    /**
+     * Description of enable pan zoom events method
+     * @param {*} flag
+     */
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
+    /**
+     * Description of event callback method
+     */
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType !== 'pan-zoom') {
@@ -843,13 +926,22 @@ export default {
           ) {
             this.checkAndCreatePopups(payload)
           }
+          /**
+           * Description of resource-selected event
+           */
           this.$emit('resource-selected', payload)
         } else {
+          /**
+           * Description of pan-zoom-callback event
+           */
           this.$emit('pan-zoom-callback', data)
         }
       }
     },
-    // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
+    /**
+     * checkNeuronClicked shows a neuron path pop up if a path was recently clicked
+     * @param {*} data
+     */
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
@@ -878,6 +970,9 @@ export default {
         }
       }
     },
+    /**
+     * Description of popup css hacks method
+     */
     popUpCssHacks: function () {
       // Below is a hack to remove flatmap tooltips while popup is open
       let ftooltip = document.querySelector('.flatmap-tooltip-popup')
@@ -889,17 +984,30 @@ export default {
         document.querySelector('.flatmap-tooltip-popup').style.display = 'block'
       }
     },
+    /**
+     * Description of close tooltip method
+     */
     closeTooltip: function () {
       this.$refs.tooltip.$el.style.display = 'none'
       document.querySelectorAll('.maplibregl-popup').forEach((item) => {
         item.style.display = 'none'
       })
     },
+    /**
+     * Description of create tooltip from neuron curation method
+     * @param {*} data
+     */
     createTooltipFromNeuronCuration: async function (data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
       this.displayTooltip(data.resource[0])
     },
     // Keeping this as an API
+    /**
+     * Description of show popup method
+     * @param {*} featureId
+     * @param {*} node
+     * @param {*} options
+     */
     showPopup: function (featureId, node, options) {
       let myOptions = options
       if (this.mapImp) {
@@ -911,11 +1019,20 @@ export default {
         this.mapImp.showPopup(featureId, node, myOptions)
       }
     },
+    /**
+     * Description of show marker popup method
+     * @param {*} featureId
+     * @param {*} node
+     * @param {*} options
+     */
     showMarkerPopup: function (featureId, node, options) {
       if (this.mapImp) {
         this.mapImp.showMarkerPopup(featureId, node, options)
       }
     },
+    /**
+     * Description of close minimap method
+     */
     closeMinimap: function () {
       let minimapEl = this.$refs.flatmapContainer.querySelector(
         '.maplibregl-ctrl-minimap'
@@ -930,6 +1047,9 @@ export default {
       }
       this.minimapSmall = !this.minimapSmall
     },
+    /**
+     * Description of add resize button to minimap method
+     */
     addResizeButtonToMinimap: function () {
       let minimapEl = this.$refs.flatmapContainer.querySelector(
         '.maplibregl-ctrl-minimap'
@@ -944,6 +1064,10 @@ export default {
         this.minimapResizeShow = true
       }
     },
+    /**
+     * Description of set help mode method
+     * @param {*} helpMode
+     */
     setHelpMode: function (helpMode) {
       if (helpMode) {
         this.inHelp = true
@@ -959,6 +1083,10 @@ export default {
         this.closeFlatmapHelpPopup()
       }
     },
+    /**
+     * Description of show tooltip method
+     * @param {*} tooltipNumber
+     */
     showToolitip: function (tooltipNumber) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
@@ -967,6 +1095,10 @@ export default {
         }, 500)
       }
     },
+    /**
+     * Description of hide tooltip method
+     * @param {*} tooltipNumber
+     */
     hideToolitip: function (tooltipNumber) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
@@ -975,12 +1107,20 @@ export default {
         }, 500)
       }
     },
+    /**
+     * Description of display tooltip method
+     * @param {*} feature
+     */
     displayTooltip: function (feature) {
       this.tooltipDisplay = true
       if (!this.disableUI) {
         this.displayPopup(feature)
       }
     },
+    /**
+     * Description of display popup method
+     * @param {*} feature
+     */
     displayPopup: function (feature) {
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
@@ -989,6 +1129,9 @@ export default {
       )
       this.popUpCssHacks()
     },
+    /**
+     * Description of open flatmap help popup method
+     */
     openFlatmapHelpPopup: function () {
       if (this.mapImp) {
         let heartId = this.mapImp.modelFeatureIds('UBERON:0000948')
@@ -1001,6 +1144,9 @@ export default {
         }
       }
     },
+    /**
+     * Description of close flatmap help popup method
+     */
     closeFlatmapHelpPopup: function () {
       this.$el
         .querySelectorAll('.maplibregl-popup-close-button')
@@ -1008,6 +1154,9 @@ export default {
           item.click()
         })
     },
+    /**
+     * Description of get labels method
+     */
     getLabels: function () {
       let labels = []
       if (this.mapImp) {
@@ -1018,6 +1167,9 @@ export default {
         return Array.from(new Set(labels))
       }
     },
+    /**
+     * Description of get state method
+     */
     getState: function () {
       if (this.mapImp) {
         let state = {
@@ -1033,6 +1185,10 @@ export default {
       }
       return undefined
     },
+    /**
+     * Description of set state method
+     * @param {*} state
+     */
     setState: function (state) {
       if (state) {
         if (
@@ -1050,12 +1206,20 @@ export default {
         this.setStateRequired = false
       }
     },
+    /**
+     * Description of restore map state method
+     * @param {*} state
+     */
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
         if (state.searchTerm) this.searchAndShowResult(state.searchTerm, true)
       }
     },
+    /**
+     * Descripotion of create flatmap method
+     * @param {*} state
+     */
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
         this.loading = true
@@ -1140,6 +1304,9 @@ export default {
           this.restoreMapState(this._stateToBeSet)
       }
     },
+    /**
+     * Description of compute path controls maximum height method
+     */
     computePathControlsMaximumHeight() {
       const elem = this.$refs.display
       if (elem) {
@@ -1150,6 +1317,9 @@ export default {
         this.pathwaysMaxHeight = height - 170
       }
     },
+    /**
+     * Description of map resize method
+     */
     mapResize: function () {
       try {
         this.computePathControlsMaximumHeight()
@@ -1164,6 +1334,9 @@ export default {
         console.error('Map resize error')
       }
     },
+    /**
+     * Description of on flatmap ready method
+     */
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
       this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
@@ -1183,11 +1356,22 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
+      /**
+       * Description of ready event
+       */
       this.$emit('ready', this)
     },
+    /**
+     * Description of show minimap method
+     * @param {*} flag
+     */
     showMinimap: function (flag) {
       if (this.mapImp) this.mapImp.showMinimap(flag)
     },
+    /**
+     * Description of show pathways drawer method
+     * @param {*} flag
+     */
     showPathwaysDrawer: function (flag) {
       this.drawerOpen = flag
     },
@@ -1241,48 +1425,87 @@ export default {
     },
   },
   props: {
+    /**
+     * Description of entry
+     */
     entry: String,
+    /**
+     * Description of uuid
+     */
     uuid: String,
+    /**
+     * Descreiption of biological sex
+     */
     biologicalSex: {
       type: String,
       default: '',
     },
+    /**
+     * Description of feature info
+     */
     featureInfo: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of min zoom
+     */
     minZoom: {
       type: Number,
       default: 4,
     },
+    /**
+     * Description of path controls
+     */
     pathControls: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of searchable
+     */
     searchable: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of layer control
+     */
     layerControl: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of tooltips
+     */
     tooltips: {
       type: Boolean,
       default: true,
     },
+    /**
+     * Description of help mode
+     */
     helpMode: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of render at mounted
+     */
     renderAtMounted: {
       type: Boolean,
       default: true,
     },
+    /**
+     * Description of display minimap
+     */
     displayMinimap: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of display warning
+     */
     displayWarning: {
       type: Boolean,
       default: false,
@@ -1295,6 +1518,9 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of open map options
+     */
     openMapOptions: {
       type: Array,
       default: function () {
@@ -1314,14 +1540,23 @@ export default {
         ]
       },
     },
+    /**
+     * Description of show star in legend
+     */
     showStarInLegend: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of is legacy
+     */
     isLegacy: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of display latest changes
+     */
     displayLatestChanges: {
       type: Boolean,
       default: false,
@@ -1340,6 +1575,9 @@ export default {
       type: String,
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
+    /**
+     * Description of SPARC API
+     */
     sparcAPI: {
       type: String,
       default: 'https://api.sparc.science/',
