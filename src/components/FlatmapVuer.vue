@@ -139,6 +139,26 @@
       <div class="bottom-draw-control">
         <template v-if="viewingMode === 'Annotation'">
           <el-popover
+            content="Relevance"
+            placement="left"
+            :teleported="false"
+            trigger="manual"
+            width="80"
+            popper-class="flatmap-popper"
+            :visible="hoverVisibilities[14].value"
+            v-if="relevantExist"
+          >
+            <template #reference>
+              <map-svg-icon
+                icon="connection"
+                class="icon-button connection"
+                @click="showRelevantDialog"
+                @mouseover="showToolitip(14)"
+                @mouseout="hideToolitip(14)"
+              />
+            </template>
+          </el-popover>
+          <el-popover
             content="Draw Point"
             placement="left"
             :teleported="false"
@@ -1781,6 +1801,7 @@ export default {
         { value: false },
         { value: false },
         { value: false },
+        { value: false },
       ],
       yellowstar: yellowstar,
       isFC: false,
@@ -2119,7 +2140,7 @@ export default {
   }
 }
 
-.drawPoint, .drawLine, .drawPolygon, .drawTrash, .zoomIn, .zoomOut, .fitWindow {
+.drawPoint, .drawLine, .drawPolygon, .drawTrash, .connection, .zoomIn, .zoomOut, .fitWindow {
   padding-left: 8px;
 }
 
