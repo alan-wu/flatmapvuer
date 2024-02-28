@@ -826,6 +826,7 @@ export default {
   },
   methods: {
     showRelevanceDialog: function (show) {
+      // Used when check exist drawn annotation relevance
       if (this.currentDrawn && Object.keys(this.relevanceEntry).length > 0) {
         if (show) this.relevanceDisplay = true
         else this.relevanceDisplay = false
@@ -841,6 +842,8 @@ export default {
       if (this.createdEvent) {
         this.checkAndCreatePopups(this.createdEvent)
         // Add relevance if exist to annotationEntry
+        // Relevance will only be added in creating draw annotation
+        // And will not be updated if move drawn annotation
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
@@ -855,6 +858,7 @@ export default {
           }
         })
       }
+      // Either confirmed or cancelled drawing, reset related variables
       if (!active) {
         this.inDrawing = false
         this.relevanceDisplay = false
@@ -882,6 +886,7 @@ export default {
       }
       this.setActiveDrawTool()
     },
+    // Remove all drawn annotations from annotation layer
     clearAnnotationFeature: function () {
       if (this.mapImp) {
         this.mapImp.clearAnnotationFeature()
@@ -890,9 +895,11 @@ export default {
     rollbackAnnotationEvent: function () {
       if (this.mapImp) {
         let annotationEvent
+        // For 'updated' and 'deleted' callback
         if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
           annotationEvent = this.annotationEntry
         } else if (this.createdEvent) {
+          // For 'created' callback
           this.closePopup()
           annotationEvent = {
             ...this.createdEvent.feature,
@@ -931,6 +938,7 @@ export default {
       if (this.mapImp) {
         this.annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
+            // Use to switch the displayed feature type
             if (type !== 'All') {
               drawnFeatures = drawnFeatures.filter((feature) => {
                 return feature.geometry.type === type
@@ -948,9 +956,9 @@ export default {
     },
     showAnnotator: function (flag) {
       if (this.mapImp) {
-        this.mapImp.showAnnotator(flag)
-        // Hide default toolbar
         // Control the show/hide of the drawn annotations
+        this.mapImp.showAnnotator(flag)
+        // Hide default toolbar, we will use customised SVG icons instead
         document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
@@ -1178,6 +1186,7 @@ export default {
           } else if (data.type === 'modeChanged') {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
+              // Reset data entry for every draw
               this.annotationEntry = {}
               this.relevanceEntry = {}
               this.inDrawing = true
@@ -1203,7 +1212,8 @@ export default {
               userData: args,
               eventType: eventType,
             }
-            // Disable direct popup if 'created' event, dialog will be used instead
+            // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
+            // Hence disable direct popup when 'created' event, dialog will be used instead.
             if (data.type === 'created') {              
               this.createdEvent = payload
             } else {
@@ -1850,7 +1860,7 @@ export default {
       minimapResizeShow: false,
       minimapSmall: false,
       currentActive: '',
-      currentDrawn: undefined,
+      currentDrawn: undefined, // Clicked drawn annotation
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
@@ -1866,7 +1876,7 @@ export default {
       inDrawing: false,
       relevanceDisplay: false,
       relevanceEntry: {},
-      drawnAnnotationFeatures: undefined,
+      drawnAnnotationFeatures: undefined, // Store all exist drawn annotations
       doubleClickedFeature: false,
     }
   },
