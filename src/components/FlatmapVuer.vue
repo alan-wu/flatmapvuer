@@ -661,7 +661,7 @@
             shadow="hover"
             v-for="(value, key) in relevantEntry" 
             :key="key"
-            @click="checkAndCreatePopups(value)"
+            @click="displayRelevantTooltip(value)"
           >
             <span>{{ key }}</span>
           </el-card>
@@ -832,6 +832,11 @@ export default {
           this.closePopup()
         }
         else this.relevantDisplay = true
+      }
+    },
+    displayRelevantTooltip: function (value) {
+      if (this.mapImp) {
+        this.checkAndCreatePopups(value)
       }
     },
     confirmDrawnFeature: function () {
