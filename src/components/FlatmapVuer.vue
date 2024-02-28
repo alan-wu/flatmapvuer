@@ -1872,7 +1872,8 @@ export default {
       return (
         Object.keys(this.relevantEntry).length > 0 &&
         this.activeDrawTool &&
-        this.activeDrawTool !== 'Polygon'
+        // Currently only draw line will show relevant feature
+        this.activeDrawTool === 'Line'
       )
     }
   },
