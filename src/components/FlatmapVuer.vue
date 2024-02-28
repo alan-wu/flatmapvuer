@@ -630,10 +630,15 @@
         :close-on-press-escape="false"
         draggable
       >
-        <template #header>
+        <template #header v-if="inDrawing">
           <span class="dialog-title">Finalise drawing</span>
         </template>
-        <el-row>
+        <template #header v-else>
+          <el-button type="primary" plain @click="showRelevantDialog">
+            Close
+          </el-button>
+        </template>
+        <el-row v-if="inDrawing">
           <el-col :span="13">
             <el-button type="primary" plain @click="confirmDrawnFeature">
               Confirm
@@ -645,7 +650,7 @@
             </el-button>
           </el-col>
         </el-row>
-        <el-row v-if="isRelevant">
+        <el-row v-if="isRelevant || relevantExist">
           <el-col :span="20">
             <b><span>Related Features</span></b>
           </el-col>
@@ -820,6 +825,15 @@ export default {
     return { annotator }
   },
   methods: {
+    showRelevantDialog: function () {
+      if (this.currentDrawn && Object.keys(this.relevantEntry).length > 0) {
+        if (this.relevantDisplay) {
+          this.relevantDisplay = false
+          this.closePopup()
+        }
+        else this.relevantDisplay = true
+      }
+    },
     confirmDrawnFeature: function () {
       if (this.createdEvent) {
         this.inDrawing = false
@@ -1211,10 +1225,13 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Only clicked relevant data will be added 
-                let relevantId = data.models ? data.models : data.featureId
-                if (!(relevantId in this.relevantEntry)) {
-                  this.relevantEntry[relevantId] = payload
-                }
+                let relevant = data.models ? data.models : data.featureId
+                if (relevant) {    
+                  this.currentDrawn = undefined
+                  if (this.inDrawing && !(relevant in this.relevantEntry)) {
+                    this.relevantEntry[relevant] = payload
+                  }
+                } else this.currentDrawn = data.id
               }
             } else if (
               eventType === 'mouseenter' &&
@@ -1819,6 +1836,7 @@ export default {
       minimapResizeShow: false,
       minimapSmall: false,
       currentActive: '',
+      currentDrawn: undefined,
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
