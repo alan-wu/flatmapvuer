@@ -9,29 +9,48 @@
     >
       <div class="options-container">
         <el-row :gutter="20">
-          <el-button @click="helpMode = !helpMode" size="small"
-            >Help Mode</el-button
-          >
-          <el-button @click="saveSettings()" size="small"
-            >Save Settings</el-button
-          >
-          <el-button
-            :disabled="mapSettings.length === 0"
-            @click="restoreSettings()"
-            size="small"
-            >Restore Settings</el-button
-          >
-          <el-autocomplete
-            class="search-box"
-            placeholder="Search"
-            v-model="searchText"
-            :fetch-suggestions="fetchSuggestions"
-            @keyup.enter="search"
-            @select="search"
-            popper-class="autocomplete-popper"
-            :teleported="false"
-          >
-          </el-autocomplete>
+          <el-col :span="8">
+            <el-button @click="helpMode = !helpMode" size="small"
+              >Help Mode</el-button
+            >
+          </el-col>
+          <el-col :span="8">
+            <el-button @click="saveSettings()" size="small"
+              >Save Settings</el-button
+            >
+          </el-col>
+          <el-col :span="8">
+            <el-button
+              :disabled="mapSettings.length === 0"
+              @click="restoreSettings()"
+              size="small"
+              >Restore Settings</el-button
+            >
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col>
+            <el-switch
+              v-model="disableUI"
+              active-text="Disable UI"
+            >
+            </el-switch>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col>
+            <el-autocomplete
+              class="search-box"
+              placeholder="Search"
+              v-model="searchText"
+              :fetch-suggestions="fetchSuggestions"
+              @keyup.enter="search"
+              @select="search"
+              popper-class="autocomplete-popper"
+              :teleported="false"
+            >
+            </el-autocomplete>
+          </el-col>
         </el-row>
       </div>
       <template #reference>
@@ -57,6 +76,7 @@
       :displayMinimap="true"
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
+      :disableUI="disableUI"
     />
   </div>
 </template>
@@ -150,6 +170,7 @@ export default {
       searchable: true,
       pathControls: true,
       layerControl: true,
+      disableUI: false,
       minZoom: 4,
       availableSpecies: {
         'Human Female': {
