@@ -146,7 +146,7 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[14].value"
-            v-if="isRelevance"
+            v-if="isRelevance && !inDrawing"
           >
             <template #reference>
               <map-svg-icon
@@ -191,7 +191,7 @@
             <template #reference>
               <map-svg-icon
                 icon="drawLine"
-                class="icon-button drawLine"
+                class="icon-button drawLineString"
                 @click="drawnEvent('line')"
                 @mouseover="showToolitip(11)"
                 @mouseout="hideToolitip(11)"
@@ -839,39 +839,44 @@ export default {
     },
     confirmDrawnFeature: function () {
       if (this.createdEvent) {
-        this.inDrawing = false
-        this.relevantDisplay = false
-        this.setActiveDrawTool(false)
-        // Add relevance if exist to annotationEntry
-        if (Object.keys(this.relevantEntry).length > 0) {
-          this.annotationEntry.feature.relevance = this.relevantEntry
-        }
         this.checkAndCreatePopups(this.createdEvent)
-        this.createdEvent = undefined
+        // Add relevance if exist to annotationEntry
+        if (Object.keys(this.relevanceEntry).length > 0) {
+          this.annotationEntry.feature.relevance = this.relevanceEntry
+        }
+        this.setActiveDrawTool(false)
       }
     },
     setActiveDrawTool: function (active = true) {
       if (document.querySelector('.toolSelected')) {
-        this.drawTools.map((t) => {
-          document.querySelector(`.draw${t}`).classList.remove('toolSelected');
+        this.drawingTypes.map((t) => {
+          if (t !== 'All' && t !== 'None') {
+            document.querySelector(`.draw${t}`).classList.remove('toolSelected');
+          }
         })
       }
-      if (!active) this.activeDrawTool = undefined
+      if (!active) {
+        this.inDrawing = false
+        this.relevanceDisplay = false
+        this.relevanceEntry = {}
+        this.activeDrawTool = undefined
+        this.createdEvent = undefined
+      }
       if (this.activeDrawTool) {
         document.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
       }
     },
     drawnEvent: function (type) {
-      if (type === 'line') {
+      if (type === 'point') {
+        document.querySelector('.mapbox-gl-draw_point').click()
+        this.activeDrawTool = 'Point'
+      } else if (type === 'line') {
         document.querySelector('.mapbox-gl-draw_line').click()
-        this.activeDrawTool = 'Line'
+        this.activeDrawTool = 'LineString'
       } else if (type === 'polygon') {
         document.querySelector('.mapbox-gl-draw_polygon').click()
         this.activeDrawTool = 'Polygon'
-      } else if (type === 'point') {
-        document.querySelector('.mapbox-gl-draw_point').click()
-        this.activeDrawTool = 'Point'
-      } else if (type === 'trash') {
+      } else  if (type === 'trash') {
         document.querySelector('.mapbox-gl-draw_trash').click()
         this.activeDrawTool = undefined
       }
@@ -884,19 +889,16 @@ export default {
     },
     rollbackAnnotationEvent: function () {
       if (this.mapImp) {
-        let annotationEvent = undefined
+        let annotationEvent
         if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
           annotationEvent = this.annotationEntry
         } else if (this.createdEvent) {
-          this.inDrawing = false
-          this.relevantDisplay = false
-          this.setActiveDrawTool(false)
           this.closePopup()
           annotationEvent = {
             ...this.createdEvent.feature,
             resourceId: this.serverUUID,
           }
-          this.createdEvent = undefined
+          this.setActiveDrawTool(false)
         }
         this.mapImp.rollbackAnnotationEvent(annotationEvent)
       }
@@ -1239,7 +1241,7 @@ export default {
                   if (
                     this.inDrawing &&
                     // Currently only draw line will show relevance
-                    this.activeDrawTool === 'Line' &&
+                    this.activeDrawTool === 'LineString' &&
                     !(relevance in this.relevanceEntry)
                   ) {
                     this.relevanceEntry[relevance] = payload
@@ -1857,15 +1859,14 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
-      drawTools: ['Point', 'Line', 'Polygon'],
       activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
-      drawnAnnotationFeatures: undefined,
       createdEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
       relevanceDisplay: false,
       relevanceEntry: {},
+      drawnAnnotationFeatures: undefined,
       doubleClickedFeature: false,
     }
   },
@@ -2178,7 +2179,7 @@ export default {
   }
 }
 
-.drawPoint, .drawLine, .drawPolygon, .drawTrash, .connection, .zoomIn, .zoomOut, .fitWindow {
+.drawPoint, .drawLineString, .drawPolygon, .drawTrash, .connection, .zoomIn, .zoomOut, .fitWindow {
   padding-left: 8px;
 }
 
