@@ -146,12 +146,13 @@
             width="80"
             popper-class="flatmap-popper"
             :visible="hoverVisibilities[14].value"
+            v-if="isRelevance"
           >
             <template #reference>
               <map-svg-icon
                 icon="connection"
                 class="icon-button connection"
-                @click="showRelevantDialog(true)"
+                @click="showRelevanceDialog(true)"
                 @mouseover="showToolitip(14)"
                 @mouseout="hideToolitip(14)"
               />
@@ -620,7 +621,7 @@
         @annotation="commitAnnotationEvent"
       />
       <el-dialog
-        v-model="relevantDisplay"
+        v-model="relevanceDisplay"
         width="200"
         :modal="false"
         :show-close="false"
@@ -633,7 +634,7 @@
           <span class="dialog-title">Finalise drawing</span>
         </template>
         <template #header v-else>
-          <el-button type="primary" plain @click="showRelevantDialog(false)">
+          <el-button type="primary" plain @click="showRelevanceDialog(false)">
             Close
           </el-button>
         </template>
@@ -649,6 +650,7 @@
             </el-button>
           </el-col>
         </el-row>
+        <el-row v-if="isRelevance">
           <el-col :span="20">
             <b><span>Related Features</span></b>
           </el-col>
@@ -657,9 +659,9 @@
           </el-col>
           <el-card
             shadow="hover"
-            v-for="(value, key) in relevantEntry" 
+            v-for="(value, key) in relevanceEntry" 
             :key="key"
-            @click="displayRelevantTooltip(value)"
+            @click="displayRelevanceTooltip(value)"
           >
             <span>{{ key }}</span>
           </el-card>
@@ -823,14 +825,14 @@ export default {
     return { annotator }
   },
   methods: {
-    showRelevantDialog: function (show) {
-      if (this.currentDrawn && Object.keys(this.relevantEntry).length > 0) {
-        if (show) this.relevantDisplay = true
-        else this.relevantDisplay = false
+    showRelevanceDialog: function (show) {
+      if (this.currentDrawn && Object.keys(this.relevanceEntry).length > 0) {
+        if (show) this.relevanceDisplay = true
+        else this.relevanceDisplay = false
         this.closePopup()
       }
     },
-    displayRelevantTooltip: function (value) {
+    displayRelevanceTooltip: function (value) {
       if (this.mapImp) {
         this.checkAndCreatePopups(value)
       }
@@ -1175,13 +1177,13 @@ export default {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
               this.annotationEntry = {}
-              this.relevantEntry = {}
+              this.relevanceEntry = {}
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               if (this.createdEvent) {
-                this.relevantDisplay = true
+                this.relevanceDisplay = true
                 // Change back to the initial window size
-                // For a better view of the relevant popup
+                // For a better view of the relevance popup
                 this.resetView()
               }
             } else if (data.feature.mode === 'direct_select') {
@@ -1230,9 +1232,9 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                // Only clicked relevant data will be added 
-                let relevant = data.models ? data.models : data.featureId
-                if (relevant) {    
+                // Only clicked relevance data will be added 
+                let relevance = data.models ? data.models : data.featureId
+                if (relevance) {
                   this.currentDrawn = undefined
                   if (this.inDrawing && !(relevant in this.relevantEntry)) {
                     this.relevantEntry[relevant] = payload
@@ -1857,8 +1859,8 @@ export default {
       createdEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
-      relevantDisplay: false,
-      relevantEntry: {},
+      relevanceDisplay: false,
+      relevanceEntry: {},
       doubleClickedFeature: false,
     }
   },
@@ -1903,13 +1905,13 @@ export default {
       } else this.showAnnotator(false)
     },
     currentDrawn: function (id) {
-      this.relevantEntry = {}
+      this.relevanceEntry = {}
       if (id && this.drawnAnnotationFeatures) {
         let relevance = this.drawnAnnotationFeatures.filter((feature) => {
           return feature.id === id
         })[0].relevance
         if (relevance) {
-          this.relevantEntry = relevance
+          this.relevanceEntry = relevance
         }
       }
     }
