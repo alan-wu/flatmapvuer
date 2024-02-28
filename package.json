@@ -24,7 +24,7 @@
     "version": "npm run build-bundle;npm run changelog; git add CHANGELOG.md",
     "vuese-gen": "vuese gen",
     "docs:dev": "vuese gen; vitepress dev docs",
-    "docs:build": "vuese gen: vitepress build docs",
+    "docs:build": "vuese gen; vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "type": "module",
