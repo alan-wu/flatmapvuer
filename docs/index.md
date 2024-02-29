@@ -5,21 +5,19 @@ layout: home
 hero:
   name: "FlatmapVuer"
   text: "API documentation for FlatmapVuer"
-  tagline: My great project tagline
+  tagline: There are currently two components available.
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: FlatmapVuer
+      link: /components/FlatmapVuer
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: MultiFlatmapVuer
+      link: /components/MultiFlatmapVuer
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: FlatmapVuer
+    details: FlatmapVuer is used for displaying a single flatmap.
+  - title: MultiFlatmapVuer
+    details: MultiFlatmapVuer takes in an array of flatmaps and provide a chooser for selecting the flatmap on display.
 ---
 
