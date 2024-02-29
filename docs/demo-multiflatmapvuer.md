@@ -2,8 +2,8 @@
 
 ## Live Demo
 
-<div style="width: 100%; padding-bottom: 75%; position: relative; border: 1px solid var(--vp-c-divider)">
-  <div style="width: 100%; height: 100%; position: absolute">
+<div class="demo-map-container">
+  <div class="demo-map-container-inner">
     <ClientOnly>
       <MultiFlatmapVuer
         ref="multi"
@@ -80,6 +80,21 @@ export default {
 </script>
 
 <style>
+  .demo-map-container {
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%;
+    border: 1px solid var(--vp-c-divider);
+    position: relative;
+    z-index: 1; /* just for demo, to prevent tooltips go out of container */
+  }
+
+  .demo-map-container-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
   .flatmap-container {
     overflow: hidden;
   }
