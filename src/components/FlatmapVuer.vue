@@ -512,6 +512,28 @@
                 </el-option>
               </el-select>
             </el-row>
+            <el-row class="backgroundText">Participation Type</el-row>
+            <el-row class="backgroundControl">
+              <el-select
+                :teleported="false"
+                v-model="participationType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setParticipationType"
+              >
+                <el-option
+                  v-for="item in participationTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-row>
           </template>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Dimension display</el-row>
@@ -1875,6 +1897,8 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       drawingType: 'All',
       drawingTypes: ['All', 'Point', 'LineString', 'Polygon', 'None'],
+      participationType: 'All',
+      participationTypes: ['All', 'Participated', 'Not participated'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
