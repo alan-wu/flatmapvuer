@@ -136,7 +136,7 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-draw-control" v-if="viewingMode === 'Annotation'" v-show="!disableUI">
+      <div class="bottom-draw-control" v-if="userInformation" v-show="!disableUI">
         <el-popover
           content="Relevance"
           placement="left"
@@ -489,7 +489,7 @@
               </el-option>
             </el-select>
           </el-row>
-          <template v-if="viewingMode === 'Annotation'">
+          <template v-if="userInformation">
             <el-row class="backgroundText">Drawing Type</el-row>
             <el-row class="backgroundControl">
               <el-select
@@ -1878,6 +1878,7 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
+      userInformation: undefined,
       activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       createdEvent: undefined,
@@ -1918,6 +1919,7 @@ export default {
         this.showAnnotator(true)
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
+            this.userInformation = userData
             this.setFeatureAnnotated()
             this.addAnnotationFeature()
           }
