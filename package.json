@@ -89,7 +89,8 @@
   ],
   "vuese": {
     "include": [
-      "src/components/FlatmapVuer.vue"
+      "src/components/FlatmapVuer.vue",
+      "src/components/MultiFlatmapVuer.vue"
     ],
     "genType": "markdown",
     "outDir": "docs"
