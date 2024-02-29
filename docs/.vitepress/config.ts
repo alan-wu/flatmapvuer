@@ -17,9 +17,10 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Live Demos',
         items: [
-          { text: 'Live demo', link: '/demo' }
+          { text: 'FlatmapVuer', link: '/demo-flatmapvuer' },
+          { text: 'MultiFlatmapVuer', link: '/demo-multiflatmapvuer' }
         ]
       },
       {
