@@ -936,14 +936,14 @@ export default {
           })
       }
     },
-    addAnnotationFeature: function (type) {
+    addAnnotationFeature: function () {
       if (this.mapImp) {
         this.annotator.drawnFeatures(this.serverUUID)
           .then((drawnFeatures) => {
             // Use to switch the displayed feature type
-            if (type !== 'All') {
+            if (this.drawingType !== 'All') {
               drawnFeatures = drawnFeatures.filter((feature) => {
-                return feature.geometry.type === type
+                return feature.geometry.type === this.drawingType
               })
             }
             this.drawnAnnotationFeatures = drawnFeatures
@@ -969,7 +969,7 @@ export default {
       if (this.mapImp) {
         this.clearAnnotationFeature()
         if (flag !== 'None') {
-          this.addAnnotationFeature(this.drawingType)
+          this.addAnnotationFeature()
         }
       }
     },
@@ -1921,7 +1921,7 @@ export default {
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
             this.setFeatureAnnotated()
-            this.addAnnotationFeature(this.drawingType)
+            this.addAnnotationFeature()
           }
         })
       } else this.showAnnotator(false)
