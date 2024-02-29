@@ -958,22 +958,45 @@ export default {
     },
     addAnnotationFeature: function () {
       if (this.mapImp) {
-        this.annotator.drawnFeatures(this.serverUUID)
-          .then((drawnFeatures) => {
-            // Use to switch the displayed feature type
-            if (this.drawingType !== 'All') {
-              drawnFeatures = drawnFeatures.filter((feature) => {
-                return feature.geometry.type === this.drawingType
-              })
-            }
-            this.drawnAnnotationFeatures = drawnFeatures
-            for (const feature of drawnFeatures) {
-              this.mapImp.addAnnotationFeature(feature)
-            }
-          })
-          .catch((reason) => {
-            console.log(reason) // Error!
-          })
+        this.clearAnnotationFeature()
+        if (this.drawingType !== 'None') {
+          this.annotator.drawnFeatures(this.serverUUID)
+            .then((drawnFeatures) => {
+              // Use to switch the displayed feature type
+              if (this.drawingType !== 'All') {
+                drawnFeatures = drawnFeatures.filter((feature) => {
+                  return feature.geometry.type === this.drawingType
+                })
+              }
+              this.drawnAnnotationFeatures = drawnFeatures
+              for (const feature of drawnFeatures) {
+                if (this.participationType !== 'All') {
+                  this.annotator
+                    .itemAnnotations(this.serverUUID, feature.id)
+                    .then((value) => {
+                      let participated = value.filter((v) => {
+                        return (
+                          v.creator.name === this.userInformation.name &&
+                          v.creator.email === this.userInformation.email
+                        )
+                      }).length > 0
+                      if (
+                        (this.participationType === 'Participated' && participated) ||
+                        (this.participationType === 'Not participated' && !participated)
+                      ) {
+                        this.mapImp.addAnnotationFeature(feature)
+                      }
+                    })
+                    .catch((reason) => {
+                      console.log(reason) // Error!
+                    })
+                } else this.mapImp.addAnnotationFeature(feature)
+              }
+            })
+            .catch((reason) => {
+              console.log(reason) // Error!
+            })
+        }
       }
     },
     showAnnotator: function (flag) {
@@ -987,10 +1010,13 @@ export default {
     setDrawingType: function (flag) {
       this.drawingType = flag
       if (this.mapImp) {
-        this.clearAnnotationFeature()
-        if (flag !== 'None') {
-          this.addAnnotationFeature()
-        }
+        this.addAnnotationFeature()
+      }
+    },
+    setParticipationType: function (flag) {
+      this.participationType = flag
+      if (this.mapImp) {
+        this.addAnnotationFeature()
       }
     },
     setDimension: function (flag) {
