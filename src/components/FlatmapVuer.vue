@@ -523,8 +523,8 @@
               class="flatmap-radio"
               @change="setDimension"
             >
-            <el-radio :label="true">2D</el-radio>
-            <el-radio :label="false">3D</el-radio>
+            <el-radio :label="false">2D</el-radio>
+            <el-radio :label="true">3D</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -976,7 +976,7 @@ export default {
     setDimension: function (flag) {
       this.dimensionRadio = flag
       if (this.mapImp) {
-        this.mapImp.enable3dPaths(!flag)
+        this.mapImp.enable3dPaths(flag)
       }
     },
     viewLatestMap: function () {
@@ -1865,7 +1865,7 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      dimensionRadio: true,
+      dimensionRadio: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
