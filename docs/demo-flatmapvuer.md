@@ -1,4 +1,4 @@
-# Live demo
+# FlatmapVuer Live Demo
 
 ## Live Demo
 
