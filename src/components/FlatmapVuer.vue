@@ -136,7 +136,9 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-draw-control" v-if="userInformation" v-show="!disableUI">
+      <div class="bottom-draw-control"
+        v-if="viewingMode === 'Annotation' && userInformation" 
+        v-show="!disableUI">
         <el-popover
           content="Relevance"
           placement="left"
@@ -489,8 +491,8 @@
               </el-option>
             </el-select>
           </el-row>
-          <template v-if="userInformation">
-            <el-row class="backgroundText">Drawing Type</el-row>
+          <template v-if="viewingMode === 'Annotation' && userInformation">
+            <el-row class="backgroundText">Drawing Type*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
@@ -512,7 +514,7 @@
                 </el-option>
               </el-select>
             </el-row>
-            <el-row class="backgroundText">Participation Type</el-row>
+            <el-row class="backgroundText">Participation Type*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
