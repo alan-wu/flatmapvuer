@@ -109,6 +109,57 @@ export default {
   .fitWindow {
     padding-left: 0px !important;
   }
+
+  /* reset dropdown style to multiflatmapvuer's style */
+  ul.el-scrollbar__view.el-select-dropdown__list {
+    list-style: none;
+    padding: 6px 0;
+    margin: 0;
+  }
+
+  /* add missing font icons for dropdown | from css file - src/icons/mapicon-species-style.css */
+  @font-face {
+    font-family: 'mapicon-species';
+    src:  url('../src/icons/fonts/mapicon-species.eot?h40clo');
+    src:  url('../src/icons/fonts/mapicon-species.eot?h40clo#iefix') format('embedded-opentype'),
+      url('../src/icons/fonts/mapicon-species.ttf?h40clo') format('truetype'),
+      url('../src/icons/fonts/mapicon-species.woff?h40clo') format('woff'),
+      url('../src/icons/fonts/mapicon-species.svg?h40clo#mapicon-species') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+  }
+
+  [class^="mapicon-icon"], [class*=" mapicon-icon"] {
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: 'mapicon-species' !important;
+    speak: never;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .mapicon-icon_cat:before {
+    content: "\e904";
+  }
+  .mapicon-icon_rat:before {
+    content: "\e900";
+  }
+  .mapicon-icon_pig:before {
+    content: "\e901";
+  }
+  .mapicon-icon_mouse:before {
+    content: "\e902";
+  }
+  .mapicon-icon_human:before {
+    content: "\e903";
+  }
 </style>
 
 ## Code Preview
