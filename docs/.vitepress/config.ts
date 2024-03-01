@@ -11,8 +11,20 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'FlatmapVuer', link: '/components/FlatmapVuer' },
-      { text: 'MultiFlatmapVuer', link: '/components/MultiFlatmapVuer' },
+      {
+        text: 'FlatmapVuer',
+        items: [
+          { text: 'Live Demo', link: '/demo-flatmapvuer' },
+          { text: 'API References', link: '/components/FlatmapVuer' },
+        ]
+      },
+      {
+        text: 'MultiFlatmapVuer',
+        items: [
+          { text: 'Live Demo', link: '/demo-multiflatmapvuer' },
+          { text: 'API References', link: '/components/MultiFlatmapVuer' },
+        ]
+      },
     ],
 
     sidebar: [
