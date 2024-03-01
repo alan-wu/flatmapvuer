@@ -611,6 +611,7 @@ export default {
   methods: {
     /**
      * @vuese
+     *
      * Description of view latest map method
      */
     viewLatestMap: function () {
@@ -631,8 +632,9 @@ export default {
     },
     /**
      * @vuese
+     *
      * Description of background change callback method
-     * @param {*} colour
+     * @arg colour
      */
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour
@@ -641,8 +643,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of processSystems
-     * @param {@} systems
+     * @arg systems
      */
     processSystems: function (systems) {
       this.systems.length = 0
@@ -664,9 +668,11 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of process Taxon
-     * @param {*} flatmapAPI
-     * @param {*} taxonIdentifiers
+     * @arg flatmapAPI
+     * @arg taxonIdentifiers
      */
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
@@ -677,11 +683,19 @@ export default {
         })
       })
     },
+    /**
+     * @vuese
+     *
+     * Description of toggle drawer method
+     */
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
     },
     /**
+     * @vuese
+     *
      * Function to toggle colour/greyscale of organs.
+     * @arg flag
      */
     setColour: function (flag) {
       this.colourRadio = flag
@@ -690,7 +704,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Function to toggle outlines f organs.
+     * @arg flag
      */
     setOutlines: function (flag) {
       this.outlineRadio = flag
@@ -699,6 +716,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Function to toggle paths to default.
      * Also called when the associated button is pressed.
      */
@@ -723,6 +742,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Function to zoom in.
      * Also called when the associated button is pressed.
      */
@@ -732,6 +753,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Function to zoom out.
      * Also called when the associated button is pressed.
      */
@@ -741,8 +764,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of centre lines selected method
-     * @param {*} payload
+     * @arg payload
      */
     centreLinesSelected: function (payload) {
       if (this.mapImp) {
@@ -750,8 +775,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of sckan selected method
-     * @param {*} payload
+     * @arg payload
      */
     sckanSelected: function (payload) {
       if (this.mapImp) {
@@ -759,8 +786,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of check all sckan method
-     * @param {*} payload
+     * @arg payload
      */
     checkAllSCKAN: function (payload) {
       if (this.mapImp) {
@@ -770,8 +799,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of highlight connected paths method
-     * @param {*} payload
+     * @arg payload
      */
     highlightConnectedPaths: function (payload) {
       if (this.mapImp) {
@@ -790,8 +821,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of system selected method
-     * @param {*} payload
+     * @arg payload
      */
     systemSelected: function (payload) {
       if (this.mapImp) {
@@ -799,8 +832,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of check all systems method
-     * @param {*} flag
+     * @arg flag
      */
     checkAllSystems: function (flag) {
       if (this.mapImp) {
@@ -810,15 +845,19 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of ftu selected method
-     * @param {*} models
+     * @arg models
      */
     ftuSelected: function (models) {
       this.searchAndShowResult(models, true)
     },
     /**
+     * @vuese
+     *
      * Description of layers selected method
-     * @param {*} payload
+     * @arg payload
      */
     layersSelected: function (payload) {
       if (this.mapImp) {
@@ -826,8 +865,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of check all layers method
-     * @param {*} payload
+     * @arg payload
      */
     checkAllLayers: function (payload) {
       if (this.mapImp) {
@@ -837,8 +878,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of taxon selected method
-     * @param {*} payload
+     * @arg payload
      */
     taxonsSelected: function (payload) {
       if (this.mapImp) {
@@ -846,8 +889,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of check all taxons method
-     * @param {*} payload
+     * @arg payload
      */
     checkAllTaxons: function (payload) {
       if (this.mapImp) {
@@ -857,8 +902,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of pathways selected method
-     * @param {*} payload
+     * @arg payload
      */
     pathwaysSelected: function (payload) {
       if (this.mapImp) {
@@ -866,8 +913,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of check all pathways method
-     * @param {*} payload
+     * @arg payload
      */
     checkAllPathways: function (payload) {
       if (this.mapImp) {
@@ -877,13 +926,17 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of enable pan zoom events method
-     * @param {*} flag
+     * @arg flag
      */
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
     /**
+     * @vuese
+     *
      * Description of event callback method
      */
     eventCallback: function () {
@@ -939,8 +992,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * checkNeuronClicked shows a neuron path pop up if a path was recently clicked
-     * @param {*} data
+     * @arg data
      */
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
@@ -971,6 +1026,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of popup css hacks method
      */
     popUpCssHacks: function () {
@@ -985,6 +1042,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of close tooltip method
      */
     closeTooltip: function () {
@@ -994,8 +1053,10 @@ export default {
       })
     },
     /**
+     * @vuese
+     *
      * Description of create tooltip from neuron curation method
-     * @param {*} data
+     * @arg data
      */
     createTooltipFromNeuronCuration: async function (data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
@@ -1003,10 +1064,12 @@ export default {
     },
     // Keeping this as an API
     /**
+     * @vuese
+     *
      * Description of show popup method
-     * @param {*} featureId
-     * @param {*} node
-     * @param {*} options
+     * @arg featureId
+     * @arg node
+     * @arg options
      */
     showPopup: function (featureId, node, options) {
       let myOptions = options
@@ -1020,10 +1083,12 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of show marker popup method
-     * @param {*} featureId
-     * @param {*} node
-     * @param {*} options
+     * @arg featureId
+     * @arg node
+     * @arg options
      */
     showMarkerPopup: function (featureId, node, options) {
       if (this.mapImp) {
@@ -1031,6 +1096,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of close minimap method
      */
     closeMinimap: function () {
@@ -1048,6 +1115,8 @@ export default {
       this.minimapSmall = !this.minimapSmall
     },
     /**
+     * @vuese
+     *
      * Description of add resize button to minimap method
      */
     addResizeButtonToMinimap: function () {
@@ -1065,8 +1134,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of set help mode method
-     * @param {*} helpMode
+     * @arg helpMode
      */
     setHelpMode: function (helpMode) {
       if (helpMode) {
@@ -1084,8 +1155,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of show tooltip method
-     * @param {*} tooltipNumber
+     * @arg tooltipNumber
      */
     showToolitip: function (tooltipNumber) {
       if (!this.inHelp) {
@@ -1096,8 +1169,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of hide tooltip method
-     * @param {*} tooltipNumber
+     * @arg tooltipNumber
      */
     hideToolitip: function (tooltipNumber) {
       if (!this.inHelp) {
@@ -1108,8 +1183,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of display tooltip method
-     * @param {*} feature
+     * @arg feature
      */
     displayTooltip: function (feature) {
       this.tooltipDisplay = true
@@ -1118,8 +1195,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of display popup method
-     * @param {*} feature
+     * @arg feature
      */
     displayPopup: function (feature) {
       this.mapImp.showPopup(
@@ -1130,6 +1209,8 @@ export default {
       this.popUpCssHacks()
     },
     /**
+     * @vuese
+     *
      * Description of open flatmap help popup method
      */
     openFlatmapHelpPopup: function () {
@@ -1145,6 +1226,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of close flatmap help popup method
      */
     closeFlatmapHelpPopup: function () {
@@ -1155,6 +1238,8 @@ export default {
         })
     },
     /**
+     * @vuese
+     *
      * Description of get labels method
      */
     getLabels: function () {
@@ -1168,6 +1253,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of get state method
      */
     getState: function () {
@@ -1186,8 +1273,10 @@ export default {
       return undefined
     },
     /**
+     * @vuese
+     *
      * Description of set state method
-     * @param {*} state
+     * @arg state
      */
     setState: function (state) {
       if (state) {
@@ -1207,8 +1296,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of restore map state method
-     * @param {*} state
+     * @arg state
      */
     restoreMapState: function (state) {
       if (state) {
@@ -1217,8 +1308,10 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Descripotion of create flatmap method
-     * @param {*} state
+     * @arg state
      */
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
@@ -1305,6 +1398,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of compute path controls maximum height method
      */
     computePathControlsMaximumHeight() {
@@ -1318,6 +1413,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of map resize method
      */
     mapResize: function () {
@@ -1335,6 +1432,8 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Description of on flatmap ready method
      */
     onFlatmapReady: function () {
@@ -1362,22 +1461,30 @@ export default {
       this.$emit('ready', this)
     },
     /**
+     * @vuese
+     *
      * Description of show minimap method
-     * @param {*} flag
+     * @arg _flag_ is example value
      */
     showMinimap: function (flag) {
       if (this.mapImp) this.mapImp.showMinimap(flag)
     },
     /**
+     * @vuese
+     *
      * Description of show pathways drawer method
-     * @param {*} flag
+     * @arg _flag_ is example value
      */
     showPathwaysDrawer: function (flag) {
       this.drawerOpen = flag
     },
     /**
+     * @vuese
+     *
      * Function to display features with annotation matching the provided term,
      * with the option to display the label using displayLabel flag.
+     * @arg term
+     * @arg displayLabel
      */
     searchAndShowResult: function (term, displayLabel) {
       if (this.mapImp) {
@@ -1417,7 +1524,10 @@ export default {
       return false
     },
     /**
+     * @vuese
+     *
      * Get the list of suggested terms
+     * @arg term
      */
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
