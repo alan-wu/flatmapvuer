@@ -118,6 +118,11 @@ export default {
     })
   },
   methods: {
+    /**
+     * @vuese
+     *
+     * Description of initialise method
+     */
     initialise: function () {
       return new Promise((resolve) => {
         if (this.requireInitialisation) {
@@ -192,12 +197,35 @@ export default {
         }
       })
     },
+    /**
+     * @vuese
+     *
+     * Description of FlatmapSelected method
+     * @arg resource
+     */
     FlatmapSelected: function (resource) {
+      /**
+       * Description of resource-selected event
+       */
       this.$emit('resource-selected', resource)
     },
+    /**
+     * @vuese
+     *
+     * Description of FlatmapReady method
+     * @arg component
+     */
     FlatmapReady: function (component) {
+      /**
+       * Description of ready event
+       */
       this.$emit('ready', component)
     },
+    /**
+     * @vuese
+     *
+     * Description of getCoordinatesOfLastClick method
+     */
     getCoordinatesOfLastClick: function () {
       const flatmap = this.$refs[this.activeSpecies]
       if (flatmap && flatmap[0]) {
@@ -205,24 +233,65 @@ export default {
       }
       return undefined
     },
+    /**
+     * @vuese
+     *
+     * Description of getCurrentFlatmap method
+     */
     getCurrentFlatmap: function () {
       return this.$refs[this.activeSpecies][0]
     },
+    /**
+     * @vuese
+     *
+     * Description of panZoomCallback method
+     * @arg payload
+     */
     panZoomCallback: function (payload) {
+      /**
+       * Description of pan-zoom-callback
+       */
       this.$emit('pan-zoom-callback', payload)
     },
+    /**
+     * @vuese
+     *
+     * Description of showPopup method
+     * @arg featureId
+     * @arg node
+     * @arg options
+     */
     showPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showPopup(featureId, node, options)
     },
+    /**
+     * @vuese
+     *
+     * Description of showMarkerPopup method
+     * @arg featureId
+     * @arg node
+     * @arg options
+     */
     showMarkerPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showMarkerPopup(featureId, node, options)
     },
+    /**
+     * @vuese
+     *
+     * Description of setSpecies method
+     * @arg species
+     * @arg state
+     * @arg numberOfRetry
+     */
     setSpecies: function (species, state, numberOfRetry) {
       if (this.$refs && species in this.$refs) {
         this.activeSpecies = species
         this.$refs[this.activeSpecies][0].createFlatmap(state)
+        /**
+         * Description of flatmapChanged event
+         */
         this.$emit('flatmapChanged', this.activeSpecies)
       } else if (numberOfRetry) {
         const retry = numberOfRetry - 1
@@ -234,8 +303,11 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Function to switch to the latest existing map from
      * a legacy map of the same species.
+     * @arg state
      *
      * @private
      */
@@ -254,7 +326,12 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Create a legacy entry with the provided information
+     * @arg state
+     * @arg taxo
+     * @arg uuid
      *
      * @private
      */
@@ -282,8 +359,11 @@ export default {
       }
     },
     /**
+     * @vuese
+     *
      * Function used to translate the legacy map state to one that can be used in current
      * flatmap if required. If it is a legacy, an Select entry will be added
+     * @arg state
      *
      * @private
      */
@@ -339,6 +419,8 @@ export default {
       })
     },
     /**
+     * @vuese
+     *
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
      *
@@ -354,8 +436,11 @@ export default {
       return state
     },
     /**
+     * @vuese
+     *
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
+     * @arg state
      *
      * @public
      */
@@ -377,27 +462,51 @@ export default {
         })
       }
     },
+    /**
+     * @vuese
+     *
+     * Description of resourceSelected method
+     * @arg action
+     */
     resourceSelected: function (action) {
+      /**
+       * Description of resource-selected event
+       */
       this.$emit('resource-selected', action)
     },
   },
   props: {
+    /**
+     * Description of show layer
+     */
     showLayer: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of feature info
+     */
     featureInfo: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of path controls
+     */
     pathControls: {
       type: Boolean,
       default: true,
     },
+    /**
+     * Description of searchable
+     */
     searchable: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of layer control
+     */
     layerControl: {
       type: Boolean,
       default: false,
@@ -410,22 +519,37 @@ export default {
       type: String,
       default: '',
     },
+    /**
+     * Description of min zoom
+     */
     minZoom: {
       type: Number,
       default: 4,
     },
+    /**
+     * Description of render at mounted
+     */
     renderAtMounted: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of help mode
+     */
     helpMode: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of display minimap
+     */
     displayMinimap: {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of show star in legend
+     */
     showStarInLegend: {
       type: Boolean,
       default: false,
@@ -438,9 +562,15 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * Description of open map options
+     */
     openMapOptions: {
       type: Array,
     },
+    /**
+     * Description of available species
+     */
     availableSpecies: {
       type: Object,
       default: function () {
@@ -494,6 +624,9 @@ export default {
       type: String,
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
+    /**
+     * Description of SPARC API
+     */
     sparcAPI: {
       type: String,
       default: 'https://api.sparc.science/',
