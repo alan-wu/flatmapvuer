@@ -828,10 +828,15 @@ export default {
   },
   methods: {
     showRelevanceDialog: function (show) {
+      // Change back to the initial window size
+      // For a better view of the relevance popup
+      this.resetView()
       // Used when check exist drawn annotation relevance
-      if (this.currentDrawn && Object.keys(this.relevanceEntry).length > 0) {
-        if (show) this.relevanceDisplay = true
-        else this.relevanceDisplay = false
+      if (
+        this.createdEvent ||
+        (this.currentDrawn && Object.keys(this.relevanceEntry).length > 0)
+      ) {
+        this.relevanceDisplay = show
         this.closePopup()
       }
     },
@@ -1188,17 +1193,13 @@ export default {
           } else if (data.type === 'modeChanged') {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
+              this.closePopup()
               // Reset data entry for every draw
               this.annotationEntry = {}
               this.relevanceEntry = {}
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              if (this.createdEvent) {
-                this.relevanceDisplay = true
-                // Change back to the initial window size
-                // For a better view of the relevance popup
-                this.resetView()
-              }
+              this.showRelevanceDialog(true)
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
