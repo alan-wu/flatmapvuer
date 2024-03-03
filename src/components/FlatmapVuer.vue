@@ -895,7 +895,11 @@ export default {
     },
     // Remove all drawn annotations from annotation layer
     clearAnnotationFeature: function () {
-      if (this.mapImp) {
+      if (
+        this.mapImp &&
+        this.drawnAnnotationFeatures &&
+        this.drawnAnnotationFeatures.length > 0
+      ) {
         this.mapImp.clearAnnotationFeature()
       }
     },
@@ -1922,7 +1926,9 @@ export default {
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
             this.setFeatureAnnotated()
-            this.addAnnotationFeature(this.drawingType)
+            if (!this.drawnAnnotationFeatures) {
+              this.addAnnotationFeature(this.drawingType)
+            }
           }
         })
       } else this.showAnnotator(false)
