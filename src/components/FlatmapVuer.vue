@@ -925,6 +925,7 @@ export default {
       if (
         this.mapImp &&
         this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
+        // Only when annotation comments stored successfully
         annotation
       ) {
         this.annotationSubmitted = true

@@ -295,10 +295,10 @@ export default {
           if (this.annotationEntry['type'] === 'deleted') {
             userAnnotation.feature = undefined
           }
-          this.$emit('annotation', userAnnotation)
           this.$annotator
-            .addAnnotation(userAnnotation)
-            .then(() => {
+          .addAnnotation(userAnnotation)
+          .then(() => {
+              this.$emit('annotation', userAnnotation)
               this.errorMessage = ''
               this.resetSubmission()
               this.updatePrevSubmissions()
