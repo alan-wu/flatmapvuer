@@ -1355,6 +1355,7 @@ export default {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
             this.annotationSubmitted = false
+            this.annotationEntry.featureId = data.feature.feature.id
             let featureGeometry = centroid(data.feature.feature.geometry)
             this.displayTooltip(data.feature.feature.id, featureGeometry)
           }

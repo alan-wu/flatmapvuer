@@ -204,9 +204,8 @@ export default {
   computed: {
     isEditable: function () {
       return (
-        this.annotationEntry['resourceId'] && (
-          this.annotationEntry['featureId'] || this.annotationEntry['feature']
-        )
+        this.annotationEntry['resourceId'] &&
+        this.annotationEntry['featureId']
       )
     },
     isDeleted: function () {
@@ -238,16 +237,13 @@ export default {
     updatePrevSubmissions: function () {
       if (this.$annotator && this.authenticated) {
         if (
-          this.annotationEntry['resourceId'] && (
-            this.annotationEntry['featureId'] || this.annotationEntry['feature']
-          )
+          this.annotationEntry['resourceId'] &&
+          this.annotationEntry['featureId']
         ) {
           this.$annotator
             .itemAnnotations(
               this.annotationEntry['resourceId'],
-              this.annotationEntry['featureId'] ?
-                this.annotationEntry['featureId'] :
-                this.annotationEntry['feature']['id']
+              this.annotationEntry['featureId']
             )
             .then((value) => {
               this.prevSubs = value
@@ -265,9 +261,8 @@ export default {
         this.annotationEntry['type'] === 'deleted'
       ) {
         if (
-          this.annotationEntry['resourceId'] && (
-            this.annotationEntry['featureId'] || this.annotationEntry['feature']
-          )
+          this.annotationEntry['resourceId'] &&
+          this.annotationEntry['featureId']
         ) {
           const evidenceURLs = []
           this.evidence.forEach((evidence) => {
@@ -288,9 +283,6 @@ export default {
             evidence: evidenceURLs,
             comment: this.comment,
             feature: this.annotationEntry['feature']
-          }
-          if (this.annotationEntry['feature']) {
-            userAnnotation.item = this.annotationEntry['feature']['id']
           }
           if (this.annotationEntry['type'] === 'deleted') {
             userAnnotation.feature = undefined
