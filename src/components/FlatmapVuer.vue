@@ -136,108 +136,108 @@
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-draw-control"  v-show="!disableUI">
-        <template v-if="viewingMode === 'Annotation'">
-          <el-popover
-            content="Relevance"
-            placement="left"
-            :teleported="false"
-            trigger="manual"
-            width="80"
-            popper-class="flatmap-popper"
-            :visible="hoverVisibilities[14].value"
-            v-if="isRelevance && !inDrawing"
-          >
-            <template #reference>
-              <map-svg-icon
-                icon="connection"
-                class="icon-button connection"
-                @click="showRelevanceDialog(true)"
-                @mouseover="showToolitip(14)"
-                @mouseout="hideToolitip(14)"
-              />
-            </template>
-          </el-popover>
-          <el-popover
-            content="Draw Point"
-            placement="left"
-            :teleported="false"
-            trigger="manual"
-            width="80"
-            popper-class="flatmap-popper"
-            :visible="hoverVisibilities[12].value"
-            v-if="drawingType !== 'LineString' && drawingType !== 'Polygon'"
-          >
-            <template #reference>
-              <map-svg-icon
-                icon="drawPoint"
-                class="icon-button drawPoint"
-                @click="drawnEvent('point')"
-                @mouseover="showToolitip(10)"
-                @mouseout="hideToolitip(10)"
-              />
-            </template>
-          </el-popover>
-          <el-popover
-            content="Draw Line"
-            placement="left"
-            :teleported="false"
-            trigger="manual"
-            width="80"
-            popper-class="flatmap-popper"
-            :visible="hoverVisibilities[10].value"
-            v-if="drawingType !== 'Point' && drawingType !== 'Polygon'"
-          >
-            <template #reference>
-              <map-svg-icon
-                icon="drawLine"
-                class="icon-button drawLineString"
-                @click="drawnEvent('line')"
-                @mouseover="showToolitip(11)"
-                @mouseout="hideToolitip(11)"
-              />
-            </template>
-          </el-popover>
-          <el-popover
-            content="Draw Polygon"
-            placement="left"
-            :teleported="false"
-            trigger="manual"
-            width="80"
-            popper-class="flatmap-popper"
-            :visible="hoverVisibilities[11].value"
-            v-if="drawingType !== 'Point' && drawingType !== 'LineString'"
-          >
-            <template #reference>
-              <map-svg-icon
-                icon="drawPolygon"
-                class="icon-button drawPolygon"
-                @click="drawnEvent('polygon')"
-                @mouseover="showToolitip(12)"
-                @mouseout="hideToolitip(12)"
-              />
-            </template>
-          </el-popover>
-          <el-popover
-            content="Draw Trash"
-            placement="left"
-            :teleported="false"
-            trigger="manual"
-            width="80"
-            popper-class="flatmap-popper"
-            :visible="hoverVisibilities[13].value"
-          >
-            <template #reference>
-              <map-svg-icon
-                icon="drawTrash"
-                class="icon-button drawTrash"
-                @click="drawnEvent('trash')"
-                @mouseover="showToolitip(13)"
-                @mouseout="hideToolitip(13)"
-              />
-            </template>
-          </el-popover>
-        </template>
+      <div class="bottom-draw-control"
+        v-if="viewingMode === 'Annotation' && userInformation" 
+        v-show="!disableUI">
+        <el-popover
+          content="Relevance"
+          placement="left"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[10].value"
+          v-if="isRelevance && !inDrawing"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="connection"
+              class="icon-button connection"
+              @click="showRelevanceDialog(true)"
+              @mouseover="showToolitip(10)"
+              @mouseout="hideToolitip(10)"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Draw Point"
+          placement="left"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[11].value"
+          v-if="drawingType !== 'LineString' && drawingType !== 'Polygon'"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawPoint"
+              class="icon-button drawPoint"
+              @click="drawnEvent('point')"
+              @mouseover="showToolitip(11)"
+              @mouseout="hideToolitip(11)"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Draw Line"
+          placement="left"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[12].value"
+          v-if="drawingType !== 'Point' && drawingType !== 'Polygon'"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawLine"
+              class="icon-button drawLineString"
+              @click="drawnEvent('line')"
+              @mouseover="showToolitip(12)"
+              @mouseout="hideToolitip(12)"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Draw Polygon"
+          placement="left"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[13].value"
+          v-if="drawingType !== 'Point' && drawingType !== 'LineString'"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawPolygon"
+              class="icon-button drawPolygon"
+              @click="drawnEvent('polygon')"
+              @mouseover="showToolitip(13)"
+              @mouseout="hideToolitip(13)"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Draw Trash"
+          placement="left"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[14].value"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawTrash"
+              class="icon-button drawTrash"
+              @click="drawnEvent('trash')"
+              @mouseover="showToolitip(14)"
+              @mouseout="hideToolitip(14)"
+            />
+          </template>
+        </el-popover>
       </div>
 
       <div class="bottom-right-control" v-show="!disableUI">
@@ -491,8 +491,8 @@
               </el-option>
             </el-select>
           </el-row>
-          <template v-if="viewingMode === 'Annotation'">
-            <el-row class="backgroundText">Drawing Type</el-row>
+          <template v-if="viewingMode === 'Annotation' && userInformation">
+            <el-row class="backgroundText">Drawing Type*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
@@ -514,6 +514,28 @@
                 </el-option>
               </el-select>
             </el-row>
+            <el-row class="backgroundText">Participation Type*</el-row>
+            <el-row class="backgroundControl">
+              <el-select
+                :teleported="false"
+                v-model="participationType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setParticipationType"
+              >
+                <el-option
+                  v-for="item in participationTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-row>
           </template>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Dimension display</el-row>
@@ -523,8 +545,8 @@
               class="flatmap-radio"
               @change="setDimension"
             >
-            <el-radio :label="true">2D</el-radio>
-            <el-radio :label="false">3D</el-radio>
+            <el-radio :label="false">2D</el-radio>
+            <el-radio :label="true">3D</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -946,24 +968,47 @@ export default {
           })
       }
     },
-    addAnnotationFeature: function (type) {
+    addAnnotationFeature: function () {
       if (this.mapImp) {
-        this.annotator.drawnFeatures(this.serverUUID)
-          .then((drawnFeatures) => {
-            // Use to switch the displayed feature type
-            if (type !== 'All') {
-              drawnFeatures = drawnFeatures.filter((feature) => {
-                return feature.geometry.type === type
-              })
-            }
-            this.drawnAnnotationFeatures = drawnFeatures
-            for (const feature of drawnFeatures) {
-              this.mapImp.addAnnotationFeature(feature)
-            }
-          })
-          .catch((reason) => {
-            console.log(reason) // Error!
-          })
+        this.clearAnnotationFeature()
+        if (this.drawingType !== 'None') {
+          this.annotator.drawnFeatures(this.serverUUID)
+            .then((drawnFeatures) => {
+              // Use to switch the displayed feature type
+              if (this.drawingType !== 'All') {
+                drawnFeatures = drawnFeatures.filter((feature) => {
+                  return feature.geometry.type === this.drawingType
+                })
+              }
+              this.drawnAnnotationFeatures = drawnFeatures
+              for (const feature of drawnFeatures) {
+                if (this.participationType !== 'All') {
+                  this.annotator
+                    .itemAnnotations(this.serverUUID, feature.id)
+                    .then((value) => {
+                      let participated = value.filter((v) => {
+                        return (
+                          v.creator.name === this.userInformation.name &&
+                          v.creator.email === this.userInformation.email
+                        )
+                      }).length > 0
+                      if (
+                        (this.participationType === 'Participated' && participated) ||
+                        (this.participationType === 'Not participated' && !participated)
+                      ) {
+                        this.mapImp.addAnnotationFeature(feature)
+                      }
+                    })
+                    .catch((reason) => {
+                      console.log(reason) // Error!
+                    })
+                } else this.mapImp.addAnnotationFeature(feature)
+              }
+            })
+            .catch((reason) => {
+              console.log(reason) // Error!
+            })
+        }
       }
     },
     showAnnotator: function (flag) {
@@ -977,16 +1022,19 @@ export default {
     setDrawingType: function (flag) {
       this.drawingType = flag
       if (this.mapImp) {
-        this.clearAnnotationFeature()
-        if (flag !== 'None') {
-          this.addAnnotationFeature(this.drawingType)
-        }
+        this.addAnnotationFeature()
+      }
+    },
+    setParticipationType: function (flag) {
+      this.participationType = flag
+      if (this.mapImp) {
+        this.addAnnotationFeature()
       }
     },
     setDimension: function (flag) {
       this.dimensionRadio = flag
       if (this.mapImp) {
-        this.mapImp.enable3dPaths(!flag)
+        this.mapImp.enable3dPaths(flag)
       }
     },
     viewLatestMap: function () {
@@ -1871,7 +1919,7 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      dimensionRadio: true,
+      dimensionRadio: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
@@ -1883,9 +1931,12 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       drawingType: 'All',
       drawingTypes: ['All', 'Point', 'LineString', 'Polygon', 'None'],
+      participationType: 'All',
+      participationTypes: ['All', 'Participated', 'Not participated'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
+      userInformation: undefined,
       activeDrawTool: undefined,
       drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       createdEvent: undefined,
@@ -1926,9 +1977,10 @@ export default {
         this.showAnnotator(true)
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
+            this.userInformation = userData
             this.setFeatureAnnotated()
             if (!this.drawnAnnotationFeatures) {
-              this.addAnnotationFeature(this.drawingType)
+              this.addAnnotationFeature()
             }
           }
         })
