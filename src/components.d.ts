@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
+    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
@@ -23,6 +24,7 @@ declare module 'vue' {
     ElIconClose: typeof import('@element-plus/icons-vue')['Close']
     ElIconDelete: typeof import('@element-plus/icons-vue')['Delete']
     ElIconEdit: typeof import('@element-plus/icons-vue')['Edit']
+    ElIconFinished: typeof import('@element-plus/icons-vue')['Finished']
     ElIconWarning: typeof import('@element-plus/icons-vue')['Warning']
     ElIconWarningFilled: typeof import('@element-plus/icons-vue')['WarningFilled']
     ElInput: typeof import('element-plus/es')['ElInput']
@@ -33,6 +35,7 @@ declare module 'vue' {
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
+    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTree: typeof import('element-plus/es')['ElTree']
     ExternalResourceCard: typeof import('./components/ExternalResourceCard.vue')['default']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
