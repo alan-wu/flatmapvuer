@@ -141,13 +141,12 @@
         v-show="!disableUI">
         <el-popover
           content="Relevance"
-          placement="left"
+          placement="top"
           :teleported="false"
           trigger="manual"
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[10].value"
-          v-if="isRelevance && !inDrawing"
         >
           <template #reference>
             <map-svg-icon
@@ -156,12 +155,13 @@
               @click="showRelevanceDialog(true)"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
+              v-show="isRelevance && !inDrawing"
             />
           </template>
         </el-popover>
         <el-popover
           content="Draw Point"
-          placement="left"
+          placement="top"
           :teleported="false"
           trigger="manual"
           width="80"
@@ -181,7 +181,7 @@
         </el-popover>
         <el-popover
           content="Draw Line"
-          placement="left"
+          placement="top"
           :teleported="false"
           trigger="manual"
           width="80"
@@ -201,7 +201,7 @@
         </el-popover>
         <el-popover
           content="Draw Polygon"
-          placement="left"
+          placement="top"
           :teleported="false"
           trigger="manual"
           width="80"
@@ -220,8 +220,8 @@
           </template>
         </el-popover>
         <el-popover
-          content="Draw Trash"
-          placement="left"
+          content="Delete"
+          placement="top"
           :teleported="false"
           trigger="manual"
           width="80"
@@ -235,6 +235,27 @@
               @click="drawnEvent('trash')"
               @mouseover="showToolitip(14)"
               @mouseout="hideToolitip(14)"
+              v-show="!doubleClickedFeature"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Comment"
+          placement="top"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[15].value"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="comment"
+              class="icon-button drawTrash"
+              @click="drawnEvent('trash')"
+              @mouseover="showToolitip(15)"
+              @mouseout="hideToolitip(15)"
+              v-show="doubleClickedFeature"
             />
           </template>
         </el-popover>
@@ -1239,11 +1260,13 @@ export default {
         if (eventType === 'annotation') {
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
+            this.doubleClickedFeature = false
             // Rollback drawing when no new annotation submitted
             if (!this.annotationSubmitted) {
               this.rollbackAnnotationEvent()
             }
           } else if (data.type === 'modeChanged') {
+            this.doubleClickedFeature = false
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
               this.closePopup()
@@ -1251,8 +1274,8 @@ export default {
               this.annotationEntry = {}
               this.relevanceEntry = {}
               this.inDrawing = true
-            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              this.showRelevanceDialog(true)
+            } else if (data.feature.mode === 'simple_select') {
+              if (this.inDrawing) this.showRelevanceDialog(true)
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1263,9 +1286,9 @@ export default {
               // NB. this might now be `null` if user has deleted it (before OK/Submit)
               // so maybe then no `service.addAnnotation` ??
               if (data.type === 'updated') {
+                // Better to use geometry change to indicate position changed
                 if (this.doubleClickedFeature) data.positionUpdated = false
                 else data.positionUpdated = true
-                this.doubleClickedFeature = false
               }
             }
             const payload = {
@@ -1894,6 +1917,7 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
+        { value: false },
         { value: false },
         { value: false },
         { value: false },

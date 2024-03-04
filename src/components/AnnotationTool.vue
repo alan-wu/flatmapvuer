@@ -59,16 +59,20 @@
         <template v-if="authenticated">
           <template v-if="isEditable">
             <el-row class="dialog-spacer"></el-row>
-            <el-row v-if="isDeleted">
-              <el-icon class="standard-icon">
-                <el-icon-delete @click="submit"/>
-              </el-icon>
-            </el-row>
-            <el-row v-else-if="!editing">
+            <el-row v-if="!editing">
               <el-icon class="standard-icon">
                 <el-icon-edit @click="editing = true" />
               </el-icon>
-              <el-icon class="standard-icon">
+              <el-icon
+                class="standard-icon"
+                v-if="isDeleted"
+              >
+                <el-icon-delete @click="submit"/>
+              </el-icon>
+              <el-icon
+                class="standard-icon"
+                v-else-if="isPositionUpdated"
+              >
                 <el-icon-finished @click="submit" />
               </el-icon>
             </el-row>
@@ -76,48 +80,50 @@
               <el-row class="dialog-text">
                 <strong class="sub-title">Suggest changes:</strong>
               </el-row>
-              <el-row class="dialog-text">
-                <strong>Evidvence:</strong>
-              </el-row>
-              <el-row v-for="(value, index) in evidence" :key="value">
-                <el-col :span="20">
-                  {{ evidence[index] }}
-                </el-col>
-                <el-col :span="4">
-                  <el-icon class="standard-icon">
-                    <el-icon-close @click="removeEvidence(index)" />
-                  </el-icon>
-                </el-col>
-              </el-row>
-              <el-row>
-                <el-input
-                  size="small"
-                  placeholder="Enter"
-                  v-model="newEvidence"
-                  @change="evidenceEntered($event)"
-                >
-                  <template #prepend>
-                    <el-select
-                      :teleported="false"
-                      v-model="evidencePrefix"
-                      placeholder="Select"
-                      class="select-box"
-                      popper-class="flatmap_dropdown"
-                    >
-                      <el-option
-                        v-for="item in evidencePrefixes"
-                        :key="item"
-                        :label="item"
-                        :value="item"
+              <template v-if="!isDeleted">
+                <el-row class="dialog-text">
+                  <strong>Evidvence:</strong>
+                </el-row>
+                <el-row v-for="(value, index) in evidence" :key="value">
+                  <el-col :span="20">
+                    {{ evidence[index] }}
+                  </el-col>
+                  <el-col :span="4">
+                    <el-icon class="standard-icon">
+                      <el-icon-close @click="removeEvidence(index)" />
+                    </el-icon>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-input
+                    size="small"
+                    placeholder="Enter"
+                    v-model="newEvidence"
+                    @change="evidenceEntered($event)"
+                  >
+                    <template #prepend>
+                      <el-select
+                        :teleported="false"
+                        v-model="evidencePrefix"
+                        placeholder="Select"
+                        class="select-box"
+                        popper-class="flatmap_dropdown"
                       >
-                        <el-row>
-                          <el-col :span="12">{{ item }}</el-col>
-                        </el-row>
-                      </el-option>
-                    </el-select>
-                  </template>
-                </el-input>
-              </el-row>
+                        <el-option
+                          v-for="item in evidencePrefixes"
+                          :key="item"
+                          :label="item"
+                          :value="item"
+                        >
+                          <el-row>
+                            <el-col :span="12">{{ item }}</el-col>
+                          </el-row>
+                        </el-option>
+                      </el-select>
+                    </template>
+                  </el-input>
+                </el-row>
+              </template>
               <el-row>
                 <strong>Comment:</strong>
               </el-row>
@@ -212,10 +218,16 @@ export default {
         this.annotationEntry['featureId']
       )
     },
+    isPositionUpdated: function () {
+      return (
+        this.annotationEntry['resourceId'] &&
+        this.annotationEntry['type'] === 'updated' &&
+        this.annotationEntry['positionUpdated']
+      )
+    },
     isDeleted: function () {
       return (
         this.annotationEntry['resourceId'] &&
-        this.annotationEntry['feature'] &&
         this.annotationEntry['type'] === 'deleted'
       )
     }
@@ -259,6 +271,8 @@ export default {
       }
     },
     submit: function () {
+      // User can either update/delete annotation directly 
+      // or provide extra comments for update/delete action
       if (
         this.annotationEntry['type'] === 'updated' &&
         this.annotationEntry['positionUpdated']
@@ -267,7 +281,9 @@ export default {
           `Position Updated: ${this.comment}` :
           'Position Updated'
       } else if (this.annotationEntry['type'] === 'deleted') {
-        this.comment = 'Feature Deleted'
+        this.comment = this.comment ?
+          `Feature Deleted: ${this.comment}` :
+          'Feature Deleted'
       }
 
       if (this.evidence.length > 0 || this.comment) {
