@@ -68,6 +68,9 @@
               <el-icon class="standard-icon">
                 <el-icon-edit @click="editing = true" />
               </el-icon>
+              <el-icon class="standard-icon">
+                <el-icon-finished @click="submit" />
+              </el-icon>
             </el-row>
             <template v-else>
               <el-row class="dialog-text">
@@ -149,6 +152,7 @@ import {
   Edit as ElIconEdit,
   Close as ElIconClose,
   Delete as ElIconDelete,
+  Finished as ElIconFinished,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import {
@@ -256,10 +260,17 @@ export default {
     },
     submit: function () {
       if (
-        this.evidence.length > 0 ||
-        this.comment ||
-        this.annotationEntry['type'] === 'deleted'
+        this.annotationEntry['type'] === 'updated' &&
+        this.annotationEntry['positionUpdated']
       ) {
+        this.comment = this.comment ?
+          `Position Updated: ${this.comment}` :
+          'Position Updated'
+      } else if (this.annotationEntry['type'] === 'deleted') {
+        this.comment = 'Feature Deleted'
+      }
+
+      if (this.evidence.length > 0 || this.comment) {
         if (
           this.annotationEntry['resourceId'] &&
           this.annotationEntry['featureId']

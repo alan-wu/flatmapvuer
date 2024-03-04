@@ -1262,6 +1262,11 @@ export default {
               data.feature = feature
               // NB. this might now be `null` if user has deleted it (before OK/Submit)
               // so maybe then no `service.addAnnotation` ??
+              if (data.type === 'updated') {
+                if (this.doubleClickedFeature) data.positionUpdated = false
+                else data.positionUpdated = true
+                this.doubleClickedFeature = false
+              }
             }
             const payload = {
               feature: data,
@@ -1345,11 +1350,6 @@ export default {
           this.annotationEntry = {
             ...data.feature,
             resourceId: this.serverUUID,
-          }
-          // Trigger 'updated' event if double clicked on drawn area ('direct-select')
-          if (this.doubleClickedFeature) {
-            this.doubleClickedFeature = false
-            this.drawnEvent('trash')
           }
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
