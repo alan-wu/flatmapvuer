@@ -1536,85 +1536,91 @@ export default {
   },
   props: {
     /**
-     * Description of entry
+     * The taxon identifier of the species represented by the map.
      */
-    entry: String,
+    entry: {
+      type: String,
+      required: true,
+    },
     /**
-     * Description of uuid
+     * The unique ``uuid`` of the flatmap.
+     * If given then this exact map will be loaded,
+     * overriding ``taxon`` and ``biologicalSex``.
      */
     uuid: String,
     /**
-     * Descreiption of biological sex
+     * The biological sex of the species represented by the map.
+     * This is specified as metadata in the map's source file.
      */
     biologicalSex: {
       type: String,
       default: '',
     },
     /**
-     * Description of feature info
+     * TODO: to provide description of feature info
      */
     featureInfo: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of min zoom
+     * The minimum zoom level of the map.
      */
     minZoom: {
       type: Number,
       default: 4,
     },
     /**
-     * Description of path controls
+     * The option to show/hide the pathway container drawer at the bottom-left side of the map.
      */
     pathControls: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of searchable
+     * TODO: to provide description of searchable
      */
     searchable: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of layer control
+     * TODO: to provide description of layer control
      */
     layerControl: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of tooltips
+     * TODO: to provide description of tooltips
      */
     tooltips: {
       type: Boolean,
       default: true,
     },
     /**
-     * Description of help mode
+     * The option to show tooltips for help mode.
      */
     helpMode: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of render at mounted
+     * The option to create map on component mounted.
      */
     renderAtMounted: {
       type: Boolean,
       default: true,
     },
     /**
-     * Description of display minimap
+     * The option to display minimap at the top-right corner of the map.
      */
     displayMinimap: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of display warning
+     * The option to show warning. Example for legacy or beta maps.
      */
     displayWarning: {
       type: Boolean,
@@ -1629,7 +1635,8 @@ export default {
       default: false,
     },
     /**
-     * Description of open map options
+     * The data to show different map options.
+     * Available at the bottom-left corner ("Open new map" tooltip).
      */
     openMapOptions: {
       type: Array,
@@ -1651,21 +1658,22 @@ export default {
       },
     },
     /**
-     * Description of show star in legend
+     * The option to show star in legend area.
      */
     showStarInLegend: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of is legacy
+     * Flag to determine whether this is legacy map or not.
+     * ``displayWarning`` should be shown for legacy map.
      */
     isLegacy: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of display latest changes
+     * The option to show the latest changes.
      */
     displayLatestChanges: {
       type: Boolean,
@@ -1686,7 +1694,7 @@ export default {
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     /**
-     * Description of SPARC API
+     * Specify the endpoint of the SPARC API.
      */
     sparcAPI: {
       type: String,

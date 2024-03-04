@@ -6,10 +6,8 @@
   <div class="demo-map-container-inner">
     <ClientOnly>
       <FlatmapVuer
-        entry="NCBITaxon:9606"
-        v-on:resource-selected="FlatmapSelected"
-        v-on:ready="FlatmapReady"
-        pathControls="true"
+        entry="NCBITaxon:10114"
+        :pathControls="pathControls"
       />
     </ClientOnly>
   </div>
@@ -28,7 +26,7 @@ const FlatmapVuer = defineClientComponent(() => {
 export default {
   data: function() {
     return {
-      entry: ''
+      pathControls: true,
     };
   }
 }
@@ -39,10 +37,8 @@ export default {
 ```js-vue
   <div class="your-outer-container">
     <FlatmapVuer
-      entry="NCBITaxon:9606"
-      v-on:resource-selected="FlatmapSelected"
-      v-on:ready="FlatmapReady"
-      pathControls="true"
+      entry="NCBITaxon:10114"
+      :pathControls="pathControls"
     />
   </div>
 
@@ -54,7 +50,7 @@ export default {
       components: { FlatmapVuer },
       data: function () {
         return {
-          entry: '',
+          pathControls: true,
         }
       }
     }
