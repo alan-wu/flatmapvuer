@@ -6,10 +6,8 @@
   <div class="demo-map-container-inner">
     <ClientOnly>
       <FlatmapVuer
-        entry="NCBITaxon:9606"
-        v-on:resource-selected="FlatmapSelected"
-        v-on:ready="FlatmapReady"
-        pathControls="true"
+        entry="NCBITaxon:10114"
+        :pathControls="pathControls"
       />
     </ClientOnly>
   </div>
@@ -17,6 +15,7 @@
 
 <script setup>
 import { defineClientComponent } from 'vitepress'
+import './demo-styles.css'
 
 const FlatmapVuer = defineClientComponent(() => {
   return import('../src/components/FlatmapVuer.vue')
@@ -27,53 +26,19 @@ const FlatmapVuer = defineClientComponent(() => {
 export default {
   data: function() {
     return {
-      entry: ''
+      pathControls: true,
     };
   }
 }
 </script>
-
-<style>
-  .demo-map-container {
-    width: 100%;
-    height: 0;
-    padding-bottom: 75%;
-    border: 1px solid var(--vp-c-divider);
-    position: relative;
-    z-index: 1; /* just for demo, to prevent tooltips go out of container */
-  }
-
-  .demo-map-container-inner {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-  }
-
-  .flatmap-container {
-    overflow: hidden;
-  }
-
-  .bottom-right-control {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-  }
-
-  .zoomOut,
-  .fitWindow {
-    padding-left: 0px !important;
-  }
-</style>
 
 ## Code Preview
 
 ```js-vue
   <div class="your-outer-container">
     <FlatmapVuer
-      entry="NCBITaxon:9606"
-      v-on:resource-selected="FlatmapSelected"
-      v-on:ready="FlatmapReady"
-      pathControls="true"
+      entry="NCBITaxon:10114"
+      :pathControls="pathControls"
     />
   </div>
 
@@ -85,7 +50,7 @@ export default {
       components: { FlatmapVuer },
       data: function () {
         return {
-          entry: '',
+          pathControls: true,
         }
       }
     }

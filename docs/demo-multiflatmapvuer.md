@@ -26,6 +26,7 @@
 
 <script setup>
 import { defineClientComponent } from 'vitepress'
+import './demo-styles.css'
 
 const MultiFlatmapVuer = defineClientComponent(() => {
   return import('../src/components/MultiFlatmapVuer.vue')
@@ -80,36 +81,6 @@ export default {
 </script>
 
 <style>
-  .demo-map-container {
-    width: 100%;
-    height: 0;
-    padding-bottom: 75%;
-    border: 1px solid var(--vp-c-divider);
-    position: relative;
-    z-index: 1; /* just for demo, to prevent tooltips go out of container */
-  }
-
-  .demo-map-container-inner {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-  }
-
-  .flatmap-container {
-    overflow: hidden;
-  }
-
-  .bottom-right-control {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-  }
-
-  .zoomOut,
-  .fitWindow {
-    padding-left: 0px !important;
-  }
-
   /* reset dropdown style to multiflatmapvuer's style */
   ul.el-scrollbar__view.el-select-dropdown__list {
     list-style: none;
