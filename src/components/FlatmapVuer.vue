@@ -1628,6 +1628,22 @@ export default {
      */
     openMapOptions: {
       type: Array,
+      /**
+       * ```[
+          {
+            display: 'Open AC Map',
+            key: 'AC',
+          },
+          {
+            display: 'Open FC Map',
+            key: 'FC',
+          },
+          {
+            display: 'Open 3D Human Map',
+            key: '3D',
+          },
+        ]```
+       */
       default: function () {
         return [
           {
