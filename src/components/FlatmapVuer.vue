@@ -350,7 +350,14 @@
         virtual-triggering
       >
         <el-row v-for="item in openMapOptions" :key="item.key">
-          <el-button type="primary" plain @click="$emit('open-map', item.key)">
+          <el-button type="primary" plain
+            @click="/**
+             * This event is emitted when user choose different map option
+             * from ``openMapOptions`` props.
+             * @arg mapOption.key
+            * */
+            $emit('open-map', item.key)"
+          >
             {{ item.display }}
           </el-button>
         </el-row>
@@ -974,12 +981,16 @@ export default {
             this.checkAndCreatePopups(payload)
           }
           /**
-           * Description of resource-selected event
+           * The event emitted in ``callback`` function from ``MapManager.loadMap()``
+           * if ``eventType`` is not ``pan-zoom``.
+           * @arg payload
            */
           this.$emit('resource-selected', payload)
         } else {
           /**
-           * Description of pan-zoom-callback event
+           * The event emitted in ``callback`` function from ``MapManager.loadMap()``
+           * if ``eventType`` is ``pan-zoom``.
+           * @arg data
            */
           this.$emit('pan-zoom-callback', data)
         }
@@ -1433,7 +1444,8 @@ export default {
       this.drawerOpen = true
       this.mapResize()
       /**
-       * Description of ready event
+       * This is ``onFlatmapReady`` event.
+       * @arg ``this`` (Component Vue Instance)
        */
       this.$emit('ready', this)
     },
