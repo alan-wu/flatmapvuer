@@ -155,7 +155,7 @@
               @click="showRelevanceDialog(true)"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
-              v-show="isRelevance && !inDrawing"
+              v-show="hasRelevance && !inDrawing"
             />
           </template>
         </el-popover>
@@ -695,7 +695,7 @@
             </el-button>
           </el-col>
         </el-row>
-        <el-row v-if="isRelevance">
+        <el-row v-if="hasRelevance">
           <el-col :span="20">
             <b><span>Related Features</span></b>
           </el-col>
@@ -877,7 +877,7 @@ export default {
       // Used when check exist drawn annotation relevance
       if (
         this.createdEvent ||
-        (this.currentDrawn && Object.keys(this.relevanceEntry).length > 0)
+        (this.currentDrawnFeature && Object.keys(this.relevanceEntry).length > 0)
       ) {
         this.relevanceDisplay = show
         this.closePopup()
@@ -1950,7 +1950,7 @@ export default {
       minimapResizeShow: false,
       minimapSmall: false,
       currentActive: '',
-      currentDrawn: undefined, // Clicked drawn annotation
+      currentDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
@@ -1974,7 +1974,7 @@ export default {
     }
   },
   computed: {
-    isRelevance: function () {
+    hasRelevance: function () {
       return Object.keys(this.relevanceEntry).length > 0
     }
   },
