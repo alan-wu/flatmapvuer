@@ -6,6 +6,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 export default defineConfig({
   title: "FlatmapVuer Docs",
   description: "API documentation for FlatmapVuer",
+  base: '/flatmapvuer/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
