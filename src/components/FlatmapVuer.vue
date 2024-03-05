@@ -232,10 +232,9 @@
             <map-svg-icon
               icon="drawTrash"
               class="icon-button drawTrash"
-              @click="drawnEvent('trash')"
+              @click="drawnEvent('delete')"
               @mouseover="showToolitip(14)"
               @mouseout="hideToolitip(14)"
-              v-show="!doubleClickedFeature"
             />
           </template>
         </el-popover>
@@ -252,10 +251,9 @@
             <map-svg-icon
               icon="comment"
               class="icon-button drawTrash"
-              @click="drawnEvent('trash')"
+              @click="drawnEvent('edit')"
               @mouseover="showToolitip(15)"
               @mouseout="hideToolitip(15)"
-              v-show="doubleClickedFeature"
             />
           </template>
         </el-popover>
@@ -930,11 +928,31 @@ export default {
       } else if (type === 'polygon') {
         document.querySelector('.mapbox-gl-draw_polygon').click()
         this.activeDrawTool = 'Polygon'
-      } else  if (type === 'trash') {
-        document.querySelector('.mapbox-gl-draw_trash').click()
-        this.activeDrawTool = undefined
+      } else {
+        let payload = {}
+        if (this.annotationEntry && this.annotationEntry.id) {
+          if (type === 'delete') {
+            payload = {
+              mode: 'simple_select',
+              options: { featureIds: [this.annotationEntry.id] }
+            }
+            this.activeDrawTool = undefined
+          } else if (type === 'edit') {
+            payload = {
+              mode: 'direct_select',
+              options: { featureId: this.annotationEntry.id }
+            }
+            this.activeDrawTool = undefined
+          }
+          this.changeAnnotationDrawMode(payload)
+        }
       }
       this.setActiveDrawTool()
+    },
+    changeAnnotationDrawMode: function (mode) {
+      if (this.mapImp) {
+        this.mapImp.changeAnnotationDrawMode(mode)
+      }
     },
     // Remove all drawn annotations from annotation layer
     clearAnnotationFeature: function () {
