@@ -1,0 +1,46 @@
+.content-container .vp-doc {
+  & table {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  & table tr {
+    th:first-child,
+    td:first-child {
+      width: 15%;
+    }
+
+    /* Description column */
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 50%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 10%;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 10%;
+    }
+
+    th:last-child,
+    td:last-child {
+      width: 15%;
+    }
+  }
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: none !important;
+}
+
+/* Hide aside for desktop */
+@media (min-width: 1280px) {
+  .VPDoc .aside {
+    display: none !important;
+  }
+}
