@@ -261,8 +261,8 @@ export default {
     /**
      * @vuese
      * Function to show popup on map.
-     * @arg featureId
-     * @arg node
+     * @arg featureId,
+     * @arg node,
      * @arg options
      */
     showPopup: function (featureId, node, options) {
@@ -272,8 +272,8 @@ export default {
     /**
      * @vuese
      * Function to show marker popup.
-     * @arg featureId
-     * @arg node
+     * @arg featureId,
+     * @arg node,
      * @arg options
      */
     showMarkerPopup: function (featureId, node, options) {
@@ -285,8 +285,8 @@ export default {
      * Function to set species.
      * This function is called on the first load and
      * when user changes the species.
-     * @arg species
-     * @arg state
+     * @arg species,
+     * @arg state,
      * @arg numberOfRetry
      */
     setSpecies: function (species, state, numberOfRetry) {
@@ -333,8 +333,8 @@ export default {
     /**
      * @vuese
      * Create a legacy entry with the provided information
-     * @arg state
-     * @arg taxo
+     * @arg state,
+     * @arg taxo,
      * @arg uuid
      *
      * @private

@@ -1471,7 +1471,7 @@ export default {
      * @vuese
      * Function to display features with annotation matching the provided term,
      * with the option to display the label using displayLabel flag.
-     * @arg term
+     * @arg term,
      * @arg displayLabel
      */
     searchAndShowResult: function (term, displayLabel) {
