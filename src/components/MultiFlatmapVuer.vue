@@ -56,7 +56,13 @@
       @resource-selected="FlatmapSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
-      @open-map="$emit('open-map', $event)"
+      @open-map="
+        /**
+         * This event is emitted when the user chooses a different map option
+         * from ``openMapOptions`` props.
+         * @arg $event
+         */
+        $emit('open-map', $event)"
       :featureInfo="featureInfo"
       :minZoom="minZoom"
       :pathControls="pathControls"
@@ -120,8 +126,8 @@ export default {
   methods: {
     /**
      * @vuese
-     *
-     * Description of initialise method
+     * Function to initialise the component when mounted.
+     * It returns a promise.
      */
     initialise: function () {
       return new Promise((resolve) => {
@@ -199,32 +205,31 @@ export default {
     },
     /**
      * @vuese
-     *
-     * Description of FlatmapSelected method
+     * Function to emit ``resource-selected`` event with provided ``resource``.
      * @arg resource
      */
     FlatmapSelected: function (resource) {
       /**
-       * Description of resource-selected event
+       * This event is emitted by ``FlatmapSelected`` method.
+       * @arg resource
        */
       this.$emit('resource-selected', resource)
     },
     /**
      * @vuese
-     *
-     * Description of FlatmapReady method
+     * Function to emit ``ready`` event after the flatmap is loaded.
      * @arg component
      */
     FlatmapReady: function (component) {
       /**
-       * Description of ready event
+       * This event is emitted by ``FlatmapReady`` method after the flatmap is loaded.
+       * @arg component
        */
       this.$emit('ready', component)
     },
     /**
-     * @vuese
-     *
-     * Description of getCoordinatesOfLastClick method
+     * TODO: This function is not in use.
+     * Function to get the map's coordinates of the last click.
      */
     getCoordinatesOfLastClick: function () {
       const flatmap = this.$refs[this.activeSpecies]
@@ -235,28 +240,27 @@ export default {
     },
     /**
      * @vuese
-     *
-     * Description of getCurrentFlatmap method
+     * Function to get the current active map.
      */
     getCurrentFlatmap: function () {
       return this.$refs[this.activeSpecies][0]
     },
     /**
      * @vuese
-     *
-     * Description of panZoomCallback method
+     * Function to emit ``pan-zoom-callback`` event
+     * from the event emitted in ``callback`` function from ``MapManager.loadMap()``.
      * @arg payload
      */
     panZoomCallback: function (payload) {
       /**
-       * Description of pan-zoom-callback
+       * The event emitted by ``panZoomCallback`` method.
+       * @arg payload
        */
       this.$emit('pan-zoom-callback', payload)
     },
     /**
      * @vuese
-     *
-     * Description of showPopup method
+     * Function to show popup on map.
      * @arg featureId
      * @arg node
      * @arg options
@@ -267,8 +271,7 @@ export default {
     },
     /**
      * @vuese
-     *
-     * Description of showMarkerPopup method
+     * Function to show marker popup.
      * @arg featureId
      * @arg node
      * @arg options
@@ -279,8 +282,9 @@ export default {
     },
     /**
      * @vuese
-     *
-     * Description of setSpecies method
+     * Function to set species.
+     * This function is called on the first load and
+     * when user changes the species.
      * @arg species
      * @arg state
      * @arg numberOfRetry
@@ -290,7 +294,9 @@ export default {
         this.activeSpecies = species
         this.$refs[this.activeSpecies][0].createFlatmap(state)
         /**
-         * Description of flatmapChanged event
+         * This event is emitted by ``setSpecies`` method.
+         * Emitted on first load and when user changes species.
+         * @arg activeSpecies
          */
         this.$emit('flatmapChanged', this.activeSpecies)
       } else if (numberOfRetry) {
@@ -304,7 +310,6 @@ export default {
     },
     /**
      * @vuese
-     *
      * Function to switch to the latest existing map from
      * a legacy map of the same species.
      * @arg state
@@ -327,7 +332,6 @@ export default {
     },
     /**
      * @vuese
-     *
      * Create a legacy entry with the provided information
      * @arg state
      * @arg taxo
@@ -360,7 +364,6 @@ export default {
     },
     /**
      * @vuese
-     *
      * Function used to translate the legacy map state to one that can be used in current
      * flatmap if required. If it is a legacy, an Select entry will be added
      * @arg state
@@ -420,7 +423,6 @@ export default {
     },
     /**
      * @vuese
-     *
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
      *
@@ -437,7 +439,6 @@ export default {
     },
     /**
      * @vuese
-     *
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
      * @arg state
@@ -463,14 +464,14 @@ export default {
       }
     },
     /**
-     * @vuese
-     *
-     * Description of resourceSelected method
+     * TODO: This function is not in use.
+     * Maybe duplicate of ``FlatmapSelected``.
+     * Function to emit ``resource-selected`` event with provided ``resource``.
      * @arg action
      */
     resourceSelected: function (action) {
       /**
-       * Description of resource-selected event
+       * This event is emitted by ``resourceSelected`` method.
        */
       this.$emit('resource-selected', action)
     },

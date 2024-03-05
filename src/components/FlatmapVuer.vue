@@ -352,7 +352,7 @@
         <el-row v-for="item in openMapOptions" :key="item.key">
           <el-button type="primary" plain
             @click="/**
-             * This event is emitted when user choose different map option
+             * This event is emitted when the user chooses a different map option
              * from ``openMapOptions`` props.
              * @arg mapOption.key
             * */
