@@ -2708,6 +2708,9 @@ export default {
   border: 1px solid $app-primary-color;
   display: flex;
   flex-direction: column;
+  position: absolute;
+  left: 100px;
+  bottom: 0px;
 }
 
 :deep(.el-dialog__body, .el-dialog__header) {
