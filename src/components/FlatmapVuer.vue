@@ -1278,13 +1278,11 @@ export default {
         if (eventType === 'annotation') {
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
-            this.doubleClickedFeature = false
             // Rollback drawing when no new annotation submitted
             if (!this.annotationSubmitted) {
               this.rollbackAnnotationEvent()
             }
           } else if (data.type === 'modeChanged') {
-            this.doubleClickedFeature = false
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
               this.closePopup()
@@ -1296,6 +1294,23 @@ export default {
               if (this.inDrawing) this.showRelevanceDialog(true)
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
+            }
+          } else if (data.type === 'selectionChanged') {
+            this.currentDrawnFeature =
+              data.feature.features.length === 0 ?
+                undefined :
+                data.feature.features[0].id
+            // For exist drawn annotation
+            if (!this.inDrawing) {
+              this.allocateRelevance()
+              // trigger 'updated' callback, show tooltip
+              if (this.doubleClickedFeature) {
+                this.changeAnnotationDrawMode({
+                  mode: 'direct_select',
+                  options: { featureId: this.currentDrawnFeature }
+                })
+                this.doubleClickedFeature = false
+              }
             }
           } else {
             if (data.type === 'created' || data.type === 'updated') {
