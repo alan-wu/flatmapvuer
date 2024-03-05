@@ -4,7 +4,7 @@ on:
   # Runs on pushes targeting the `docs` branch.
   # TODO: to change this to `main`
   push:
-    branches: ["docs-preview"]
+    branches: ["docs"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
