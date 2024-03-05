@@ -1302,7 +1302,6 @@ export default {
                 data.feature.features[0].id
             // For exist drawn annotation
             if (!this.inDrawing) {
-              this.allocateRelevance()
               // trigger 'updated' callback, show tooltip
               if (this.doubleClickedFeature) {
                 this.changeAnnotationDrawMode({
@@ -1310,6 +1309,8 @@ export default {
                   options: { featureId: this.currentDrawnFeature }
                 })
                 this.doubleClickedFeature = false
+              } else { // single click
+                this.allocateRelevance()
               }
             }
           } else {
@@ -1385,7 +1386,7 @@ export default {
       }
     },
     allocateRelevance: function (data = undefined) {
-      if (data.feature) {
+      if (data && data.feature) {
         // Only clicked relevance data will be added 
         let relevance = data.feature.models ? data.feature.models : data.feature.featureId
         if (
