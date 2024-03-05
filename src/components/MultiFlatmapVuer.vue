@@ -477,35 +477,35 @@ export default {
   },
   props: {
     /**
-     * Description of show layer
+     * TODO: to provide description of show layer
      */
     showLayer: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     /**
-     * Description of feature info
+     * TODO: to provide description of feature info
      */
     featureInfo: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of path controls
+     * The option to show/hide the pathway container drawer at the bottom-left side of the map.
      */
     pathControls: {
       type: Boolean,
       default: true,
     },
     /**
-     * Description of searchable
+     * TODO: to provide description of searchable
      */
     searchable: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of layer control
+     * TODO: to provide description of layer control
      */
     layerControl: {
       type: Boolean,
@@ -520,35 +520,35 @@ export default {
       default: '',
     },
     /**
-     * Description of min zoom
+     * The minimum zoom level of the map.
      */
     minZoom: {
       type: Number,
       default: 4,
     },
     /**
-     * Description of render at mounted
+     * The option to create map on component mounted.
      */
     renderAtMounted: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of help mode
+     * The option to show tooltips for help mode.
      */
     helpMode: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of display minimap
+     * The option to display minimap at the top-right corner of the map.
      */
     displayMinimap: {
       type: Boolean,
       default: false,
     },
     /**
-     * Description of show star in legend
+     * The option to show star in legend area.
      */
     showStarInLegend: {
       type: Boolean,
@@ -563,13 +563,15 @@ export default {
       default: false,
     },
     /**
-     * Description of open map options
+     * The data to show different map options.
+     * Available at the bottom-left corner ("Open new map" tooltip).
      */
     openMapOptions: {
       type: Array,
     },
     /**
-     * Description of available species
+     * The available species data for different maps.
+     * This data is used for multi flatmaps.
      */
     availableSpecies: {
       type: Object,
@@ -625,7 +627,7 @@ export default {
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     /**
-     * Description of SPARC API
+     * Specify the endpoint of the SPARC API.
      */
     sparcAPI: {
       type: String,
