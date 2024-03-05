@@ -1346,19 +1346,7 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                // Only clicked relevance data will be added 
-                let relevance = data.models ? data.models : data.featureId
-                if (relevance) {
-                  this.currentDrawn = undefined
-                  if (
-                    this.inDrawing &&
-                    // Currently only draw line will show relevance
-                    this.activeDrawTool === 'LineString' &&
-                    !(relevance in this.relevanceEntry)
-                  ) {
-                    this.relevanceEntry[relevance] = payload
-                  }
-                } else this.currentDrawn = data.id
+                this.allocateRelevance(payload)
               }
             } else if (
               eventType === 'mouseenter' &&
@@ -1380,6 +1368,30 @@ export default {
           } else {
             this.$emit('pan-zoom-callback', data)
           }
+        }
+      }
+    },
+    allocateRelevance: function (data = undefined) {
+      if (data.feature) {
+        // Only clicked relevance data will be added 
+        let relevance = data.feature.models ? data.feature.models : data.feature.featureId
+        if (
+          relevance &&
+          this.inDrawing &&
+          // Currently only draw line will show relevance
+          this.activeDrawTool === 'LineString' &&
+          !(relevance in this.relevanceEntry)
+        ) {
+          this.relevanceEntry[relevance] = data
+        }
+      } else {
+        this.relevanceEntry = {}
+        if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
+          let relevance = this.drawnAnnotationFeatures
+            .filter((feature) => {
+              return feature.id === this.currentDrawnFeature
+            })[0].relevance
+          if (relevance) this.relevanceEntry = relevance
         }
       }
     },
@@ -2028,17 +2040,6 @@ export default {
           }
         })
       } else this.showAnnotator(false)
-    },
-    currentDrawn: function (id) {
-      this.relevanceEntry = {}
-      if (id && this.drawnAnnotationFeatures) {
-        let relevance = this.drawnAnnotationFeatures.filter((feature) => {
-          return feature.id === id
-        })[0].relevance
-        if (relevance) {
-          this.relevanceEntry = relevance
-        }
-      }
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
