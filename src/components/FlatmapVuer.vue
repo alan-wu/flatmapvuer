@@ -1290,8 +1290,8 @@ export default {
               this.annotationEntry = {}
               this.relevanceEntry = {}
               this.inDrawing = true
-            } else if (data.feature.mode === 'simple_select') {
-              if (this.inDrawing) this.showRelevanceDialog(true)
+            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
+              this.showRelevanceDialog(true)
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1313,16 +1313,14 @@ export default {
               }
             }
           } else {
+            if (data.type === 'updated' && data.feature.action) {
+              data.positionUpdated = data.feature.action === 'move'
+            }
             if (data.type === 'created' || data.type === 'updated') {
               const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
               data.feature = feature
               // NB. this might now be `null` if user has deleted it (before OK/Submit)
               // so maybe then no `service.addAnnotation` ??
-              if (data.type === 'updated') {
-                // Better to use geometry change to indicate position changed
-                if (this.doubleClickedFeature) data.positionUpdated = false
-                else data.positionUpdated = true
-              }
             }
             const payload = {
               feature: data,
@@ -1331,7 +1329,7 @@ export default {
             }
             // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
             // Hence disable direct popup when 'created' event, dialog will be used instead.
-            if (data.type === 'created') {              
+            if (data.type === 'created') {
               this.createdEvent = payload
             } else {
               this.checkAndCreatePopups(payload)
