@@ -1,8 +1,8 @@
 /**
- * Vuese Dev Docs Watcher
+ * Vuese Generator
  *
- * To watch components changes for Vuese gen
- * so that Vitepress dev will refresh the docs for components
+ * To generate markdown files from Vue components
+ * To watch components changes for Vitepress on Dev Mode
  */
 
 import fs from 'fs'
@@ -11,14 +11,11 @@ import chokidar from 'chokidar'
 import { parser } from '@vuese/parser'
 import { Render } from '@vuese/markdown-render'
 
+const watchMode = process.argv.find((argv) => argv === 'watch')
+
 const componentsDir = 'src/components'
 const components = ['FlatmapVuer.vue', 'MultiFlatmapVuer.vue']
 const outputDir = 'docs/components'
-
-const watcher = chokidar.watch(components, {
-  cwd: componentsDir,
-  ignoreInitial: true,
-})
 
 function generateMarkdown(file) {
   const fileWithPath = `${componentsDir}/${file}`
@@ -48,14 +45,21 @@ function generateMarkdown(file) {
   }
 }
 
-// Run on first load
+// To generate markdown files - one time
 components.forEach((component) => {
   console.log(`Write markdown file for ${component} on first load.`)
   generateMarkdown(component)
 })
 
-// Run on file change
-watcher.on('change', (file) => {
-  console.log(`The component ${file} has changed!`)
-  generateMarkdown(file)
-})
+// To watch component changes and generate markdown files
+if (watchMode) {
+  const watcher = chokidar.watch(components, {
+    cwd: componentsDir,
+    ignoreInitial: true,
+  })
+
+  watcher.on('change', (file) => {
+    console.log(`The component ${file} has changed!`)
+    generateMarkdown(file)
+  })
+}
