@@ -60,6 +60,8 @@
     "@vitejs/plugin-vue": "^4.6.2",
     "@vue/compiler-sfc": "^3.3.13",
     "@vuese/cli": "^2.14.3",
+    "@vuese/markdown-render": "^2.11.3",
+    "@vuese/parser": "^2.10.3",
     "auto-changelog": "^2.4.0",
     "babel-eslint": "^10.1.0",
     "babel-plugin-component": "^1.1.1",
