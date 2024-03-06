@@ -1312,17 +1312,8 @@ export default {
                 undefined :
                 data.feature.features[0]
             // For exist drawn annotation
-            if (!this.inDrawing) {
-              // trigger 'updated' callback, show tooltip
-              if (this.doubleClickedFeature) {
-                this.changeAnnotationDrawMode({
-                  mode: 'direct_select',
-                  options: { featureId: this.currentDrawnFeature }
-                })
-                this.doubleClickedFeature = false
-              } else { // single click
-                this.allocateRelevance()
-              }
+            if (!this.inDrawing && this.currentDrawnFeature) {
+              this.checkAndCreateDrawnFeaturePopups(this.currentDrawnFeature)
             }
           } else {
             if (data.type === 'updated' && data.feature.action) {
@@ -1399,7 +1390,9 @@ export default {
     allocateRelevance: function (data = undefined) {
       if (data && data.feature) {
         // Only clicked relevance data will be added 
-        let relevance = data.feature.models ? data.feature.models : data.feature.featureId
+        let relevance = data.feature.models ?
+          data.feature.models :
+          data.feature.featureId
         if (
           relevance &&
           this.inDrawing &&
@@ -1410,6 +1403,20 @@ export default {
           this.relevanceEntry[relevance] = data
         }
       } else {
+    checkAndCreateDrawnFeaturePopups: function (feature) {
+      // double click fires 'updated' callback
+      if (this.doubleClickedFeature) {
+        if (feature.geometry.type !== 'Point') {
+          // show tooltip and enter edit mode
+          this.changeAnnotationDrawMode({
+            mode: 'direct_select',
+            options: { featureId: feature.id }
+          })
+        }
+        this.activeDrawMode = 'Edit'
+        this.setActiveDrawIcon()
+        this.doubleClickedFeature = false
+      } else { // single click
         this.relevanceEntry = {}
         if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
           let relevance = this.drawnAnnotationFeatures
@@ -1417,6 +1424,21 @@ export default {
               return feature.id === this.currentDrawnFeature
             })[0].relevance
           if (relevance) this.relevanceEntry = relevance
+        this.allocateRelevance()
+        if (this.activeDrawMode) {
+          if (this.activeDrawMode === 'Delete') {
+            this.changeAnnotationDrawMode({
+              mode: 'simple_select',
+              options: { featureIds: [feature.id] }
+            })
+          } else if (this.activeDrawMode === 'Edit') {
+            if (feature.geometry.type !== 'Point') {
+              this.changeAnnotationDrawMode({
+                mode: 'direct_select',
+                options: { featureId: feature.id }
+              })
+            }
+          }
         }
       }
     },
