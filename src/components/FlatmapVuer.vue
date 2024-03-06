@@ -1402,7 +1402,14 @@ export default {
         ) {
           this.relevanceEntry[relevance] = data
         }
-      } else {
+      } else if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
+        let relevance = this.drawnAnnotationFeatures
+          .filter((feature) => {
+            return feature.id === this.currentDrawnFeature.id
+          })[0].relevance
+        if (relevance) this.relevanceEntry = relevance
+      }
+    },
     checkAndCreateDrawnFeaturePopups: function (feature) {
       // double click fires 'updated' callback
       if (this.doubleClickedFeature) {
@@ -1418,12 +1425,6 @@ export default {
         this.doubleClickedFeature = false
       } else { // single click
         this.relevanceEntry = {}
-        if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
-          let relevance = this.drawnAnnotationFeatures
-            .filter((feature) => {
-              return feature.id === this.currentDrawnFeature
-            })[0].relevance
-          if (relevance) this.relevanceEntry = relevance
         this.allocateRelevance()
         if (this.activeDrawMode) {
           if (this.activeDrawMode === 'Delete') {
