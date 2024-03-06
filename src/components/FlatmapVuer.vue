@@ -871,14 +871,13 @@ export default {
     showRelevanceDialog: function (show) {
       // Change back to the initial window size
       // For a better view of the relevance popup
-      this.resetView()
+      if (show) this.resetView()
+      this.closePopup()
       // Used when check exist drawn annotation relevance
-      if (
-        this.createdEvent ||
-        (this.currentDrawnFeature && Object.keys(this.relevanceEntry).length > 0)
-      ) {
+      if (!this.createdEvent && !this.currentDrawnFeature && Object.keys(this.relevanceEntry).length === 0) {
+        this.drawnEvent()
+      } else if (Object.keys(this.relevanceEntry).length > 0) {
         this.relevanceDisplay = show
-        this.closePopup()
       }
     },
     displayRelevanceTooltip: function (value) {
@@ -928,9 +927,13 @@ export default {
         document.querySelector(mclass).classList.add('toolSelected');
       }
     },
-    drawnEvent: function (type) {
+    drawnEvent: function (type = undefined) {
       this.closePopup()
-      if (this.drawingTypes.includes(type)) {
+      if (!type) {
+        this.activeDrawTool = undefined
+        this.activeDrawMode = undefined
+        this.inDrawing = false
+      } else if (this.drawingTypes.includes(type)) {
         if (this.activeDrawMode) {
           document.querySelector('.mapbox-gl-draw_trash').click()
           this.activeDrawMode = undefined
@@ -944,9 +947,6 @@ export default {
         } else if (type === 'Polygon') {
           document.querySelector('.mapbox-gl-draw_polygon').click()
           this.activeDrawTool = this.activeDrawTool === 'Polygon' ? undefined : 'Polygon'
-        }
-        if (!this.activeDrawTool) {
-          document.querySelector('.mapbox-gl-draw_trash').click()
         }
       } else if (this.drawModes.includes(type)) {
         if (this.activeDrawTool) {
@@ -1300,6 +1300,7 @@ export default {
               // Reset data entry for every draw
               this.annotationEntry = {}
               this.relevanceEntry = {}
+              this.currentDrawnFeature = undefined
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               this.showRelevanceDialog(true)
