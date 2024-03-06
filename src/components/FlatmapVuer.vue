@@ -1362,7 +1362,7 @@ export default {
             //annotatable: false,
             //debug: true,
             featureInfo: this.featureInfo,
-            'min-zoom': this.minZoom,
+            minZoom: this.minZoom,
             layerControl: true,
             pathControls: true,
             searchable: this.searchable,
@@ -1546,6 +1546,7 @@ export default {
     },
     /**
      * TODO: to provide description of feature info
+     *
      */
     featureInfo: {
       type: Boolean,
