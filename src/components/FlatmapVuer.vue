@@ -152,7 +152,7 @@
             <map-svg-icon
               icon="connection"
               class="icon-button connection"
-              @click="showRelevanceDialog(true)"
+              @click="displayRelevanceDialog(true)"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
               v-show="hasRelevance && !inDrawing"
@@ -677,7 +677,7 @@
           <span class="dialog-title">Finalise drawing</span>
         </template>
         <template #header v-else>
-          <el-button type="primary" plain @click="showRelevanceDialog(false)">
+          <el-button type="primary" plain @click="displayRelevanceDialog(false)">
             Close
           </el-button>
         </template>
@@ -868,18 +868,6 @@ export default {
     return { annotator }
   },
   methods: {
-    showRelevanceDialog: function (show) {
-      // Change back to the initial window size
-      // For a better view of the relevance popup
-      if (show) this.resetView()
-      this.closePopup()
-      // Used when check exist drawn annotation relevance
-      if (!this.createdEvent && !this.currentDrawnFeature && Object.keys(this.relevanceEntry).length === 0) {
-        this.drawnEvent()
-      } else if (Object.keys(this.relevanceEntry).length > 0) {
-        this.relevanceDisplay = show
-      }
-    },
     displayRelevanceTooltip: function (value) {
       if (this.mapImp) {
         this.checkAndCreatePopups(value)
@@ -895,6 +883,18 @@ export default {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
         this.setActiveDrawIcon(false)
+      }
+    },
+    displayRelevanceDialog: function (show) {
+      // Change back to the initial window size
+      // For a better view of the relevance popup
+      if (show) this.resetView()
+      this.closePopup()
+      // Used when check exist drawn annotation relevance
+      if (!this.createdEvent && !this.currentDrawnFeature && Object.keys(this.relevanceEntry).length === 0) {
+        this.drawnEvent()
+      } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
+        this.relevanceDisplay = show
       }
     },
     setActiveDrawIcon: function (active = true) {
@@ -1308,7 +1308,7 @@ export default {
               this.currentDrawnFeature = undefined
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              this.showRelevanceDialog(true)
+              this.displayRelevanceDialog(true)
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
