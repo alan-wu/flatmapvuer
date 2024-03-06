@@ -1293,6 +1293,11 @@ export default {
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
+          const payload = {
+            feature: data,
+            userData: args,
+            eventType: eventType,
+          }
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
             // Rollback drawing when no new annotation submitted
@@ -1317,24 +1322,18 @@ export default {
               data.feature.features.length === 0 ?
                 undefined :
                 data.feature.features[0]
-            // For exist drawn annotation
-            if (!this.inDrawing && this.currentDrawnFeature) {
-              this.checkAndCreateDrawnFeaturePopups(this.currentDrawnFeature)
-            }
+            payload.feature.feature = this.currentDrawnFeature
+            // For exist drawn annotation features
+            this.checkAndCreateDrawnFeaturePopups(payload)
           } else {
-            if (data.type === 'updated' && data.feature.action) {
-              data.positionUpdated = data.feature.action === 'move'
-            }
             if (data.type === 'created' || data.type === 'updated') {
+              if (data.type === 'updated' && data.feature.action) {
+                data.positionUpdated = data.feature.action === 'move'
+              }
               const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
-              data.feature = feature
+              payload.feature.feature = feature
               // NB. this might now be `null` if user has deleted it (before OK/Submit)
               // so maybe then no `service.addAnnotation` ??
-            }
-            const payload = {
-              feature: data,
-              userData: args,
-              eventType: eventType,
             }
             // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
             // Hence disable direct popup when 'created' event, dialog will be used instead.
