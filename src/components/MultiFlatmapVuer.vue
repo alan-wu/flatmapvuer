@@ -53,7 +53,7 @@
       :openMapOptions="openMapOptions"
       :disableUI="disableUI"
       @view-latest-map="viewLatestMap"
-      @resource-selected="FlatmapSelected"
+      @resource-selected="resourceSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
       @open-map="
@@ -120,7 +120,7 @@ export default {
   mounted: function () {
     this.initialise()
     EventBus.on('onActionClick', (action) => {
-      this.FlatmapSelected(action)
+      this.resourceSelected(action)
     })
   },
   methods: {
@@ -206,14 +206,13 @@ export default {
     /**
      * @vuese
      * Function to emit ``resource-selected`` event with provided ``resource``.
-     * @arg resource
+     * @arg action
      */
-    FlatmapSelected: function (resource) {
+     resourceSelected: function (action) {
       /**
-       * This event is emitted by ``FlatmapSelected`` method.
-       * @arg resource
+       * This event is emitted by ``resourceSelected`` method.
        */
-      this.$emit('resource-selected', resource)
+      this.$emit('resource-selected', action)
     },
     /**
      * @vuese
@@ -462,18 +461,6 @@ export default {
           })
         })
       }
-    },
-    /**
-     * TODO: This function is not in use.
-     * Maybe duplicate of ``FlatmapSelected``.
-     * Function to emit ``resource-selected`` event with provided ``resource``.
-     * @arg action
-     */
-    resourceSelected: function (action) {
-      /**
-       * This event is emitted by ``resourceSelected`` method.
-       */
-      this.$emit('resource-selected', action)
     },
   },
   props: {
