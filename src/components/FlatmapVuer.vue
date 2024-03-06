@@ -1453,10 +1453,17 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            this.annotationSubmitted = false
-            this.annotationEntry.featureId = data.feature.feature.id
-            let featureGeometry = centroid(data.feature.feature.geometry)
-            this.displayTooltip(data.feature.feature.id, featureGeometry)
+            if (this.activeDrawMode) {
+              this.annotationSubmitted = false
+              this.annotationEntry.featureId = data.feature.feature.id
+              let featureGeometry = centroid(data.feature.feature.geometry)
+              this.displayTooltip(data.feature.feature.id, featureGeometry)
+            } else {
+              // Not allowed to update feature if edit mode not on
+              if (data.feature.type === 'updated') {
+                this.rollbackAnnotationEvent()
+              }
+            }
           }
         } else {
           this.annotation = {}
