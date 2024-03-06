@@ -1415,31 +1415,29 @@ export default {
         if (relevance) this.relevanceEntry = relevance
       }
     },
-    checkAndCreateDrawnFeaturePopups: function (feature) {
-      // double click fires 'updated' callback
-      if (this.doubleClickedFeature) {
-        if (feature.geometry.type !== 'Point') {
-          // show tooltip and enter edit mode
-          this.changeAnnotationDrawMode({
-            mode: 'direct_select',
-            options: { featureId: feature.id }
-          })
-          this.trashAnnotationFeature()
-          if (this.activeDrawMode !== 'Edit') {
-            this.activeDrawMode = 'Edit'
-            this.setActiveDrawIcon()
+    checkAndCreateDrawnFeaturePopups: function (data) {
+      if (!this.inDrawing && this.currentDrawnFeature && this.activeDrawMode) {
+        // double click fires 'updated' callback
+        if (this.doubleClickedFeature) {
+          if (data.feature.feature.geometry.type !== 'Point') {
+            // show tooltip and enter edit mode
+            this.changeAnnotationDrawMode({
+              mode: 'direct_select',
+              options: { featureId: data.feature.feature.id }
+            })
+            this.trashAnnotationFeature()
           }
-        }
-        this.doubleClickedFeature = false
-      } else { // single click
-        this.relevanceEntry = {}
-        this.allocateRelevance()
-        if (this.activeDrawMode && this.activeDrawMode === 'Delete') {
-          this.changeAnnotationDrawMode({
-            mode: 'simple_select',
-            options: { featureIds: [feature.id] }
-          })
-          this.trashAnnotationFeature()
+          this.doubleClickedFeature = false
+        } else { // single click
+          this.relevanceEntry = {}
+          this.allocateRelevance()
+          if (this.activeDrawMode && this.activeDrawMode === 'Delete') {
+            this.changeAnnotationDrawMode({
+              mode: 'simple_select',
+              options: { featureIds: [data.feature.feature.id] }
+            })
+            this.trashAnnotationFeature()
+          }
         }
       }
     },
