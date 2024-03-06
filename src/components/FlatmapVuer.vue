@@ -173,7 +173,7 @@
             <map-svg-icon
               icon="drawPoint"
               class="icon-button drawPoint"
-              @click="drawnEvent('point')"
+              @click="drawnEvent('Point')"
               @mouseover="showToolitip(11)"
               @mouseout="hideToolitip(11)"
             />
@@ -193,7 +193,7 @@
             <map-svg-icon
               icon="drawLine"
               class="icon-button drawLineString"
-              @click="drawnEvent('line')"
+              @click="drawnEvent('LineString')"
               @mouseover="showToolitip(12)"
               @mouseout="hideToolitip(12)"
             />
@@ -213,7 +213,7 @@
             <map-svg-icon
               icon="drawPolygon"
               class="icon-button drawPolygon"
-              @click="drawnEvent('polygon')"
+              @click="drawnEvent('Polygon')"
               @mouseover="showToolitip(13)"
               @mouseout="hideToolitip(13)"
             />
@@ -232,7 +232,7 @@
             <map-svg-icon
               icon="drawTrash"
               class="icon-button drawTrash"
-              @click="drawnEvent('delete')"
+              @click="drawnEvent('Delete')"
               @mouseover="showToolitip(14)"
               @mouseout="hideToolitip(14)"
             />
@@ -250,8 +250,8 @@
           <template #reference>
             <map-svg-icon
               icon="comment"
-              class="icon-button drawTrash"
-              @click="drawnEvent('edit')"
+              class="icon-button comment"
+              @click="drawnEvent('Edit')"
               @mouseover="showToolitip(15)"
               @mouseout="hideToolitip(15)"
             />
@@ -895,15 +895,21 @@ export default {
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
-        this.setActiveDrawTool(false)
+        this.setActiveDrawIcon(false)
       }
     },
-    setActiveDrawTool: function (active = true) {
+    setActiveDrawIcon: function (active = true) {
+      let mclass
       if (document.querySelector('.toolSelected')) {
         this.drawingTypes.map((t) => {
           if (t !== 'All' && t !== 'None') {
             document.querySelector(`.draw${t}`).classList.remove('toolSelected');
           }
+        })
+        this.drawModes.map((m) => {
+          if (m === 'Delete') mclass = '.drawTrash'
+          else if (m === 'Edit') mclass = '.comment'
+          document.querySelector(mclass).classList.remove('toolSelected');
         })
       }
       // Either confirmed or cancelled drawing, reset related variables
@@ -916,38 +922,44 @@ export default {
       }
       if (this.activeDrawTool) {
         document.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
+      } else if (this.activeDrawMode) {
+        if (this.activeDrawMode === 'Delete') mclass = '.drawTrash'
+        else if (this.activeDrawMode === 'Edit') mclass = '.comment'
+        document.querySelector(mclass).classList.add('toolSelected');
       }
     },
     drawnEvent: function (type) {
-      if (type === 'point') {
-        document.querySelector('.mapbox-gl-draw_point').click()
-        this.activeDrawTool = 'Point'
-      } else if (type === 'line') {
-        document.querySelector('.mapbox-gl-draw_line').click()
-        this.activeDrawTool = 'LineString'
-      } else if (type === 'polygon') {
-        document.querySelector('.mapbox-gl-draw_polygon').click()
-        this.activeDrawTool = 'Polygon'
-      } else {
-        let payload = {}
-        if (this.annotationEntry && this.annotationEntry.id) {
-          if (type === 'delete') {
-            payload = {
-              mode: 'simple_select',
-              options: { featureIds: [this.annotationEntry.id] }
-            }
-            this.activeDrawTool = undefined
-          } else if (type === 'edit') {
-            payload = {
-              mode: 'direct_select',
-              options: { featureId: this.annotationEntry.id }
-            }
-            this.activeDrawTool = undefined
-          }
-          this.changeAnnotationDrawMode(payload)
+      this.closePopup()
+      if (this.drawingTypes.includes(type)) {
+        if (this.activeDrawMode) {
+          document.querySelector('.mapbox-gl-draw_trash').click()
+          this.activeDrawMode = undefined
+        }
+        if (type === 'Point') {
+          document.querySelector('.mapbox-gl-draw_point').click()
+          this.activeDrawTool = this.activeDrawTool === 'Point' ? undefined : 'Point'
+        } else if (type === 'LineString') {
+          document.querySelector('.mapbox-gl-draw_line').click()
+          this.activeDrawTool = this.activeDrawTool === 'LineString' ? undefined : 'LineString'
+        } else if (type === 'Polygon') {
+          document.querySelector('.mapbox-gl-draw_polygon').click()
+          this.activeDrawTool = this.activeDrawTool === 'Polygon' ? undefined : 'Polygon'
+        }
+        if (!this.activeDrawTool) {
+          document.querySelector('.mapbox-gl-draw_trash').click()
+        }
+      } else if (this.drawModes.includes(type)) {
+        if (this.activeDrawTool) {
+          document.querySelector('.mapbox-gl-draw_trash').click()
+          this.activeDrawTool = undefined
+        }
+        if (type === 'Delete') {
+          this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
+        } else if (type === 'Edit') {
+          this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
         }
       }
-      this.setActiveDrawTool()
+      this.setActiveDrawIcon()
     },
     changeAnnotationDrawMode: function (mode) {
       if (this.mapImp) {
@@ -977,7 +989,7 @@ export default {
             ...this.createdEvent.feature,
             resourceId: this.serverUUID,
           }
-          this.setActiveDrawTool(false)
+          this.setActiveDrawIcon(false)
         }
         this.mapImp.rollbackAnnotationEvent(annotationEvent)
       }
@@ -1285,7 +1297,6 @@ export default {
           } else if (data.type === 'modeChanged') {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
-              this.closePopup()
               // Reset data entry for every draw
               this.annotationEntry = {}
               this.relevanceEntry = {}
@@ -1299,7 +1310,7 @@ export default {
             this.currentDrawnFeature =
               data.feature.features.length === 0 ?
                 undefined :
-                data.feature.features[0].id
+                data.feature.features[0]
             // For exist drawn annotation
             if (!this.inDrawing) {
               // trigger 'updated' callback, show tooltip
@@ -2015,6 +2026,8 @@ export default {
       relevanceEntry: {},
       drawnAnnotationFeatures: undefined, // Store all exist drawn annotations
       doubleClickedFeature: false,
+      activeDrawMode: undefined,
+      drawModes: ['Delete', 'Edit'],
     }
   },
   computed: {
@@ -2323,7 +2336,8 @@ export default {
   }
 }
 
-.drawPoint, .drawLineString, .drawPolygon, .drawTrash, .connection, .zoomIn, .zoomOut, .fitWindow {
+.drawPoint, .drawLineString, .drawPolygon, .drawTrash, 
+.connection, .comment, .zoomIn, .zoomOut, .fitWindow {
   padding-left: 8px;
 }
 
