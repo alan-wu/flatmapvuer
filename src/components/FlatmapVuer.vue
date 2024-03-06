@@ -966,6 +966,11 @@ export default {
         this.mapImp.changeAnnotationDrawMode(mode)
       }
     },
+    trashAnnotationFeature: function () {
+      if (this.mapImp) {
+        this.mapImp.trashAnnotationFeature()
+      }
+    },
     // Remove all drawn annotations from annotation layer
     clearAnnotationFeature: function () {
       if (
@@ -1420,27 +1425,22 @@ export default {
             mode: 'direct_select',
             options: { featureId: feature.id }
           })
+          this.trashAnnotationFeature()
+          if (this.activeDrawMode !== 'Edit') {
+            this.activeDrawMode = 'Edit'
+            this.setActiveDrawIcon()
+          }
         }
-        this.activeDrawMode = 'Edit'
-        this.setActiveDrawIcon()
         this.doubleClickedFeature = false
       } else { // single click
         this.relevanceEntry = {}
         this.allocateRelevance()
-        if (this.activeDrawMode) {
-          if (this.activeDrawMode === 'Delete') {
-            this.changeAnnotationDrawMode({
-              mode: 'simple_select',
-              options: { featureIds: [feature.id] }
-            })
-          } else if (this.activeDrawMode === 'Edit') {
-            if (feature.geometry.type !== 'Point') {
-              this.changeAnnotationDrawMode({
-                mode: 'direct_select',
-                options: { featureId: feature.id }
-              })
-            }
-          }
+        if (this.activeDrawMode && this.activeDrawMode === 'Delete') {
+          this.changeAnnotationDrawMode({
+            mode: 'simple_select',
+            options: { featureIds: [feature.id] }
+          })
+          this.trashAnnotationFeature()
         }
       }
     },
