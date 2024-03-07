@@ -396,8 +396,8 @@
               class="flatmap-radio"
               @change="setColour"
             >
-              <el-radio :label="true">Colour</el-radio>
-              <el-radio :label="false">Greyscale</el-radio>
+              <el-radio :value="true">Colour</el-radio>
+              <el-radio :value="false">Greyscale</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -408,8 +408,8 @@
               class="flatmap-radio"
               @change="setOutlines"
             >
-              <el-radio :label="true">Show</el-radio>
-              <el-radio :label="false">Hide</el-radio>
+              <el-radio :value="true">Show</el-radio>
+              <el-radio :value="false">Hide</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -801,11 +801,18 @@ export default {
         )
       }
     },
+    talkBack: function (message) {
+      console.log('talkBack', message)
+    },
+    testProv: function () {
+      console.log('testProv')
+    },
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
     eventCallback: function () {
       return (eventType, data, ...args) => {
+        console.log('eventCallback', eventType, data, args)
         if (eventType !== 'pan-zoom') {
           const label = data.label
           const resource = [data.models]
@@ -982,9 +989,8 @@ export default {
         this.displayPopup(feature)
       }
     },
-    displayTooltip: function() {
-    console.log("displayTooltip", this.mapImp.modelFeatureIds(this.resourceForTooltip)[0])
-    window.mapImp = this.mapImp
+    displayPopup: function(feature) {
+      console.log("displayPopup", this.mapImp.modelFeatureIds(this.resourceForTooltip)[0])
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,
@@ -1451,7 +1457,15 @@ export default {
       }
     }
   },
+  created: function () {
+
+  },
   mounted: function () {
+    if (window.Cypress){
+      console.log('Cypress detected in FlatmapVuer')
+      window.Cypress.flatmapVuer = this
+    }
+
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait = []
