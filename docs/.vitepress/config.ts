@@ -2,6 +2,9 @@ import { defineConfig } from 'vitepress'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
+// Version number
+const versionNumber = process.env.npm_package_version
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "FlatmapVuer Docs",
@@ -40,6 +43,14 @@ export default defineConfig({
         items: [
           { text: 'FlatmapVuer', link: '/components/FlatmapVuer' },
           { text: 'MultiFlatmapVuer', link: '/components/MultiFlatmapVuer' },
+        ]
+      },
+      {
+        text: 'Version',
+        items: [
+          {
+            text: `${versionNumber}`
+          }
         ]
       }
     ],
