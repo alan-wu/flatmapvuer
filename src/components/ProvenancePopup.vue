@@ -225,15 +225,15 @@ export default {
         return this.originDescriptions.sensory
       }
     },
-    provSpeciesDescription: function () {
-      let text = 'Observed in'
-      this.entry.provenanceTaxonomyLabel.forEach((label) => {
-        text += ` ${label},`
-      })
-      text = text.slice(0, -1) // remove last comma
-      text += ' species'
-      return text
-    },
+    // provSpeciesDescription: function () {
+    //   let text = 'Observed in'
+    //   this.entry.provenanceTaxonomyLabel.forEach((label) => {
+    //     text += ` ${label},`
+    //   })
+    //   text = text.slice(0, -1) // remove last comma
+    //   text += ' species'
+    //   return text
+    // },
   },
   methods: {
     titleCase: function (title) {

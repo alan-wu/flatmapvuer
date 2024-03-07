@@ -23,8 +23,8 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {},
     specPattern: "cypress/component/*.cy.js",
     devServer: {
-      framework: "vue-cli",
-      bundler: "webpack",
+      framework: "vue",
+      bundler: "vite",
     },
   },
 });

@@ -19,9 +19,14 @@ import './commands'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-import { mount } from 'cypress/vue2'
+import { mount } from 'cypress/vue'
 
-Cypress.Commands.add('mount', mount)
+Cypress.Commands.add('mount', (...args) => {
+  return mount(...args).then(({ wrapper }) => {
+    return cy.wrap(wrapper).as('vue')
+  })
+})
+
 
 // Example use:
 // cy.mount(MyComponent)

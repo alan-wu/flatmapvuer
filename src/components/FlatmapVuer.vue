@@ -1425,16 +1425,20 @@ export default {
     entry: function () {
       if (!this.state) this.createFlatmap()
     },
-    helpMode: function (val) {
-      this.setHelpMode(val)
+    helpMode: function (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.setHelpMode(val)
+      }
     },
     state: {
-      handler: function (state) {
-        if (this.mapManager) {
-          this.setState(state)
-        } else {
-          //this component has not been mounted yet
-          this.setStateRequired = true
+      handler: function (state, oldVal) {
+        if (state !== oldVal) {
+          if (this.mapManager) {
+            this.setState(state)
+          } else {
+            //this component has not been mounted yet
+            this.setStateRequired = true
+          }
         }
       },
       immediate: true,
