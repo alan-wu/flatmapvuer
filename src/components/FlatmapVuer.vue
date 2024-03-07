@@ -368,6 +368,7 @@
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
+            <!-- The select box below is causing the issue -->
             <el-select
               :teleported="false"
               v-model="viewingMode"
@@ -376,8 +377,8 @@
               popper-class="flatmap_dropdown"
             >
               <el-option
-                v-for="item in viewingModes"
-                :key="item"
+                v-for="(item, i) in viewingModes"
+                :key="item + i"
                 :label="item"
                 :value="item"
               >
