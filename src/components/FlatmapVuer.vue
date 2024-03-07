@@ -907,16 +907,21 @@ export default {
         this.setActiveDrawIcon()
       }
     },
-    displayRelevanceDialog: function (show) {
+    displayRelevanceDialog: function (display) {
       // Change back to the initial window size
       // For a better view of the relevance popup
-      if (show) this.resetView()
+      if (display) this.resetView()
       this.closePopup()
       // Used when check exist drawn annotation relevance
-      if (!this.createdEvent && !this.currentDrawnFeature && Object.keys(this.relevanceEntry).length === 0) {
+      if (
+        !this.createdEvent && !this.currentDrawnFeature &&
+        Object.keys(this.relevanceEntry).length === 0
+      ) {
+        // Reset drawn event
         this.drawnEvent()
       } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
-        this.relevanceDisplay = show
+        this.relevanceDisplay = display
+        if (!display && this.activeDrawMode === 'Delete') this.relevanceEntry = {}
       }
     },
     setActiveDrawIcon: function () {
@@ -1420,27 +1425,31 @@ export default {
       }
     },
     checkAndCreateDrawnFeaturePopups: function (data) {
-      if (!this.inDrawing && this.currentDrawnFeature && this.activeDrawMode) {
-        // double click fires 'updated' callback
-        if (this.doubleClickedFeature) {
-          if (data.feature.feature.geometry.type !== 'Point') {
-            // show tooltip and enter edit mode
-            this.changeAnnotationDrawMode({
-              mode: 'direct_select',
-              options: { featureId: data.feature.feature.id }
-            })
-            this.trashAnnotationFeature()
-          }
-          this.doubleClickedFeature = false
-        } else { // single click
-          this.relevanceEntry = {}
+      if (!this.inDrawing ) {
+        this.relevanceEntry = {}
+        if (this.currentDrawnFeature) {          
           this.allocateRelevance()
-          if (this.activeDrawMode && this.activeDrawMode === 'Delete') {
-            this.changeAnnotationDrawMode({
-              mode: 'simple_select',
-              options: { featureIds: [data.feature.feature.id] }
-            })
-            this.trashAnnotationFeature()
+          if (this.activeDrawMode) {          
+            // double click fires 'updated' callback
+            if (this.doubleClickedFeature) {
+              if (data.feature.feature.geometry.type !== 'Point') {
+                // show tooltip and enter edit mode
+                this.changeAnnotationDrawMode({
+                  mode: 'direct_select',
+                  options: { featureId: data.feature.feature.id }
+                })
+                this.trashAnnotationFeature()
+              }
+              this.doubleClickedFeature = false
+            } else { // single click
+              if (this.activeDrawMode === 'Delete') {
+                this.changeAnnotationDrawMode({
+                  mode: 'simple_select',
+                  options: { featureIds: [data.feature.feature.id] }
+                })
+                this.trashAnnotationFeature()
+              }
+            }
           }
         }
       }
@@ -1457,7 +1466,7 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            if (this.activeDrawMode) {
+            if (this.inDrawing || this.activeDrawMode) {
               this.annotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
               let featureGeometry = centroid(data.feature.feature.geometry)
