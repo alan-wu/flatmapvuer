@@ -368,7 +368,6 @@
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
-            <!-- The select box below is causing the issue -->
             <el-select
               :teleported="false"
               v-model="viewingMode"
@@ -801,12 +800,6 @@ export default {
         )
       }
     },
-    talkBack: function (message) {
-      console.log('talkBack', message)
-    },
-    testProv: function () {
-      console.log('testProv')
-    },
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
@@ -990,7 +983,6 @@ export default {
       }
     },
     displayPopup: function(feature) {
-      console.log("displayPopup", this.mapImp.modelFeatureIds(this.resourceForTooltip)[0])
       this.mapImp.showPopup(
         this.mapImp.modelFeatureIds(feature)[0],
         this.$refs.tooltip.$el,

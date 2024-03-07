@@ -30,16 +30,6 @@ export default {
     },
     annotationEntry: {
       type: Object,
-    },
-    provSpeciesDescription: function(){
-      let text = "Observed in"
-      this.entry.provenanceTaxonomyLabel.forEach(label => {
-        text += ` ${label},`
-      });
-      text = text.slice(0,-1) // remove last comma
-      text += " species"
-      console.log('tooltipentry',this.entry)
-      return text
     }
   },
 }
