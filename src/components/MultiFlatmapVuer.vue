@@ -223,17 +223,6 @@ export default {
       this.$emit('ready', component)
     },
     /**
-     * TODO: This function is not in use.
-     * Function to get the map's coordinates of the last click.
-     */
-    getCoordinatesOfLastClick: function () {
-      const flatmap = this.$refs[this.activeSpecies]
-      if (flatmap && flatmap[0]) {
-        return flatmap[0].getCoordinatesOfLastClick()
-      }
-      return undefined
-    },
-    /**
      * @vuese
      * Function to get the current active map.
      */
