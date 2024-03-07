@@ -67,7 +67,6 @@
       @pan-zoom-callback="panZoomcallback"
       @open-map="openMap"
       @ready="FlatmapReady"
-      :layerControl="layerControl"
       :initial="initial"
       :pathControls="pathControls"
       :helpMode="helpMode"
@@ -165,7 +164,6 @@ export default {
     return {
       searchText: '',
       pathControls: true,
-      layerControl: true,
       disableUI: false,
       minZoom: 4,
       availableSpecies: {

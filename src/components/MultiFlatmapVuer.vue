@@ -65,7 +65,6 @@
         $emit('open-map', $event)"
       :minZoom="minZoom"
       :pathControls="pathControls"
-      :layerControl="layerControl"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
@@ -475,13 +474,6 @@ export default {
     pathControls: {
       type: Boolean,
       default: true,
-    },
-    /**
-     * TODO: to provide description of layer control
-     */
-    layerControl: {
-      type: Boolean,
-      default: false,
     },
     /**
      * Initial species for the flatmap.

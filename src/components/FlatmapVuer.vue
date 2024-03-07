@@ -1362,7 +1362,6 @@ export default {
             //annotatable: false,
             //debug: true,
             minZoom: this.minZoom,
-            layerControl: true,
             tooltips: this.tooltips,
             minimap: minimap,
           }
@@ -1552,13 +1551,6 @@ export default {
      * The option to show/hide the pathway container drawer at the bottom-left side of the map.
      */
     pathControls: {
-      type: Boolean,
-      default: false,
-    },
-    /**
-     * TODO: to provide description of layer control
-     */
-    layerControl: {
       type: Boolean,
       default: false,
     },
