@@ -40,7 +40,6 @@
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
-      :showLayer="showLayer"
       v-show="activeSpecies == key"
       :entry="item.taxo"
       :uuid="item.uuid"
@@ -461,13 +460,6 @@ export default {
     },
   },
   props: {
-    /**
-     * TODO: to provide description of show layer
-     */
-    showLayer: {
-      type: Boolean,
-      default: true,
-    },
     /**
      * The option to show/hide the pathway container drawer at the bottom-left side of the map.
      */
