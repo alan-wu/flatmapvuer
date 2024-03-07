@@ -2,7 +2,9 @@
 // import { MapContent } from '../../src/components/index.js';
 
 /* eslint-disable no-alert, no-console */
-import { FlatmapVuer, MultiFlatmapVuer } from '../../src/components/index.js';
+// import { FlatmapVuer, MultiFlatmapVuer } from '../../src/components/index.js';
+
+import CypressComponentWrapper from './CypressComponentWrapper.vue'
 
 describe('MultiFlatmapVuer', () => {
 
@@ -22,21 +24,13 @@ describe('MultiFlatmapVuer', () => {
     const readySpy = cy.spy().as('readySpy')
     cy.get('@props').then((props) => {
       console.log('flatmapAPI', props)
-      cy.mount(MultiFlatmapVuer, {
+      cy.mount(CypressComponentWrapper, {
         propsData: {
-          availableSpecies: props.availableSpecies,
-          minZoom: props.minZoom,
-          ready: readySpy,
-          onchange: readySpy,
-          featureInfo: props.featureInfo,
-          searchable: props.searchable,
-          layerControl: props.layerControl,
-          initial: props.initial,
-          pathControls: props.pathControls,
-          helpMode: props.helpMode,
-          displayMinimap: props.displayMinimap,
-          enableOpenMapUI: props.enableOpenMapUI,
-          flatmapAPI: props.flatmapAPI,
+          component: 'MultiFlatmapVuer',
+          props: props,
+          events: {
+            ready: readySpy
+          }
         }
       }).then((vm) => {
         cy.wrap(vm).as('vm')

@@ -24,6 +24,7 @@
     "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
     "version": "npm run build-bundle;npm run changelog; git add CHANGELOG.md"
   },
+  "type": "module",
   "main": "./dist/flatmapvuer.umd.cjs",
   "module": "./dist/flatmapvuer.js",
   "exports": {
@@ -43,7 +44,7 @@
     "core-js": "^3.22.5",
     "css-element-queries": "^1.2.2",
     "current-script-polyfill": "^1.0.0",
-    "element-plus": "^2.6.0",
+    "element-plus": "2.3.14",
     "file-loader": "^5.0.2",
     "lodash": "^4.17.21",
     "mitt": "^3.0.1",

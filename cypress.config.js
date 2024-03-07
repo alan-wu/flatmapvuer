@@ -1,6 +1,6 @@
-const { defineConfig } = require("cypress");
+import { defineConfig } from "cypress";
 
-module.exports = defineConfig({
+const config = defineConfig({
   "viewportWidth": 1920,
   "viewportHeight": 1080,
   defaultCommandTimeout: 30000,
@@ -28,3 +28,5 @@ module.exports = defineConfig({
     },
   },
 });
+
+export default config;
