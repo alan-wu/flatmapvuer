@@ -880,6 +880,7 @@ export default {
       this.relevanceEntry = {}
       this.activeDrawTool = undefined
       this.createdEvent = undefined
+      this.setActiveDrawIcon()
     },
     cancelDrawnFeature: function () {
       if (this.createdEvent) {
@@ -891,7 +892,6 @@ export default {
         }
         this.rollbackAnnotationEvent()
         this.initialiseDraw()
-        this.setActiveDrawIcon()
       }
     },
     confirmDrawnFeature: function () {
@@ -904,7 +904,6 @@ export default {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
         this.initialiseDraw()
-        this.setActiveDrawIcon()
       }
     },
     displayRelevanceDialog: function (display) {
