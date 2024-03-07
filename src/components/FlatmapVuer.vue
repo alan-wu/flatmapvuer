@@ -973,6 +973,9 @@ export default {
           this.activeDrawTool = undefined
         }
         if (type === 'Delete') {
+          if (this.currentDrawnFeature) {
+            this.trashAnnotationFeature()
+          }
           this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
         } else if (type === 'Edit') {
           this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
@@ -985,11 +988,6 @@ export default {
         this.mapImp.changeAnnotationDrawMode(mode)
       }
     },
-    trashAnnotationFeature: function () {
-      if (this.mapImp) {
-        this.mapImp.trashAnnotationFeature()
-      }
-    },
     // Remove all drawn annotations from annotation layer
     clearAnnotationFeature: function () {
       if (
@@ -998,6 +996,11 @@ export default {
         this.drawnAnnotationFeatures.length > 0
       ) {
         this.mapImp.clearAnnotationFeature()
+      }
+    },
+    trashAnnotationFeature: function () {
+      if (this.mapImp) {
+        this.mapImp.trashAnnotationFeature()
       }
     },
     rollbackAnnotationEvent: function () {
@@ -1317,9 +1320,7 @@ export default {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
               // Reset data entry for every draw
-              this.annotationEntry = {}
               this.relevanceEntry = {}
-              this.currentDrawnFeature = undefined
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               this.displayRelevanceDialog(true)
@@ -1425,11 +1426,11 @@ export default {
       }
     },
     checkAndCreateDrawnFeaturePopups: function (data) {
-      if (!this.inDrawing ) {
+      if (!this.inDrawing) {
         this.relevanceEntry = {}
-        if (this.currentDrawnFeature) {          
+        if (this.currentDrawnFeature) {
           this.allocateRelevance()
-          if (this.activeDrawMode) {          
+          if (this.activeDrawMode) {
             // double click fires 'updated' callback
             if (this.doubleClickedFeature) {
               if (data.feature.feature.geometry.type !== 'Point') {
@@ -1992,7 +1993,7 @@ export default {
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
-      tooltipDisplay: false,
+      tooltipDisplay: true,
       serverUUID: undefined,
       layers: [],
       pathways: [],
