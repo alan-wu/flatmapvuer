@@ -67,7 +67,6 @@
       @pan-zoom-callback="panZoomcallback"
       @open-map="openMap"
       @ready="FlatmapReady"
-      :searchable="searchable"
       :layerControl="layerControl"
       :initial="initial"
       :pathControls="pathControls"
@@ -165,7 +164,6 @@ export default {
   data: function () {
     return {
       searchText: '',
-      searchable: true,
       pathControls: true,
       layerControl: true,
       disableUI: false,

@@ -9,7 +9,6 @@
         ref="multi"
         :availableSpecies="availableSpecies"
         @ready="FlatmapReady"
-        :searchable="searchable"
         :layerControl="layerControl"
         :initial="initial"
         :pathControls="pathControls"
@@ -66,7 +65,6 @@ export default {
           displayWarning: true,
         },
       },
-      searchable: true,
       pathControls: true,
       layerControl: true,
       initial: 'Rat (NPO)',
@@ -139,7 +137,6 @@ export default {
       ref="multi"
       :availableSpecies="availableSpecies"
       @ready="FlatmapReady"
-      :searchable="searchable"
       :layerControl="layerControl"
       :initial="initial"
       :pathControls="pathControls"
@@ -189,7 +186,6 @@ export default {
               displayWarning: true,
             },
           },
-          searchable: true,
           pathControls: true,
           layerControl: true,
           initial: 'Rat (NPO)',

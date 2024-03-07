@@ -65,7 +65,6 @@
         $emit('open-map', $event)"
       :minZoom="minZoom"
       :pathControls="pathControls"
-      :searchable="searchable"
       :layerControl="layerControl"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
@@ -476,13 +475,6 @@ export default {
     pathControls: {
       type: Boolean,
       default: true,
-    },
-    /**
-     * TODO: to provide description of searchable
-     */
-    searchable: {
-      type: Boolean,
-      default: false,
     },
     /**
      * TODO: to provide description of layer control
