@@ -1556,7 +1556,7 @@ export default {
     },
     /**
      * The option to add another feature label _(`FeatureSmallSymbolLayer`)_
-     * when this `tooltips` set to `false`.
+     * when this `tooltips` is set to `false`.
      */
     tooltips: {
       type: Boolean,

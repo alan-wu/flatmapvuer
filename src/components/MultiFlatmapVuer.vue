@@ -97,6 +97,9 @@ const TAXON_UUID = {
   'NCBITaxon:9685': '73060497-46a6-52bf-b975-cac511c127cb',
 }
 
+/**
+ * A vue component to show a flatmap from the list of multiple flatmap data.
+ */
 export default {
   name: 'MultiFlatmapVuer',
   components: {
