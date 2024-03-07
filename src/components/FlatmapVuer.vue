@@ -873,6 +873,14 @@ export default {
         this.checkAndCreatePopups(value)
       }
     },
+    // This should be called when create is confirmed or cancelled
+    initialiseDraw: function () {
+      this.inDrawing = false
+      this.relevanceDisplay = false
+      this.relevanceEntry = {}
+      this.activeDrawTool = undefined
+      this.createdEvent = undefined
+    },
     cancelDrawnFeature: function () {
       if (this.createdEvent) {
         // For 'created' callback
@@ -895,7 +903,8 @@ export default {
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
-        this.setActiveDrawIcon(false)
+        this.initialiseDraw()
+        this.setActiveDrawIcon()
       }
     },
     displayRelevanceDialog: function (show) {
@@ -910,7 +919,7 @@ export default {
         this.relevanceDisplay = show
       }
     },
-    setActiveDrawIcon: function (active = true) {
+    setActiveDrawIcon: function () {
       let mclass
       if (document.querySelector('.toolSelected')) {
         this.drawingTypes.map((t) => {
@@ -923,14 +932,6 @@ export default {
           else if (m === 'Edit') mclass = '.comment'
           document.querySelector(mclass).classList.remove('toolSelected');
         })
-      }
-      // Either confirmed or cancelled drawing, reset related variables
-      if (!active) {
-        this.inDrawing = false
-        this.relevanceDisplay = false
-        this.relevanceEntry = {}
-        this.activeDrawTool = undefined
-        this.createdEvent = undefined
       }
       if (this.activeDrawTool) {
         document.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
