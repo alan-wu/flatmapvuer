@@ -1363,7 +1363,6 @@ export default {
             //debug: true,
             minZoom: this.minZoom,
             layerControl: true,
-            pathControls: true,
             tooltips: this.tooltips,
             minimap: minimap,
           }
