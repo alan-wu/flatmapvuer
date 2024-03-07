@@ -1361,7 +1361,6 @@ export default {
             //fullscreenControl: false,
             //annotatable: false,
             //debug: true,
-            featureInfo: this.featureInfo,
             minZoom: this.minZoom,
             layerControl: true,
             pathControls: true,
@@ -1543,14 +1542,6 @@ export default {
     biologicalSex: {
       type: String,
       default: '',
-    },
-    /**
-     * TODO: to provide description of feature info
-     *
-     */
-    featureInfo: {
-      type: Boolean,
-      default: false,
     },
     /**
      * The minimum zoom level of the map.

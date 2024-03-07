@@ -63,7 +63,6 @@
          * @arg $event
          */
         $emit('open-map', $event)"
-      :featureInfo="featureInfo"
       :minZoom="minZoom"
       :pathControls="pathControls"
       :searchable="searchable"
@@ -470,13 +469,6 @@ export default {
     showLayer: {
       type: Boolean,
       default: true,
-    },
-    /**
-     * TODO: to provide description of feature info
-     */
-    featureInfo: {
-      type: Boolean,
-      default: false,
     },
     /**
      * The option to show/hide the pathway container drawer at the bottom-left side of the map.

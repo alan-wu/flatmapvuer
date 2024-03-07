@@ -9,7 +9,6 @@
         ref="multi"
         :availableSpecies="availableSpecies"
         @ready="FlatmapReady"
-        :featureInfo="featureInfo"
         :searchable="searchable"
         :layerControl="layerControl"
         :initial="initial"
@@ -67,7 +66,6 @@ export default {
           displayWarning: true,
         },
       },
-      featureInfo: true,
       searchable: true,
       pathControls: true,
       layerControl: true,
@@ -141,7 +139,6 @@ export default {
       ref="multi"
       :availableSpecies="availableSpecies"
       @ready="FlatmapReady"
-      :featureInfo="featureInfo"
       :searchable="searchable"
       :layerControl="layerControl"
       :initial="initial"
@@ -192,7 +189,6 @@ export default {
               displayWarning: true,
             },
           },
-          featureInfo: true,
           searchable: true,
           pathControls: true,
           layerControl: true,
