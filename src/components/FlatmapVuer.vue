@@ -688,7 +688,7 @@
             </el-button>
           </el-col>
           <el-col :span="11">
-            <el-button type="primary" plain @click="rollbackAnnotationEvent">
+            <el-button type="primary" plain @click="cancelDrawnFeature">
               Cancel
             </el-button>
           </el-col>
@@ -873,6 +873,19 @@ export default {
         this.checkAndCreatePopups(value)
       }
     },
+    cancelDrawnFeature: function () {
+      if (this.createdEvent) {
+        // For 'created' callback
+        this.closePopup()
+        this.annotationEntry = {
+          ...this.createdEvent.feature,
+          resourceId: this.serverUUID,
+        }
+        this.rollbackAnnotationEvent()
+        this.initialiseDraw()
+        this.setActiveDrawIcon()
+      }
+    },
     confirmDrawnFeature: function () {
       if (this.createdEvent) {
         this.checkAndCreatePopups(this.createdEvent)
@@ -983,20 +996,10 @@ export default {
     },
     rollbackAnnotationEvent: function () {
       if (this.mapImp) {
-        let annotationEvent
         // For 'updated' and 'deleted' callback
         if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
-          annotationEvent = this.annotationEntry
-        } else if (this.createdEvent) {
-          // For 'created' callback
-          this.closePopup()
-          annotationEvent = {
-            ...this.createdEvent.feature,
-            resourceId: this.serverUUID,
-          }
-          this.setActiveDrawIcon(false)
+          this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
         }
-        this.mapImp.rollbackAnnotationEvent(annotationEvent)
       }
     },
     commitAnnotationEvent: function (annotation) {
