@@ -2,7 +2,7 @@
   <div class="selections-container">
     <el-row>
       <el-col :span="12">
-        <div class="checkall-display-text">{{title}}</div>
+        <div class="checkall-display-text">{{ title }}</div>
       </el-col>
       <el-col :span="12">
         <el-checkbox
@@ -11,7 +11,8 @@
           :indeterminate="isIndeterminate"
           v-model="checkAll"
           @change="handleCheckAllChange"
-        >Display all</el-checkbox>
+          >Display all</el-checkbox
+        >
       </el-col>
     </el-row>
     <el-checkbox-group
@@ -21,20 +22,25 @@
       @change="handleCheckedItemsChange"
     >
       <div class="checkbox-group-inner">
-        <el-row v-for="item in selections" :key="item[identifierKey]" :label="item[identifierKey]">
+        <el-row
+          v-for="item in selections"
+          :key="item[identifierKey]"
+          :label="item[identifierKey]"
+        >
           <div class="checkbox-container">
             <el-checkbox
               class="my-checkbox"
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
-              :checked="!('enabled' in item) || (item.enabled === true)">
+              :checked="!('enabled' in item) || item.enabled === true"
+            >
               <el-row class="checkbox-row">
-                <el-col :span="4">
-                <div class="path-visual" :style="getLineStyles(item)"></div>
+                <el-col :span="4" v-if="hasLineStyles(item)">
+                  <div class="path-visual" :style="getLineStyles(item)"></div>
                 </el-col>
                 <el-col :span="20">
                   <div :style="getBackgroundStyles(item)">
-                    {{item[labelKey]}}
+                    {{ item[labelKey] }}
                   </div>
                 </el-col>
               </el-row>
@@ -48,125 +54,120 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
 import {
-  Checkbox,
-  CheckboxGroup,
-  Col,
-  Row
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-
-locale.use(lang);
-Vue.use(Checkbox);
-Vue.use(CheckboxGroup);
-Vue.use(Col);
-Vue.use(Row);
-
+  ElCheckbox as Checkbox,
+  ElCheckboxGroup as CheckboxGroup,
+  ElCol as Col,
+  ElRow as Row,
+} from 'element-plus'
 
 export default {
-  name: "SelectionsGroup",
+  name: 'SelectionsGroup',
+  components: {
+    Checkbox,
+    CheckboxGroup,
+    Col,
+    Row,
+  },
   methods: {
     /**
      * Function to toggle paths to default.
      * Also called when the associated button is pressed.
      */
-    reset: function() {
-      this.checkAll = true;
-      this.checkedItems = [];
-      this.selections.forEach(item => {
+    reset: function () {
+      this.checkAll = true
+      this.checkedItems = []
+      this.selections.forEach((item) => {
         if (!('enabled' in item) || item.enabled === true) {
-          this.checkedItems.push(item[this.identifierKey]);
+          this.checkedItems.push(item[this.identifierKey])
         } else {
-          this.checkAll = false;
+          this.checkAll = false
         }
-      });
+      })
     },
-    visibilityToggle: function(key, value) {
-      this.$emit("changed", {key, value});
+    visibilityToggle: function (key, value) {
+      this.$emit('changed', { key, value })
     },
-    handleCheckedItemsChange: function(value) {
-      let checkedCount = value.length;
-      this.checkAll = checkedCount === this.selections.length;
+    handleCheckedItemsChange: function (value) {
+      let checkedCount = value.length
+      this.checkAll = checkedCount === this.selections.length
     },
-    handleCheckAllChange: function(val) {
-      this.checkedItems = val ? this.selections.map(a => a[this.identifierKey]) : [];
-      this.$emit("checkAll",
-      {
-        keys: this.selections.map(a => a[this.identifierKey]),
-        value: val
-      });
+    handleCheckAllChange: function (val) {
+      this.checkedItems = val
+        ? this.selections.map((a) => a[this.identifierKey])
+        : []
+      this.$emit('checkAll', {
+        keys: this.selections.map((a) => a[this.identifierKey]),
+        value: val,
+      })
     },
-    getBackgroundStyles: function(item) {
-      if ('colour' in item && this.colourStyle === "background") {
-        return { background: item.colour };
+    getBackgroundStyles: function (item) {
+      if ('colour' in item && this.colourStyle === 'background') {
+        return { background: item.colour }
       }
-      return {};
+      return {}
     },
-    getLineStyles: function(item) {
-      if ('colour' in item && this.colourStyle === "line") {
-        if (('dashed' in item) && (item.dashed === true)) {
-          const background = `repeating-linear-gradient(90deg,${item.colour},${item.colour} 6px,transparent 0,transparent 9px)`;
-          return { background };
-        }
-        else {
-          return { background: item.colour };
+    hasLineStyles: function(item) {
+      return 'colour' in item && this.colourStyle === 'line'
+    },
+    getLineStyles: function (item) {
+      if ('colour' in item && this.colourStyle === 'line') {
+        if ('dashed' in item && item.dashed === true) {
+          const background = `repeating-linear-gradient(90deg,${item.colour},${item.colour} 6px,transparent 0,transparent 9px)`
+          return { background }
+        } else {
+          return { background: item.colour }
         }
       }
-      return { display: "None"};
-    }
+      return { display: 'None' }
+    },
   },
   props: {
     colourStyle: {
       type: String,
-      default: "line"   
+      default: 'line',
     },
     identifierKey: {
       type: String,
-      default: "id"
+      default: 'id',
     },
     labelKey: {
       type: String,
-      default: "label"
+      default: 'label',
     },
     title: {
       type: String,
-      default: ""
+      default: '',
     },
     selections: {
       type: Array,
-      default: function() {
-        return [];
+      default: function () {
+        return []
       },
     },
   },
   computed: {
-    isIndeterminate: function() {
-      const count = this.checkedItems.length;
-      if ((count === 0) || this.checkAll){
-        return false;
+    isIndeterminate: function () {
+      const count = this.checkedItems.length
+      if (count === 0 || this.checkAll) {
+        return false
       }
-      return true;
-    }
+      return true
+    },
   },
-  data: function() {
+  data: function () {
     return {
       checkedItems: [],
       checkAll: true,
-    };
+    }
   },
-  mounted: function() {
-    this.reset();
-  }
-};
+  mounted: function () {
+    this.reset()
+  },
+}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/checkbox";
-@import "~element-ui/packages/theme-chalk/src/checkbox-group";
-@import "~element-ui/packages/theme-chalk/src/row";
+<style lang="scss" scoped>
 
 .path-visual {
   margin: 3px 0;
@@ -192,12 +193,14 @@ export default {
 }
 
 .all-checkbox {
+  height:20px;
   float: right;
 }
 
 .checkbox-container {
   display: flex;
   cursor: pointer;
+  width: 100%;
 }
 
 .checkbox-group {
@@ -216,7 +219,7 @@ export default {
   padding: 18px;
 }
 
-::v-deep .el-checkbox__label {
+:deep(.el-checkbox__label) {
   padding-left: 5px;
   color: $app-primary-color;
   font-size: 12px;
@@ -226,7 +229,7 @@ export default {
   width: 100%;
 }
 
-::v-deep .el-checkbox__input {
+:deep(.el-checkbox__input) {
   &.is-indeterminate,
   &.is-checked {
     .el-checkbox__inner {
@@ -236,7 +239,12 @@ export default {
   }
 }
 
-::v-deep .el-checkbox__label {
+:deep(.el-row) {
+  height:20px;
+  margin-bottom: 0;
+}
+
+:deep(.el-checkbox__label) {
   color: $app-primary-color !important;
 }
 
@@ -244,6 +252,4 @@ export default {
   width: 100%;
   top: 2px;
 }
-
 </style>
-
