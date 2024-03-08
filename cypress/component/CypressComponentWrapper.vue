@@ -4,6 +4,7 @@
     :is="component"
     v-bind="props"
     @vue:mounted="componentMounted"
+    @ready="flatmapReady"
   />
 </template>
 
@@ -30,9 +31,14 @@ export default {
   methods: {
     componentMounted() {
       console.log('Component mounted!')
+      window.Cypress.multiFlatmapVuer = this.$refs.component
       if (this.component === 'MultiFlatmapVuer') {
         this.$refs.component.$el.style.position = 'absolute'
       }
+    },
+    flatmapReady() {
+      console.log('Flatmap ready!')
+      window.Cypress.flatmapVuer = this.$refs.component.$refs.Test
     },
   },
 }

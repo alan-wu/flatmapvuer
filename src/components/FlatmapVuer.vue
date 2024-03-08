@@ -1453,10 +1453,6 @@ export default {
 
   },
   mounted: function () {
-    if (window.Cypress){
-      console.log('Cypress detected in FlatmapVuer')
-      window.Cypress.flatmapVuer = this
-    }
 
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)

@@ -112,10 +112,6 @@ export default {
     this._initialised = false
   },
   mounted: function () {
-    if (window.Cypress) {
-      console.log('Cypress detected')
-      window.Cypress.multiFlatmapVuer = this
-    }
     this.initialise()
     EventBus.on('onActionClick', (action) => {
       this.FlatmapSelected(action)
