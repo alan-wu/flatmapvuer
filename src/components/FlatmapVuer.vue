@@ -239,7 +239,7 @@
           </template>
         </el-popover>
         <el-popover
-          content="Comment"
+          content="Edit"
           placement="top"
           :teleported="false"
           trigger="manual"
