@@ -7,7 +7,6 @@
     <ClientOnly>
       <FlatmapVuer
         entry="NCBITaxon:10114"
-        :pathControls="pathControls"
       />
     </ClientOnly>
   </div>
@@ -26,7 +25,7 @@ const FlatmapVuer = defineClientComponent(() => {
 export default {
   data: function() {
     return {
-      pathControls: true,
+
     };
   }
 }
@@ -38,7 +37,6 @@ export default {
   <div class="your-outer-container">
     <FlatmapVuer
       entry="NCBITaxon:10114"
-      :pathControls="pathControls"
     />
   </div>
 
@@ -50,7 +48,7 @@ export default {
       components: { FlatmapVuer },
       data: function () {
         return {
-          pathControls: true,
+
         }
       }
     }

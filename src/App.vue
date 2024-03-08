@@ -68,7 +68,6 @@
       @open-map="openMap"
       @ready="FlatmapReady"
       :initial="initial"
-      :pathControls="pathControls"
       :helpMode="helpMode"
       :displayMinimap="true"
       :enableOpenMapUI="true"
@@ -163,7 +162,6 @@ export default {
   data: function () {
     return {
       searchText: '',
-      pathControls: true,
       disableUI: false,
       minZoom: 4,
       availableSpecies: {

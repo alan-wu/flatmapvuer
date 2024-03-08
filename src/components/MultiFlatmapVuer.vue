@@ -63,7 +63,6 @@
          */
         $emit('open-map', $event)"
       :minZoom="minZoom"
-      :pathControls="pathControls"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
@@ -452,13 +451,6 @@ export default {
     },
   },
   props: {
-    /**
-     * The option to show/hide the pathway container drawer at the bottom-left side of the map.
-     */
-    pathControls: {
-      type: Boolean,
-      default: true,
-    },
     /**
      * Initial species for the flatmap.
      * This value will be ignored if a valid state object is provided.

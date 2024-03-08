@@ -219,7 +219,7 @@
               class="pathway-container"
               :class="{ open: drawerOpen, close: !drawerOpen }"
               :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
-              v-if="pathControls"
+
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
@@ -1546,13 +1546,6 @@ export default {
     minZoom: {
       type: Number,
       default: 4,
-    },
-    /**
-     * The option to show/hide the pathway container drawer at the bottom-left side of the map.
-     */
-    pathControls: {
-      type: Boolean,
-      default: false,
     },
     /**
      * The option to add another feature label _(`FeatureSmallSymbolLayer`)_

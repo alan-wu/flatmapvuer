@@ -10,7 +10,6 @@
         :availableSpecies="availableSpecies"
         @ready="FlatmapReady"
         :initial="initial"
-        :pathControls="pathControls"
         :helpMode="helpMode"
         :displayMinimap="true"
         :enableOpenMapUI="true"
@@ -64,7 +63,6 @@ export default {
           displayWarning: true,
         },
       },
-      pathControls: true,
       initial: 'Rat (NPO)',
       helpMode: false,
       flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
@@ -136,7 +134,6 @@ export default {
       :availableSpecies="availableSpecies"
       @ready="FlatmapReady"
       :initial="initial"
-      :pathControls="pathControls"
       :helpMode="helpMode"
       :displayMinimap="true"
       :enableOpenMapUI="true"
@@ -183,7 +180,6 @@ export default {
               displayWarning: true,
             },
           },
-          pathControls: true,
           initial: 'Rat (NPO)',
           helpMode: false,
           flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
