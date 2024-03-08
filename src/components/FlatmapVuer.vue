@@ -972,7 +972,13 @@ export default {
           this.activeDrawTool = undefined
         }
         if (type === 'Delete') {
-          if (this.currentDrawnFeature) {
+          if (this.currentDrawnFeature && !this.activeDrawMode) {
+            // Force simple_select a feature for delete event
+            this.doubleClickedFeature = false
+            this.changeAnnotationDrawMode({
+              mode: 'simple_select',
+              options: { featureIds: [this.currentDrawnFeature.id] }
+            })
             this.trashAnnotationFeature()
           }
           this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
