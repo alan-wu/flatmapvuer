@@ -36,7 +36,7 @@ describe('MultiFlatmapVuer', () => {
         cy.wrap(vm).as('vm')
         window.vm = vm
         
-      })
+      }).get('@vue').should('exist')
 
     })
 
@@ -59,9 +59,10 @@ describe('MultiFlatmapVuer', () => {
     // *** Commenting this out until we can figure out why it's not working
     // cy.get('@readySpy').should('have.been.calledWith', true)
 
-    // Since ready event is not working, we'll just wait for a bit
-    cy.wait(9000).then(() => {
-      
+    // Check if flatmap emits ready event
+    cy.get('@vue').should(wrapper => {
+      expect(wrapper.emitted('ready')).to.be.ok
+    }).then(() => {
 
       // Create a pop up and ensure it shows
       let mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
@@ -71,11 +72,11 @@ describe('MultiFlatmapVuer', () => {
         // Close the pop up
         cy.get('.maplibregl-popup-close-button').click();
         cy.get('.flatmapvuer-popover').should('not.exist');
-      })
 
       // Check the metadata for path exploration is loading correctly
-      cy.wait(2000).then(() => {
+      }).then(() => {
         let flatmapVuer = window.Cypress.flatmapVuer
+        console.log('flatmapVuer', flatmapVuer)
         let fmEventCallback = flatmapVuer.eventCallback()
         fmEventCallback('click', {
           "id": "ilxtr_neuron-type-keast-4",
@@ -88,13 +89,15 @@ describe('MultiFlatmapVuer', () => {
           "type": "feature",
           "mapUUID": "dbd2fe65-ef1e-5fd1-8614-e26498d00ffb"
         }, [])
+
+        // Check the pop up
         cy.get('.flatmapvuer-popover').should('exist').contains('Sympathetic chain ganglion neuron (kblad)').then(() => {
+          
           // Close the pop up
           cy.get('.maplibregl-popup-close-button').should('exist')
-        })
         
         // Test the search
-        cy.wait(5000).then(() => {
+        }).then(() => {
           flatmapVuer.searchAndShowResult('body proper', 'body proper')
           cy.get('.maplibregl-popup').should('exist').contains('body proper')
         })
