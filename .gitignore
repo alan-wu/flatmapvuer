@@ -4,3 +4,6 @@ node_modules
 cypress/videos/*
 cypress/screenshots/*
 cypress/results/*
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/components
