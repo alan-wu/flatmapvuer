@@ -2803,8 +2803,8 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  left: 100px;
-  bottom: 0px;
+  left: 430px;
+  bottom: 5px;
 }
 
 :deep(.el-dialog__body, .el-dialog__header) {
