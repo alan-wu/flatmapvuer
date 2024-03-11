@@ -982,7 +982,7 @@ export default {
           }
           /**
            * The event emitted from the mouse event callbacks that come from flatmap-viewer. The payload
-           * argument provide an object with information on the featured where the mouse event takes place.
+           * argument provides an object with information on the feature where the mouse event takes place.
            * @arg payload
            */
           this.$emit('resource-selected', payload)
