@@ -981,8 +981,8 @@ export default {
             this.checkAndCreatePopups(payload)
           }
           /**
-           * The event emitted in ``callback`` function from ``MapManager.loadMap()``
-           * if ``eventType`` is not ``pan-zoom``.
+           * The event emitted from the mouse event callbacks that come from flatmap-viewer. The payload
+           * argument provide an object with information on the featured where the mouse event takes place.
            * @arg payload
            */
           this.$emit('resource-selected', payload)
