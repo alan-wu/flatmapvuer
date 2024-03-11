@@ -27,10 +27,10 @@
               :label="key"
               :value="key"
             >
-              <el-row>
-                <el-col :span="8"><i :class="item.iconClass"></i></el-col>
-                <el-col :span="12">{{ key }}</el-col>
-              </el-row>
+              <span class="select-box-icon">
+                <i :class="item.iconClass"></i>
+              </span>
+              {{ key }}
             </el-option>
           </el-select>
         </template>
@@ -566,6 +566,13 @@ export default {
         }
       }
     }
+  }
+
+  .select-box-icon {
+    display: inline-block;
+    width: 24px;
+    margin-right: 5px;
+    text-align: center;
   }
 }
 
