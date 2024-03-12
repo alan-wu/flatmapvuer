@@ -925,24 +925,24 @@ export default {
     },
     setActiveDrawIcon: function () {
       let mclass
-      if (document.querySelector('.toolSelected')) {
+      if (this.$el.querySelector('.toolSelected')) {
         this.drawingTypes.map((t) => {
           if (t !== 'All' && t !== 'None') {
-            document.querySelector(`.draw${t}`).classList.remove('toolSelected');
+            this.$el.querySelector(`.draw${t}`).classList.remove('toolSelected');
           }
         })
         this.drawModes.map((m) => {
           if (m === 'Delete') mclass = '.drawTrash'
           else if (m === 'Edit') mclass = '.comment'
-          document.querySelector(mclass).classList.remove('toolSelected');
+          this.$el.querySelector(mclass).classList.remove('toolSelected');
         })
       }
       if (this.activeDrawTool) {
-        document.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
+        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
       } else if (this.activeDrawMode) {
         if (this.activeDrawMode === 'Delete') mclass = '.drawTrash'
         else if (this.activeDrawMode === 'Edit') mclass = '.comment'
-        document.querySelector(mclass).classList.add('toolSelected');
+        this.$el.querySelector(mclass).classList.add('toolSelected');
       }
     },
     drawnEvent: function (type = undefined) {
@@ -953,22 +953,22 @@ export default {
         this.inDrawing = false
       } else if (this.drawingTypes.includes(type)) {
         if (this.activeDrawMode) {
-          document.querySelector('.mapbox-gl-draw_trash').click()
+          this.$el.querySelector('.mapbox-gl-draw_trash').click()
           this.activeDrawMode = undefined
         }
         if (type === 'Point') {
-          document.querySelector('.mapbox-gl-draw_point').click()
+          this.$el.querySelector('.mapbox-gl-draw_point').click()
           this.activeDrawTool = this.activeDrawTool === 'Point' ? undefined : 'Point'
         } else if (type === 'LineString') {
-          document.querySelector('.mapbox-gl-draw_line').click()
+          this.$el.querySelector('.mapbox-gl-draw_line').click()
           this.activeDrawTool = this.activeDrawTool === 'LineString' ? undefined : 'LineString'
         } else if (type === 'Polygon') {
-          document.querySelector('.mapbox-gl-draw_polygon').click()
+          this.$el.querySelector('.mapbox-gl-draw_polygon').click()
           this.activeDrawTool = this.activeDrawTool === 'Polygon' ? undefined : 'Polygon'
         }
       } else if (this.drawModes.includes(type)) {
         if (this.activeDrawTool) {
-          document.querySelector('.mapbox-gl-draw_trash').click()
+          this.$el.querySelector('.mapbox-gl-draw_trash').click()
           this.activeDrawTool = undefined
         }
         if (type === 'Delete') {
@@ -1094,7 +1094,7 @@ export default {
         // Control the show/hide of the drawn annotations
         this.mapImp.showAnnotator(flag)
         // Hide default toolbar, we will use customised SVG icons instead
-        document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
+        this.$el.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
     setDrawingType: function (flag) {
