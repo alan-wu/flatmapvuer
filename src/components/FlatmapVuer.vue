@@ -2805,7 +2805,7 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  left: 430px;
+  right: 40%;
   bottom: 5px;
 }
 
