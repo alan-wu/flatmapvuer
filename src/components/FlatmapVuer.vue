@@ -1026,6 +1026,8 @@ export default {
         this.annotationSubmitted = true
         if (this.annotationEntry.type === 'deleted') this.closePopup()
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
+        // Use to update 'this.drawnAnnotationFeatures'
+        this.addAnnotationFeature()
       }
     },
     setFeatureAnnotated: function () {
@@ -1043,7 +1045,7 @@ export default {
     },
     addAnnotationFeature: function () {
       if (this.mapImp) {
-        this.clearAnnotationFeature()
+        if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawingType !== 'None') {
           this.annotator.drawnFeatures(this.serverUUID)
             .then((drawnFeatures) => {
@@ -1054,28 +1056,31 @@ export default {
                 })
               }
               this.drawnAnnotationFeatures = drawnFeatures
-              for (const feature of drawnFeatures) {
-                if (this.participationType !== 'All') {
-                  this.annotator
-                    .itemAnnotations(this.serverUUID, feature.id)
-                    .then((value) => {
-                      let participated = value.filter((v) => {
-                        return (
-                          v.creator.name === this.userInformation.name &&
-                          v.creator.email === this.userInformation.email
-                        )
-                      }).length > 0
-                      if (
-                        (this.participationType === 'Participated' && participated) ||
-                        (this.participationType === 'Not participated' && !participated)
-                      ) {
-                        this.mapImp.addAnnotationFeature(feature)
-                      }
-                    })
-                    .catch((reason) => {
-                      console.log(reason) // Error!
-                    })
-                } else this.mapImp.addAnnotationFeature(feature)
+              // No need to call 'addAnnotationFeature' when a new feature created
+              if (!this.annotationSubmitted) {
+                for (const feature of drawnFeatures) {
+                  if (this.participationType !== 'All') {
+                    this.annotator
+                      .itemAnnotations(this.serverUUID, feature.id)
+                      .then((value) => {
+                        let participated = value.filter((v) => {
+                          return (
+                            v.creator.name === this.userInformation.name &&
+                            v.creator.email === this.userInformation.email
+                          )
+                        }).length > 0
+                        if (
+                          (this.participationType === 'Participated' && participated) ||
+                          (this.participationType === 'Not participated' && !participated)
+                        ) {
+                          this.mapImp.addAnnotationFeature(feature)
+                        }
+                      })
+                      .catch((reason) => {
+                        console.log(reason) // Error!
+                      })
+                  } else this.mapImp.addAnnotationFeature(feature)
+                }
               }
             })
             .catch((reason) => {
@@ -1318,9 +1323,8 @@ export default {
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
             // Rollback drawing when no new annotation submitted
-            if (!this.annotationSubmitted) {
-              this.rollbackAnnotationEvent()
-            }
+            if (!this.annotationSubmitted) this.rollbackAnnotationEvent()
+            else this.annotationSubmitted = false
           } else if (data.type === 'modeChanged') {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
@@ -1416,18 +1420,16 @@ export default {
         if (
           relevance &&
           this.inDrawing &&
-          // Currently only draw line will show relevance
+          // only the linestring will have relevance at the current stage
           this.activeDrawTool === 'LineString' &&
           !(relevance in this.relevanceEntry)
         ) {
           this.relevanceEntry[relevance] = data
         }
       } else if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
-        let relevance = this.drawnAnnotationFeatures
-          .filter((feature) => {
-            return feature.id === this.currentDrawnFeature.id
-          })[0].relevance
-        if (relevance) this.relevanceEntry = relevance
+        let feature = this.drawnAnnotationFeatures
+          .filter((feature) => feature.id === this.currentDrawnFeature.id)[0]
+        if (feature && feature.relevance) this.relevanceEntry = feature.relevance
       }
     },
     checkAndCreateDrawnFeaturePopups: function (data) {
