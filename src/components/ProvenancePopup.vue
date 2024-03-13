@@ -15,6 +15,22 @@
     <div class="block" v-else>
       <span class="title">{{ entry.featureId }}</span>
     </div>
+    <div v-if="alert">
+      <span class="attribute-title">Alert</span>
+      <el-popover
+        width="250"
+        trigger="hover"
+        :teleported="false"
+        popper-class="popover-origin-help"
+      >
+        <template #reference>
+          <el-icon class="info"><el-icon-warning /></el-icon>
+        </template>
+        <span style="word-break: keep-all">
+          {{ alert }}
+        </span>
+      </el-popover>
+    </div>
     <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
       <el-icon><el-icon-arrow-up /></el-icon>
@@ -197,6 +213,7 @@ export default {
   },
   data: function () {
     return {
+      alert: "An alert was added to indicate that limited evidence is available for this projection may be needed. The general consensus among anatomists consulted is that there is no parasympathetic innervation of the ovary in humans. However, in rats, Gerendai and colleagues have provided evidence of a parasympathetic innervation of the ovaries using transsynaptic tracing techniques. We added the projections represented in Figure 1 of Gerendai (2002) et al Microscopy Research and Technique Volume 59, Issue 6 p. 474-483 but note that transsynaptic tracing studies can be difficult to interpret and that additional evidence may be needed.",
       controller: undefined,
       activeSpecies: undefined,
       pubmedSearchUrl: '',
