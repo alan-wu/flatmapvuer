@@ -671,6 +671,7 @@
         :lock-scroll="false"
         :close-on-click-modal="false"
         :close-on-press-escape="false"
+        :teleported="false"
         draggable
       >
         <template #header v-if="inDrawing">
@@ -2809,7 +2810,7 @@ export default {
   flex-direction: column;
   position: absolute;
   right: 40%;
-  bottom: 5px;
+  bottom: 40px;
 }
 
 :deep(.el-dialog__body, .el-dialog__header) {
