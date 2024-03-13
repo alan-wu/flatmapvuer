@@ -15,11 +15,11 @@
     <div class="block" v-else>
       <span class="title">{{ entry.featureId }}</span>
     </div>
-    <div v-show="showDetails" class="hide" @click="showDetails = false">
+    <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
       <el-icon><el-icon-arrow-up /></el-icon>
     </div>
-    <div v-show="!showDetails" class="hide" @click="showDetails = true">
+    <div v-show="!showDetails" class="hide" id="show-path-info" @click="showDetails = true">
       Show path information
       <el-icon><el-icon-arrow-down /></el-icon>
     </div>
@@ -46,6 +46,7 @@
           <div
             v-for="(origin, i) in entry.origins"
             class="attribute-content"
+            :origin-item-label="origin"
             :key="origin"
           >
             {{ capitalise(origin) }}
@@ -56,6 +57,7 @@
               entry.originsWithDatasets && entry.originsWithDatasets.length > 0
             "
             class="button"
+            id="open-dendrites-button"
             @click="openDendrites"
           >
             Explore origin data
@@ -69,6 +71,7 @@
           <div
             v-for="(component, i) in entry.components"
             class="attribute-content"
+            :component-item-label="component"
             :key="component"
           >
             {{ capitalise(component) }}
@@ -101,6 +104,7 @@
           <div
             v-for="(destination, i) in entry.destinations"
             class="attribute-content"
+            :destination-item-label="destination"
             :key="destination"
           >
             {{ capitalise(destination) }}

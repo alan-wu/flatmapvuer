@@ -383,8 +383,8 @@
               popper-class="flatmap_dropdown"
             >
               <el-option
-                v-for="item in viewingModes"
-                :key="item"
+                v-for="(item, i) in viewingModes"
+                :key="item + i"
                 :label="item"
                 :value="item"
               >
@@ -402,8 +402,8 @@
               class="flatmap-radio"
               @change="setColour"
             >
-              <el-radio :label="true">Colour</el-radio>
-              <el-radio :label="false">Greyscale</el-radio>
+              <el-radio :value="true">Colour</el-radio>
+              <el-radio :value="false">Greyscale</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -414,8 +414,8 @@
               class="flatmap-radio"
               @change="setOutlines"
             >
-              <el-radio :label="true">Show</el-radio>
-              <el-radio :label="false">Hide</el-radio>
+              <el-radio :value="true">Show</el-radio>
+              <el-radio :value="false">Hide</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -942,6 +942,7 @@ export default {
      */
     eventCallback: function () {
       return (eventType, data, ...args) => {
+        console.log('eventCallback', eventType, data, args)
         if (eventType !== 'pan-zoom') {
           const label = data.label
           const resource = [data.models]
@@ -1752,16 +1753,20 @@ export default {
     entry: function () {
       if (!this.state) this.createFlatmap()
     },
-    helpMode: function (val) {
-      this.setHelpMode(val)
+    helpMode: function (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.setHelpMode(val)
+      }
     },
     state: {
-      handler: function (state) {
-        if (this.mapManager) {
-          this.setState(state)
-        } else {
-          //this component has not been mounted yet
-          this.setStateRequired = true
+      handler: function (state, oldVal) {
+        if (state !== oldVal) {
+          if (this.mapManager) {
+            this.setState(state)
+          } else {
+            //this component has not been mounted yet
+            this.setStateRequired = true
+          }
         }
       },
       immediate: true,
@@ -1773,7 +1778,11 @@ export default {
       }
     }
   },
+  created: function () {
+
+  },
   mounted: function () {
+
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait = []
