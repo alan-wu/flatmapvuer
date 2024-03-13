@@ -37,10 +37,11 @@
             >
               <template #reference>
                 <el-icon class="info"><el-icon-warning /></el-icon>
-                <span style="word-break: keep-all">
-                  <i>Origin</i> {{ originDescription }}
-                </span>
               </template>
+              <span style="word-break: keep-all">
+                <i>Origin</i> {{ originDescription }}
+              </span>
+
             </el-popover>
           </div>
           <div
@@ -95,10 +96,10 @@
             >
               <template #reference>
                 <el-icon class="info"><el-icon-warning /></el-icon>
-                <span style="word-break: keep-all">
-                  <i>Destination</i> is where the axons terminate
-                </span>
               </template>
+              <span style="word-break: keep-all">
+                <i>Destination</i> is where the axons terminate
+              </span>
             </el-popover>
           </div>
           <div
