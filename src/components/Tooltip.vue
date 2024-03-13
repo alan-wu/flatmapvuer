@@ -1,5 +1,5 @@
 <template>
-  <div class="tooltip-container">
+  <div class="tooltip-container" id="tooltip-container">
     <template v-if="annotationDisplay">
       <annotation-tool :annotationEntry="annotationEntry" />
     </template>

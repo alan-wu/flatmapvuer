@@ -22,6 +22,7 @@ describe('MultiFlatmapVuer', () => {
   it('Workflow testing', () => {
 
     const readySpy = cy.spy().as('readySpy')
+    // const resourceSelectedSpy = cy.spy().as('resourceSelectedSpy')
     cy.get('@props').then((props) => {
       console.log('flatmapAPI', props)
       cy.mount(CypressComponentWrapper, {
@@ -35,8 +36,16 @@ describe('MultiFlatmapVuer', () => {
       }).then((vm) => {
         cy.wrap(vm).as('vm')
         window.vm = vm
-        
+
       }).get('@vue').should('exist')
+
+      // Now that we have the vue wrapper, check that the ready event is fired
+      .then(() => {
+        cy.get('@vue').should(wrapper => {
+          expect(wrapper.emitted('ready')).to.be.ok
+          Cypress.multiFlatmapVuerWrapper = wrapper
+        })
+      })
 
     })
 
@@ -90,8 +99,43 @@ describe('MultiFlatmapVuer', () => {
           "mapUUID": "dbd2fe65-ef1e-5fd1-8614-e26498d00ffb"
         }, [])
 
-        // Check the pop up
+        // Check the pop up has the same information as when the test was created
+        cy.get('.subtitle').should('exist').contains('Observed in Rattus norvegicus species')
+        cy.get('[origin-item-label="Twelfth thoracic ganglion"]').should('exist')
+        cy.get('[component-item-label="connective tissue, neck of urinary bladder"]').should('exist')
+        cy.get('[destination-item-label="wall of blood vessel, Arteriole in connective tissue of bladder dome"]').should('exist')
+
+
+
         cy.get('.flatmapvuer-popover').should('exist').contains('Sympathetic chain ganglion neuron (kblad)').then(() => {
+
+          // Set the tooltip to be visible (this is needed as the css hack does not work in testing for some reason)
+          document.querySelector('#tooltip-container').style.display = 'block'
+
+          cy.get('#tooltip-container').invoke('css', 'display').then((display) => {
+            expect(display).to.equal('block')
+          }).then(() => {
+            // Open the 'show more' section
+            cy.get('#show-path-info').should('exist').click()
+
+            // Click on the dendrites button
+            cy.get('#open-dendrites-button').should('exist').click()
+
+            // Check that the resource selected event is emitted
+            cy.get('@vue').should(wrapper => {
+              expect(wrapper.emitted('resource-selected')).to.be.ok
+            })
+
+            // create a single stub we will use
+            cy.window().then(win => {
+              cy.stub(win, 'open').as('Open')
+            })
+            
+            // Click the open pubmed button and check that the window.open call was intercepted
+            cy.get('#open-pubmed-button').should('exist').click()
+            cy.get('@Open').should('have.been.calledOnceWithExactly', 'https://pubmed.ncbi.nlm.nih.gov/?term=1358408%2C9622251%2C9442414%2C7174880', '_blank')            
+
+          })
           
           // Close the pop up
           cy.get('.maplibregl-popup-close-button').should('exist')

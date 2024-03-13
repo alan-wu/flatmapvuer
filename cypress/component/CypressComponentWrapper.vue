@@ -5,6 +5,7 @@
     v-bind="props"
     @vue:mounted="componentMounted"
     @ready="flatmapReady"
+    @resource-selected="resourceSelected"
   />
 </template>
 
@@ -41,6 +42,10 @@ export default {
       window.Cypress.flatmapVuer = this.$refs.component.$refs.Test[0]
       console.log('window.Cypress.flatmapVuer', window.Cypress.flatmapVuer)
       this.$emit('ready', true)
+    },
+    resourceSelected(resource) {
+      console.log('Resource selected!', resource)
+      this.$emit('resource-selected', resource)
     },
   },
 }
