@@ -957,14 +957,17 @@ export default {
           this.activeDrawMode = undefined
         }
         if (type === 'Point') {
+          const point = this.$el.querySelector('.mapbox-gl-draw_point')
           this.$el.querySelector('.mapbox-gl-draw_point').click()
-          this.activeDrawTool = this.activeDrawTool === 'Point' ? undefined : 'Point'
+          this.activeDrawTool = point.classList.contains('active') ? 'Point' : undefined
         } else if (type === 'LineString') {
+          const line = this.$el.querySelector('.mapbox-gl-draw_line')
           this.$el.querySelector('.mapbox-gl-draw_line').click()
-          this.activeDrawTool = this.activeDrawTool === 'LineString' ? undefined : 'LineString'
+          this.activeDrawTool = line.classList.contains('active') ? 'LineString' : undefined
         } else if (type === 'Polygon') {
+          const polygon = this.$el.querySelector('.mapbox-gl-draw_polygon')
           this.$el.querySelector('.mapbox-gl-draw_polygon').click()
-          this.activeDrawTool = this.activeDrawTool === 'Polygon' ? undefined : 'Polygon'
+          this.activeDrawTool = polygon.classList.contains('active') ? 'Polygon' : undefined
         }
       } else if (this.drawModes.includes(type)) {
         if (this.activeDrawTool) {
