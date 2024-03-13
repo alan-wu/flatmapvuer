@@ -1188,7 +1188,9 @@ export default {
     displayTooltip: function (feature) {
       this.tooltipDisplay = true
       if (!this.disableUI) {
-        this.displayPopup(feature)
+        this.$nextTick(() => {
+          this.displayPopup(feature)
+        });
       }
     },
     /**
