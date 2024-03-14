@@ -726,7 +726,7 @@ const draggable = (scopeElement, dragElement) => {
     clickX = e.clientX
     clickY = e.clientY
     dragElement.addEventListener('mousemove', drag, false);
-    dragElement.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', () => {
       dragElement.removeEventListener('mousemove', drag, false);
     }, false);
   }, false);
