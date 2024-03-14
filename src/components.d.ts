@@ -39,6 +39,7 @@ declare module 'vue' {
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
     MultiFlatmapVuer: typeof import('./components/MultiFlatmapVuer.vue')['default']
     ProvenancePopup: typeof import('./components/ProvenancePopup.vue')['default']
+    RelevanceDialog: typeof import('./components/RelevanceDialog.vue')['default']
     SelectionsGroup: typeof import('./components/SelectionsGroup.vue')['default']
     SvgLegends: typeof import('./components/legends/SvgLegends.vue')['default']
     Tooltip: typeof import('./components/Tooltip.vue')['default']

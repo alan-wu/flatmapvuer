@@ -663,6 +663,18 @@
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
+      <RelevanceDialog
+        class="relevance-dialog"
+        v-show="relevanceDisplay"
+        :entry="relevanceEntry"
+        :drawing="inDrawing"
+        :relevance="hasRelevance"
+        @display="displayRelevanceDialog"
+        @confirm="confirmDrawnFeature"
+        @cancel="cancelDrawnFeature"
+        @popup="closePopup"
+        @tooltip="displayRelevanceTooltip"
+      />
     </div>
   </div>
 </template>
@@ -700,6 +712,49 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
+import RelevanceDialog from './RelevanceDialog.vue'
+
+const draggable = (scopeElement, dragElement) => {
+  let startX, startY, clickX, clickY, posX, posY
+  // const scopeRect = scopeElement.getBoundingClientRect()
+  // const dragRect = dragElement.getBoundingClientRect()
+  
+  dragElement.addEventListener('mousedown', (e) => {
+    startX = dragElement.offsetLeft
+    startY = dragElement.offsetTop
+    e.preventDefault();
+    clickX = e.clientX
+    clickY = e.clientY
+    dragElement.addEventListener('mousemove', drag, false);
+    dragElement.addEventListener('mouseup', () => {
+      dragElement.removeEventListener('mousemove', drag, false);
+    }, false);
+  }, false);
+
+  function drag(e) {
+    e.preventDefault();
+    posX = startX - (clickX - e.clientX)
+    posY = startY - (clickY - e.clientY)
+    // if (
+    //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
+    //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
+    // ) {
+    dragElement.style.left = `${posX}px`;
+    dragElement.style.top = `${posY}px`;
+    // } else {
+    //   if (posX <= scopeRect.left) {
+    //     dragElement.style.left = '0px';
+    //   } else if (posX + dragRect.width >= scopeRect.right) {
+    //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
+    //   }
+    //   if (posY <= scopeRect.top) {
+    //     dragElement.style.top = '0px';
+    //   } else if (posY + dragRect.height >= scopeRect.bottom) {
+    //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
+    //   }
+    // }
+  }
+}
 
 const centroid = (geometry) => {
   let featureGeometry = {
@@ -861,7 +916,12 @@ export default {
     displayRelevanceDialog: function (display) {
       // Change back to the initial window size
       // For a better view of the relevance popup
-      if (display) this.resetView()
+      if (display) {
+        this.resetView()
+        this.$nextTick(() => {
+          draggable(this.$el, this.$el.querySelector('.relevance-dialog'))
+        })
+      }
       this.closePopup()
       // Used when check exist drawn annotation relevance
       if (
@@ -871,9 +931,9 @@ export default {
         // Reset drawn event
         this.drawnEvent()
       } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
-        this.relevanceDisplay = display
         if (!display && this.activeDrawMode === 'Delete') this.relevanceEntry = {}
       }
+      this.relevanceDisplay = display
     },
     setActiveDrawIcon: function () {
       let mclass
@@ -1341,7 +1401,10 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                this.allocateRelevance(payload)
+                // Stop adding features if dialog displayed
+                if (!this.relevanceDisplay) {
+                  this.allocateRelevance(payload)
+                }
               }
             } else if (
               eventType === 'mouseenter' &&
@@ -2556,7 +2619,7 @@ export default {
 
 .bottom-draw-control {
   position: absolute;
-  right: 40%;
+  right: calc(50vw - 100px);;
   bottom: 16px;
 }
 
@@ -2750,7 +2813,12 @@ export default {
   }
 }
 
+.relevance-dialog {
   position: absolute;
+  right: calc(50vw - 100px);
+  bottom: 50px;
+  z-index: 10;
+  cursor: move;
 }
 </style>
 
