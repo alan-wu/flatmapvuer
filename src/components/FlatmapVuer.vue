@@ -663,54 +663,6 @@
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
-      <el-dialog
-        v-model="relevanceDisplay"
-        width="200"
-        :modal="false"
-        :show-close="false"
-        :lock-scroll="false"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        :teleported="false"
-        draggable
-      >
-        <template #header v-if="inDrawing">
-          <span class="dialog-title">Finalise drawing</span>
-        </template>
-        <template #header v-else>
-          <el-button type="primary" plain @click="displayRelevanceDialog(false)">
-            Close
-          </el-button>
-        </template>
-        <el-row v-if="inDrawing">
-          <el-col :span="13">
-            <el-button type="primary" plain @click="confirmDrawnFeature">
-              Confirm
-            </el-button>
-          </el-col>
-          <el-col :span="11">
-            <el-button type="primary" plain @click="cancelDrawnFeature">
-              Cancel
-            </el-button>
-          </el-col>
-        </el-row>
-        <el-row v-if="hasRelevance">
-          <el-col :span="20">
-            <b><span>Related Features</span></b>
-          </el-col>
-          <el-col :span="4">
-            <el-icon><el-icon-circle-close @click="closePopup()"/></el-icon>
-          </el-col>
-          <el-card
-            shadow="hover"
-            v-for="(value, key) in relevanceEntry" 
-            :key="key"
-            @click="displayRelevanceTooltip(value)"
-          >
-            <span>{{ key }}</span>
-          </el-card>
-        </el-row>
-      </el-dialog>
     </div>
   </div>
 </template>
@@ -722,7 +674,6 @@ import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
-  CircleClose as ElIconCircleClose,
 } from '@element-plus/icons-vue'
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
@@ -2799,34 +2750,7 @@ export default {
   }
 }
 
-:deep(.el-dialog) {
-  text-align: justify;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  pointer-events: auto;
-  background: #fff;
-  border: 1px solid $app-primary-color;
-  display: flex;
-  flex-direction: column;
   position: absolute;
-  right: 40%;
-  bottom: 40px;
-}
-
-:deep(.el-dialog__body, .el-dialog__header) {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.dialog-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: rgb(131, 0, 191);
-}
-
-:deep(.el-card) {
-  --el-card-padding: 12px;
-  border: 0;
 }
 </style>
 
