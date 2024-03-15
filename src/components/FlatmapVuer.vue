@@ -756,10 +756,7 @@ import RelevanceDialog from './RelevanceDialog.vue'
 // }
 
 const centroid = (geometry) => {
-  let featureGeometry = {
-    lng: 0,
-    lat: 0,
-  }
+  let featureGeometry = { lng: 0, lat: 0, }
   let coordinates
   if (geometry.type === "Polygon") {
     coordinates = geometry.coordinates[0]
@@ -923,6 +920,7 @@ export default {
     },
     setActiveDrawIcon: function () {
       let mclass
+      // remove any exist selected status
       if (this.$el.querySelector('.toolSelected')) {
         this.drawnTypes.map((t) => {
           if (t !== 'All tools' && t !== 'None') {
@@ -935,6 +933,7 @@ export default {
           this.$el.querySelector(mclass).classList.remove('toolSelected');
         })
       }
+      // set tool/mode selected status
       if (this.activeDrawTool) {
         this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
       } else if (this.activeDrawMode) {
@@ -945,11 +944,8 @@ export default {
     },
     drawingEvent: function (type) {
       this.closePopup()
-      if (!type) {
-        this.activeDrawTool = undefined
-        this.activeDrawMode = undefined
-        this.inDrawing = false
-      } else if (this.drawnTypes.includes(type)) {
+      if (this.drawnTypes.includes(type)) {
+        // reset activeDrawMode when use draw tool
         if (this.activeDrawMode) {
           this.$el.querySelector('.mapbox-gl-draw_trash').click()
           this.activeDrawMode = undefined
@@ -968,6 +964,7 @@ export default {
           this.activeDrawTool = polygon.classList.contains('active') ? 'Polygon' : undefined
         }
       } else if (this.drawModes.includes(type)) {
+        // reset activeDrawTool when enter draw mode
         if (this.activeDrawTool) {
           this.$el.querySelector('.mapbox-gl-draw_trash').click()
           this.activeDrawTool = undefined
@@ -1010,11 +1007,12 @@ export default {
       }
     },
     rollbackAnnotationEvent: function () {
-      if (this.mapImp) {
-        // For 'updated' and 'deleted' callback
-        if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
-          this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
-        }
+      // For 'updated' and 'deleted' callback
+      if (
+        this.mapImp &&
+        this.drawnAnnotationEvent.includes(this.annotationEntry.type)
+      ) {
+        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
     },
     commitAnnotationEvent: function (annotation) {
@@ -1491,8 +1489,10 @@ export default {
             if (this.inDrawing || this.activeDrawMode) {
               this.annotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
-              let featureGeometry = centroid(data.feature.feature.geometry)
-              this.displayTooltip(data.feature.feature.id, featureGeometry)
+              this.displayTooltip(
+                data.feature.feature.id,
+                centroid(data.feature.feature.geometry)
+              )
             } else {
               // Not allowed to update feature if edit mode not on
               if (data.feature.type === 'updated') {
@@ -2087,7 +2087,7 @@ export default {
       inDrawing: false,
       relevanceDisplay: false,
       relevanceEntry: {},
-      drawnAnnotationFeatures: undefined, // Store all exist drawn annotations
+      drawnAnnotationFeatures: undefined, // Store all exist drawn features
       doubleClickedFeature: false,
       activeDrawMode: undefined,
       drawModes: ['Delete', 'Edit'],
