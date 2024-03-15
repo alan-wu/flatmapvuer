@@ -395,6 +395,18 @@
             </el-select>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Dimension display</el-row>
+          <el-row class="backgroundControl">
+            <el-radio-group
+              v-model="dimensionRadio"
+              class="flatmap-radio"
+              @change="setDimension"
+            >
+            <el-radio :label="false">2D</el-radio>
+            <el-radio :label="true">3D</el-radio>
+            </el-radio-group>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Organs display</el-row>
           <el-row class="backgroundControl">
             <el-radio-group
@@ -616,6 +628,17 @@ export default {
     this.setStateRequired = false
   },
   methods: {
+    /**
+     * @vuese
+     * Function to switch from 2D to 3D
+     * @arg flag
+     */
+    setDimension: function (flag) {
+      this.dimensionRadio = flag
+      if (this.mapImp) {
+        this.mapImp.enable3dPaths(flag)
+      }
+    },
     /**
      * @vuese
      * Function to view the latest map (example when you are on legacy map).
@@ -1739,6 +1762,7 @@ export default {
       connectivityTooltipVisible: false,
       drawerOpen: false,
       annotationRadio: false,
+      dimensionRadio: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
