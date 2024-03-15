@@ -926,7 +926,6 @@ export default {
       } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
         if (!display && this.activeDrawMode === 'Delete') this.relevanceEntry = {}
       }
-      this.relevanceDisplay = display
     },
     setActiveDrawIcon: function () {
       let mclass
@@ -1421,6 +1420,16 @@ export default {
           }
         }
       }
+    },
+    dialogPositionCss: function () {
+      this.$nextTick(() => {
+        const container = this.$el.getBoundingClientRect()
+        const dialog = this.$el.querySelector('.relevance-dialog').getBoundingClientRect()
+        if (this.dialogPosition.x > container.width / 2) this.dialogPosition.x -= dialog.width
+        if (this.dialogPosition.y > container.height / 2) this.dialogPosition.y -= dialog.height
+        this.$el.querySelector('.relevance-dialog').style.transform =
+          `translate(${this.dialogPosition.x}px, ${this.dialogPosition.y}px)`
+      })
     },
     allocateRelevance: function (data = undefined) {
       if (data && data.feature) {
@@ -2088,6 +2097,10 @@ export default {
       doubleClickedFeature: false,
       activeDrawMode: undefined,
       drawModes: ['Delete', 'Edit'],
+      dialogPosition: {
+        x: undefined,
+        y: undefined
+      }
     }
   },
   computed: {
@@ -2114,9 +2127,26 @@ export default {
       immediate: true,
       deep: true,
     },
+    relevanceDisplay: function (display) {
+      if (display) {
         // draggable(this.$el, this.$el.querySelector('.relevance-dialog'))
+        this.dialogPositionCss()
+      }
+    },
+    relevanceEntry: function (entry) {
+      if (Object.keys(entry).length === 0) {
+        this.displayRelevanceDialog(false)
+      } else {
+        this.dialogPositionCss()
+      }
+    },
     viewingMode: function (mode) {
       if (mode === 'Annotation') {
+        this.$el.querySelector('.maplibregl-canvas').addEventListener('click', (event) => {
+          event.preventDefault();
+          this.dialogPosition.x = event.clientX
+          this.dialogPosition.y = event.clientY
+        }, false)
         this.showAnnotator(true)
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
@@ -2809,10 +2839,10 @@ export default {
 
 .relevance-dialog {
   position: absolute;
-  right: calc(50vw - 100px);
-  bottom: 50px;
-  z-index: 10;
-  cursor: move;
+  // right: calc(50vw - 100px);
+  // bottom: 50px;
+  // z-index: 10;
+  // cursor: move;
 }
 </style>
 
