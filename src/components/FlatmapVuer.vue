@@ -713,47 +713,50 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import RelevanceDialog from './RelevanceDialog.vue'
 
-// const draggable = (scopeElement, dragElement) => {
-//   let startX, startY, clickX, clickY, posX, posY
-//   // const scopeRect = scopeElement.getBoundingClientRect()
-//   // const dragRect = dragElement.getBoundingClientRect()
-  
-//   dragElement.addEventListener('mousedown', (e) => {
-//     startX = dragElement.offsetLeft
-//     startY = dragElement.offsetTop
-//     e.preventDefault();
-//     clickX = e.clientX
-//     clickY = e.clientY
-//     dragElement.addEventListener('mousemove', drag, false);
-//     document.addEventListener('mouseup', () => {
-//       dragElement.removeEventListener('mousemove', drag, false);
-//     }, false);
-//   }, false);
+const draggable = (scopeElement, dragElement) => {
+  let startX, startY, clickX, clickY, posX, posY
+  dragElement.style.left = ''
+  dragElement.style.top = ''
+  // const scopeRect = scopeElement.getBoundingClientRect()
+  // const dragRect = dragElement.getBoundingClientRect()
 
-//   function drag(e) {
-//     e.preventDefault();
-//     posX = startX - (clickX - e.clientX)
-//     posY = startY - (clickY - e.clientY)
-//     // if (
-//     //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
-//     //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
-//     // ) {
-//     dragElement.style.left = `${posX}px`;
-//     dragElement.style.top = `${posY}px`;
-//     // } else {
-//     //   if (posX <= scopeRect.left) {
-//     //     dragElement.style.left = '0px';
-//     //   } else if (posX + dragRect.width >= scopeRect.right) {
-//     //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
-//     //   }
-//     //   if (posY <= scopeRect.top) {
-//     //     dragElement.style.top = '0px';
-//     //   } else if (posY + dragRect.height >= scopeRect.bottom) {
-//     //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
-//     //   }
-//     // }
-//   }
-// }
+  dragElement.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = dragElement.offsetLeft
+    startY = dragElement.offsetTop
+    clickX = e.clientX
+    clickY = e.clientY
+
+    dragElement.addEventListener('mousemove', drag, false);
+    document.addEventListener('mouseup', () => {
+      dragElement.removeEventListener('mousemove', drag, false);
+    }, false);
+  }, false);
+
+  function drag(e) {
+    e.preventDefault();
+    posX = startX - (clickX - e.clientX)
+    posY = startY - (clickY - e.clientY)
+    // if (
+    //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
+    //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
+    // ) {
+    dragElement.style.left = `${posX}px`;
+    dragElement.style.top = `${posY}px`;
+    // } else {
+    //   if (posX <= scopeRect.left) {
+    //     dragElement.style.left = '0px';
+    //   } else if (posX + dragRect.width >= scopeRect.right) {
+    //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
+    //   }
+    //   if (posY <= scopeRect.top) {
+    //     dragElement.style.top = '0px';
+    //   } else if (posY + dragRect.height >= scopeRect.bottom) {
+    //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
+    //   }
+    // }
+  }
+}
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -2874,10 +2877,8 @@ export default {
 
 .relevance-dialog {
   position: absolute;
-  // right: calc(50vw - 100px);
-  // bottom: 50px;
-  // z-index: 10;
-  // cursor: move;
+  z-index: 10;
+  cursor: move;
 }
 </style>
 
