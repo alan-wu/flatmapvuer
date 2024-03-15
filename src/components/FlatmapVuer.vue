@@ -2428,8 +2428,9 @@ export default {
 }
 
 .drawPoint, .drawLineString, .drawPolygon, .drawTrash, 
-.connection, .comment, .zoomIn, .zoomOut, .fitWindow {
-  padding-left: 8px;
+.comment, .connection,
+.zoomIn, .zoomOut, .fitWindow {
+  padding: 4px;
 }
 
 .toolSelected {
@@ -2642,6 +2643,11 @@ export default {
 }
 
 .bottom-draw-control {
+  background-color: var(--el-color-primary-light-9);
+  padding: 4px 4px 2px 4px;
+  border-style: solid;
+  border-color: var(--el-color-primary-light-5);
+  border-radius: 1rem;
   position: absolute;
   right: calc(50vw - 100px);;
   bottom: 16px;
