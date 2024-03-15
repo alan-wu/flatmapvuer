@@ -167,7 +167,7 @@
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[11].value"
-          v-if="drawingType !== 'LineString' && drawingType !== 'Polygon'"
+          v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
         >
           <template #reference>
             <map-svg-icon
@@ -187,7 +187,7 @@
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[12].value"
-          v-if="drawingType !== 'Point' && drawingType !== 'Polygon'"
+          v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
         >
           <template #reference>
             <map-svg-icon
@@ -207,7 +207,7 @@
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[13].value"
-          v-if="drawingType !== 'Point' && drawingType !== 'LineString'"
+          v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
         >
           <template #reference>
             <map-svg-icon
@@ -511,18 +511,18 @@
             </el-select>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
-            <el-row class="backgroundText">Drawing Type*</el-row>
+            <el-row class="backgroundText">Drawn By*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
-                v-model="drawingType"
+                v-model="drawnType"
                 placeholder="Select"
                 class="select-box"
                 popper-class="flatmap_dropdown"
-                @change="setDrawingType"
+                @change="setDrawnType"
               >
                 <el-option
-                  v-for="item in drawingTypes"
+                  v-for="item in drawnTypes"
                   :key="item"
                   :label="item"
                   :value="item"
@@ -533,18 +533,18 @@
                 </el-option>
               </el-select>
             </el-row>
-            <el-row class="backgroundText">Participation Type*</el-row>
+            <el-row class="backgroundText">Annotated By*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
-                v-model="participationType"
+                v-model="annotatedType"
                 placeholder="Select"
                 class="select-box"
                 popper-class="flatmap_dropdown"
-                @change="setParticipationType"
+                @change="setAnnotatedType"
               >
                 <el-option
-                  v-for="item in participationTypes"
+                  v-for="item in annotatedTypes"
                   :key="item"
                   :label="item"
                   :value="item"
@@ -908,9 +908,7 @@ export default {
       }
     },
     displayRelevanceDialog: function (display) {
-      // Change back to the initial window size
-      // For a better view of the relevance popup
-      if (display) this.resetView()
+      this.relevanceDisplay = display
       this.closePopup()
       // Used when check exist drawn annotation relevance
       if (
@@ -927,8 +925,8 @@ export default {
     setActiveDrawIcon: function () {
       let mclass
       if (this.$el.querySelector('.toolSelected')) {
-        this.drawingTypes.map((t) => {
-          if (t !== 'All' && t !== 'None') {
+        this.drawnTypes.map((t) => {
+          if (t !== 'All tools' && t !== 'None') {
             this.$el.querySelector(`.draw${t}`).classList.remove('toolSelected');
           }
         })
@@ -952,7 +950,7 @@ export default {
         this.activeDrawTool = undefined
         this.activeDrawMode = undefined
         this.inDrawing = false
-      } else if (this.drawingTypes.includes(type)) {
+      } else if (this.drawnTypes.includes(type)) {
         if (this.activeDrawMode) {
           this.$el.querySelector('.mapbox-gl-draw_trash').click()
           this.activeDrawMode = undefined
@@ -1050,20 +1048,20 @@ export default {
     addAnnotationFeature: function () {
       if (this.mapImp) {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
-        if (this.drawingType !== 'None') {
+        if (this.drawnType !== 'None') {
           this.annotator.drawnFeatures(this.serverUUID)
             .then((drawnFeatures) => {
               // Use to switch the displayed feature type
-              if (this.drawingType !== 'All') {
+              if (this.drawnType !== 'All tools') {
                 drawnFeatures = drawnFeatures.filter((feature) => {
-                  return feature.geometry.type === this.drawingType
+                  return feature.geometry.type === this.drawnType
                 })
               }
               this.drawnAnnotationFeatures = drawnFeatures
               // No need to call 'addAnnotationFeature' when a new feature created
               if (!this.annotationSubmitted) {
                 for (const feature of drawnFeatures) {
-                  if (this.participationType !== 'All') {
+                  if (this.annotatedType !== 'Everyone') {
                     this.annotator
                       .itemAnnotations(this.serverUUID, feature.id)
                       .then((value) => {
@@ -1074,8 +1072,8 @@ export default {
                           )
                         }).length > 0
                         if (
-                          (this.participationType === 'Participated' && participated) ||
-                          (this.participationType === 'Not participated' && !participated)
+                          (this.annotatedType === 'Only me' && participated) ||
+                          (this.annotatedType === 'Others' && !participated)
                         ) {
                           this.mapImp.addAnnotationFeature(feature)
                         }
@@ -1101,14 +1099,14 @@ export default {
         this.$el.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
-    setDrawingType: function (flag) {
-      this.drawingType = flag
+    setDrawnType: function (flag) {
+      this.drawnType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
       }
     },
-    setParticipationType: function (flag) {
-      this.participationType = flag
+    setAnnotatedType: function (flag) {
+      this.annotatedType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
       }
@@ -2062,10 +2060,10 @@ export default {
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
-      drawingType: 'All',
-      drawingTypes: ['All', 'Point', 'LineString', 'Polygon', 'None'],
-      participationType: 'All',
-      participationTypes: ['All', 'Participated', 'Not participated'],
+      drawnType: 'All tools',
+      drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
+      annotatedType: 'Everyone',
+      annotatedTypes: ['Everyone', 'Only me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
