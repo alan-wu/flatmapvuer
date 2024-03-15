@@ -151,8 +151,8 @@
           <template #reference>
             <map-svg-icon
               icon="connection"
-              @click="displayRelevanceDialog(true)"
               class="icon-button connection inactive"
+              @click="relevanceDialogPopup(true)"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
             />
@@ -172,7 +172,7 @@
             <map-svg-icon
               icon="drawPoint"
               class="icon-button drawPoint"
-              @click="drawnEvent('Point')"
+              @click="drawingEvent('Point')"
               @mouseover="showToolitip(11)"
               @mouseout="hideToolitip(11)"
             />
@@ -192,7 +192,7 @@
             <map-svg-icon
               icon="drawLine"
               class="icon-button drawLineString"
-              @click="drawnEvent('LineString')"
+              @click="drawingEvent('LineString')"
               @mouseover="showToolitip(12)"
               @mouseout="hideToolitip(12)"
             />
@@ -212,7 +212,7 @@
             <map-svg-icon
               icon="drawPolygon"
               class="icon-button drawPolygon"
-              @click="drawnEvent('Polygon')"
+              @click="drawingEvent('Polygon')"
               @mouseover="showToolitip(13)"
               @mouseout="hideToolitip(13)"
             />
@@ -231,7 +231,7 @@
             <map-svg-icon
               icon="drawTrash"
               class="icon-button drawTrash"
-              @click="drawnEvent('Delete')"
+              @click="drawingEvent('Delete')"
               @mouseover="showToolitip(14)"
               @mouseout="hideToolitip(14)"
             />
@@ -250,7 +250,7 @@
             <map-svg-icon
               icon="comment"
               class="icon-button comment"
-              @click="drawnEvent('Edit')"
+              @click="drawingEvent('Edit')"
               @mouseover="showToolitip(15)"
               @mouseout="hideToolitip(15)"
             />
@@ -667,12 +667,12 @@
         v-show="relevanceDisplay"
         :entry="relevanceEntry"
         :drawing="inDrawing"
-        :relevance="hasRelevance"
-        @display="displayRelevanceDialog"
+        :relevance="relevance"
+        @display="relevanceDialogPopup"
         @confirm="confirmDrawnFeature"
         @cancel="cancelDrawnFeature"
         @popup="closePopup"
-        @tooltip="displayRelevanceTooltip"
+        @tooltip="checkAndCreatePopups"
       />
     </div>
   </div>
@@ -874,11 +874,6 @@ export default {
     return { annotator }
   },
   methods: {
-    displayRelevanceTooltip: function (value) {
-      if (this.mapImp) {
-        this.checkAndCreatePopups(value)
-      }
-    },
     // This should be called when create is confirmed or cancelled
     initialiseDraw: function () {
       this.inDrawing = false
@@ -912,7 +907,6 @@ export default {
         this.initialiseDraw()
       }
     },
-    displayRelevanceDialog: function (display) {
       this.relevanceDisplay = display
       this.closePopup()
       // Used when check exist drawn annotation relevance
@@ -924,6 +918,7 @@ export default {
         this.drawnEvent()
       } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
         if (!display && this.activeDrawMode === 'Delete') this.relevanceEntry = {}
+    relevanceDialogPopup: function (display) {
       }
     },
     setActiveDrawIcon: function () {
@@ -948,7 +943,7 @@ export default {
         this.$el.querySelector(mclass).classList.add('toolSelected');
       }
     },
-    drawnEvent: function (type = undefined) {
+    drawingEvent: function (type) {
       this.closePopup()
       if (!type) {
         this.activeDrawTool = undefined
@@ -1338,7 +1333,7 @@ export default {
               this.relevanceEntry = {}
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              this.displayRelevanceDialog(true)
+              this.relevanceDialogPopup(true)
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
@@ -1394,7 +1389,7 @@ export default {
                 this.currentActive = data.models ? data.models : ''
                 // Stop adding features if dialog displayed
                 if (!this.relevanceDisplay) {
-                  this.allocateRelevance(payload)
+                  this.processRelevance(payload)
                 }
               }
             } else if (
@@ -1430,7 +1425,7 @@ export default {
           `translate(${this.dialogPosition.x}px, ${this.dialogPosition.y}px)`
       })
     },
-    allocateRelevance: function (data = undefined) {
+    processRelevance: function (data = undefined) {
       if (data && data.feature) {
         // Only clicked relevance data will be added 
         let relevance = data.feature.models ?
@@ -1455,7 +1450,7 @@ export default {
       if (!this.inDrawing) {
         this.relevanceEntry = {}
         if (this.currentDrawnFeature) {
-          this.allocateRelevance()
+          this.processRelevance()
           if (this.activeDrawMode) {
             // double click fires 'updated' callback
             if (this.doubleClickedFeature) {
@@ -2103,7 +2098,7 @@ export default {
     }
   },
   computed: {
-    hasRelevance: function () {
+    relevance: function () {
       return Object.keys(this.relevanceEntry).length > 0
     }
   },
