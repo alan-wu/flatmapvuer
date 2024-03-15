@@ -980,6 +980,10 @@ export default {
             this.trashAnnotationFeature()
           }
           this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
+          // clear currentDrawnFeature when quit delete mode
+          if (!this.activeDrawMode) {
+            this.currentDrawnFeature = undefined
+          }
         } else if (type === 'Edit') {
           this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
         }
@@ -1386,7 +1390,7 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Stop adding features if dialog displayed
-                if (!this.relevanceDisplay) {
+                if (this.inDrawing && !this.relevanceDisplay ) {
                   this.processRelevance(payload)
                 }
               }
