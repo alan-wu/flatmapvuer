@@ -1432,24 +1432,25 @@ export default {
       })
     },
     processRelevance: function (data = undefined) {
+      // process while drawing new features
       if (data && data.feature) {
         // Only clicked relevance data will be added 
-        let relevance = data.feature.models ?
-          data.feature.models :
-          data.feature.featureId
-        if (
-          relevance &&
-          this.inDrawing &&
-          // only the linestring will have relevance at the current stage
-          this.activeDrawTool === 'LineString' &&
-          !(relevance in this.relevanceEntry)
-        ) {
-          this.relevanceEntry[relevance] = data
+        let relevant = data.feature.models ? data.feature.models : data.feature.featureId
+        // only the linestring will have relevance at the current stage
+        if (relevant && this.activeDrawTool === 'LineString') {
+          this.relevanceEntry[relevant] = data
         }
-      } else if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
-        let feature = this.drawnAnnotationFeatures
-          .filter((feature) => feature.id === this.currentDrawnFeature.id)[0]
-        if (feature && feature.relevance) this.relevanceEntry = feature.relevance
+      } else {
+        // process while checking exist features
+        if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
+          let feature = this.drawnAnnotationFeatures
+            .filter((feature) => {
+              return feature.id === this.currentDrawnFeature.id
+            })[0]
+          if (feature && feature.relevance) {
+            this.relevanceEntry = feature.relevance
+          }
+        }
       }
     },
     checkAndCreateDrawnFeaturePopups: function (data) {
