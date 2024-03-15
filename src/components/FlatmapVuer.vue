@@ -663,54 +663,18 @@
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
-      <el-dialog
-        v-model="relevanceDisplay"
-        width="200"
-        :modal="false"
-        :show-close="false"
-        :lock-scroll="false"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        :teleported="false"
-        draggable
-      >
-        <template #header v-if="inDrawing">
-          <span class="dialog-title">Finalise drawing</span>
-        </template>
-        <template #header v-else>
-          <el-button type="primary" plain @click="displayRelevanceDialog(false)">
-            Close
-          </el-button>
-        </template>
-        <el-row v-if="inDrawing">
-          <el-col :span="13">
-            <el-button type="primary" plain @click="confirmDrawnFeature">
-              Confirm
-            </el-button>
-          </el-col>
-          <el-col :span="11">
-            <el-button type="primary" plain @click="cancelDrawnFeature">
-              Cancel
-            </el-button>
-          </el-col>
-        </el-row>
-        <el-row v-if="hasRelevance">
-          <el-col :span="20">
-            <b><span>Related Features</span></b>
-          </el-col>
-          <el-col :span="4">
-            <el-icon><el-icon-circle-close @click="closePopup()"/></el-icon>
-          </el-col>
-          <el-card
-            shadow="hover"
-            v-for="(value, key) in relevanceEntry" 
-            :key="key"
-            @click="displayRelevanceTooltip(value)"
-          >
-            <span>{{ key }}</span>
-          </el-card>
-        </el-row>
-      </el-dialog>
+      <RelevanceDialog
+        class="relevance-dialog"
+        v-show="relevanceDisplay"
+        :entry="relevanceEntry"
+        :drawing="inDrawing"
+        :relevance="hasRelevance"
+        @display="displayRelevanceDialog"
+        @confirm="confirmDrawnFeature"
+        @cancel="cancelDrawnFeature"
+        @popup="closePopup"
+        @tooltip="displayRelevanceTooltip"
+      />
     </div>
   </div>
 </template>
@@ -722,7 +686,6 @@ import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
-  CircleClose as ElIconCircleClose,
 } from '@element-plus/icons-vue'
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
@@ -749,6 +712,49 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
+import RelevanceDialog from './RelevanceDialog.vue'
+
+const draggable = (scopeElement, dragElement) => {
+  let startX, startY, clickX, clickY, posX, posY
+  // const scopeRect = scopeElement.getBoundingClientRect()
+  // const dragRect = dragElement.getBoundingClientRect()
+  
+  dragElement.addEventListener('mousedown', (e) => {
+    startX = dragElement.offsetLeft
+    startY = dragElement.offsetTop
+    e.preventDefault();
+    clickX = e.clientX
+    clickY = e.clientY
+    dragElement.addEventListener('mousemove', drag, false);
+    document.addEventListener('mouseup', () => {
+      dragElement.removeEventListener('mousemove', drag, false);
+    }, false);
+  }, false);
+
+  function drag(e) {
+    e.preventDefault();
+    posX = startX - (clickX - e.clientX)
+    posY = startY - (clickY - e.clientY)
+    // if (
+    //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
+    //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
+    // ) {
+    dragElement.style.left = `${posX}px`;
+    dragElement.style.top = `${posY}px`;
+    // } else {
+    //   if (posX <= scopeRect.left) {
+    //     dragElement.style.left = '0px';
+    //   } else if (posX + dragRect.width >= scopeRect.right) {
+    //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
+    //   }
+    //   if (posY <= scopeRect.top) {
+    //     dragElement.style.top = '0px';
+    //   } else if (posY + dragRect.height >= scopeRect.bottom) {
+    //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
+    //   }
+    // }
+  }
+}
 
 const centroid = (geometry) => {
   let featureGeometry = {
@@ -918,9 +924,9 @@ export default {
         // Reset drawn event
         this.drawnEvent()
       } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
-        this.relevanceDisplay = display
         if (!display && this.activeDrawMode === 'Delete') this.relevanceEntry = {}
       }
+      this.relevanceDisplay = display
     },
     setActiveDrawIcon: function () {
       let mclass
@@ -1388,7 +1394,10 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                this.allocateRelevance(payload)
+                // Stop adding features if dialog displayed
+                if (!this.relevanceDisplay) {
+                  this.allocateRelevance(payload)
+                }
               }
             } else if (
               eventType === 'mouseenter' &&
@@ -2603,7 +2612,7 @@ export default {
 
 .bottom-draw-control {
   position: absolute;
-  right: 40%;
+  right: calc(50vw - 100px);;
   bottom: 16px;
 }
 
@@ -2797,34 +2806,12 @@ export default {
   }
 }
 
-:deep(.el-dialog) {
-  text-align: justify;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  pointer-events: auto;
-  background: #fff;
-  border: 1px solid $app-primary-color;
-  display: flex;
-  flex-direction: column;
+.relevance-dialog {
   position: absolute;
-  right: 40%;
-  bottom: 40px;
-}
-
-:deep(.el-dialog__body, .el-dialog__header) {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.dialog-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: rgb(131, 0, 191);
-}
-
-:deep(.el-card) {
-  --el-card-padding: 12px;
-  border: 0;
+  right: calc(50vw - 100px);
+  bottom: 50px;
+  z-index: 10;
+  cursor: move;
 }
 </style>
 
