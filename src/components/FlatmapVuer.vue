@@ -395,8 +395,8 @@
             </el-select>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
-          <el-row class="backgroundText">Dimension display</el-row>
-          <el-row class="backgroundControl">
+          <el-row class="backgroundText" v-if="isFC">Dimension display</el-row>
+          <el-row class="backgroundControl" v-if="isFC">
             <el-radio-group
               v-model="dimensionRadio"
               class="flatmap-radio"
@@ -1451,6 +1451,8 @@ export default {
       this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
+        // Show 3D as default on FC type
+        this.setDimension(true)
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
