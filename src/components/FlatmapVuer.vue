@@ -1413,13 +1413,21 @@ export default {
         }
       }
     },
-    dialogPositionCss: function () {
+    dialogCssHacks: function () {
       this.$nextTick(() => {
-        const container = this.$el.getBoundingClientRect()
-        const dialog = this.$el.querySelector('.relevance-dialog').getBoundingClientRect()
-        if (this.dialogPosition.x > container.width / 2) this.dialogPosition.x -= dialog.width
-        if (this.dialogPosition.y > container.height / 2) this.dialogPosition.y -= dialog.height
-        this.$el.querySelector('.relevance-dialog').style.transform =
+        const dialog = this.$el.querySelector('.relevance-dialog')
+        // reset position in case previous pupped up dialog is dragged
+        draggable(this.$el, dialog)
+        // dialog popup at the click position, slightly change x or y
+        const containerRect = this.$el.getBoundingClientRect()
+        const dialogRect = dialog.getBoundingClientRect()
+        if (this.dialogPosition.x > containerRect.width / 2) {
+          this.dialogPosition.x -= dialogRect.width
+        }
+        if (this.dialogPosition.y > containerRect.height / 2) {
+          this.dialogPosition.y -= dialogRect.height
+        }
+        dialog.style.transform =
           `translate(${this.dialogPosition.x}px, ${this.dialogPosition.y}px)`
       })
     },
@@ -2121,25 +2129,42 @@ export default {
       immediate: true,
       deep: true,
     },
-    relevanceDisplay: function (display) {
-      if (display) {
-        // draggable(this.$el, this.$el.querySelector('.relevance-dialog'))
-        this.dialogPositionCss()
+    /**
+     * hide dialog when relevanceEntry is empty
+     */
+    relevance: function (value) {
+      const connectionIcon = this.$el.querySelector('.connection')
+      if (!value) {
+        this.relevanceDisplay = false
+        connectionIcon.classList.add('inactive')
+      } else {
+        connectionIcon.classList.remove('inactive')
       }
     },
-    relevanceEntry: function (entry) {
-      if (Object.keys(entry).length === 0) {
-        this.displayRelevanceDialog(false)
-      } else {
-        this.dialogPositionCss()
+    /**
+     * click different linestring content when displayed
+     */
+    relevanceEntry: function () {
+      this.dialogCssHacks()
+    },
+    /**
+     * popup dialog via click icon
+     */
+    relevanceDisplay: function (display) {
+      if (display) {
+        this.dialogCssHacks()
       }
     },
     viewingMode: function (mode) {
       if (mode === 'Annotation') {
-        this.$el.querySelector('.maplibregl-canvas').addEventListener('click', (event) => {
-          event.preventDefault();
-          this.dialogPosition.x = event.clientX
-          this.dialogPosition.y = event.clientY
+        this.$el.querySelector('.maplibregl-canvas').addEventListener('click', (e) => {
+          e.preventDefault();
+          this.dialogPosition.x = e.clientX
+          this.dialogPosition.y = e.clientY
+          // use to fix the draw point pop up position issue
+          if (this.activeDrawTool === 'Point') {
+            this.dialogCssHacks()
+          }
         }, false)
         this.showAnnotator(true)
         this.annotator.authenticate().then((userData) => {
