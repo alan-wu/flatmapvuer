@@ -151,11 +151,10 @@
           <template #reference>
             <map-svg-icon
               icon="connection"
-              class="icon-button connection"
               @click="displayRelevanceDialog(true)"
+              class="icon-button connection inactive"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
-              v-show="hasRelevance && !inDrawing"
             />
           </template>
         </el-popover>
@@ -2435,6 +2434,11 @@ export default {
 
 .toolSelected {
   color: var(--el-color-primary-light-5) !important;
+}
+
+.inactive {
+  color: #DDDDDD !important;
+  cursor: not-allowed !important;
 }
 
 .yellow-star-legend {
