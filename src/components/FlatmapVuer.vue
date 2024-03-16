@@ -884,7 +884,6 @@ export default {
     },
     cancelDrawnFeature: function () {
       if (this.createdEvent) {
-        // For 'created' callback
         this.closePopup()
         this.annotationEntry = {
           ...this.createdEvent.feature,
@@ -898,8 +897,8 @@ export default {
       if (this.createdEvent) {
         this.checkAndCreatePopups(this.createdEvent)
         // Add relevance if exist to annotationEntry
-        // Relevance will only be added in creating draw annotation
-        // And will not be updated if move drawn annotation
+        // Relevance will only be added in creating new drawn feature annotation
+        // And will not be updated if move drawn features
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
@@ -916,6 +915,7 @@ export default {
     },
     drawingEvent: function (type) {
       this.closePopup()
+      // disable mode icon click if any tool is active
       if (this.drawnTypes.includes(type) && !this.activeDrawMode) {
         if (type === 'Point') {
           const point = this.$el.querySelector('.mapbox-gl-draw_point')
@@ -930,6 +930,7 @@ export default {
           this.$el.querySelector('.mapbox-gl-draw_polygon').click()
           this.activeDrawTool = polygon.classList.contains('active') ? 'Polygon' : undefined
         }
+        // disable tool icon click if any mode is on
       } else if (this.drawModes.includes(type) && !this.activeDrawTool) {
         if (type === 'Delete') {
           if (this.currentDrawnFeature && !this.activeDrawMode) {
@@ -1502,7 +1503,7 @@ export default {
                 centroid(data.feature.feature.geometry)
               )
             } else {
-              // Not allowed to update feature if edit mode not on
+              // Not allowed to update feature if not on edit mode
               if (data.feature.type === 'updated') {
                 this.rollbackAnnotationEvent()
               }
