@@ -1508,6 +1508,11 @@ export default {
                 this.rollbackAnnotationEvent()
               }
             }
+            // Hide dialog when updated or deleted event is fired and tooltip is displayed
+            if (data.feature.type === 'updated' || data.feature.type === 'deleted') {
+              this.relevanceDisplay = false
+              this.relevanceEntry = {}
+            }
           }
         } else {
           this.annotation = {}
