@@ -151,7 +151,7 @@
           <template #reference>
             <map-svg-icon
               icon="connection"
-              class="icon-button connection inactive"
+              class="icon-button drawRelevance inactive"
               @click="relevanceDialogPopup(true)"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
@@ -230,7 +230,7 @@
           <template #reference>
             <map-svg-icon
               icon="drawTrash"
-              class="icon-button drawTrash"
+              class="icon-button drawDelete"
               @click="drawingEvent('Delete')"
               @mouseover="showToolitip(14)"
               @mouseout="hideToolitip(14)"
@@ -249,7 +249,7 @@
           <template #reference>
             <map-svg-icon
               icon="comment"
-              class="icon-button comment"
+              class="icon-button drawEdit"
               @click="drawingEvent('Edit')"
               @mouseover="showToolitip(15)"
               @mouseout="hideToolitip(15)"
@@ -881,7 +881,6 @@ export default {
       this.relevanceEntry = {}
       this.activeDrawTool = undefined
       this.createdEvent = undefined
-      this.setActiveDrawIcon()
     },
     cancelDrawnFeature: function () {
       if (this.createdEvent) {
@@ -907,52 +906,18 @@ export default {
         this.initialiseDraw()
       }
     },
-      this.relevanceDisplay = display
-      this.closePopup()
-      // Used when check exist drawn annotation relevance
-      if (
-        !this.createdEvent && !this.currentDrawnFeature &&
-        Object.keys(this.relevanceEntry).length === 0
-      ) {
-        // Reset drawn event
-        this.drawnEvent()
-      } else if (this.createdEvent || Object.keys(this.relevanceEntry).length > 0) {
-        if (!display && this.activeDrawMode === 'Delete') this.relevanceEntry = {}
     relevanceDialogPopup: function (display) {
-      }
-    },
-    setActiveDrawIcon: function () {
-      let mclass
-      // remove any exist selected status
-      if (this.$el.querySelector('.toolSelected')) {
-        this.drawnTypes.map((t) => {
-          if (t !== 'All tools' && t !== 'None') {
-            this.$el.querySelector(`.draw${t}`).classList.remove('toolSelected');
-          }
-        })
-        this.drawModes.map((m) => {
-          if (m === 'Delete') mclass = '.drawTrash'
-          else if (m === 'Edit') mclass = '.comment'
-          this.$el.querySelector(mclass).classList.remove('toolSelected');
-        })
-      }
-      // set tool/mode selected status
-      if (this.activeDrawTool) {
-        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
-      } else if (this.activeDrawMode) {
-        if (this.activeDrawMode === 'Delete') mclass = '.drawTrash'
-        else if (this.activeDrawMode === 'Edit') mclass = '.comment'
-        this.$el.querySelector(mclass).classList.add('toolSelected');
+      const inactive = this.$el.querySelector('.drawRelevance').classList.contains('inactive')
+      // disable any event if relevance icon inactive
+      // enable during drawing
+      if (!inactive || this.inDrawing) { 
+        this.closePopup()       
+        this.relevanceDisplay = display
       }
     },
     drawingEvent: function (type) {
       this.closePopup()
-      if (this.drawnTypes.includes(type)) {
-        // reset activeDrawMode when use draw tool
-        if (this.activeDrawMode) {
-          this.$el.querySelector('.mapbox-gl-draw_trash').click()
-          this.activeDrawMode = undefined
-        }
+      if (this.drawnTypes.includes(type) && !this.activeDrawMode) {
         if (type === 'Point') {
           const point = this.$el.querySelector('.mapbox-gl-draw_point')
           this.$el.querySelector('.mapbox-gl-draw_point').click()
@@ -966,12 +931,7 @@ export default {
           this.$el.querySelector('.mapbox-gl-draw_polygon').click()
           this.activeDrawTool = polygon.classList.contains('active') ? 'Polygon' : undefined
         }
-      } else if (this.drawModes.includes(type)) {
-        // reset activeDrawTool when enter draw mode
-        if (this.activeDrawTool) {
-          this.$el.querySelector('.mapbox-gl-draw_trash').click()
-          this.activeDrawTool = undefined
-        }
+      } else if (this.drawModes.includes(type) && !this.activeDrawTool) {
         if (type === 'Delete') {
           if (this.currentDrawnFeature && !this.activeDrawMode) {
             // Force simple_select a feature for delete event
@@ -991,7 +951,6 @@ export default {
           this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
         }
       }
-      this.setActiveDrawIcon()
     },
     changeAnnotationDrawMode: function (mode) {
       if (this.mapImp) {
@@ -1420,6 +1379,7 @@ export default {
         }
       }
     },
+    // for dialog popup
     dialogCssHacks: function () {
       this.$nextTick(() => {
         const dialog = this.$el.querySelector('.relevance-dialog')
@@ -1437,6 +1397,34 @@ export default {
         dialog.style.transform =
           `translate(${this.dialogPosition.x}px, ${this.dialogPosition.y}px)`
       })
+    },
+    drawIconCssHacks: function () {
+      // set tool/mode icon status
+      if (this.$el.querySelector('.toolSelected')) {
+        this.drawnTypes.map((t) => {
+          const dtype = this.$el.querySelector(`.draw${t}`)
+          if (dtype) {
+            dtype.classList.remove('toolSelected');
+            dtype.classList.remove('inactive');
+          }
+        })
+        this.drawModes.map((m) => {
+          this.$el.querySelector(`.draw${m}`).classList.remove('toolSelected');
+          this.$el.querySelector(`.draw${m}`).classList.remove('inactive');
+        })
+      }
+      if (this.activeDrawTool) {
+        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
+        this.drawModes.map((m) => {
+          this.$el.querySelector(`.draw${m}`).classList.add('inactive');
+        })
+      } else if (this.activeDrawMode) {
+        this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('toolSelected');
+        this.drawnTypes.map((t) => {
+          const dtype = this.$el.querySelector(`.draw${t}`)
+          if (dtype) dtype.classList.add('inactive');
+        })
+      }
     },
     processRelevance: function (data = undefined) {
       // process while drawing new features
@@ -2137,16 +2125,22 @@ export default {
       immediate: true,
       deep: true,
     },
+    activeDrawTool: function () {
+      this.drawIconCssHacks()
+    },
+    activeDrawMode: function () {
+      this.drawIconCssHacks()
+    },
     /**
      * hide dialog when relevanceEntry is empty
      */
     relevance: function (value) {
-      const connectionIcon = this.$el.querySelector('.connection')
+      const relevanceIcon = this.$el.querySelector('.drawRelevance')
       if (!value) {
         this.relevanceDisplay = false
-        connectionIcon.classList.add('inactive')
+        relevanceIcon.classList.add('inactive')
       } else {
-        connectionIcon.classList.remove('inactive')
+        relevanceIcon.classList.remove('inactive')
       }
     },
     /**
@@ -2454,8 +2448,8 @@ export default {
   }
 }
 
-.drawPoint, .drawLineString, .drawPolygon, .drawTrash, 
-.comment, .connection,
+.drawPoint, .drawLineString, .drawPolygon, 
+.drawDelete, .drawEdit, .drawRelevance,
 .zoomIn, .zoomOut, .fitWindow {
   padding: 4px;
 }
