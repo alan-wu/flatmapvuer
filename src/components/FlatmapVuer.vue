@@ -152,7 +152,7 @@
             <map-svg-icon
               icon="connection"
               class="icon-button drawRelevance inactive"
-              @click="relevanceDialogPopup(true)"
+              @click="relevanceDialogPopup"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
             />
@@ -906,13 +906,12 @@ export default {
         this.initialiseDraw()
       }
     },
-    relevanceDialogPopup: function (display) {
+    relevanceDialogPopup: function () {
       const inactive = this.$el.querySelector('.drawRelevance').classList.contains('inactive')
-      // disable any event if relevance icon inactive
-      // enable during drawing
-      if (!inactive || this.inDrawing) { 
+      // disable popup if icon inactive or in drawing
+      if (!inactive && !this.inDrawing) { 
         this.closePopup()       
-        this.relevanceDisplay = display
+        this.relevanceDisplay = !this.relevanceDisplay
       }
     },
     drawingEvent: function (type) {
@@ -1298,7 +1297,7 @@ export default {
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               if (this.createdEvent) {
-                this.relevanceDialogPopup(true)
+                this.relevanceDisplay = true
               } else {
                 // Reset if a invalid draw
                 this.activeDrawTool = undefined
