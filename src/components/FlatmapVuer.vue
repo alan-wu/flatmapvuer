@@ -1297,7 +1297,12 @@ export default {
               this.relevanceEntry = {}
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              this.relevanceDialogPopup(true)
+              if (this.createdEvent) {
+                this.relevanceDialogPopup(true)
+              } else {
+                // Reset if a invalid draw
+                this.activeDrawTool = undefined
+              }
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
