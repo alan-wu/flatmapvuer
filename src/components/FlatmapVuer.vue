@@ -875,7 +875,7 @@ export default {
   },
   methods: {
     // This should be called when create is confirmed or cancelled
-    initialiseDraw: function () {
+    initialiseDrawingEvent: function () {
       this.inDrawing = false
       this.relevanceDisplay = false
       this.relevanceEntry = {}
@@ -891,7 +891,7 @@ export default {
           resourceId: this.serverUUID,
         }
         this.rollbackAnnotationEvent()
-        this.initialiseDraw()
+        this.initialiseDrawingEvent()
       }
     },
     confirmDrawnFeature: function () {
@@ -903,7 +903,7 @@ export default {
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
-        this.initialiseDraw()
+        this.initialiseDrawingEvent()
       }
     },
     relevanceDialogPopup: function () {
