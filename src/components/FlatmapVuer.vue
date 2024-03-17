@@ -1397,16 +1397,20 @@ export default {
         // reset position in case previous pupped up dialog is dragged
         draggable(this.$el, dialog)
         // dialog popup at the click position, slightly change x or y
+        let posX, posY
         const containerRect = this.$el.getBoundingClientRect()
         const dialogRect = dialog.getBoundingClientRect()
         if (this.dialogPosition.x > containerRect.width / 2) {
-          this.dialogPosition.x -= dialogRect.width
+          posX = this.dialogPosition.x - dialogRect.width
+        } else {
+          posX = this.dialogPosition.x
         }
         if (this.dialogPosition.y > containerRect.height / 2) {
-          this.dialogPosition.y -= dialogRect.height
+          posY = this.dialogPosition.y - dialogRect.height
+        } else {
+          posY = this.dialogPosition.y
         }
-        dialog.style.transform =
-          `translate(${this.dialogPosition.x}px, ${this.dialogPosition.y}px)`
+        dialog.style.transform = `translate(${posX}px, ${posY}px)`
       })
     },
     drawIconCssHacks: function () {
