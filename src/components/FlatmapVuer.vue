@@ -713,8 +713,13 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import RelevanceDialog from './RelevanceDialog.vue'
 
+/**
+ * @param scopeElement    Draggable scope area (Optional)
+ * @param dragElement     Draggable element
+ */
 const draggable = (scopeElement, dragElement) => {
   let startX, startY, clickX, clickY, posX, posY
+  // reset position in case previous pupped up dialog is dragged
   dragElement.style.left = ''
   dragElement.style.top = ''
   // const scopeRect = scopeElement.getBoundingClientRect()
@@ -910,7 +915,7 @@ export default {
     },
     relevanceDialogPopup: function () {
       const inactive = this.$el.querySelector('.drawRelevance').classList.contains('inactive')
-      // disable popup if icon inactive or in drawing
+      // disable click popup if icon inactive or in drawing
       if (!inactive && !this.inDrawing) { 
         this.closePopup()       
         this.relevanceDisplay = !this.relevanceDisplay
@@ -1038,7 +1043,7 @@ export default {
                           )
                         }).length > 0
                         if (
-                          (this.annotatedType === 'Only me' && participated) ||
+                          (this.annotatedType === 'Me' && participated) ||
                           (this.annotatedType === 'Others' && !participated)
                         ) {
                           this.mapImp.addAnnotationFeature(feature)
@@ -1397,9 +1402,9 @@ export default {
     dialogCssHacks: function () {
       this.$nextTick(() => {
         const dialog = this.$el.querySelector('.relevance-dialog')
-        // reset position in case previous pupped up dialog is dragged
         draggable(this.$el, dialog)
-        // dialog popup at the click position, slightly change x or y
+        // dialog popup at the click position
+        // slightly change x or y if close to boundary
         let posX, posY
         const containerRect = this.$el.getBoundingClientRect()
         const dialogRect = dialog.getBoundingClientRect()
@@ -1466,6 +1471,7 @@ export default {
         }
       }
     },
+    // This is used only when either edit or delete mode is on
     checkAndCreateDrawnFeaturePopups: function (data) {
       if (this.activeDrawMode) {
         // double click fires 'updated' callback
@@ -2096,7 +2102,7 @@ export default {
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       annotatedType: 'Everyone',
-      annotatedTypes: ['Everyone', 'Only me', 'Others'],
+      annotatedTypes: ['Everyone', 'Me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
