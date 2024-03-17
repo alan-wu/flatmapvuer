@@ -1923,6 +1923,8 @@ export default {
   transition: all 1s ease;
   &.open {
     opacity: 1;
+    position: relative;
+    z-index: 2;
   }
   &.close {
     opacity: 0;
