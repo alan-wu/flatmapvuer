@@ -924,7 +924,7 @@ export default {
     drawingEvent: function (type) {
       this.closePopup()
       // disable mode icon click if any tool is active
-      if (this.drawnTypes.includes(type) && !this.activeDrawMode) {
+      if (this.drawnTypes.includes(type) && !this.activeDrawMode && !this.relevanceDisplay) {
         if (type === 'Point') {
           const point = this.$el.querySelector('.mapbox-gl-draw_point')
           this.$el.querySelector('.mapbox-gl-draw_point').click()
