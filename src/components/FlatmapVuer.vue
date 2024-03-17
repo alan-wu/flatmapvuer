@@ -2160,8 +2160,12 @@ export default {
      * popup dialog via click icon
      */
     relevanceDisplay: function (display) {
+      const relevanceIcon = this.$el.querySelector('.drawRelevance')
       if (display) {
+        relevanceIcon.classList.add('iconSelected')
         this.dialogCssHacks()
+      } else {
+        relevanceIcon.classList.remove('iconSelected')
       }
     },
     viewingMode: function (mode) {
