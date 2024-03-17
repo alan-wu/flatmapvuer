@@ -877,8 +877,7 @@ export default {
     // This should be called when create is confirmed or cancelled
     initialiseDrawingEvent: function () {
       this.inDrawing = false
-      this.relevanceDisplay = false
-      this.relevanceEntry = {}
+      this.initialiseDialog()
       this.activeDrawTool = undefined
       this.createdEvent = undefined
     },
@@ -904,6 +903,10 @@ export default {
         }
         this.initialiseDrawingEvent()
       }
+    },
+    initialiseDialog: function () {
+      this.relevanceDisplay = false
+      this.relevanceEntry = {}
     },
     relevanceDialogPopup: function () {
       const inactive = this.$el.querySelector('.drawRelevance').classList.contains('inactive')
@@ -1294,7 +1297,7 @@ export default {
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
               // Reset data entry for every draw
-              this.relevanceEntry = {}
+              this.initialiseDialog()
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               if (this.createdEvent) {
@@ -1510,8 +1513,7 @@ export default {
             }
             // Hide dialog when updated or deleted event is fired and tooltip is displayed
             if (data.feature.type === 'updated' || data.feature.type === 'deleted') {
-              this.relevanceDisplay = false
-              this.relevanceEntry = {}
+              this.initialiseDialog()
             }
           }
         } else {
@@ -2152,12 +2154,6 @@ export default {
       } else {
         relevanceIcon.classList.remove('inactive')
       }
-    },
-    /**
-     * click different linestring content when displayed
-     */
-    relevanceEntry: function () {
-      this.dialogCssHacks()
     },
     /**
      * popup dialog via click icon
