@@ -1411,26 +1411,26 @@ export default {
     },
     drawIconCssHacks: function () {
       // set tool/mode icon status
-      if (this.$el.querySelector('.toolSelected')) {
+      if (this.$el.querySelector('.iconSelected')) {
         this.drawnTypes.map((t) => {
           const dtype = this.$el.querySelector(`.draw${t}`)
           if (dtype) {
-            dtype.classList.remove('toolSelected');
+            dtype.classList.remove('iconSelected');
             dtype.classList.remove('inactive');
           }
         })
         this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.remove('toolSelected');
+          this.$el.querySelector(`.draw${m}`).classList.remove('iconSelected');
           this.$el.querySelector(`.draw${m}`).classList.remove('inactive');
         })
       }
       if (this.activeDrawTool) {
-        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
+        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('iconSelected');
         this.drawModes.map((m) => {
           this.$el.querySelector(`.draw${m}`).classList.add('inactive');
         })
       } else if (this.activeDrawMode) {
-        this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('toolSelected');
+        this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('iconSelected');
         this.drawnTypes.map((t) => {
           const dtype = this.$el.querySelector(`.draw${t}`)
           if (dtype) dtype.classList.add('inactive');
@@ -2461,7 +2461,7 @@ export default {
   padding: 4px;
 }
 
-.toolSelected {
+.iconSelected {
   color: var(--el-color-primary-light-5) !important;
 }
 
