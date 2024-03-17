@@ -369,7 +369,7 @@
         width="200"
         :teleported="false"
         trigger="click"
-        popper-class="background-popper"
+        popper-class="background-popper h-auto"
         virtual-triggering
       >
         <div>
@@ -971,6 +971,15 @@ export default {
           const resource = [data.models]
           const taxonomy = this.entry
           const biologicalSex = this.biologicalSex
+          let taxons = undefined
+          if (data.taxons) {
+            // check if data.taxons is string or array
+            if (typeof data.taxons !== 'object') {
+              taxons = JSON.parse(data.taxons)
+            } else {
+              taxons = data.taxons
+            }
+          }
           const payload = {
             dataset: data.dataset,
             biologicalSex: biologicalSex,
@@ -980,9 +989,7 @@ export default {
             feature: data,
             userData: args,
             eventType: eventType,
-            provenanceTaxonomy: data.taxons
-              ? JSON.parse(data.taxons)
-              : undefined,
+            provenanceTaxonomy: taxons,
           }
           if (eventType === 'click') {
             if (this.viewingMode === 'Network Discovery') {
@@ -2109,6 +2116,10 @@ export default {
       border-color: $app-primary-color;
     }
   }
+}
+
+:deep(.background-popper.el-popover.el-popper.h-auto) {
+  height: auto !important;
 }
 
 :deep(.open-map-popper.el-popover.el-popper) {

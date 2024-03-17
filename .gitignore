@@ -8,3 +8,4 @@ cypress/reports/*
 docs/.vitepress/dist
 docs/.vitepress/cache
 docs/components
+.DS_Store
