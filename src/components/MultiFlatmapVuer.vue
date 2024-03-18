@@ -27,10 +27,10 @@
               :label="key"
               :value="key"
             >
-              <el-row>
-                <el-col :span="8"><i :class="item.iconClass"></i></el-col>
-                <el-col :span="12">{{ key }}</el-col>
-              </el-row>
+              <span class="select-box-icon">
+                <i :class="item.iconClass"></i>
+              </span>
+              {{ key }}
             </el-option>
           </el-select>
         </template>
@@ -40,7 +40,6 @@
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
-      :showLayer="showLayer"
       v-show="activeSpecies == key"
       :entry="item.taxo"
       :uuid="item.uuid"
@@ -53,15 +52,17 @@
       :openMapOptions="openMapOptions"
       :disableUI="disableUI"
       @view-latest-map="viewLatestMap"
-      @resource-selected="FlatmapSelected"
+      @resource-selected="resourceSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
-      @open-map="$emit('open-map', $event)"
-      :featureInfo="featureInfo"
+      @open-map="
+        /**
+         * This event is emitted when the user chooses a different map option
+         * from ``openMapOptions`` props.
+         * @arg $event
+         */
+        $emit('open-map', $event)"
       :minZoom="minZoom"
-      :pathControls="pathControls"
-      :searchable="searchable"
-      :layerControl="layerControl"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
@@ -95,6 +96,9 @@ const TAXON_UUID = {
   'NCBITaxon:9685': '73060497-46a6-52bf-b975-cac511c127cb',
 }
 
+/**
+ * A vue component to show a flatmap from the list of multiple flatmap data.
+ */
 export default {
   name: 'MultiFlatmapVuer',
   components: {
@@ -114,10 +118,15 @@ export default {
   mounted: function () {
     this.initialise()
     EventBus.on('onActionClick', (action) => {
-      this.FlatmapSelected(action)
+      this.resourceSelected(action)
     })
   },
   methods: {
+    /**
+     * @vuese
+     * Function to initialise the component when mounted.
+     * It returns a promise.
+     */
     initialise: function () {
       return new Promise((resolve) => {
         if (this.requireInitialisation) {
@@ -192,37 +201,89 @@ export default {
         }
       })
     },
-    FlatmapSelected: function (resource) {
-      this.$emit('resource-selected', resource)
+    /**
+     * @vuese
+     * Function to emit ``resource-selected`` event with provided ``resource``.
+     * @arg action
+     */
+     resourceSelected: function (action) {
+      /**
+       * This event is emitted by ``resourceSelected`` method.
+       */
+      this.$emit('resource-selected', action)
     },
+    /**
+     * @vuese
+     * Function to emit ``ready`` event after the flatmap is loaded.
+     * @arg component
+     */
     FlatmapReady: function (component) {
+      /**
+       * This event is emitted by ``FlatmapReady`` method after the flatmap is loaded.
+       * @arg component
+       */
       this.$emit('ready', component)
     },
-    getCoordinatesOfLastClick: function () {
-      const flatmap = this.$refs[this.activeSpecies]
-      if (flatmap && flatmap[0]) {
-        return flatmap[0].getCoordinatesOfLastClick()
-      }
-      return undefined
-    },
+    /**
+     * @vuese
+     * Function to get the current active map.
+     */
     getCurrentFlatmap: function () {
       return this.$refs[this.activeSpecies][0]
     },
+    /**
+     * @vuese
+     * Function to emit ``pan-zoom-callback`` event
+     * from the event emitted in ``callback`` function from ``MapManager.loadMap()``.
+     * @arg payload
+     */
     panZoomCallback: function (payload) {
+      /**
+       * The event emitted by ``panZoomCallback`` method.
+       * @arg payload
+       */
       this.$emit('pan-zoom-callback', payload)
     },
+    /**
+     * @vuese
+     * Function to show popup on map.
+     * @arg featureId,
+     * @arg node,
+     * @arg options
+     */
     showPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showPopup(featureId, node, options)
     },
+    /**
+     * @vuese
+     * Function to show marker popup.
+     * @arg featureId,
+     * @arg node,
+     * @arg options
+     */
     showMarkerPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showMarkerPopup(featureId, node, options)
     },
+    /**
+     * @vuese
+     * Function to set species.
+     * This function is called on the first load and
+     * when user changes the species.
+     * @arg species,
+     * @arg state,
+     * @arg numberOfRetry
+     */
     setSpecies: function (species, state, numberOfRetry) {
       if (this.$refs && species in this.$refs) {
         this.activeSpecies = species
         this.$refs[this.activeSpecies][0].createFlatmap(state)
+        /**
+         * This event is emitted by ``setSpecies`` method.
+         * Emitted on first load and when user changes species.
+         * @arg activeSpecies
+         */
         this.$emit('flatmapChanged', this.activeSpecies)
       } else if (numberOfRetry) {
         const retry = numberOfRetry - 1
@@ -234,8 +295,10 @@ export default {
       }
     },
     /**
+     * @vuese
      * Function to switch to the latest existing map from
      * a legacy map of the same species.
+     * @arg state
      *
      * @private
      */
@@ -254,7 +317,11 @@ export default {
       }
     },
     /**
+     * @vuese
      * Create a legacy entry with the provided information
+     * @arg state,
+     * @arg taxo,
+     * @arg uuid
      *
      * @private
      */
@@ -282,8 +349,10 @@ export default {
       }
     },
     /**
+     * @vuese
      * Function used to translate the legacy map state to one that can be used in current
      * flatmap if required. If it is a legacy, an Select entry will be added
+     * @arg state
      *
      * @private
      */
@@ -339,6 +408,7 @@ export default {
       })
     },
     /**
+     * @vuese
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
      *
@@ -354,8 +424,10 @@ export default {
       return state
     },
     /**
+     * @vuese
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
+     * @arg state
      *
      * @public
      */
@@ -377,31 +449,8 @@ export default {
         })
       }
     },
-    resourceSelected: function (action) {
-      this.$emit('resource-selected', action)
-    },
   },
   props: {
-    showLayer: {
-      type: Boolean,
-      default: false,
-    },
-    featureInfo: {
-      type: Boolean,
-      default: false,
-    },
-    pathControls: {
-      type: Boolean,
-      default: true,
-    },
-    searchable: {
-      type: Boolean,
-      default: false,
-    },
-    layerControl: {
-      type: Boolean,
-      default: false,
-    },
     /**
      * Initial species for the flatmap.
      * This value will be ignored if a valid state object is provided.
@@ -410,22 +459,37 @@ export default {
       type: String,
       default: '',
     },
+    /**
+     * The minimum zoom level of the map.
+     */
     minZoom: {
       type: Number,
       default: 4,
     },
+    /**
+     * The option to create map on component mounted.
+     */
     renderAtMounted: {
       type: Boolean,
       default: false,
     },
+    /**
+     * The option to show tooltips for help mode.
+     */
     helpMode: {
       type: Boolean,
       default: false,
     },
+    /**
+     * The option to display minimap at the top-right corner of the map.
+     */
     displayMinimap: {
       type: Boolean,
       default: false,
     },
+    /**
+     * The option to show star in legend area.
+     */
     showStarInLegend: {
       type: Boolean,
       default: false,
@@ -438,11 +502,55 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * The data to show different map options.
+     * Available at the bottom-left corner ("Open new map" tooltip).
+     */
     openMapOptions: {
       type: Array,
     },
+    /**
+     * The available species data for different maps.
+     * This data is used for multi flatmaps.
+     */
     availableSpecies: {
       type: Object,
+      /**
+       * ```{
+          'Human Female': {
+            taxo: 'NCBITaxon:9606',
+            biologicalSex: 'PATO:0000383',
+            iconClass: 'mapicon-icon_human',
+            displayWarning: true,
+          },
+          'Human Male': {
+            taxo: 'NCBITaxon:9606',
+            biologicalSex: 'PATO:0000384',
+            iconClass: 'mapicon-icon_human',
+            displayWarning: true,
+          },
+          Rat: {
+            taxo: 'NCBITaxon:10114',
+            iconClass: 'mapicon-icon_rat',
+            displayLatestChanges: true,
+          },
+          Mouse: {
+            taxo: 'NCBITaxon:10090',
+            iconClass: 'mapicon-icon_mouse',
+            displayWarning: true,
+          },
+          Pig: {
+            taxo: 'NCBITaxon:9823',
+            iconClass: 'mapicon-icon_pig',
+            displayWarning: true,
+          },
+          Cat: {
+            taxo: 'NCBITaxon:9685',
+            iconClass: 'mapicon-icon_cat',
+            displayWarning: true,
+          },
+        }```
+       */
       default: function () {
         return {
           'Human Female': {
@@ -494,6 +602,9 @@ export default {
       type: String,
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
+    /**
+     * Specify the endpoint of the SPARC API.
+     */
     sparcAPI: {
       type: String,
       default: 'https://api.sparc.science/',
@@ -566,6 +677,13 @@ export default {
         }
       }
     }
+  }
+
+  .select-box-icon {
+    display: inline-block;
+    width: 24px;
+    margin-right: 5px;
+    text-align: center;
   }
 }
 
