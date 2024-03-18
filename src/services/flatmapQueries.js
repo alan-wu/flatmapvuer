@@ -1,9 +1,12 @@
 /* eslint-disable no-alert, no-console */
 // remove duplicates by stringifying the objects
 const removeDuplicates = function (arrayOfAnything) {
-  return [...new Set(arrayOfAnything.map((e) => JSON.stringify(e)))].map((e) =>
-    JSON.parse(e)
-  )
+  if (arrayOfAnything) {
+    return [...new Set(arrayOfAnything.map((e) => JSON.stringify(e)))].map((e) =>
+      JSON.parse(e)
+    )
+  }
+  return [];
 }
 
 const cachedLabels = {}
@@ -35,9 +38,13 @@ const findTaxonomyLabel = async function (flatmapAPI, taxonomy) {
 }
 
 const inArray = function (ar1, ar2) {
-  let as1 = JSON.stringify(ar1)
-  let as2 = JSON.stringify(ar2)
-  return as1.indexOf(as2) !== -1
+  if (ar1 && ar2) {
+    let as1 = JSON.stringify(ar1)
+    let as2 = JSON.stringify(ar2)
+    return as1.indexOf(as2) !== -1
+  } else {
+    return false;
+  }
 }
 
 let FlatmapQueries = function () {
@@ -221,6 +228,7 @@ let FlatmapQueries = function () {
     this.components = []
     if (!keastIds || keastIds.length == 0) return
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
+
     let prom1 = new Promise((resolve) => {
       fetch(`${this.flatmapApi}knowledge/query/`, {
         method: 'POST',
@@ -337,29 +345,6 @@ let FlatmapQueries = function () {
       }
     })
     return found.flat()
-  }
-
-  this.findComponents = function (connectivity) {
-    let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-    let nodes = removeDuplicates(dnodes)
-
-    let found = []
-    let terminal = false
-    nodes.forEach((node) => {
-      terminal = false
-      // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-      if (inArray(connectivity.axons, node)) {
-        terminal = true
-      }
-      if (inArray(connectivity.dendrites, node)) {
-        terminal = true
-      }
-      if (!terminal) {
-        found.push(node)
-      }
-    })
-
-    return found
   }
 
   this.stripPMIDPrefix = function (pubmedId) {

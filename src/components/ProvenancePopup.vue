@@ -328,8 +328,15 @@ export default {
   cursor: pointer;
 }
 
-.popover-origin-help {
+:deep(.popover-origin-help.el-popover) {
   text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #f3ecf6;
+    }
+  }
 }
 
 .info {

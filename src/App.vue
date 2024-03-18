@@ -218,7 +218,7 @@ export default {
         position: 'absolute',
       },
       displayCloseButton: false,
-      initial: 'Rat (NPO)',
+      initial: 'Rat',
       helpMode: false,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
