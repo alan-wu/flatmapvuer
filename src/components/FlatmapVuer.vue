@@ -151,11 +151,10 @@
           <template #reference>
             <map-svg-icon
               icon="connection"
-              class="icon-button connection"
-              @click="showRelevanceDialog(true)"
+              class="icon-button drawRelevance inactive"
+              @click="relevanceDialogPopup"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
-              v-show="isRelevance && !inDrawing"
             />
           </template>
         </el-popover>
@@ -167,13 +166,13 @@
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[11].value"
-          v-if="drawingType !== 'LineString' && drawingType !== 'Polygon'"
+          v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
         >
           <template #reference>
             <map-svg-icon
               icon="drawPoint"
               class="icon-button drawPoint"
-              @click="drawnEvent('point')"
+              @click="drawingEvent('Point')"
               @mouseover="showToolitip(11)"
               @mouseout="hideToolitip(11)"
             />
@@ -187,13 +186,13 @@
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[12].value"
-          v-if="drawingType !== 'Point' && drawingType !== 'Polygon'"
+          v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
         >
           <template #reference>
             <map-svg-icon
               icon="drawLine"
               class="icon-button drawLineString"
-              @click="drawnEvent('line')"
+              @click="drawingEvent('LineString')"
               @mouseover="showToolitip(12)"
               @mouseout="hideToolitip(12)"
             />
@@ -207,13 +206,13 @@
           width="80"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[13].value"
-          v-if="drawingType !== 'Point' && drawingType !== 'LineString'"
+          v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
         >
           <template #reference>
             <map-svg-icon
               icon="drawPolygon"
               class="icon-button drawPolygon"
-              @click="drawnEvent('polygon')"
+              @click="drawingEvent('Polygon')"
               @mouseover="showToolitip(13)"
               @mouseout="hideToolitip(13)"
             />
@@ -231,16 +230,15 @@
           <template #reference>
             <map-svg-icon
               icon="drawTrash"
-              class="icon-button drawTrash"
-              @click="drawnEvent('trash')"
+              class="icon-button drawDelete"
+              @click="drawingEvent('Delete')"
               @mouseover="showToolitip(14)"
               @mouseout="hideToolitip(14)"
-              v-show="!doubleClickedFeature"
             />
           </template>
         </el-popover>
         <el-popover
-          content="Comment"
+          content="Edit"
           placement="top"
           :teleported="false"
           trigger="manual"
@@ -251,11 +249,10 @@
           <template #reference>
             <map-svg-icon
               icon="comment"
-              class="icon-button drawTrash"
-              @click="drawnEvent('trash')"
+              class="icon-button drawEdit"
+              @click="drawingEvent('Edit')"
               @mouseover="showToolitip(15)"
               @mouseout="hideToolitip(15)"
-              v-show="doubleClickedFeature"
             />
           </template>
         </el-popover>
@@ -520,18 +517,18 @@
             </el-select>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
-            <el-row class="backgroundText">Drawing Type*</el-row>
+            <el-row class="backgroundText">Drawn By*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
-                v-model="drawingType"
+                v-model="drawnType"
                 placeholder="Select"
                 class="select-box"
                 popper-class="flatmap_dropdown"
-                @change="setDrawingType"
+                @change="setDrawnType"
               >
                 <el-option
-                  v-for="item in drawingTypes"
+                  v-for="item in drawnTypes"
                   :key="item"
                   :label="item"
                   :value="item"
@@ -542,18 +539,18 @@
                 </el-option>
               </el-select>
             </el-row>
-            <el-row class="backgroundText">Participation Type*</el-row>
+            <el-row class="backgroundText">Annotated By*</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
-                v-model="participationType"
+                v-model="annotatedType"
                 placeholder="Select"
                 class="select-box"
                 popper-class="flatmap_dropdown"
-                @change="setParticipationType"
+                @change="setAnnotatedType"
               >
                 <el-option
-                  v-for="item in participationTypes"
+                  v-for="item in annotatedTypes"
                   :key="item"
                   :label="item"
                   :value="item"
@@ -573,8 +570,8 @@
               class="flatmap-radio"
               @change="setDimension"
             >
-            <el-radio :value="false">2D</el-radio>
-            <el-radio :value="true">3D</el-radio>
+            <el-radio :label="false">2D</el-radio>
+            <el-radio :label="true">3D</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -597,8 +594,8 @@
               class="flatmap-radio"
               @change="setColour"
             >
-              <el-radio :value="true">Colour</el-radio>
-              <el-radio :value="false">Greyscale</el-radio>
+              <el-radio :label="true">Colour</el-radio>
+              <el-radio :label="false">Greyscale</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -609,8 +606,8 @@
               class="flatmap-radio"
               @change="setOutlines"
             >
-              <el-radio :value="true">Show</el-radio>
-              <el-radio :value="false">Hide</el-radio>
+              <el-radio :label="true">Show</el-radio>
+              <el-radio :label="false">Hide</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -684,53 +681,18 @@
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
-      <el-dialog
-        v-model="relevanceDisplay"
-        width="200"
-        :modal="false"
-        :show-close="false"
-        :lock-scroll="false"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        draggable
-      >
-        <template #header v-if="inDrawing">
-          <span class="dialog-title">Finalise drawing</span>
-        </template>
-        <template #header v-else>
-          <el-button type="primary" plain @click="showRelevanceDialog(false)">
-            Close
-          </el-button>
-        </template>
-        <el-row v-if="inDrawing">
-          <el-col :span="13">
-            <el-button type="primary" plain @click="confirmDrawnFeature">
-              Confirm
-            </el-button>
-          </el-col>
-          <el-col :span="11">
-            <el-button type="primary" plain @click="rollbackAnnotationEvent">
-              Cancel
-            </el-button>
-          </el-col>
-        </el-row>
-        <el-row v-if="isRelevance">
-          <el-col :span="20">
-            <b><span>Related Features</span></b>
-          </el-col>
-          <el-col :span="4">
-            <el-icon><el-icon-circle-close @click="closePopup()"/></el-icon>
-          </el-col>
-          <el-card
-            shadow="hover"
-            v-for="(value, key) in relevanceEntry" 
-            :key="key"
-            @click="displayRelevanceTooltip(value)"
-          >
-            <span>{{ key }}</span>
-          </el-card>
-        </el-row>
-      </el-dialog>
+      <RelevanceDialog
+        class="relevance-dialog"
+        v-show="relevanceDisplay"
+        :entry="relevanceEntry"
+        :drawing="inDrawing"
+        :relevance="relevance"
+        @display="relevanceDialogPopup"
+        @confirm="confirmDrawnFeature"
+        @cancel="cancelDrawnFeature"
+        @popup="closePopup"
+        @tooltip="checkAndCreatePopups"
+      />
     </div>
   </div>
 </template>
@@ -742,7 +704,6 @@ import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
-  CircleClose as ElIconCircleClose,
 } from '@element-plus/icons-vue'
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
@@ -769,12 +730,60 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
+import RelevanceDialog from './RelevanceDialog.vue'
+
+/**
+ * @param scopeElement    Draggable scope area (Optional)
+ * @param dragElement     Draggable element
+ */
+const draggable = (scopeElement, dragElement) => {
+  let startX, startY, clickX, clickY, posX, posY
+  // reset position in case previous pupped up dialog is dragged
+  dragElement.style.left = ''
+  dragElement.style.top = ''
+  // const scopeRect = scopeElement.getBoundingClientRect()
+  // const dragRect = dragElement.getBoundingClientRect()
+
+  dragElement.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = dragElement.offsetLeft
+    startY = dragElement.offsetTop
+    clickX = e.clientX
+    clickY = e.clientY
+
+    dragElement.addEventListener('mousemove', drag, false);
+    document.addEventListener('mouseup', () => {
+      dragElement.removeEventListener('mousemove', drag, false);
+    }, false);
+  }, false);
+
+  function drag(e) {
+    e.preventDefault();
+    posX = startX - (clickX - e.clientX)
+    posY = startY - (clickY - e.clientY)
+    // if (
+    //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
+    //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
+    // ) {
+    dragElement.style.left = `${posX}px`;
+    dragElement.style.top = `${posY}px`;
+    // } else {
+    //   if (posX <= scopeRect.left) {
+    //     dragElement.style.left = '0px';
+    //   } else if (posX + dragRect.width >= scopeRect.right) {
+    //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
+    //   }
+    //   if (posY <= scopeRect.top) {
+    //     dragElement.style.top = '0px';
+    //   } else if (posY + dragRect.height >= scopeRect.bottom) {
+    //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
+    //   }
+    // }
+  }
+}
 
 const centroid = (geometry) => {
-  let featureGeometry = {
-    lng: 0,
-    lat: 0,
-  }
+  let featureGeometry = { lng: 0, lat: 0, }
   let coordinates
   if (geometry.type === "Polygon") {
     coordinates = geometry.coordinates[0]
@@ -892,71 +901,91 @@ export default {
     return { annotator }
   },
   methods: {
-    showRelevanceDialog: function (show) {
-      // Change back to the initial window size
-      // For a better view of the relevance popup
-      this.resetView()
-      // Used when check exist drawn annotation relevance
-      if (
-        this.createdEvent ||
-        (this.currentDrawn && Object.keys(this.relevanceEntry).length > 0)
-      ) {
-        this.relevanceDisplay = show
-        this.closePopup()
-      }
+    // This should be called when create is confirmed or cancelled
+    initialiseDrawing: function () {
+      this.inDrawing = false
+      this.initialiseDialog()
+      this.activeDrawTool = undefined
+      this.createdEvent = undefined
     },
-    displayRelevanceTooltip: function (value) {
-      if (this.mapImp) {
-        this.checkAndCreatePopups(value)
+    cancelDrawnFeature: function () {
+      if (this.createdEvent) {
+        this.closePopup()
+        this.annotationEntry = {
+          ...this.createdEvent.feature,
+          resourceId: this.serverUUID,
+        }
+        this.rollbackAnnotationEvent()
+        this.initialiseDrawing()
       }
     },
     confirmDrawnFeature: function () {
       if (this.createdEvent) {
         this.checkAndCreatePopups(this.createdEvent)
         // Add relevance if exist to annotationEntry
-        // Relevance will only be added in creating draw annotation
-        // And will not be updated if move drawn annotation
+        // Relevance will only be added in creating new drawn feature annotation
+        // And will not be updated if move drawn features
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
-        this.setActiveDrawTool(false)
+        this.initialiseDrawing()
       }
     },
-    setActiveDrawTool: function (active = true) {
-      if (document.querySelector('.toolSelected')) {
-        this.drawingTypes.map((t) => {
-          if (t !== 'All' && t !== 'None') {
-            document.querySelector(`.draw${t}`).classList.remove('toolSelected');
+    initialiseDialog: function () {
+      this.relevanceDisplay = false
+      this.relevanceEntry = {}
+    },
+    relevanceDialogPopup: function () {
+      const inactive = this.$el.querySelector('.drawRelevance').classList.contains('inactive')
+      // disable click popup if icon inactive or in drawing
+      if (!inactive && !this.inDrawing) { 
+        this.closePopup()       
+        this.relevanceDisplay = !this.relevanceDisplay
+      }
+    },
+    drawingEvent: function (type) {
+      this.closePopup()
+      // disable mode icon click if any tool is active
+      if (this.drawnTypes.includes(type) && !this.activeDrawMode && !this.relevanceDisplay) {
+        if (type === 'Point') {
+          const point = this.$el.querySelector('.mapbox-gl-draw_point')
+          this.$el.querySelector('.mapbox-gl-draw_point').click()
+          this.activeDrawTool = point.classList.contains('active') ? 'Point' : undefined
+        } else if (type === 'LineString') {
+          const line = this.$el.querySelector('.mapbox-gl-draw_line')
+          this.$el.querySelector('.mapbox-gl-draw_line').click()
+          this.activeDrawTool = line.classList.contains('active') ? 'LineString' : undefined
+        } else if (type === 'Polygon') {
+          const polygon = this.$el.querySelector('.mapbox-gl-draw_polygon')
+          this.$el.querySelector('.mapbox-gl-draw_polygon').click()
+          this.activeDrawTool = polygon.classList.contains('active') ? 'Polygon' : undefined
+        }
+        // disable tool icon click if any mode is on
+      } else if (this.drawModes.includes(type) && !this.activeDrawTool) {
+        if (type === 'Delete') {
+          if (this.currentDrawnFeature && !this.activeDrawMode) {
+            // Force simple_select a feature for delete event
+            this.doubleClickedFeature = false
+            this.changeAnnotationDrawMode({
+              mode: 'simple_select',
+              options: { featureIds: [this.currentDrawnFeature.id] }
+            })
+            this.trashAnnotationFeature()
           }
-        })
-      }
-      // Either confirmed or cancelled drawing, reset related variables
-      if (!active) {
-        this.inDrawing = false
-        this.relevanceDisplay = false
-        this.relevanceEntry = {}
-        this.activeDrawTool = undefined
-        this.createdEvent = undefined
-      }
-      if (this.activeDrawTool) {
-        document.querySelector(`.draw${this.activeDrawTool}`).classList.add('toolSelected');
+          this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
+          // clear currentDrawnFeature when quit delete mode
+          if (!this.activeDrawMode) {
+            this.currentDrawnFeature = undefined
+          }
+        } else if (type === 'Edit') {
+          this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
+        }
       }
     },
-    drawnEvent: function (type) {
-      if (type === 'point') {
-        document.querySelector('.mapbox-gl-draw_point').click()
-        this.activeDrawTool = 'Point'
-      } else if (type === 'line') {
-        document.querySelector('.mapbox-gl-draw_line').click()
-        this.activeDrawTool = 'LineString'
-      } else if (type === 'polygon') {
-        document.querySelector('.mapbox-gl-draw_polygon').click()
-        this.activeDrawTool = 'Polygon'
-      } else  if (type === 'trash') {
-        document.querySelector('.mapbox-gl-draw_trash').click()
-        this.activeDrawTool = undefined
+    changeAnnotationDrawMode: function (mode) {
+      if (this.mapImp) {
+        this.mapImp.changeAnnotationDrawMode(mode)
       }
-      this.setActiveDrawTool()
     },
     // Remove all drawn annotations from annotation layer
     clearAnnotationFeature: function () {
@@ -968,22 +997,18 @@ export default {
         this.mapImp.clearAnnotationFeature()
       }
     },
-    rollbackAnnotationEvent: function () {
+    trashAnnotationFeature: function () {
       if (this.mapImp) {
-        let annotationEvent
-        // For 'updated' and 'deleted' callback
-        if (this.drawnAnnotationEvent.includes(this.annotationEntry.type)) {
-          annotationEvent = this.annotationEntry
-        } else if (this.createdEvent) {
-          // For 'created' callback
-          this.closePopup()
-          annotationEvent = {
-            ...this.createdEvent.feature,
-            resourceId: this.serverUUID,
-          }
-          this.setActiveDrawTool(false)
-        }
-        this.mapImp.rollbackAnnotationEvent(annotationEvent)
+        this.mapImp.trashAnnotationFeature()
+      }
+    },
+    rollbackAnnotationEvent: function () {
+      // For 'updated' and 'deleted' callback
+      if (
+        this.mapImp &&
+        this.drawnAnnotationEvent.includes(this.annotationEntry.type)
+      ) {
+        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
     },
     commitAnnotationEvent: function (annotation) {
@@ -996,6 +1021,8 @@ export default {
         this.annotationSubmitted = true
         if (this.annotationEntry.type === 'deleted') this.closePopup()
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
+        // Use to update 'this.drawnAnnotationFeatures'
+        this.addAnnotationFeature()
       }
     },
     setFeatureAnnotated: function () {
@@ -1013,39 +1040,42 @@ export default {
     },
     addAnnotationFeature: function () {
       if (this.mapImp) {
-        this.clearAnnotationFeature()
-        if (this.drawingType !== 'None') {
+        if (!this.annotationSubmitted) this.clearAnnotationFeature()
+        if (this.drawnType !== 'None') {
           this.annotator.drawnFeatures(this.serverUUID)
             .then((drawnFeatures) => {
               // Use to switch the displayed feature type
-              if (this.drawingType !== 'All') {
+              if (this.drawnType !== 'All tools') {
                 drawnFeatures = drawnFeatures.filter((feature) => {
-                  return feature.geometry.type === this.drawingType
+                  return feature.geometry.type === this.drawnType
                 })
               }
               this.drawnAnnotationFeatures = drawnFeatures
-              for (const feature of drawnFeatures) {
-                if (this.participationType !== 'All') {
-                  this.annotator
-                    .itemAnnotations(this.serverUUID, feature.id)
-                    .then((value) => {
-                      let participated = value.filter((v) => {
-                        return (
-                          v.creator.name === this.userInformation.name &&
-                          v.creator.email === this.userInformation.email
-                        )
-                      }).length > 0
-                      if (
-                        (this.participationType === 'Participated' && participated) ||
-                        (this.participationType === 'Not participated' && !participated)
-                      ) {
-                        this.mapImp.addAnnotationFeature(feature)
-                      }
-                    })
-                    .catch((reason) => {
-                      console.log(reason) // Error!
-                    })
-                } else this.mapImp.addAnnotationFeature(feature)
+              // No need to call 'addAnnotationFeature' when a new feature created
+              if (!this.annotationSubmitted) {
+                for (const feature of drawnFeatures) {
+                  if (this.annotatedType !== 'Everyone') {
+                    this.annotator
+                      .itemAnnotations(this.serverUUID, feature.id)
+                      .then((value) => {
+                        let participated = value.filter((v) => {
+                          return (
+                            v.creator.name === this.userInformation.name &&
+                            v.creator.email === this.userInformation.email
+                          )
+                        }).length > 0
+                        if (
+                          (this.annotatedType === 'Me' && participated) ||
+                          (this.annotatedType === 'Others' && !participated)
+                        ) {
+                          this.mapImp.addAnnotationFeature(feature)
+                        }
+                      })
+                      .catch((reason) => {
+                        console.log(reason) // Error!
+                      })
+                  } else this.mapImp.addAnnotationFeature(feature)
+                }
               }
             })
             .catch((reason) => {
@@ -1059,17 +1089,17 @@ export default {
         // Control the show/hide of the drawn annotations
         this.mapImp.showAnnotator(flag)
         // Hide default toolbar, we will use customised SVG icons instead
-        document.querySelector('.maplibregl-ctrl-group').style.display = 'none'
+        this.$el.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
-    setDrawingType: function (flag) {
-      this.drawingType = flag
+    setDrawnType: function (flag) {
+      this.drawnType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
       }
     },
-    setParticipationType: function (flag) {
-      this.participationType = flag
+    setAnnotatedType: function (flag) {
+      this.annotatedType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
       }
@@ -1412,47 +1442,59 @@ export default {
     eventCallback: function () {
       return (eventType, data, ...args) => {
         if (eventType === 'annotation') {
+          const payload = {
+            feature: data,
+            userData: args,
+            eventType: eventType,
+          }
           // Popup closed will trigger aborted event
           if (data.type === 'aborted') {
-            this.doubleClickedFeature = false
             // Rollback drawing when no new annotation submitted
-            if (!this.annotationSubmitted) {
-              this.rollbackAnnotationEvent()
-            }
+            if (!this.annotationSubmitted) this.rollbackAnnotationEvent()
+            else this.annotationSubmitted = false
           } else if (data.type === 'modeChanged') {
-            this.doubleClickedFeature = false
             // 'modeChanged' event is before 'created' event
             if (data.feature.mode.startsWith('draw_')) {
-              this.closePopup()
               // Reset data entry for every draw
-              this.annotationEntry = {}
-              this.relevanceEntry = {}
+              this.initialiseDialog()
               this.inDrawing = true
-            } else if (data.feature.mode === 'simple_select') {
-              if (this.inDrawing) this.showRelevanceDialog(true)
+            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
+              if (this.createdEvent) {
+                this.relevanceDisplay = true
+              } else {
+                // Reset if a invalid draw
+                this.initialiseDrawing()
+              }
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
             }
-          } else {
-            if (data.type === 'created' || data.type === 'updated') {
-              const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
-              data.feature = feature
-              // NB. this might now be `null` if user has deleted it (before OK/Submit)
-              // so maybe then no `service.addAnnotation` ??
-              if (data.type === 'updated') {
-                // Better to use geometry change to indicate position changed
-                if (this.doubleClickedFeature) data.positionUpdated = false
-                else data.positionUpdated = true
+          } else if (data.type === 'selectionChanged') {
+            this.currentDrawnFeature =
+              data.feature.features.length === 0 ?
+                undefined :
+                data.feature.features[0]
+            payload.feature.feature = this.currentDrawnFeature
+            if (!this.inDrawing) {
+              this.initialiseDialog()
+              // For exist drawn annotation features
+              if (this.currentDrawnFeature) {
+                this.processRelevance()
+                this.checkAndCreateDrawnFeaturePopups(payload)
               }
             }
-            const payload = {
-              feature: data,
-              userData: args,
-              eventType: eventType,
+          } else {
+            if (data.type === 'created' || data.type === 'updated') {
+              if (data.type === 'updated' && data.feature.action) {
+                data.positionUpdated = data.feature.action === 'move'
+              }
+              const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
+              payload.feature.feature = feature
+              // NB. this might now be `null` if user has deleted it (before OK/Submit)
+              // so maybe then no `service.addAnnotation` ??
             }
             // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
             // Hence disable direct popup when 'created' event, dialog will be used instead.
-            if (data.type === 'created') {              
+            if (data.type === 'created') {
               this.createdEvent = payload
             } else {
               this.checkAndCreatePopups(payload)
@@ -1482,19 +1524,10 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                // Only clicked relevance data will be added 
-                let relevance = data.models ? data.models : data.featureId
-                if (relevance) {
-                  this.currentDrawn = undefined
-                  if (
-                    this.inDrawing &&
-                    // Currently only draw line will show relevance
-                    this.activeDrawTool === 'LineString' &&
-                    !(relevance in this.relevanceEntry)
-                  ) {
-                    this.relevanceEntry[relevance] = payload
-                  }
-                } else this.currentDrawn = data.id
+                // Stop adding features if dialog displayed
+                if (this.inDrawing && !this.relevanceDisplay ) {
+                  this.processRelevance(payload)
+                }
               }
             } else if (
               eventType === 'mouseenter' &&
@@ -1519,6 +1552,109 @@ export default {
         }
       }
     },
+    // for dialog popup
+    dialogCssHacks: function () {
+      this.$nextTick(() => {
+        const dialog = this.$el.querySelector('.relevance-dialog')
+        draggable(this.$el, dialog)
+        // dialog popup at the click position
+        // slightly change x or y if close to boundary
+        let posX, posY
+        const containerRect = this.$el.getBoundingClientRect()
+        const dialogRect = dialog.getBoundingClientRect()
+        if (this.dialogPosition.x > containerRect.width / 2) {
+          posX = this.dialogPosition.x - dialogRect.width
+        } else {
+          posX = this.dialogPosition.x
+        }
+        if (this.dialogPosition.y > containerRect.height / 2) {
+          posY = this.dialogPosition.y - dialogRect.height
+        } else {
+          posY = this.dialogPosition.y
+        }
+        dialog.style.transform =
+          `translate(${posX - this.dialogPosition.offsetX}px, ${posY - this.dialogPosition.offsetY}px)`
+      })
+    },
+    drawIconCssHacks: function () {
+      // set tool/mode icon status
+      if (this.$el.querySelector('.iconSelected') || !this.relevanceDisplay) {
+        this.drawnTypes.map((t) => {
+          const dtype = this.$el.querySelector(`.draw${t}`)
+          if (dtype) {
+            dtype.classList.remove('iconSelected');
+            dtype.classList.remove('inactive');
+          }
+        })
+        this.drawModes.map((m) => {
+          this.$el.querySelector(`.draw${m}`).classList.remove('iconSelected');
+          this.$el.querySelector(`.draw${m}`).classList.remove('inactive');
+        })
+      }
+      if (this.activeDrawTool) {
+        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('iconSelected');
+        this.drawModes.map((m) => {
+          this.$el.querySelector(`.draw${m}`).classList.add('inactive');
+        })
+      } else if (this.activeDrawMode || this.relevanceDisplay) {
+        if (this.activeDrawMode) {
+          this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('iconSelected');
+        }
+        this.drawnTypes.map((t) => {
+          const dtype = this.$el.querySelector(`.draw${t}`)
+          if (dtype) dtype.classList.add('inactive');
+        })
+      }
+    },
+    processRelevance: function (data = undefined) {
+      // process while drawing new features
+      if (data && data.feature) {
+        // Only clicked relevance data will be added 
+        let relevant = data.feature.models ? data.feature.models : data.feature.featureId
+        // only the linestring will have relevance at the current stage
+        if (relevant && this.activeDrawTool === 'LineString') {
+          this.relevanceEntry[relevant] = data
+        }
+      } else {
+        // process while checking exist features
+        if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
+          let feature = this.drawnAnnotationFeatures
+            .filter((feature) => {
+              return feature.id === this.currentDrawnFeature.id
+            })[0]
+          if (feature && feature.relevance) {
+            this.relevanceEntry = feature.relevance
+          }
+        }
+      }
+    },
+    // This is used only when either edit or delete mode is on
+    checkAndCreateDrawnFeaturePopups: function (data) {
+      if (this.activeDrawMode) {
+        // double click fires 'updated' callback
+        if (this.doubleClickedFeature) {
+          if (data.feature.feature.geometry.type !== 'Point') {
+            // show tooltip and enter edit mode
+            this.changeAnnotationDrawMode({
+              mode: 'direct_select',
+              options: { featureId: data.feature.feature.id }
+            })
+            this.trashAnnotationFeature()
+          }
+          this.doubleClickedFeature = false
+        } else {
+          // single click fires delete
+          if (this.activeDrawMode === 'Delete') {
+            this.changeAnnotationDrawMode({
+              mode: 'simple_select',
+              options: { featureIds: [data.feature.feature.id] }
+            })
+            this.trashAnnotationFeature()
+          }
+        }
+      }
+    },
+    // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     /**
      * @vuese
      * Function to create/display tooltips from the provided ``data``.
@@ -1536,10 +1672,23 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            this.annotationSubmitted = false
-            this.annotationEntry.featureId = data.feature.feature.id
-            let featureGeometry = centroid(data.feature.feature.geometry)
-            this.displayTooltip(data.feature.feature.id, featureGeometry)
+            if (this.inDrawing || this.activeDrawMode) {
+              this.annotationSubmitted = false
+              this.annotationEntry.featureId = data.feature.feature.id
+              this.displayTooltip(
+                data.feature.feature.id,
+                centroid(data.feature.feature.geometry)
+              )
+            } else {
+              // Not allowed to update feature if not on edit mode
+              if (data.feature.type === 'updated') {
+                this.rollbackAnnotationEvent()
+              }
+            }
+            // Hide dialog when updated or deleted event is fired and tooltip is displayed
+            if (data.feature.type === 'updated' || data.feature.type === 'deleted') {
+              this.initialiseDialog()
+            }
           }
         } else {
           this.annotation = {}
@@ -1731,20 +1880,12 @@ export default {
           options.positionAtLastClick = true
         }
       }
-    },
-    /**
-     * @vuese
-     * Function to display popup
-     * by providing featureId (``feature``).
-     * @arg feature
-     */
-    displayPopup: function (feature) {
-      this.mapImp.showPopup(
-        this.mapImp.modelFeatureIds(feature)[0],
-        this.$refs.tooltip.$el,
-        { className: 'flatmapvuer-popover', positionAtLastClick: true }
-      )
-      this.popUpCssHacks()
+      if (!this.disableUI) {
+        this.$nextTick(() => {
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
+          this.popUpCssHacks()
+        })
+      }
     },
     /**
      * @vuese
@@ -2238,7 +2379,7 @@ export default {
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
-      tooltipDisplay: false,
+      tooltipDisplay: true,
       serverUUID: undefined,
       layers: [],
       pathways: [],
@@ -2292,14 +2433,14 @@ export default {
       minimapResizeShow: false,
       minimapSmall: false,
       currentActive: '',
-      currentDrawn: undefined, // Clicked drawn annotation
+      currentDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
-      drawingType: 'All',
-      drawingTypes: ['All', 'Point', 'LineString', 'Polygon', 'None'],
-      participationType: 'All',
-      participationTypes: ['All', 'Participated', 'Not participated'],
+      drawnType: 'All tools',
+      drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
+      annotatedType: 'Everyone',
+      annotatedTypes: ['Everyone', 'Me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
@@ -2311,12 +2452,20 @@ export default {
       inDrawing: false,
       relevanceDisplay: false,
       relevanceEntry: {},
-      drawnAnnotationFeatures: undefined, // Store all exist drawn annotations
+      drawnAnnotationFeatures: undefined, // Store all exist drawn features
       doubleClickedFeature: false,
+      activeDrawMode: undefined,
+      drawModes: ['Delete', 'Edit'],
+      dialogPosition: {
+        offsetX: 0,
+        offsetY: 0,
+        x: undefined,
+        y: undefined
+      }
     }
   },
   computed: {
-    isRelevance: function () {
+    relevance: function () {
       return Object.keys(this.relevanceEntry).length > 0
     }
   },
@@ -2343,8 +2492,60 @@ export default {
       immediate: true,
       deep: true,
     },
+    activeDrawTool: function () {
+      this.drawIconCssHacks()
+    },
+    activeDrawMode: function () {
+      this.drawIconCssHacks()
+    },
+    /**
+     * hide dialog when relevanceEntry is empty
+     */
+    relevance: function (value) {
+      const relevanceIcon = this.$el.querySelector('.drawRelevance')
+      if (!value) {
+        this.relevanceDisplay = false
+        relevanceIcon.classList.add('inactive')
+      } else {
+        relevanceIcon.classList.remove('inactive')
+      }
+    },
+    /**
+     * popup dialog via click icon
+     */
+    relevanceDisplay: function (display) {
+      const relevanceIcon = this.$el.querySelector('.drawRelevance')
+      if (display) {
+        relevanceIcon.classList.add('iconSelected')
+        this.dialogCssHacks()
+      } else {
+        relevanceIcon.classList.remove('iconSelected')
+      }
+      this.drawIconCssHacks()
+    },
+    /**
+     * Set dialog offset when flatmap annotator used
+     */
+    dialogPosition: {
+      handler: function () {
+        const containerRect = this.$el.getBoundingClientRect()
+        this.dialogPosition.offsetX = containerRect.x
+        this.dialogPosition.offsetY = containerRect.y
+      },
+      deep: true,
+      once: true,
+    },
     viewingMode: function (mode) {
       if (mode === 'Annotation') {
+        this.$el.querySelector('.maplibregl-canvas').addEventListener('click', (e) => {
+          e.preventDefault();
+          this.dialogPosition.x = e.clientX
+          this.dialogPosition.y = e.clientY
+          // use to fix the draw point pop up position issue
+          if (this.activeDrawTool === 'Point') {
+            this.dialogCssHacks()
+          }
+        }, false)
         this.showAnnotator(true)
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
@@ -2356,17 +2557,6 @@ export default {
           }
         })
       } else this.showAnnotator(false)
-    },
-    currentDrawn: function (id) {
-      this.relevanceEntry = {}
-      if (id && this.drawnAnnotationFeatures) {
-        let relevance = this.drawnAnnotationFeatures.filter((feature) => {
-          return feature.id === id
-        })[0].relevance
-        if (relevance) {
-          this.relevanceEntry = relevance
-        }
-      }
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
@@ -2642,12 +2832,19 @@ export default {
   }
 }
 
-.drawPoint, .drawLineString, .drawPolygon, .drawTrash, .connection, .zoomIn, .zoomOut, .fitWindow {
-  padding-left: 8px;
+.drawPoint, .drawLineString, .drawPolygon, 
+.drawDelete, .drawEdit, .drawRelevance,
+.zoomIn, .zoomOut, .fitWindow {
+  padding: 4px;
 }
 
-.toolSelected {
+.iconSelected {
   color: var(--el-color-primary-light-5) !important;
+}
+
+.inactive {
+  color: #DDDDDD !important;
+  cursor: not-allowed !important;
 }
 
 .yellow-star-legend {
@@ -2860,8 +3057,13 @@ export default {
 }
 
 .bottom-draw-control {
+  background-color: var(--el-color-primary-light-9);
+  padding: 4px 4px 2px 4px;
+  border-style: solid;
+  border-color: var(--el-color-primary-light-5);
+  border-radius: 1rem;
   position: absolute;
-  right: 40%;
+  right: calc(50vw - 100px);;
   bottom: 16px;
 }
 
@@ -3055,34 +3257,10 @@ export default {
   }
 }
 
-:deep(.el-dialog) {
-  text-align: justify;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  pointer-events: auto;
-  background: #fff;
-  border: 1px solid $app-primary-color;
-  display: flex;
-  flex-direction: column;
+.relevance-dialog {
   position: absolute;
-  left: 100px;
-  bottom: 0px;
-}
-
-:deep(.el-dialog__body, .el-dialog__header) {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.dialog-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: rgb(131, 0, 191);
-}
-
-:deep(.el-card) {
-  --el-card-padding: 12px;
-  border: 0;
+  z-index: 10;
+  cursor: move;
 }
 </style>
 
