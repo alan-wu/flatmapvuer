@@ -369,7 +369,7 @@
         width="200"
         :teleported="false"
         trigger="click"
-        popper-class="background-popper"
+        popper-class="background-popper h-auto"
         virtual-triggering
       >
         <div>
@@ -393,6 +393,18 @@
                 </el-row>
               </el-option>
             </el-select>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText" v-if="isFC">Dimension display</el-row>
+          <el-row class="backgroundControl" v-if="isFC">
+            <el-radio-group
+              v-model="dimensionRadio"
+              class="flatmap-radio"
+              @change="setDimension"
+            >
+            <el-radio :label="false">2D</el-radio>
+            <el-radio :label="true">3D</el-radio>
+            </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Organs display</el-row>
@@ -616,6 +628,17 @@ export default {
     this.setStateRequired = false
   },
   methods: {
+    /**
+     * @vuese
+     * Function to switch from 2D to 3D
+     * @arg flag
+     */
+    setDimension: function (flag) {
+      this.dimensionRadio = flag
+      if (this.mapImp) {
+        this.mapImp.enable3dPaths(flag)
+      }
+    },
     /**
      * @vuese
      * Function to view the latest map (example when you are on legacy map).
@@ -948,6 +971,15 @@ export default {
           const resource = [data.models]
           const taxonomy = this.entry
           const biologicalSex = this.biologicalSex
+          let taxons = undefined
+          if (data.taxons) {
+            // check if data.taxons is string or array
+            if (typeof data.taxons !== 'object') {
+              taxons = JSON.parse(data.taxons)
+            } else {
+              taxons = data.taxons
+            }
+          }
           const payload = {
             dataset: data.dataset,
             biologicalSex: biologicalSex,
@@ -957,9 +989,7 @@ export default {
             feature: data,
             userData: args,
             eventType: eventType,
-            provenanceTaxonomy: data.taxons
-              ? JSON.parse(data.taxons)
-              : undefined,
+            provenanceTaxonomy: taxons,
           }
           if (eventType === 'click') {
             if (this.viewingMode === 'Network Discovery') {
@@ -1428,6 +1458,8 @@ export default {
       this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
+        // Show 3D as default on FC type
+        this.setDimension(true)
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
@@ -1739,6 +1771,7 @@ export default {
       connectivityTooltipVisible: false,
       drawerOpen: false,
       annotationRadio: false,
+      dimensionRadio: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
@@ -1890,6 +1923,8 @@ export default {
   transition: all 1s ease;
   &.open {
     opacity: 1;
+    position: relative;
+    z-index: 2;
   }
   &.close {
     opacity: 0;
@@ -2083,6 +2118,10 @@ export default {
       border-color: $app-primary-color;
     }
   }
+}
+
+:deep(.background-popper.el-popover.el-popper.h-auto) {
+  height: auto !important;
 }
 
 :deep(.open-map-popper.el-popover.el-popper) {
