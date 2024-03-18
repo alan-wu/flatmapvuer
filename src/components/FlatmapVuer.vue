@@ -1418,7 +1418,8 @@ export default {
         } else {
           posY = this.dialogPosition.y
         }
-        dialog.style.transform = `translate(${posX}px, ${posY}px)`
+        dialog.style.transform =
+          `translate(${posX - this.dialogPosition.offsetX}px, ${posY - this.dialogPosition.offsetY}px)`
       })
     },
     drawIconCssHacks: function () {
@@ -2119,6 +2120,8 @@ export default {
       activeDrawMode: undefined,
       drawModes: ['Delete', 'Edit'],
       dialogPosition: {
+        offsetX: 0,
+        offsetY: 0,
         x: undefined,
         y: undefined
       }
@@ -2177,6 +2180,18 @@ export default {
       } else {
         relevanceIcon.classList.remove('iconSelected')
       }
+    },
+    /**
+     * Set dialog offset when flatmap annotator used
+     */
+    dialogPosition: {
+      handler: function () {
+        const containerRect = this.$el.getBoundingClientRect()
+        this.dialogPosition.offsetX = containerRect.x
+        this.dialogPosition.offsetY = containerRect.y
+      },
+      deep: true,
+      once: true,
     },
     viewingMode: function (mode) {
       if (mode === 'Annotation') {
