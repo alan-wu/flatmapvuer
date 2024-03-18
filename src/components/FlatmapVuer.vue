@@ -570,8 +570,8 @@
               class="flatmap-radio"
               @change="setDimension"
             >
-            <el-radio :value="false">2D</el-radio>
-            <el-radio :value="true">3D</el-radio>
+            <el-radio :label="false">2D</el-radio>
+            <el-radio :label="true">3D</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -594,8 +594,8 @@
               class="flatmap-radio"
               @change="setColour"
             >
-              <el-radio :value="true">Colour</el-radio>
-              <el-radio :value="false">Greyscale</el-radio>
+              <el-radio :label="true">Colour</el-radio>
+              <el-radio :label="false">Greyscale</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -606,8 +606,8 @@
               class="flatmap-radio"
               @change="setOutlines"
             >
-              <el-radio :value="true">Show</el-radio>
-              <el-radio :value="false">Hide</el-radio>
+              <el-radio :label="true">Show</el-radio>
+              <el-radio :label="false">Hide</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>

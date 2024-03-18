@@ -30,7 +30,7 @@
           <div class="checkbox-container">
             <el-checkbox
               class="my-checkbox"
-              :value="item[identifierKey]"
+              :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
               :checked="!('enabled' in item) || item.enabled === true"
             >
