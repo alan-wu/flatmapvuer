@@ -1880,20 +1880,12 @@ export default {
           options.positionAtLastClick = true
         }
       }
-    },
-    /**
-     * @vuese
-     * Function to display popup
-     * by providing featureId (``feature``).
-     * @arg feature
-     */
-    displayPopup: function (feature) {
-      this.mapImp.showPopup(
-        this.mapImp.modelFeatureIds(feature)[0],
-        this.$refs.tooltip.$el,
-        { className: 'flatmapvuer-popover', positionAtLastClick: true }
-      )
-      this.popUpCssHacks()
+      if (!this.disableUI) {
+        this.$nextTick(() => {
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
+          this.popUpCssHacks()
+        })
+      }
     },
     /**
      * @vuese
