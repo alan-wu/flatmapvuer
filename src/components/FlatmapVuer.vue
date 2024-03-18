@@ -880,7 +880,7 @@ export default {
   },
   methods: {
     // This should be called when create is confirmed or cancelled
-    initialiseDrawingEvent: function () {
+    initialiseDrawing: function () {
       this.inDrawing = false
       this.initialiseDialog()
       this.activeDrawTool = undefined
@@ -894,7 +894,7 @@ export default {
           resourceId: this.serverUUID,
         }
         this.rollbackAnnotationEvent()
-        this.initialiseDrawingEvent()
+        this.initialiseDrawing()
       }
     },
     confirmDrawnFeature: function () {
@@ -906,7 +906,7 @@ export default {
         if (Object.keys(this.relevanceEntry).length > 0) {
           this.annotationEntry.feature.relevance = this.relevanceEntry
         }
-        this.initialiseDrawingEvent()
+        this.initialiseDrawing()
       }
     },
     initialiseDialog: function () {
@@ -1309,7 +1309,7 @@ export default {
                 this.relevanceDisplay = true
               } else {
                 // Reset if a invalid draw
-                this.activeDrawTool = undefined
+                this.initialiseDrawing()
               }
             } else if (data.feature.mode === 'direct_select') {
               this.doubleClickedFeature = true
