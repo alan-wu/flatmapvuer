@@ -1424,7 +1424,7 @@ export default {
     },
     drawIconCssHacks: function () {
       // set tool/mode icon status
-      if (this.$el.querySelector('.iconSelected')) {
+      if (this.$el.querySelector('.iconSelected') || !this.relevanceDisplay) {
         this.drawnTypes.map((t) => {
           const dtype = this.$el.querySelector(`.draw${t}`)
           if (dtype) {
@@ -1442,8 +1442,10 @@ export default {
         this.drawModes.map((m) => {
           this.$el.querySelector(`.draw${m}`).classList.add('inactive');
         })
-      } else if (this.activeDrawMode) {
-        this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('iconSelected');
+      } else if (this.activeDrawMode || this.relevanceDisplay) {
+        if (this.activeDrawMode) {
+          this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('iconSelected');
+        }
         this.drawnTypes.map((t) => {
           const dtype = this.$el.querySelector(`.draw${t}`)
           if (dtype) dtype.classList.add('inactive');
@@ -2180,6 +2182,7 @@ export default {
       } else {
         relevanceIcon.classList.remove('iconSelected')
       }
+      this.drawIconCssHacks()
     },
     /**
      * Set dialog offset when flatmap annotator used
