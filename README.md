@@ -1,5 +1,7 @@
 # FlatmapVuer
 
+View the a live demo and documentation at: https://abi-software.github.io/flatmapvuer/
+
 This project aims to wrap the flatmap viewer project into a vue component.
 There are currently two components available. FlatmapVuer and MultiFlatmapVuer. FlatmapVuer is used for displaying a single flatmap whereas MultiFlatmapVuer takes in an array of flatmaps and provide a chooser for selecting the flatmap on display.
 

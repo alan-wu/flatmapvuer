@@ -4,6 +4,8 @@ node_modules
 cypress/videos/*
 cypress/screenshots/*
 cypress/results/*
+cypress/reports/*
 docs/.vitepress/dist
 docs/.vitepress/cache
 docs/components
+.DS_Store
