@@ -1,5 +1,7 @@
 # FlatmapVuer
 
+View the a live demo and documentation at: https://abi-software.github.io/flatmapvuer/
+
 This project aims to wrap the flatmap viewer project into a vue component.
 There are currently two components available. FlatmapVuer and MultiFlatmapVuer. FlatmapVuer is used for displaying a single flatmap whereas MultiFlatmapVuer takes in an array of flatmaps and provide a chooser for selecting the flatmap on display.
 
@@ -41,7 +43,7 @@ You can now use the FlatmapVuer in your vue template as followed:
 NCBITaxon:9606 (Human), NCBITaxon:9685 (Cat), NCBITaxon:9823 (Pig), NCBITaxon:10090 (Mouse) and NCBITaxon:10114 (Rat)
 
 **ready** is the custom event when the map has been loaded successfully.
-**resource-selected** is the custom event triggered when a part of the flatmap is selected, the returned argument **resource** provides information of the selected resource. 
+**resource-selected** is the custom event triggered when a part of the flatmap is selected, the returned argument **resource** provides information of the selected resource.
 
 Markers must be added to make a label selectable and it can be done through the **addMarker** method on the mapImp member of the FlatmapVuer component.
 
@@ -54,7 +56,7 @@ Please see the following sample codes for details.
     },
     FlatmapReady: function(flatmapComponent) {
       labels = flatmapComponent.getLabels(); //return list of labels
-      //The following line adds a marker on the map. UBERON:0000948 
+      //The following line adds a marker on the map. UBERON:0000948
       //is the UBERON id representing the heart.
       flatmapComponent.mapImp.addMarker("UBERON:0000948", "simulation");
     }
@@ -63,7 +65,7 @@ Please see the following sample codes for details.
 
 You can also use MultiFlatmapVuer to provide a selection of flatmaps.
 ```html
-<MultiFlatmapVuer :availableSpecies="availableSpecies" 
+<MultiFlatmapVuer :availableSpecies="availableSpecies"
   @resource-selected="FlatmapSelected"
   @ready="FlatmapReady" :initial="initial"/>
 ```
@@ -73,7 +75,7 @@ You can also use MultiFlatmapVuer to provide a selection of flatmaps.
     "Human":{taxo: "NCBITaxon:9606", iconClass:"icon-mapicon_human"},
     "Rat":{taxo: "NCBITaxon:10114", iconClass:"icon-mapicon_rat"},
     "Mouse":{taxo: "NCBITaxon:10090", iconClass:"icon-mapicon_mouse"},
-    "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig"}, 
+    "Pig":{taxo: "NCBITaxon:9823", iconClass:"icon-mapicon_pig"},
     "Cat":{taxo: "NCBITaxon:9685", iconClass:"icon-mapicon_cat"},
   }
 ```
@@ -105,3 +107,14 @@ npm run build-bundle
 ```bash
 npm run serve
 ```
+
+
+## Documentation
+
+The documentation is developed with `vitepress` and `vuese`. Documentation pages are in the `docs` folder.
+
+### To run in local development mode
+```bash
+npm run docs:watch
+```
+This will start the documentation server with `vitepress` on port `:5173` and watch the `FlatmapVuer` and `MultiFlatmapVuer` components changes.

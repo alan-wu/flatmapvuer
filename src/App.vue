@@ -67,11 +67,7 @@
       @pan-zoom-callback="panZoomcallback"
       @open-map="openMap"
       @ready="FlatmapReady"
-      :featureInfo="featureInfo"
-      :searchable="searchable"
-      :layerControl="layerControl"
       :initial="initial"
-      :pathControls="pathControls"
       :helpMode="helpMode"
       :displayMinimap="true"
       :enableOpenMapUI="true"
@@ -166,10 +162,6 @@ export default {
   data: function () {
     return {
       searchText: '',
-      featureInfo: true,
-      searchable: true,
-      pathControls: true,
-      layerControl: true,
       disableUI: false,
       minZoom: 4,
       availableSpecies: {
