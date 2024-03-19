@@ -1019,10 +1019,12 @@ export default {
         annotation
       ) {
         this.annotationSubmitted = true
-        if (this.annotationEntry.type === 'deleted') this.closePopup()
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
-        // Use to update 'this.drawnAnnotationFeatures'
-        this.addAnnotationFeature()
+        if (this.annotationEntry.type === 'deleted') {
+          this.closePopup()
+          // Use to update 'this.drawnAnnotationFeatures' when created or updated
+          this.addAnnotationFeature()
+        }
       }
     },
     setFeatureAnnotated: function () {
