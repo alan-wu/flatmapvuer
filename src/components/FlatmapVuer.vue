@@ -562,25 +562,13 @@
               </el-select>
             </el-row>
           </template>
-          <el-row class="backgroundSpacer"></el-row>
-          <el-row class="backgroundText">Dimension display</el-row>
-          <el-row class="backgroundControl">
+          <el-row class="backgroundSpacer" v-if="displayFlightPathOption"></el-row>
+          <el-row class="backgroundText" v-if="displayFlightPathOption">Flight path display</el-row>
+          <el-row class="backgroundControl" v-if="displayFlightPathOption">
             <el-radio-group
-              v-model="dimensionRadio"
+              v-model="flightPath3DRadio"
               class="flatmap-radio"
-              @change="setDimension"
-            >
-            <el-radio :label="false">2D</el-radio>
-            <el-radio :label="true">3D</el-radio>
-            </el-radio-group>
-          </el-row>
-          <el-row class="backgroundSpacer"></el-row>
-          <el-row class="backgroundText" v-if="isFC">Dimension display</el-row>
-          <el-row class="backgroundControl" v-if="isFC">
-            <el-radio-group
-              v-model="dimensionRadio"
-              class="flatmap-radio"
-              @change="setDimension"
+              @change="setFlightPath3D"
             >
             <el-radio :label="false">2D</el-radio>
             <el-radio :label="true">3D</el-radio>
@@ -1116,8 +1104,8 @@ export default {
      * Function to switch from 2D to 3D
      * @arg flag
      */
-    setDimension: function (flag) {
-      this.dimensionRadio = flag
+    setFlightPath3D: function (flag) {
+      this.flightPath3DRadio = flag
       if (this.mapImp) {
         this.mapImp.enable3dPaths(flag)
       }
@@ -1513,6 +1501,15 @@ export default {
             const resource = [data.models]
             const taxonomy = this.entry
             const biologicalSex = this.biologicalSex
+            let taxons = undefined
+            if (data.taxons) {
+              // check if data.taxons is string or array
+              if (typeof data.taxons !== 'object') {
+                taxons = JSON.parse(data.taxons)
+              } else {
+                taxons = data.taxons
+              }
+            }
             const payload = {
               dataset: data.dataset,
               biologicalSex: biologicalSex,
@@ -1522,9 +1519,7 @@ export default {
               feature: data,
               userData: args,
               eventType: eventType,
-              provenanceTaxonomy: data.taxons
-                ? JSON.parse(data.taxons)
-                : undefined,
+              provenanceTaxonomy: taxons,
             }
             if (eventType === 'click') {
               if (this.viewingMode === 'Network Discovery') {
@@ -1990,6 +1985,22 @@ export default {
     },
     /**
      * @vuese
+     * Function to show flight path option
+     * (3D option)
+     * based on the map version (currently 1.6 and above).
+     * @arg mapVersion
+     */
+    setFlightPathInfo: function (mapVersion) {
+      const mapVersionForFlightPath = 1.6
+      if (mapVersion === mapVersionForFlightPath || mapVersion > mapVersionForFlightPath) {
+        // Show flight path option UI
+        this.displayFlightPathOption = true
+        // Show 3D as default on FC type
+        this.setFlightPath3D(true)
+      }
+    },
+    /**
+     * @vuese
      * Function to create Flatmap
      * by providing the ``state``.
      * @arg state
@@ -2059,6 +2070,8 @@ export default {
         promise1.then((returnedObject) => {
           this.mapImp = returnedObject
           this.serverUUID = this.mapImp.getIdentifier().uuid
+          let mapVersion = this.mapImp.details.version
+          this.setFlightPathInfo(mapVersion)
           this.onFlatmapReady()
           if (this._stateToBeSet) this.restoreMapState(this._stateToBeSet)
           else {
@@ -2115,8 +2128,6 @@ export default {
       this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
-        // Show 3D as default on FC type
-        this.setDimension(true)
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
@@ -2434,7 +2445,8 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      dimensionRadio: false,
+      flightPath3DRadio: false,
+      displayFlightPathOption: false,
       colourRadio: true,
       outlinesRadio: true,
       minimapResizeShow: false,
