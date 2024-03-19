@@ -209,6 +209,7 @@ export default {
       prevSubs: [],
       showSubmissions: true,
       errorMessage: '',
+      creator: undefined
     }
   },
   computed: {
@@ -314,9 +315,10 @@ export default {
           if (this.annotationEntry['type'] === 'deleted') {
             userAnnotation.feature = undefined
           }
+          if (this.creator) userAnnotation.creator = this.creator
           this.$annotator
-          .addAnnotation(userAnnotation)
-          .then(() => {
+            .addAnnotation(userAnnotation)
+            .then(() => {
               this.$emit('annotation', userAnnotation)
               this.errorMessage = ''
               this.resetSubmission()
@@ -354,6 +356,8 @@ export default {
   mounted: function () {
     this.$annotator.authenticate().then((userData) => {
       if (userData.name && userData.email) {
+        this.creator = userData
+        if (!userData.orcid) this.creator.orcid = '0000-0000-0000-0000'
         this.authenticated = true
         this.updatePrevSubmissions()
       } else {
