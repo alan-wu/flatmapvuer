@@ -1026,6 +1026,7 @@ export default {
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
         if (this.annotationEntry.type === 'deleted') {
           this.closePopup()
+        } else {
           // Use to update 'this.drawnAnnotationFeatures' when created or updated
           this.addAnnotationFeature()
         }
