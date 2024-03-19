@@ -2737,6 +2737,7 @@ export default {
 }
 
 :deep(.maplibregl-popup) {
+  z-index: 10;
   max-width: 300px !important;
 }
 
