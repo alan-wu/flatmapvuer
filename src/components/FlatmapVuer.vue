@@ -991,6 +991,7 @@ export default {
             provenanceTaxonomy: taxons,
           }
           if (eventType === 'click') {
+            this.featuresAlert = data.alert
             if (this.viewingMode === 'Network Discovery') {
               this.highlightConnectedPaths([data.models])
             } else {
@@ -1735,6 +1736,7 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
+      getFeaturesAlert: () => this.featuresAlert,
     }
   },
   data: function () {
@@ -1786,6 +1788,7 @@ export default {
       connectivityTooltipVisible: false,
       drawerOpen: false,
       annotationRadio: false,
+      featuresAlert: undefined,
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
