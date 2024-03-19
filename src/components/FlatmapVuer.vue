@@ -965,7 +965,6 @@ export default {
      */
     eventCallback: function () {
       return (eventType, data, ...args) => {
-        console.log('eventCallback', eventType, data, args)
         if (eventType !== 'pan-zoom') {
           const label = data.label
           const resource = [data.models]
