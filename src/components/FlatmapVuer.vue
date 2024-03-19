@@ -963,7 +963,11 @@ export default {
         // disable tool icon click if any mode is on
       } else if (this.drawModes.includes(type) && !this.activeDrawTool) {
         if (type === 'Delete') {
-          if (this.currentDrawnFeature && !this.activeDrawMode) {
+          if (
+            this.currentDrawnFeature &&
+            // For either no mode is on or edit is on
+            (!this.activeDrawMode || this.activeDrawMode === 'Edit')
+          ) {
             // Force simple_select a feature for delete event
             this.doubleClickedFeature = false
             this.changeAnnotationDrawMode({
