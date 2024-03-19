@@ -1,6 +1,7 @@
 /* eslint-disable no-alert, no-console */
 // remove duplicates by stringifying the objects
 const removeDuplicates = function (arrayOfAnything) {
+  if (!arrayOfAnything) return []
   return [...new Set(arrayOfAnything.map((e) => JSON.stringify(e)))].map((e) =>
     JSON.parse(e)
   )
@@ -35,6 +36,7 @@ const findTaxonomyLabel = async function (flatmapAPI, taxonomy) {
 }
 
 const inArray = function (ar1, ar2) {
+  if (!ar1 || !ar2) return false
   let as1 = JSON.stringify(ar1)
   let as2 = JSON.stringify(ar2)
   return as1.indexOf(as2) !== -1
