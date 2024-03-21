@@ -171,7 +171,7 @@ export default {
       type: Object,
     },
   },
-  inject: ['flatmapAPI'],
+  inject: ['flatmapAPI', 'userApiKey'],
   data: function () {
     return {
       displayPair: {
@@ -226,6 +226,7 @@ export default {
         ) {
           this.$annotator
             .itemAnnotations(
+              this.userApiKey,
               this.annotationEntry['resourceId'],
               this.annotationEntry['featureId']
             )
@@ -264,7 +265,7 @@ export default {
             comment: this.comment,
           }
           this.$annotator
-            .addAnnotation(userAnnotation)
+            .addAnnotation(this.userApiKey, userAnnotation)
             .then(() => {
               this.errorMessage = ''
               this.resetSubmission()
@@ -305,7 +306,7 @@ export default {
         `${this.flatmapAPI}annotator`
       )
     }
-    this.$annotator.authenticate().then((userData) => {
+    this.$annotator.authenticate(this.userApiKey).then((userData) => {
       if (userData.name && userData.email) {
         this.authenticated = true
         this.updatePrevSubmissions()

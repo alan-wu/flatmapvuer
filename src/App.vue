@@ -72,6 +72,7 @@
       :displayMinimap="true"
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
+      :userApiKey="userApiKey"
       :disableUI="disableUI"
     />
   </div>
@@ -228,6 +229,7 @@ export default {
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
+      userApiKey: undefined,
       ElIconSetting: shallowRef(ElIconSetting)
     }
   },

@@ -70,6 +70,7 @@
       style="height: 100%"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
+      :userApiKey="userApiKey"
     />
   </div>
 </template>
@@ -608,6 +609,10 @@ export default {
     sparcAPI: {
       type: String,
       default: 'https://api.sparc.science/',
+    },
+     userApiKey: {
+      type: String,
+      default: undefined,
     },
     /**
      * Flag to disable UIs on Map

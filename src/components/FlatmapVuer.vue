@@ -1723,6 +1723,10 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
+    userApiKey: {
+      type: String,
+      default: undefined,
+    },
     /**
      * Flag to disable UIs on Map
      */
@@ -1735,6 +1739,7 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
+      userApiKey: this.userApiKey
     }
   },
   data: function () {
