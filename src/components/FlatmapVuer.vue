@@ -1723,10 +1723,6 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
-    userApiKey: {
-      type: String,
-      default: undefined,
-    },
     /**
      * Flag to disable UIs on Map
      */
@@ -1834,11 +1830,7 @@ export default {
       }
     }
   },
-  created: function () {
-
-  },
   mounted: function () {
-
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait = []
