@@ -222,23 +222,36 @@ let FlatmapQueries = function () {
     this.origins = []
     this.components = []
     if (!keastIds || keastIds.length == 0) return
+    
+    let prom1 = this.queryForConnectivity(keastIds, signal) // This on returns a promise so dont need 'await'
+    let prom2 = await this.pubmedQueryOnIds(eventData)
+    let results = await Promise.all([prom1, prom2])
+    return results
+  }
+
+  this.queryForConnectivity = function (keastIds, signal, processConnectivity=true) {
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
-    let prom1 = new Promise((resolve) => {
-      fetch(`${this.flatmapApi}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        signal: signal,
-      })
+    
+    const headers = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+      ...(signal ? { signal: signal } : {}), // add signal to header if it exists
+    }
+    return new Promise((resolve) => {
+      fetch(`${this.flatmapApi}knowledge/query/`, headers)
         .then((response) => response.json())
         .then((data) => {
           if (this.connectivityExists(data)) {
             let connectivity = JSON.parse(data.values[0][0])
-            this.processConnectivity(connectivity).then(() => {
-              resolve(true)
-            })
+            if (processConnectivity) {
+              this.processConnectivity(connectivity).then((processedConnectivity) => {
+                resolve(processedConnectivity)
+              })
+            }
+            else resolve(connectivity)
           } else {
             resolve(false)
           }
@@ -248,9 +261,6 @@ let FlatmapQueries = function () {
           resolve(false)
         })
     })
-    let prom2 = await this.pubmedQueryOnIds(eventData)
-    let results = await Promise.all([prom1, prom2])
-    return results
   }
 
   this.connectivityExists = function (data) {
@@ -322,7 +332,18 @@ let FlatmapQueries = function () {
           this.createLabelFromNeuralNode(c, lookUp)
         )
         this.flattenAndFindDatasets(components, axons, dendrites)
-        resolve(true)
+        resolve({
+          ids: {
+            axons: axons,
+            dendrites: dendrites,
+            components: components,
+          },
+          labels: {
+            destinations: this.destinations,
+            origins: this.origins,
+            components: this.components,
+          }
+        })
       })
     })
   }
