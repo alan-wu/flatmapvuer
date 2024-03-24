@@ -219,7 +219,6 @@
               class="pathway-container"
               :class="{ open: drawerOpen, close: !drawerOpen }"
               :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
-
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
@@ -534,6 +533,8 @@ import {
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
+import { mapState } from 'pinia'
+import { useMainStore } from '@/store/index'
 
 
 const processFTUs = (parent, key) => {
@@ -1735,7 +1736,7 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      userApiKey: this.userApiKey
+      userApiKey: this.userToken
     }
   },
   data: function () {
@@ -1800,6 +1801,9 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
     }
+  },
+  computed: {
+    ...mapState(useMainStore, ['userToken']),
   },
   watch: {
     entry: function () {
