@@ -74,7 +74,7 @@
                   {{ evidence[index] }}
                 </el-col>
                 <el-col :span="4">
-                  <el-icon class="standard-icon"><el-icon-close /></el-icon>
+                  <el-icon class="standard-icon"><el-icon-close @click="removeEvidence(index)" /></el-icon>
                 </el-col>
               </el-row>
               <el-row>
