@@ -2663,6 +2663,7 @@ export default {
   position: absolute;
   bottom: 0px;
   transition: all 1s ease;
+  z-index: 10;
   &.open {
     left: 0px;
   }
@@ -2876,6 +2877,7 @@ export default {
   bottom: 16px;
   position: absolute;
   transition: all 1s ease;
+  z-index: 10;
   &.open {
     left: 322px;
   }
@@ -3091,6 +3093,7 @@ export default {
   position: absolute;
   right: 16px;
   bottom: 16px;
+  z-index: 10;
 }
 
 :deep(.my-drawer) {
