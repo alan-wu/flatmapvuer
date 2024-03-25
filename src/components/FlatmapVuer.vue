@@ -1039,6 +1039,7 @@ export default {
         if (data.feature && data.feature.featureId && data.feature.models) {
           this.annotationEntry = {
             ...data.feature,
+            resource: this.serverURL,
             resourceId: this.serverUUID,
           }
           this.displayTooltip(data.feature.models)
@@ -1418,6 +1419,7 @@ export default {
         promise1.then((returnedObject) => {
           this.mapImp = returnedObject
           this.serverUUID = this.mapImp.getIdentifier().uuid
+          this.serverURL = this.mapImp.makeServerUrl('')
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
           this.onFlatmapReady()
@@ -1747,6 +1749,7 @@ export default {
       //undesired location.
       tooltipDisplay: false,
       serverUUID: undefined,
+      serverURL: undefined,
       layers: [],
       pathways: [],
       sckanDisplay: [

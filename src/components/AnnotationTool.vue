@@ -196,7 +196,7 @@ export default {
   computed: {
     isEditable: function () {
       return (
-        this.annotationEntry['resourceId'] && this.annotationEntry['featureId']
+        this.annotationEntry['resource'] && this.annotationEntry['featureId']
       )
     },
   },
@@ -242,7 +242,7 @@ export default {
     submit: function () {
       if (this.evidence.length > 0 || this.comment) {
         if (
-          this.annotationEntry['resourceId'] &&
+          this.annotationEntry['resource'] &&
           this.annotationEntry['featureId']
         ) {
           const evidenceURLs = []
@@ -259,7 +259,7 @@ export default {
             }
           })
           const userAnnotation = {
-            resource: this.annotationEntry['resourceId'],
+            resource: this.annotationEntry['resource'],
             item: this.annotationEntry['featureId'],
             evidence: evidenceURLs,
             comment: this.comment,
