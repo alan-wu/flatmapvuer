@@ -191,6 +191,7 @@ export default {
       prevSubs: [],
       showSubmissions: true,
       errorMessage: '',
+      creator: undefined,
     }
   },
   computed: {
@@ -264,6 +265,7 @@ export default {
             evidence: evidenceURLs,
             comment: this.comment,
           }
+          if (this.creator) userAnnotation.creator = this.creator
           this.$annotator
             .addAnnotation(this.userApiKey, userAnnotation)
             .then(() => {
@@ -308,6 +310,8 @@ export default {
     }
     this.$annotator.authenticate(this.userApiKey).then((userData) => {
       if (userData.name && userData.email) {
+        this.creator = userData
+        if (!userData.orcid) this.creator.orcid = '0000-0000-0000-0000'
         this.authenticated = true
         this.updatePrevSubmissions()
       } else {
