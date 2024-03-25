@@ -60,7 +60,7 @@
           <template v-if="isEditable">
             <el-row class="dialog-spacer"></el-row>
             <el-row v-if="!editing">
-              <el-icon class="standard-icon"><el-icon-edit /></el-icon>
+              <el-icon class="standard-icon"><el-icon-edit @click="editing = true"/></el-icon>
             </el-row>
             <template v-else>
               <el-row class="dialog-text">
@@ -79,7 +79,7 @@
               </el-row>
               <el-row>
                 <el-input
-                  size="mini"
+                  size="small"
                   placeholder="Enter"
                   v-model="newEvidence"
                   @change="evidenceEntered($event)"
