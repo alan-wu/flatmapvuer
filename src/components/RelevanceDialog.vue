@@ -30,9 +30,13 @@
                     <el-icon><el-icon-circle-close @click="$emit('popup', true)" /></el-icon>
                 </el-col>
             </el-row>
-            <el-card shadow="hover" v-for="(value, key) in entry" :key="key" @click="$emit('tooltip', value)">
-                <span>{{ key }}</span>
-            </el-card>
+            <el-row>
+                <el-col>
+                    <el-card shadow="hover" v-for="(value, key) in entry" :key="key" @click="$emit('tooltip', value)">
+                        <span>{{ capitalise(key) }}</span>
+                    </el-card>
+                </el-col>
+            </el-row>
         </el-row>
     </div>
 </template>
@@ -66,6 +70,11 @@ export default {
             default: false,
         }
     },
+    methods: {
+        capitalise(label) {
+            return label[0].toUpperCase() + label.slice(1);
+        }
+    }
 }
 </script>
 

@@ -1612,7 +1612,7 @@ export default {
       // process while drawing new features
       if (data && data.feature) {
         // Only clicked relevance data will be added 
-        let relevant = data.feature.models ? data.feature.models : data.feature.featureId
+        let relevant = data.feature.label ? data.feature.label : `*${data.feature.id}`
         // only the linestring will have relevance at the current stage
         if (relevant && this.activeDrawTool === 'LineString') {
           this.relevanceEntry[relevant] = data
