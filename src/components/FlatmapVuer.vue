@@ -962,7 +962,7 @@ export default {
               mode: 'simple_select',
               options: { featureIds: [this.currentDrawnFeature.id] }
             })
-            this.trashAnnotationFeature()
+            this.deleteOrEditAnnotationFeature()
           }
           this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
           // clear currentDrawnFeature when quit delete mode
@@ -989,9 +989,12 @@ export default {
         this.mapImp.clearAnnotationFeature()
       }
     },
-    trashAnnotationFeature: function () {
+    deleteOrEditAnnotationFeature: function () {
       if (this.mapImp) {
-        this.mapImp.trashAnnotationFeature()
+        // Fire the 'trash' button
+        // Not only use to remove features
+        // 'simple_select' for DELETE and 'direct_select' for EDIT
+        this.mapImp.removeAnnotationFeature()
       }
     },
     rollbackAnnotationEvent: function () {
@@ -1641,7 +1644,7 @@ export default {
               mode: 'direct_select',
               options: { featureId: data.feature.feature.id }
             })
-            this.trashAnnotationFeature()
+            this.deleteOrEditAnnotationFeature()
           }
           this.doubleClickedFeature = false
         } else {
@@ -1651,7 +1654,7 @@ export default {
               mode: 'simple_select',
               options: { featureIds: [data.feature.feature.id] }
             })
-            this.trashAnnotationFeature()
+            this.deleteOrEditAnnotationFeature()
           }
         }
       }
