@@ -1419,7 +1419,7 @@ export default {
         promise1.then((returnedObject) => {
           this.mapImp = returnedObject
           this.serverUUID = this.mapImp.getIdentifier().uuid
-          this.serverURL = this.mapImp.makeServerUrl('')
+          this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
           this.onFlatmapReady()

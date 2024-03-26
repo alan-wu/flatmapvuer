@@ -222,13 +222,13 @@ export default {
     updatePrevSubmissions: function () {
       if (this.$annotator && this.authenticated) {
         if (
-          this.annotationEntry['resourceId'] &&
+          this.annotationEntry['resource'] &&
           this.annotationEntry['featureId']
         ) {
           this.$annotator
             .itemAnnotations(
               this.userApiKey,
-              this.annotationEntry['resourceId'],
+              this.annotationEntry['resource'],
               this.annotationEntry['featureId']
             )
             .then((value) => {
