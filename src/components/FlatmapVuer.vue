@@ -901,7 +901,7 @@ export default {
         this.closePopup()
         this.annotationEntry = {
           ...this.createdEvent.feature,
-          resourceId: this.serverUUID,
+          resourceId: this.serverURL,
         }
         this.rollbackAnnotationEvent()
         this.initialiseDrawing()
@@ -1025,7 +1025,7 @@ export default {
     },
     setFeatureAnnotated: function () {
       if (this.mapImp) {
-        this.annotator.annotatedItemIds(this.serverUUID)
+        this.annotator.annotatedItemIds(this.serverURL)
           .then((annotatedItemIds) => {
             for (const id of annotatedItemIds) {
               this.mapImp.setFeatureAnnotated(id)
@@ -1040,7 +1040,7 @@ export default {
       if (this.mapImp) {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawnType !== 'None') {
-          this.annotator.drawnFeatures(this.serverUUID)
+          this.annotator.drawnFeatures(this.serverURL)
             .then((drawnFeatures) => {
               // Use to switch the displayed feature type
               if (this.drawnType !== 'All tools') {
@@ -1054,7 +1054,7 @@ export default {
                 for (const feature of drawnFeatures) {
                   if (this.annotatedType !== 'Everyone') {
                     this.annotator
-                      .itemAnnotations(this.serverUUID, feature.id)
+                      .itemAnnotations(this.serverURL, feature.id)
                       .then((value) => {
                         let participated = value.filter((v) => {
                           return (
@@ -1672,7 +1672,7 @@ export default {
         if (data.feature) {
           this.annotationEntry = {
             ...data.feature,
-            resourceId: this.serverUUID,
+            resourceId: this.serverURL,
           }
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
@@ -2072,7 +2072,7 @@ export default {
         )
         promise1.then((returnedObject) => {
           this.mapImp = returnedObject
-          this.serverUUID = this.mapImp.getIdentifier().uuid
+          this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
           this.onFlatmapReady()
@@ -2401,7 +2401,7 @@ export default {
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
       tooltipDisplay: true,
-      serverUUID: undefined,
+      serverURL: undefined,
       layers: [],
       pathways: [],
       sckanDisplay: [
