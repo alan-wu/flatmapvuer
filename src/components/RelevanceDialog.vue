@@ -73,6 +73,11 @@ export default {
             tooltipId: undefined
         }
     },
+    watch: {
+        relevance: function () {
+            this.tooltipId = undefined
+        },
+    },
     methods: {
         capitalise: function (label) {
             return label[0].toUpperCase() + label.slice(1);
