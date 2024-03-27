@@ -1032,7 +1032,7 @@ export default {
     },
     setFeatureAnnotated: function () {
       if (this.mapImp) {
-        this.annotator.annotatedItemIds(this.serverURL)
+        this.annotator.annotatedItemIds(this.userToken, this.serverURL)
           .then((annotatedItemIds) => {
             for (const id of annotatedItemIds) {
               this.mapImp.setFeatureAnnotated(id)
@@ -1048,7 +1048,7 @@ export default {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawnType !== 'None') {
           this.loading = true
-          this.annotator.drawnFeatures(this.serverURL)
+          this.annotator.drawnFeatures(this.userToken, this.serverURL)
             .then((drawnFeatures) => {
               // Use to switch the displayed feature type
               if (this.drawnType !== 'All tools') {
@@ -1063,7 +1063,7 @@ export default {
                 for (const feature of drawnFeatures) {
                   if (this.annotatedType !== 'Everyone') {
                     this.annotator
-                      .itemAnnotations(this.serverURL, feature.id)
+                      .itemAnnotations(this.userToken, this.serverURL, feature.id)
                       .then((value) => {
                         let participated = value.filter((v) => {
                           return (
@@ -2502,12 +2502,10 @@ export default {
     }
   },
   computed: {
+    ...mapState(useMainStore, ['userToken']),
     relevance: function () {
       return Object.keys(this.relevanceEntry).length > 0
     }
-  },
-  computed: {
-    ...mapState(useMainStore, ['userToken']),
   },
   watch: {
     entry: function () {
@@ -2588,7 +2586,7 @@ export default {
         }, false)
         if (!this.drawnAnnotationFeatures) this.loading = true
         this.showAnnotator(true)
-        this.annotator.authenticate().then((userData) => {
+        this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email) {
             this.userInformation = userData
             this.setFeatureAnnotated()
