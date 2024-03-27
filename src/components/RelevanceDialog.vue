@@ -22,21 +22,19 @@
             </el-row>
         </el-row>
         <el-row v-if="relevance">
-            <el-row>
-                <el-col :span="23">
-                    <b><span>Related Features</span></b>
-                </el-col>
-                <el-col :span="1">
-                    <el-icon><el-icon-circle-close @click="$emit('popup', true)" /></el-icon>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col>
-                    <el-card shadow="hover" v-for="(value, key) in entry" :key="key" @click="$emit('tooltip', value)">
-                        <span>{{ capitalise(key) }}</span>
-                    </el-card>
-                </el-col>
-            </el-row>
+            <el-col>
+                <b><span>Related Features</span></b>
+                <el-row v-for="(value, key) in entry" :key="key">
+                    <el-col :span="20">
+                        <el-card shadow="hover" @click="handleTooltipOpen(value)">
+                            <span>{{ capitalise(key) }}</span>
+                        </el-card>
+                    </el-col>
+                    <el-col :span="4" v-if="value === tooltipId">
+                        <el-icon><el-icon-circle-close @click="handleTooltipClose" /></el-icon>
+                    </el-col>
+                </el-row>
+            </el-col>
         </el-row>
     </div>
 </template>
@@ -68,11 +66,24 @@ export default {
         relevance: {
             type: Boolean,
             default: false,
+        },
+    },
+    data: function () {
+        return {
+            tooltipId: undefined
         }
     },
     methods: {
-        capitalise(label) {
+        capitalise: function (label) {
             return label[0].toUpperCase() + label.slice(1);
+        },
+        handleTooltipOpen: function (value) {
+            this.tooltipId = value
+            this.$emit('tooltip', value)
+        },
+        handleTooltipClose: function () {
+            this.tooltipId = undefined
+            this.$emit('popup', true)
         }
     }
 }
@@ -90,7 +101,7 @@ export default {
     border: 1px solid $app-primary-color;
     display: flex;
     flex-direction: column;
-    padding: 1em 5px 1em 5px;
+    padding: .8em;
 }
 
 .dialog-title {
