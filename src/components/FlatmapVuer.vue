@@ -137,8 +137,8 @@
       </el-icon>
 
       <div class="bottom-draw-control"
-        v-if="viewingMode === 'Annotation' && userInformation" 
-        v-show="!disableUI">
+        v-show="viewingMode === 'Annotation' && userInformation && !disableUI"
+      >
         <el-popover
           content="Relevance"
           placement="top"
@@ -1046,6 +1046,7 @@ export default {
       if (this.mapImp) {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawnType !== 'None') {
+          this.loading = true
           this.annotator.drawnFeatures(this.serverURL)
             .then((drawnFeatures) => {
               // Use to switch the displayed feature type
@@ -1055,6 +1056,7 @@ export default {
                 })
               }
               this.drawnAnnotationFeatures = drawnFeatures
+              this.loading = false
               // No need to call 'addAnnotationFeature' when a new feature created
               if (!this.annotationSubmitted) {
                 for (const feature of drawnFeatures) {
@@ -2579,6 +2581,7 @@ export default {
             this.dialogCssHacks()
           }
         }, false)
+        if (!this.drawnAnnotationFeatures) this.loading = true
         this.showAnnotator(true)
         this.annotator.authenticate().then((userData) => {
           if (userData.name && userData.email) {
@@ -2587,6 +2590,7 @@ export default {
             if (!this.drawnAnnotationFeatures) {
               this.addAnnotationFeature()
             }
+            this.loading = false
           }
         })
       } else this.showAnnotator(false)
@@ -2753,7 +2757,7 @@ export default {
 
 :deep(.maplibregl-popup) {
   z-index: 10;
-  max-width: 300px !important;
+  max-width: 330px !important;
 }
 
 :deep(.flatmap-tooltip-popup) {
