@@ -1047,7 +1047,7 @@ export default {
       if (this.mapImp) {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawnType !== 'None') {
-          this.loading = true
+          if (!this.annotationSubmitted) this.loading = true
           this.annotator.drawnFeatures(this.userToken, this.serverURL)
             .then((drawnFeatures) => {
               // Use to switch the displayed feature type
