@@ -1345,7 +1345,7 @@ export default {
         // Show flight path option UI
         this.displayFlightPathOption = true
         // Show 3D as default on FC type
-        this.setFlightPath3D(true)
+        this.setFlightPath3D(false)
       }
     },
     /**
