@@ -1487,7 +1487,7 @@ export default {
                 if (feature && feature.relevance) {
                   this.relevanceEntry = feature.relevance
                 }
-                this.checkAndCreateDrawnFeaturePopups(payload)
+                this.drawModeEvent(payload)
               }
             }
           } else {
@@ -1626,8 +1626,8 @@ export default {
         })
       }
     },
-    // This is used only when either edit or delete mode is on
-    checkAndCreateDrawnFeaturePopups: function (data) {
+    // Fire either update or delete event
+    drawModeEvent: function (data) {
       if (this.activeDrawMode) {
         // double click fires 'updated' callback
         if (this.doubleClickedFeature) {
