@@ -43,7 +43,7 @@
               <el-row class="dialog-text">
                 <strong>Evidence: </strong>
                 <el-row
-                  v-for="evidence in sub.evidence"
+                  v-for="evidence in sub.body.evidence"
                   :key="evidence"
                   class="dialog-text"
                 >
@@ -51,7 +51,7 @@
                 </el-row>
               </el-row>
               <el-row class="dialog-text">
-                <strong>Comment: </strong> {{ sub.comment }}
+                <strong>Comment: </strong> {{ sub.body.comment }}
               </el-row>
             </div>
           </template>
