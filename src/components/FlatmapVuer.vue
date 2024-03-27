@@ -341,7 +341,6 @@
               class="pathway-container"
               :class="{ open: drawerOpen, close: !drawerOpen }"
               :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
-
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
@@ -719,6 +718,8 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import RelevanceDialog from './RelevanceDialog.vue'
+import { mapState } from 'pinia'
+import { useMainStore } from '@/store/index'
 
 /**
  * @param scopeElement    Draggable scope area (Optional)
@@ -2404,7 +2405,8 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      $annotator: this.annotator
+      $annotator: this.annotator,
+      userApiKey: this.userToken
     }
   },
   data: function () {
@@ -2413,7 +2415,7 @@ export default {
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
-      tooltipDisplay: true,
+      tooltipDisplay: false,
       serverURL: undefined,
       layers: [],
       pathways: [],
@@ -2503,6 +2505,9 @@ export default {
     relevance: function () {
       return Object.keys(this.relevanceEntry).length > 0
     }
+  },
+  computed: {
+    ...mapState(useMainStore, ['userToken']),
   },
   watch: {
     entry: function () {
@@ -2601,11 +2606,7 @@ export default {
       }
     }
   },
-  created: function () {
-
-  },
   mounted: function () {
-
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait = []

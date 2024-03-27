@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmapvuer",
-  "version": "0.6.1-vue3.8",
+  "version": "0.6.1-auth.6",
   "license": "Apache-2.0",
   "files": [
     "dist/*",
@@ -44,12 +44,13 @@
   },
   "dependencies": {
     "@abi-software/flatmap-viewer": "^2.6.0",
-    "@abi-software/sparc-annotation": "0.1.1",
+    "@abi-software/sparc-annotation": "0.2.0",
     "@abi-software/svg-sprite": "^0.4.0-vue3.3",
     "@element-plus/icons-vue": "^2.3.1",
     "css-element-queries": "^1.2.2",
     "element-plus": "2.5.5",
     "mitt": "^3.0.1",
+    "pinia": "^2.1.7",
     "unplugin-vue-components": "^0.26.0",
     "vue": "^3.3.13"
   },

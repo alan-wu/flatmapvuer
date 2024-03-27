@@ -189,7 +189,7 @@ export default {
       type: Object,
     },
   },
-  inject: ['flatmapAPI', '$annotator'],
+  inject: ['flatmapAPI', '$annotator', 'userApiKey'],
   data: function () {
     return {
       displayPair: {
@@ -259,6 +259,7 @@ export default {
         ) {
           this.$annotator
             .itemAnnotations(
+              this.userApiKey,
               this.annotationEntry['resourceId'],
               this.annotationEntry['featureId']
             )
@@ -320,7 +321,7 @@ export default {
           }
           if (this.creator) userAnnotation.creator = this.creator
           this.$annotator
-            .addAnnotation(userAnnotation)
+            .addAnnotation(this.userApiKey, userAnnotation)
             .then(() => {
               this.$emit('annotation', userAnnotation)
               this.errorMessage = ''
@@ -357,7 +358,7 @@ export default {
     },
   },
   mounted: function () {
-    this.$annotator.authenticate().then((userData) => {
+    this.$annotator.authenticate(this.userApiKey).then((userData) => {
       if (userData.name && userData.email) {
         this.creator = userData
         if (!userData.orcid) this.creator.orcid = '0000-0000-0000-0000'
