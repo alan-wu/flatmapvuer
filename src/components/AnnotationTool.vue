@@ -43,7 +43,7 @@
               <el-row class="dialog-text">
                 <strong>Evidence: </strong>
                 <el-row
-                  v-for="evidence in sub.evidence"
+                  v-for="evidence in sub.body.evidence"
                   :key="evidence"
                   class="dialog-text"
                 >
@@ -51,7 +51,7 @@
                 </el-row>
               </el-row>
               <el-row class="dialog-text">
-                <strong>Comment: </strong> {{ sub.comment }}
+                <strong>Comment: </strong> {{ sub.body.comment }}
               </el-row>
             </div>
           </template>
@@ -262,8 +262,10 @@ export default {
           const userAnnotation = {
             resource: this.annotationEntry['resource'],
             item: this.annotationEntry['featureId'],
-            evidence: evidenceURLs,
-            comment: this.comment,
+            body: {
+              evidence: evidenceURLs,
+              comment: this.comment,
+            },
           }
           if (this.creator) userAnnotation.creator = this.creator
           this.$annotator
