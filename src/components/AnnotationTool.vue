@@ -308,10 +308,13 @@ export default {
           const userAnnotation = {
             resource: this.annotationEntry['resourceId'],
             item: this.annotationEntry['featureId'],
-            evidence: evidenceURLs,
-            comment: this.comment,
+            body: {
+              evidence: evidenceURLs,
+              comment: this.comment,
+            },
             feature: this.annotationEntry['feature']
           }
+          Object.assign(userAnnotation.body, this.annotationEntry['body'])
           if (this.annotationEntry['type'] === 'deleted') {
             userAnnotation.feature = undefined
           }

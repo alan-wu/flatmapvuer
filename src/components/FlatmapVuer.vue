@@ -1653,6 +1653,23 @@ export default {
       }
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
+    createConnectivityBody: function () {
+      if (Object.keys(this.relevanceEntry).length > 0) {        
+        const featureIds = Object.values(this.relevanceEntry)
+        const body = {
+          type: 'connectivity',
+          sourceId: featureIds[0],
+          targetId: featureIds[featureIds.length - 1],
+          intermediateIds: [],
+        }
+        if (featureIds.length > 2) {
+          featureIds.slice(1, -1).forEach((id) => {
+            body.intermediateIds.push(id)
+          });
+        }
+        this.annotationEntry.body = body
+      }
+    },
     /**
      * @vuese
      * Function to create/display tooltips from the provided ``data``.
@@ -1673,6 +1690,7 @@ export default {
             if (this.inDrawing || this.activeDrawMode) {
               this.annotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
+              this.createConnectivityBody()
               this.displayTooltip(
                 data.feature.feature.id,
                 centroid(data.feature.feature.geometry)
