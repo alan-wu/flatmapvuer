@@ -1544,10 +1544,10 @@ export default {
                 // Stop adding features if dialog displayed
                 if (this.inDrawing && !this.relevanceDisplay) {
                   // Only clicked relevance data will be added 
-                  let relevant = data.feature.label ? data.feature.label : `*${data.feature.id}`
+                  let relevant = data.label ? data.label : `*${data.id}`
                   // only the linestring will have relevance at the current stage
                   if (relevant && this.activeDrawTool === 'LineString') {
-                    this.relevanceEntry[relevant] = data.feature.featureId
+                    this.relevanceEntry[relevant] = data.featureId
                   }
                 }
               }
