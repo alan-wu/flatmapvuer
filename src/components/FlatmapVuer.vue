@@ -679,7 +679,7 @@
         @confirm="confirmDrawnFeature"
         @cancel="cancelDrawnFeature"
         @popup="closePopup"
-        @tooltip="checkAndCreatePopups"
+        @tooltip="displayRelevantFeatureTooltip"
       />
     </div>
   </div>
@@ -905,6 +905,12 @@ export default {
         }
         this.rollbackAnnotationEvent()
         this.initialiseDrawing()
+      }
+    },
+    displayRelevantFeatureTooltip: function (id) {
+      if (this.mapImp) {
+        const data = this.mapImp.featureProperties(id)
+        this.checkAndCreatePopups({ feature: data })
       }
     },
     confirmDrawnFeature: function () {
@@ -1476,7 +1482,11 @@ export default {
               this.initialiseDialog()
               // For exist drawn annotation features
               if (this.currentDrawnFeature) {
-                this.processRelevance()
+                let feature = this.drawnAnnotationFeatures
+                  .filter((feature) => feature.id === this.currentDrawnFeature.id)[0]
+                if (feature && feature.relevance) {
+                  this.relevanceEntry = feature.relevance
+                }
                 this.checkAndCreateDrawnFeaturePopups(payload)
               }
             }
@@ -1530,8 +1540,13 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Stop adding features if dialog displayed
-                if (this.inDrawing && !this.relevanceDisplay ) {
-                  this.processRelevance(payload)
+                if (this.inDrawing && !this.relevanceDisplay) {
+                  // Only clicked relevance data will be added 
+                  let relevant = data.feature.label ? data.feature.label : `*${data.feature.id}`
+                  // only the linestring will have relevance at the current stage
+                  if (relevant && this.activeDrawTool === 'LineString') {
+                    this.relevanceEntry[relevant] = data.feature.featureId
+                  }
                 }
               }
             } else if (
@@ -1609,28 +1624,6 @@ export default {
           const dtype = this.$el.querySelector(`.draw${t}`)
           if (dtype) dtype.classList.add('inactive');
         })
-      }
-    },
-    processRelevance: function (data = undefined) {
-      // process while drawing new features
-      if (data && data.feature) {
-        // Only clicked relevance data will be added 
-        let relevant = data.feature.label ? data.feature.label : `*${data.feature.id}`
-        // only the linestring will have relevance at the current stage
-        if (relevant && this.activeDrawTool === 'LineString') {
-          this.relevanceEntry[relevant] = data
-        }
-      } else {
-        // process while checking exist features
-        if (this.currentDrawnFeature && this.drawnAnnotationFeatures) {
-          let feature = this.drawnAnnotationFeatures
-            .filter((feature) => {
-              return feature.id === this.currentDrawnFeature.id
-            })[0]
-          if (feature && feature.relevance) {
-            this.relevanceEntry = feature.relevance
-          }
-        }
       }
     },
     // This is used only when either edit or delete mode is on
