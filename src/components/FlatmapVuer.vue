@@ -1119,7 +1119,7 @@ export default {
     setFlightPath3D: function (flag) {
       this.flightPath3DRadio = flag
       if (this.mapImp) {
-        this.mapImp.enable3dPaths(flag)
+        this.mapImp.enableFlightPaths(flag)
       }
     },
     /**
@@ -2012,8 +2012,8 @@ export default {
       if (mapVersion === mapVersionForFlightPath || mapVersion > mapVersionForFlightPath) {
         // Show flight path option UI
         this.displayFlightPathOption = true
-        // Show 3D as default on FC type
-        this.setFlightPath3D(true)
+        // Show 2D as default on FC type
+        this.setFlightPath3D(false)
       }
     },
     /**
