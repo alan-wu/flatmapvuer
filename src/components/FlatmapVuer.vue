@@ -2585,16 +2585,16 @@ export default {
           }
         }, false)
         if (!this.drawnAnnotationFeatures) this.loading = true
-        this.showAnnotator(true)
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email) {
+            this.showAnnotator(true)
             this.userInformation = userData
             this.setFeatureAnnotated()
             if (!this.drawnAnnotationFeatures) {
               this.addAnnotationFeature()
             }
-            this.loading = false
           }
+          this.loading = false
         })
       } else this.showAnnotator(false)
     },
