@@ -637,7 +637,7 @@ export default {
     setFlightPath3D: function (flag) {
       this.flightPath3DRadio = flag
       if (this.mapImp) {
-        this.mapImp.enable3dPaths(flag)
+        this.mapImp.enableFlightPaths(flag)
       }
     },
     /**
