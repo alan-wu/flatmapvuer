@@ -1344,7 +1344,7 @@ export default {
       if (mapVersion === mapVersionForFlightPath || mapVersion > mapVersionForFlightPath) {
         // Show flight path option UI
         this.displayFlightPathOption = true
-        // Show 3D as default on FC type
+        // Show 2D as default on FC type
         this.setFlightPath3D(false)
       }
     },
