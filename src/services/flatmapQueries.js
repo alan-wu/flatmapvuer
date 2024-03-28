@@ -276,7 +276,11 @@ let FlatmapQueries = function () {
     }
   }
 
-  this.createLabelFromNeuralNode = function (node, lookUp) {
+  this.createLabelFromNeuralNode = function (node, lookUp, isSingle=true) {
+    if (isSingle) {
+      return lookUp[node]
+    }
+
     let label = lookUp[node[0]]
     if (node.length === 2 && node[1].length > 0) {
       node[1].forEach((n) => {
@@ -325,11 +329,12 @@ let FlatmapQueries = function () {
         this.destinations = axons.map((a) =>
           this.createLabelFromNeuralNode(a, lookUp)
         )
+
         this.origins = dendrites.map((d) =>
-          this.createLabelFromNeuralNode(d, lookUp)
+          this.createLabelFromNeuralNode(d, lookUp, true)
         )
         this.components = components.map((c) =>
-          this.createLabelFromNeuralNode(c, lookUp)
+          this.createLabelFromNeuralNode(c, lookUp, false)
         )
         this.flattenAndFindDatasets(components, axons, dendrites)
         resolve({
