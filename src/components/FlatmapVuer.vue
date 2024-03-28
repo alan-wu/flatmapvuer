@@ -2680,7 +2680,7 @@ export default {
   position: absolute;
   bottom: 0px;
   transition: all 1s ease;
-  z-index: 10;
+  z-index: 8;
   &.open {
     left: 0px;
   }
@@ -3104,6 +3104,7 @@ export default {
   position: absolute;
   right: calc(50vw - 100px);;
   bottom: 16px;
+  z-index: 10;
 }
 
 .bottom-right-control {
