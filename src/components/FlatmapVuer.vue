@@ -1061,7 +1061,7 @@ export default {
               // No need to call 'addAnnotationFeature' when a new feature created
               if (!this.annotationSubmitted) {
                 for (const feature of drawnFeatures) {
-                  if (this.annotatedType !== 'Everyone') {
+                  if (this.annotatedType !== 'Anyone') {
                     this.annotator
                       .itemAnnotations(this.userToken, this.serverURL, feature.id)
                       .then((value) => {
@@ -2476,8 +2476,8 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
-      annotatedType: 'Everyone',
-      annotatedTypes: ['Everyone', 'Me', 'Others'],
+      annotatedType: 'Anyone',
+      annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       annotator: undefined,
