@@ -2584,7 +2584,7 @@ export default {
             this.dialogCssHacks()
           }
         }, false)
-        if (!this.drawnAnnotationFeatures) this.loading = true
+        this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email) {
             this.showAnnotator(true)
