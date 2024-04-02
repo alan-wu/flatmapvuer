@@ -11,13 +11,15 @@ describe('MultiFlatmapVuer', () => {
 
   beforeEach(() => {
     cy.viewport(1920, 1080);
+    cy.fixture('MultiFlatmapProps.json').as('props');
   });
 
 
   //Load in some responses/assets before beginning the test
   //This should prevent any async behaviours.
   before(() => {
-    cy.fixture('MultiFlatmapProps.json').as('props');
+    // moved to beforeEach
+    // cy.fixture('MultiFlatmapProps.json').as('props');
   })
 
   it('Workflow testing', () => {
@@ -152,11 +154,79 @@ describe('MultiFlatmapVuer', () => {
 
       })
 
-
-
     })
 
   })
 
+  it('change different species', () => {
+
+    // const resourceSelectedSpy = cy.spy().as('resourceSelectedSpy')
+    cy.get('@props').then((props) => {
+      console.log('flatmapAPI', props)
+      cy.mount(CypressComponentWrapper, {
+        propsData: {
+          component: 'MultiFlatmapVuer',
+          props: props,
+        },
+        global: {
+          plugins: setActivePinia(createPinia())
+        }
+      }).then((vm) => {
+        cy.wrap(vm).as('vm')
+        window.vm = vm
+
+      }).get('@vue').should('exist')
+
+      // Now that we have the vue wrapper, check that the ready event is fired
+      .then(() => {
+        cy.get('@vue').should(wrapper => {
+          expect(wrapper.emitted('ready')).to.be.ok
+          Cypress.multiFlatmapVuerWrapper = wrapper
+        })
+      })
+
+    })
+
+    //Check if multiflatmap is mounted correctly
+    cy.get('.content-container').should('exist');
+
+    // Check if flatmap emits ready event
+    cy.get('@vue').should(wrapper => {
+      expect(wrapper.emitted('ready')).to.be.ok
+    }).then(() => {
+      const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
+      const speciesList = [
+        {
+          name: 'Human Female',
+          taxon: 'NCBITaxon:9606'
+        },
+        {
+          name: 'Rat (NPO)',
+          taxon: 'NCBITaxon:10116'
+        },
+        {
+          name: 'Functional Connectivity',
+          taxon: 'FunctionalConnectivity'
+        }
+      ]
+
+      // Switching species
+      const switchSpeciesAndTest = (speciesId, speciesTaxo) => {
+        multiFlatmapVuer.setSpecies(
+          speciesId,
+          multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
+          1
+        )
+        // TODO: to add test to check the expected map UI is fully loaded or not
+      }
+
+      speciesList.forEach((species) => {
+        switchSpeciesAndTest(species.name, species.taxon)
+        const activeSpecies = multiFlatmapVuer.activeSpecies
+        expect(activeSpecies).to.eq(species.name)
+      })
+    })
+
+  })
 
 });
