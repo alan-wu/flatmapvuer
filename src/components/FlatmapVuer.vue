@@ -939,7 +939,7 @@ export default {
       const inactive = this.$el.querySelector('.drawConnection').classList.contains('inactive')
       // disable click popup if icon inactive or in drawing
       if (!inactive && !this.inDrawing) { 
-        this.closePopup()       
+        this.closePopup()
         this.connectionDisplay = !this.connectionDisplay
       }
     },
