@@ -1039,6 +1039,10 @@ export default {
       if (this.mapImp) {
         this.annotator.annotatedItemIds(this.userToken, this.serverURL)
           .then((annotatedItemIds) => {
+              if ('resource' in annotatedItemIds) {
+                // The annotator has `resource` and `items` fields
+                annotatedItemIds = annotatedItemIds.items
+              }
             for (const id of annotatedItemIds) {
               this.mapImp.setFeatureAnnotated(id)
             }
@@ -1055,6 +1059,10 @@ export default {
           if (!this.annotationSubmitted) this.loading = true
           this.annotator.drawnFeatures(this.userToken, this.serverURL)
             .then((drawnFeatures) => {
+              if ('resource' in drawnFeatures) {
+                // The annotator has `resource` and `features` fields
+                drawnFeatures = drawnFeatures.features
+              }
               // Use to switch the displayed feature type
               if (this.drawnType !== 'All tools') {
                 drawnFeatures = drawnFeatures.filter((feature) => {
