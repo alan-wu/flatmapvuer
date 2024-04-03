@@ -1674,17 +1674,12 @@ export default {
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     createConnectivityBody: function () {
       if (Object.keys(this.connectionEntry).length > 0) {
-        const featureIds = Object.values(this.connectionEntry)
+        const features = Object.values(this.connectionEntry)
         const body = {
           type: 'connectivity',
-          source: featureIds[0],
-          target: featureIds[featureIds.length - 1],
-          intermediates: [],
-        }
-        if (featureIds.length > 2) {
-          featureIds.slice(1, -1).forEach((id) => {
-            body.intermediateIds.push(id)
-          });
+          source: features[0],
+          target: features[features.length - 1],
+          intermediates: features.slice(1, -1),
         }
         this.annotationEntry.body = body
       }
