@@ -2,7 +2,7 @@
     <div class="dialog-container">
         <el-row>
             <span class="dialog-title" v-if="drawing">Finalise drawing</span>
-            <span class="dialog-title" v-else>Visualise relevance</span>
+            <span class="dialog-title" v-else>Visualise connection</span>
             <el-row v-if="drawing">
                 <el-col :span="13">
                     <el-button type="primary" plain @click="$emit('confirm', true)">
@@ -21,7 +21,7 @@
                 </el-button>
             </el-row>
         </el-row>
-        <el-row v-if="relevance">
+        <el-row v-if="connection">
             <el-col>
                 <b><span>Related Features</span></b>
                 <el-row v-for="(value, key) in entry" :key="key">
@@ -49,7 +49,7 @@ import {
 } from 'element-plus'
 
 export default {
-    name: 'RelevanceDialog',
+    name: 'ConnectionDialog',
     components: {
         Row,
         Col,
@@ -63,7 +63,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        relevance: {
+        connection: {
             type: Boolean,
             default: false,
         },
@@ -74,7 +74,7 @@ export default {
         }
     },
     watch: {
-        relevance: function () {
+        connection: function () {
             this.tooltipId = undefined
         },
     },

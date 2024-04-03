@@ -140,7 +140,7 @@
         v-show="viewingMode === 'Annotation' && userInformation && !disableUI"
       >
         <el-popover
-          content="Relevance"
+          content="Draw Connection"
           placement="top"
           :teleported="false"
           trigger="manual"
@@ -151,8 +151,8 @@
           <template #reference>
             <map-svg-icon
               icon="connection"
-              class="icon-button drawRelevance inactive"
-              @click="relevanceDialogPopup"
+              class="icon-button drawConnection inactive"
+              @click="connectionDialogPopup"
               @mouseover="showToolitip(10)"
               @mouseout="hideToolitip(10)"
             />
@@ -668,17 +668,17 @@
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
-      <RelevanceDialog
-        class="relevance-dialog"
-        v-show="relevanceDisplay"
-        :entry="relevanceEntry"
+      <ConnectionDialog
+        class="connection-dialog"
+        v-show="connectionDisplay"
+        :entry="connectionEntry"
         :drawing="inDrawing"
-        :relevance="relevance"
-        @display="relevanceDialogPopup"
+        :connection="connection"
+        @display="connectionDialogPopup"
         @confirm="confirmDrawnFeature"
         @cancel="cancelDrawnFeature"
         @popup="closePopup"
-        @tooltip="displayRelevantFeatureTooltip"
+        @tooltip="displayConnectedFeatureTooltip"
       />
     </div>
   </div>
@@ -717,7 +717,7 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
-import RelevanceDialog from './RelevanceDialog.vue'
+import ConnectionDialog from './ConnectionDialog.vue'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 
@@ -908,7 +908,7 @@ export default {
         this.initialiseDrawing()
       }
     },
-    displayRelevantFeatureTooltip: function (id) {
+    displayConnectedFeatureTooltip: function (id) {
       if (this.mapImp) {
         const data = this.mapImp.featureProperties(id)
         this.checkAndCreatePopups({ feature: data })
@@ -917,31 +917,31 @@ export default {
     confirmDrawnFeature: function () {
       if (this.createdEvent) {
         this.checkAndCreatePopups(this.createdEvent)
-        // Add relevance if exist to annotationEntry
-        // Relevance will only be added in creating new drawn feature annotation
+        // Add connection if exist to annotationEntry
+        // Connection will only be added in creating new drawn feature annotation
         // And will not be updated if move drawn features
-        if (Object.keys(this.relevanceEntry).length > 0) {
-          this.annotationEntry.feature.relevance = this.relevanceEntry
+        if (Object.keys(this.connectionEntry).length > 0) {
+          this.annotationEntry.feature.connection = this.connectionEntry
         }
         this.initialiseDrawing()
       }
     },
     initialiseDialog: function () {
-      this.relevanceDisplay = false
-      this.relevanceEntry = {}
+      this.connectionDisplay = false
+      this.connectionEntry = {}
     },
-    relevanceDialogPopup: function () {
-      const inactive = this.$el.querySelector('.drawRelevance').classList.contains('inactive')
+    connectionDialogPopup: function () {
+      const inactive = this.$el.querySelector('.drawConnection').classList.contains('inactive')
       // disable click popup if icon inactive or in drawing
       if (!inactive && !this.inDrawing) { 
         this.closePopup()       
-        this.relevanceDisplay = !this.relevanceDisplay
+        this.connectionDisplay = !this.connectionDisplay
       }
     },
     drawingEvent: function (type) {
       this.closePopup()
       // disable mode icon click if any tool is active
-      if (this.drawnTypes.includes(type) && !this.activeDrawMode && !this.relevanceDisplay) {
+      if (this.drawnTypes.includes(type) && !this.activeDrawMode && !this.connectionDisplay) {
         if (type === 'Point') {
           const point = this.$el.querySelector('.mapbox-gl-draw_point')
           this.$el.querySelector('.mapbox-gl-draw_point').click()
@@ -1467,7 +1467,7 @@ export default {
               this.inDrawing = true
             } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
               if (this.createdEvent) {
-                this.relevanceDisplay = true
+                this.connectionDisplay = true
               } else {
                 // Reset if a invalid draw
                 this.initialiseDrawing()
@@ -1487,8 +1487,8 @@ export default {
               if (this.currentDrawnFeature) {
                 let feature = this.drawnAnnotationFeatures
                   .filter((feature) => feature.id === this.currentDrawnFeature.id)[0]
-                if (feature && feature.relevance) {
-                  this.relevanceEntry = feature.relevance
+                if (feature && feature.connection) {
+                  this.connectionEntry = feature.connection
                 }
                 this.drawModeEvent(payload)
               }
@@ -1543,12 +1543,12 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Stop adding features if dialog displayed
-                if (this.inDrawing && !this.relevanceDisplay) {
-                  // Only clicked relevance data will be added 
+                if (this.inDrawing && !this.connectionDisplay) {
+                  // Only clicked connection data will be added
                   let relevant = data.label ? data.label : `*${data.id}`
-                  // only the linestring will have relevance at the current stage
+                  // only the linestring will have connection at the current stage
                   if (relevant && this.activeDrawTool === 'LineString') {
-                    this.relevanceEntry[relevant] = data.featureId
+                    this.connectionEntry[relevant] = data.featureId
                   }
                 }
               }
@@ -1578,7 +1578,7 @@ export default {
     // for dialog popup
     dialogCssHacks: function () {
       this.$nextTick(() => {
-        const dialog = this.$el.querySelector('.relevance-dialog')
+        const dialog = this.$el.querySelector('.connection-dialog')
         draggable(this.$el, dialog)
         // dialog popup at the click position
         // slightly change x or y if close to boundary
@@ -1601,7 +1601,7 @@ export default {
     },
     drawIconCssHacks: function () {
       // set tool/mode icon status
-      if (this.$el.querySelector('.iconSelected') || !this.relevanceDisplay) {
+      if (this.$el.querySelector('.iconSelected') || !this.connectionDisplay) {
         this.drawnTypes.map((t) => {
           const dtype = this.$el.querySelector(`.draw${t}`)
           if (dtype) {
@@ -1619,7 +1619,7 @@ export default {
         this.drawModes.map((m) => {
           this.$el.querySelector(`.draw${m}`).classList.add('inactive');
         })
-      } else if (this.activeDrawMode || this.relevanceDisplay) {
+      } else if (this.activeDrawMode || this.connectionDisplay) {
         if (this.activeDrawMode) {
           this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('iconSelected');
         }
@@ -1657,8 +1657,8 @@ export default {
     },
     // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
     createConnectivityBody: function () {
-      if (Object.keys(this.relevanceEntry).length > 0) {        
-        const featureIds = Object.values(this.relevanceEntry)
+      if (Object.keys(this.connectionEntry).length > 0) {
+        const featureIds = Object.values(this.connectionEntry)
         const body = {
           type: 'connectivity',
           sourceId: featureIds[0],
@@ -2487,8 +2487,8 @@ export default {
       createdEvent: undefined,
       annotationSubmitted: false,
       inDrawing: false,
-      relevanceDisplay: false,
-      relevanceEntry: {},
+      connectionDisplay: false,
+      connectionEntry: {},
       drawnAnnotationFeatures: undefined, // Store all exist drawn features
       doubleClickedFeature: false,
       activeDrawMode: undefined,
@@ -2503,8 +2503,8 @@ export default {
   },
   computed: {
     ...mapState(useMainStore, ['userToken']),
-    relevance: function () {
-      return Object.keys(this.relevanceEntry).length > 0
+    connection: function () {
+      return Object.keys(this.connectionEntry).length > 0
     }
   },
   watch: {
@@ -2537,27 +2537,27 @@ export default {
       this.drawIconCssHacks()
     },
     /**
-     * hide dialog when relevanceEntry is empty
+     * hide dialog when connectionEntry is empty
      */
-    relevance: function (value) {
-      const relevanceIcon = this.$el.querySelector('.drawRelevance')
+    connection: function (value) {
+      const connectionIcon = this.$el.querySelector('.drawConnection')
       if (!value) {
-        this.relevanceDisplay = false
-        relevanceIcon.classList.add('inactive')
+        this.connectionDisplay = false
+        connectionIcon.classList.add('inactive')
       } else {
-        relevanceIcon.classList.remove('inactive')
+        connectionIcon.classList.remove('inactive')
       }
     },
     /**
      * popup dialog via click icon
      */
-    relevanceDisplay: function (display) {
-      const relevanceIcon = this.$el.querySelector('.drawRelevance')
+    connectionDisplay: function (display) {
+      const connectionIcon = this.$el.querySelector('.drawConnection')
       if (display) {
-        relevanceIcon.classList.add('iconSelected')
+        connectionIcon.classList.add('iconSelected')
         this.dialogCssHacks()
       } else {
-        relevanceIcon.classList.remove('iconSelected')
+        connectionIcon.classList.remove('iconSelected')
       }
       this.drawIconCssHacks()
     },
@@ -2871,7 +2871,7 @@ export default {
 }
 
 .drawPoint, .drawLineString, .drawPolygon, 
-.drawDelete, .drawEdit, .drawRelevance,
+.drawDelete, .drawEdit, .drawConnection,
 .zoomIn, .zoomOut, .fitWindow {
   padding: 4px;
 }
@@ -3298,7 +3298,7 @@ export default {
   }
 }
 
-.relevance-dialog {
+.connection-dialog {
   position: absolute;
   z-index: 10;
   cursor: move;
