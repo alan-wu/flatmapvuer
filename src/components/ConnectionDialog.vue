@@ -26,11 +26,11 @@
                 <b><span>Related Features</span></b>
                 <el-row v-for="(value, key) in entry" :key="key">
                     <el-col :span="20">
-                        <el-card shadow="hover" @click="handleTooltipOpen(value)">
-                            <span>{{ capitalise(key) }}</span>
+                        <el-card shadow="hover" @click="handleTooltipOpen(key)">
+                            <span>{{ capitalise(value.label) }}</span>
                         </el-card>
                     </el-col>
-                    <el-col :span="4" v-if="value === tooltipId">
+                    <el-col :span="4" v-if="key === tooltipId">
                         <el-icon><el-icon-circle-close @click="handleTooltipClose" /></el-icon>
                     </el-col>
                 </el-row>

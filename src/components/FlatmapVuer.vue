@@ -1545,10 +1545,13 @@ export default {
                 // Stop adding features if dialog displayed
                 if (this.inDrawing && !this.connectionDisplay) {
                   // Only clicked connection data will be added
-                  let relevant = data.label ? data.label : `*${data.id}`
+                  let nodeLabel = data.label ? data.label : `Feature ${data.id}`
                   // only the linestring will have connection at the current stage
-                  if (relevant && this.activeDrawTool === 'LineString') {
-                    this.connectionEntry[relevant] = data.featureId
+                  if (nodeLabel && this.activeDrawTool === 'LineString') {
+                    this.connectionEntry[data.featureId] = Object.assign({label: nodeLabel},
+                      Object.fromEntries(
+                        Object.entries(data)
+                              .filter(([key]) => ['featureId', 'models'].includes(key))))
                   }
                 }
               }
@@ -1661,9 +1664,9 @@ export default {
         const featureIds = Object.values(this.connectionEntry)
         const body = {
           type: 'connectivity',
-          sourceId: featureIds[0],
-          targetId: featureIds[featureIds.length - 1],
-          intermediateIds: [],
+          source: featureIds[0],
+          target: featureIds[featureIds.length - 1],
+          intermediates: [],
         }
         if (featureIds.length > 2) {
           featureIds.slice(1, -1).forEach((id) => {
