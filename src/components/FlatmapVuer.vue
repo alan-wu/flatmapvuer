@@ -20,6 +20,11 @@
             :visible="hoverVisibilities[6].value"
             ref="warningPopover"
           >
+<!--
+What magic meaning do the numbers 6, 7, etc have?
+
+Please use `const` to assign meaningful names to them...
+ -->
             <p
               v-if="isLegacy"
               @mouseover="showToolitip(6)"
