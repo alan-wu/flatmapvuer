@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
+    ConnectionDialog: typeof import('./components/ConnectionDialog.vue')['default']
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
@@ -38,7 +39,6 @@ declare module 'vue' {
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
     MultiFlatmapVuer: typeof import('./components/MultiFlatmapVuer.vue')['default']
     ProvenancePopup: typeof import('./components/ProvenancePopup.vue')['default']
-    RelevanceDialog: typeof import('./components/RelevanceDialog.vue')['default']
     SelectionsGroup: typeof import('./components/SelectionsGroup.vue')['default']
     SvgLegends: typeof import('./components/legends/SvgLegends.vue')['default']
     Tooltip: typeof import('./components/Tooltip.vue')['default']
