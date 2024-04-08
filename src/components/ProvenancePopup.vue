@@ -15,6 +15,18 @@
     <div class="block" v-else>
       <span class="title">{{ entry.featureId }}</span>
     </div>
+    <div class="block">
+      <el-button
+        class="button"
+        @click="showImages = !showImages"
+      >
+        <span v-if="showImages">Hide images</span>
+        <span v-else>View images at this location</span>
+      </el-button>
+      <div v-if="showImages">
+        <p>Images will be here.</p>
+      </div>
+    </div>
     <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
       <el-icon><el-icon-arrow-up /></el-icon>
@@ -203,6 +215,7 @@ export default {
       loading: false,
       showToolip: false,
       showDetails: false,
+      showImages: false,
       originDescriptions: {
         motor: 'is the location of the initial cell body of the circuit',
         sensory: 'is the location of the initial cell body in the PNS circuit',
