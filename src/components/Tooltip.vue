@@ -4,7 +4,7 @@
       <annotation-tool :annotationEntry="annotationEntry" />
     </template>
     <template v-else>
-      <provenance-popup :entry="entry" />
+      <provenance-popup :entry="entry" @view-image="viewImage"/>
     </template>
   </div>
 </template>
@@ -32,6 +32,11 @@ export default {
       type: Object,
     }
   },
+  methods: {
+    viewImage: function (url) {
+      this.$emit('view-image', url)
+    }
+  }
 }
 </script>
 

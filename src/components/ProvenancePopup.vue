@@ -21,11 +21,17 @@
         @click="showImages = !showImages"
       >
         <span v-if="showImages">Hide images</span>
-        <span v-else>View images at this location</span>
+        <span v-else>View images at this location (Gallery)</span>
       </el-button>
-      <div v-if="showImages">
-        <p>Images will be here.</p>
+      <div v-if="showImages" class="image-gallery-container">
+        <Gallery :items="galleryItems" />
       </div>
+      <el-button
+        class="button"
+        @click="viewImage(imageIframeURL)"
+      >
+        <span>View images at this location (iFrame)</span>
+      </el-button>
     </div>
     <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
@@ -156,6 +162,8 @@
 </template>
 
 <script>
+import Gallery from "@abi-software/gallery";
+import "@abi-software/gallery/dist/style.css";
 import {
   ArrowUp as ElIconArrowUp,
   ArrowDown as ElIconArrowDown,
@@ -182,6 +190,26 @@ const capitalise = function (str) {
   return ''
 }
 
+// TODO: temp data for testing
+const galleryItems = [
+  {
+    title: 'Title 1',
+    type: 'data1',
+    userData: 'https://sparc.science/',
+  },
+  {
+    title: 'Title 2',
+    type: 'data2',
+    link: 'https://sparc.science/',
+  },
+  {
+    title: 'Title 3',
+    type: 'data3',
+    link: 'https://sparc.science/',
+  },
+]
+const imageIframeURL = 'https://sparc.biolucida.net/image?c=NzQ5My1jb2wtMTkz'
+
 export default {
   name: 'ProvenancePopup',
   components: {
@@ -192,6 +220,7 @@ export default {
     ElIconArrowUp,
     ElIconArrowDown,
     ElIconWarning,
+    Gallery,
   },
   props: {
     entry: {
@@ -216,6 +245,8 @@ export default {
       showToolip: false,
       showDetails: false,
       showImages: false,
+      galleryItems: galleryItems,
+      imageIframeURL: imageIframeURL,
       originDescriptions: {
         motor: 'is the location of the initial cell body of the circuit',
         sensory: 'is the location of the initial cell body in the PNS circuit',
@@ -284,6 +315,9 @@ export default {
     pubmedSearchUrlUpdate: function (val) {
       this.pubmedSearchUrl = val
     },
+    viewImage: function (url) {
+      this.$emit('view-image', url)
+    }
   },
 }
 </script>
@@ -498,6 +532,18 @@ export default {
   border-radius: 4px;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
   background-color: #979797;
+}
+
+.image-gallery-container {
+  :deep(.gallery) {
+    .gallery-strip {
+      padding: 1rem 0;
+    }
+
+    > div {
+      min-height: max-content !important;
+    }
+  }
 }
 
 /* Fix for chrome bug where under triangle pops up above one on top of it  */

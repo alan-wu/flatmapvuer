@@ -498,6 +498,12 @@
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
+        @viewImage="viewIframeImage"
+      />
+      <IframeImageDialog
+        :imageIframeURL="imageIframeURL"
+        :imageIframeOpen="imageIframeOpen"
+        @closeImageIframe="closeImageIframe"
       />
     </div>
   </div>
@@ -516,6 +522,7 @@ import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import SvgLegends from './legends/SvgLegends.vue'
+import IframeImageDialog from './IframeImageDialog.vue'
 import {
   ElButton as Button,
   ElCol as Col,
@@ -1570,6 +1577,14 @@ export default {
       if (this.mapImp) return this.mapImp.search(term)
       return []
     },
+    viewIframeImage: function (url) {
+      this.imageIframeURL = url
+      this.imageIframeOpen = true
+    },
+    closeImageIframe: function () {
+      this.imageIframeURL = ''
+      this.imageIframeOpen = false
+    },
   },
   props: {
     /**
@@ -1752,6 +1767,8 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
+      imageIframeOpen: false,
+      imageIframeURL: '',
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
