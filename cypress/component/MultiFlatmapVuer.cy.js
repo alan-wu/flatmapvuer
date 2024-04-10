@@ -217,14 +217,32 @@ describe('MultiFlatmapVuer', () => {
           multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
           1
         )
-        // TODO: to add test to check the expected map UI is fully loaded or not
       }
 
-      speciesList.forEach((species) => {
-        switchSpeciesAndTest(species.name, species.taxon)
-        const activeSpecies = multiFlatmapVuer.activeSpecies
-        expect(activeSpecies).to.eq(species.name)
-      })
+      // Human Female
+      switchSpeciesAndTest(speciesList[0].name, speciesList[0].taxon)
+      expect(multiFlatmapVuer.activeSpecies).to.eq(speciesList[0].name)
+      cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
+      cy.get('.maplibregl-map').should('exist');
+      cy.get('.pathway-location').should('exist');
+
+      cy.wait(8000)
+
+      // Rat (NPO)
+      switchSpeciesAndTest(speciesList[1].name, speciesList[1].taxon)
+      expect(multiFlatmapVuer.activeSpecies).to.eq(speciesList[1].name)
+      cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
+      cy.get('.maplibregl-map').should('exist');
+      cy.get('.pathway-location').should('exist');
+
+      cy.wait(8000)
+
+      // Functional Connectivity
+      switchSpeciesAndTest(speciesList[2].name, speciesList[2].taxon)
+      expect(multiFlatmapVuer.activeSpecies).to.eq(speciesList[2].name)
+      cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
+      cy.get('.maplibregl-map').should('exist');
+      cy.get('.pathway-location').should('exist');
     })
 
   })
