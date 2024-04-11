@@ -1012,7 +1012,6 @@ export default {
           }
           if (
             data &&
-            data.type !== 'marker' &&
             eventType === 'click' &&
             !(this.viewingMode === 'Network Discovery')
           ) {
@@ -1058,9 +1057,11 @@ export default {
           await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
         // The line below only creates the tooltip if some data was found on the path
         // result 0 is the connection, result 1 is the pubmed results from flatmap
+        console.log(data)
         if (
           results[0] ||
           results[1] ||
+          data.feature.type === 'marker' ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
           this.resourceForTooltip = data.resource[0]

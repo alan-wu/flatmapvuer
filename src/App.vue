@@ -90,6 +90,9 @@ import {
   ElRow as Row,
 } from 'element-plus'
 import './icons/mapicon-species-style.css'
+import imageThumbnail1 from './icons/imageThumbnail1'
+import imageThumbnail2 from './icons/imageThumbnail2'
+import imageThumbnail3 from './icons/imageThumbnail3'
 
 export default {
   name: 'app',
@@ -114,10 +117,30 @@ export default {
         console.log('resource', resource)
       }
     },
+    createImageThumbnailMarker: function (component, id, image) {
+      // create the image element
+      let wrapperElement = document.createElement("div");
+      wrapperElement.innerHTML = image;
+
+      // add it to the flatmap
+      const markerIdentifier = component.mapImp.addMarker(id, {
+        element: wrapperElement,
+        className: "highlight-marker", 
+        type: "image",
+      });
+
+      const marker = component.mapImp.addMarker(id,)
+      return marker
+    },
     FlatmapReady: function (component) {
       console.log(component)
       let taxon = component.mapImp.describes
       let id = component.mapImp.addMarker('UBERON:0000948')
+
+      this.createImageThumbnailMarker(component, 'UBERON:0000948', imageThumbnail1)
+      this.createImageThumbnailMarker(component, "UBERON:0016508", imageThumbnail2)
+      this.createImageThumbnailMarker(component, "ILX:0793082", imageThumbnail3)
+
       window.flatmapImp = component.mapImp
       component.enablePanZoomEvents(true)
       //component.showPathwaysDrawer(false);

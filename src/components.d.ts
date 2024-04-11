@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
+    copy: typeof import('./components/ProvenancePopup copy.vue')['default']
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -35,6 +36,7 @@ declare module 'vue' {
     ExternalResourceCard: typeof import('./components/ExternalResourceCard.vue')['default']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
     IframeImageDialog: typeof import('./components/IframeImageDialog.vue')['default']
+    ImagePopup: typeof import('./components/imagePopup.vue')['default']
     MultiFlatmapVuer: typeof import('./components/MultiFlatmapVuer.vue')['default']
     ProvenancePopup: typeof import('./components/ProvenancePopup.vue')['default']
     SelectionsGroup: typeof import('./components/SelectionsGroup.vue')['default']
