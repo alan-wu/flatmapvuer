@@ -1560,7 +1560,7 @@ export default {
                   // Only clicked connection data will be added
                   let nodeLabel = data.label ? data.label : `Feature ${data.id}`
                   // only the linestring will have connection at the current stage
-                  if (nodeLabel && this.activeDrawTool === 'LineString') {
+                  if (this.activeDrawTool === 'LineString') {
                     this.connectionEntry[data.featureId] = Object.assign({label: nodeLabel},
                       Object.fromEntries(
                         Object.entries(data)
