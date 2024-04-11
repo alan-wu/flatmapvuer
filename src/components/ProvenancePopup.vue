@@ -295,6 +295,10 @@ export default {
 
 .block {
   margin-bottom: 0.5em;
+
+  .main > &:first-of-type {
+    margin-right: 0.5em;
+  }
 }
 
 .pub {
@@ -468,6 +472,10 @@ export default {
   overflow-y: scroll;
   scrollbar-width: thin !important;
   max-height: 240px;
+
+  .block {
+    padding-top: 0.5em;
+  }
 }
 
 .scrollbar::-webkit-scrollbar-track {
