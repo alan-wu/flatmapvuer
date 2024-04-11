@@ -2016,7 +2016,7 @@ export default {
       margin-top: 18px;
       &::after,
       &::before {
-        top: calc(-100% + 6px);
+        top: calc(-100% - 4px);
         border-width: 12px;
       }
       /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
@@ -2027,6 +2027,59 @@ export default {
       &::before {
         margin: 0 auto;
         border-color: transparent transparent $app-primary-color transparent;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-left {
+    margin-left: 8px;
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        top: 50%;
+        left: 0;
+        border-width: 8px;
+        margin-top: -8px;
+        margin-left: -16px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        transform: translateX(1px);
+        border-color: transparent rgb(255, 255, 255) transparent transparent;
+      }
+      &::before {
+        border-color: transparent $app-primary-color transparent transparent;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-right {
+    margin-right: 8px;
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        top: 50%;
+        right: 0;
+        border-width: 8px;
+        margin-top: -8px;
+        margin-right: -16px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        transform: translateX(-1px);
+        border-color: transparent transparent transparent rgb(255, 255, 255);
+      }
+      &::before {
+        border-color: transparent transparent transparent $app-primary-color;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-top-left,
+  &.maplibregl-popup-anchor-top-right,
+  &.maplibregl-popup-anchor-bottom-left,
+  &.maplibregl-popup-anchor-bottom-right {
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        display: none;
       }
     }
   }
