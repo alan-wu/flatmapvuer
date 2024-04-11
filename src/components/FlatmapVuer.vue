@@ -1564,7 +1564,8 @@ export default {
                     this.connectionEntry[data.featureId] = Object.assign({label: nodeLabel},
                       Object.fromEntries(
                         Object.entries(data)
-                              .filter(([key]) => ['featureId', 'models'].includes(key))))
+                              .filter(([key]) => ['featureId', 'models'].includes(key))
+                              .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
                   }
                 }
               }
