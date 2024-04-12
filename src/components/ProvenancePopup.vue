@@ -1,7 +1,7 @@
 <template>
   <div v-if="entry" class="main" v-loading="loading">
     <div class="block" v-if="entry.title">
-      <span class="title">{{ capitalise(entry.title) }}</span>
+      <div class="title">{{ capitalise(entry.title) }}</div>
       <div
         v-if="
           entry.provenanceTaxonomyLabel &&
@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="block" v-else>
-      <span class="title">{{ entry.featureId }}</span>
+      <div class="title">{{ entry.featureId }}</div>
     </div>
     <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
@@ -284,7 +284,7 @@ export default {
 
 .title {
   text-align: left;
-  width: 16em;
+  // width: 16em;
   line-height: 1.5em !important;
   font-size: 1em;
   font-family: Helvetica;
