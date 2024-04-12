@@ -1057,46 +1057,42 @@ export default {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawnType !== 'None') {
           if (!this.annotationSubmitted) this.loading = true
-          this.annotator.drawnFeatures(this.userToken, this.serverURL)
-            .then((drawnFeatures) => {
-              if ('resource' in drawnFeatures) {
-                // The annotator has `resource` and `features` fields
-                drawnFeatures = drawnFeatures.features
+          const userId = this.annotatedType === 'Anyone' ?
+            undefined : this.userInformation.orcid ?
+              this.userInformation.orcid : '0000-0000-0000-0000'
+          const participated = this.annotatedType === 'Anyone' ?
+            undefined : this.annotatedType === 'Me' ?
+              true : false
+          this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
+            .then((annotatedItemIds) => {
+              if ('resource' in annotatedItemIds) {
+                // The annotator has `resource` and `items` fields
+                annotatedItemIds = annotatedItemIds.itemIds
               }
-              // Use to switch the displayed feature type
-              if (this.drawnType !== 'All tools') {
-                drawnFeatures = drawnFeatures.filter((feature) => {
-                  return feature.geometry.type === this.drawnType
+              this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
+                .then((drawnFeatures) => {
+                  if ('resource' in drawnFeatures) {
+                    // The annotator has `resource` and `features` fields
+                    drawnFeatures = drawnFeatures.features
+                  }
+                  // Use to switch the displayed feature type
+                  if (this.drawnType !== 'All tools') {
+                    drawnFeatures = drawnFeatures.filter((feature) => {
+                      return feature.geometry.type === this.drawnType
+                    })
+                  }
+                  this.drawnAnnotationFeatures = drawnFeatures
+                  this.loading = false
+                  // No need to call 'addAnnotationFeature' when a new feature created, as it is already on the map
+                  if (!this.annotationSubmitted) {
+                    for (const feature of drawnFeatures) {
+                      this.mapImp.addAnnotationFeature(feature)
+                    }
+                  }
                 })
-              }
-              this.drawnAnnotationFeatures = drawnFeatures
-              this.loading = false
-              // No need to call 'addAnnotationFeature' when a new feature created
-              if (!this.annotationSubmitted) {
-                for (const feature of drawnFeatures) {
-                  if (this.annotatedType !== 'Anyone') {
-                    this.annotator
-                      .itemAnnotations(this.userToken, this.serverURL, feature.id)
-                      .then((value) => {
-                        let participated = value.filter((v) => {
-                          return (
-                            v.creator.name === this.userInformation.name &&
-                            v.creator.email === this.userInformation.email
-                          )
-                        }).length > 0
-                        if (
-                          (this.annotatedType === 'Me' && participated) ||
-                          (this.annotatedType === 'Others' && !participated)
-                        ) {
-                          this.mapImp.addAnnotationFeature(feature)
-                        }
-                      })
-                      .catch((reason) => {
-                        console.log(reason) // Error!
-                      })
-                  } else this.mapImp.addAnnotationFeature(feature)
-                }
-              }
+                .catch((reason) => {
+                  console.log(reason) // Error!
+                })
             })
             .catch((reason) => {
               console.log(reason) // Error!
