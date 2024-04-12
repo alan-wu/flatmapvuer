@@ -1041,7 +1041,7 @@ export default {
           .then((annotatedItemIds) => {
               if ('resource' in annotatedItemIds) {
                 // The annotator has `resource` and `items` fields
-                annotatedItemIds = annotatedItemIds.items
+                annotatedItemIds = annotatedItemIds.itemIds
               }
             for (const id of annotatedItemIds) {
               this.mapImp.setFeatureAnnotated(id)
