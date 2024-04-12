@@ -308,7 +308,10 @@ export default {
           })
           const userAnnotation = {
             resource: this.annotationEntry['resourceId'],
-            item: this.annotationEntry['featureId'],
+            item: Object.assign({id: this.annotationEntry['featureId']},
+                    Object.fromEntries(
+                      Object.entries(this.annotationEntry)
+                            .filter(([key]) => ['label', 'models'].includes(key)))),
             body: {
               evidence: evidenceURLs,
               comment: this.comment,
