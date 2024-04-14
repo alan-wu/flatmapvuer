@@ -377,6 +377,7 @@
             <el-select
               :teleported="false"
               v-model="viewingMode"
+              @change="changeViewingMode"
               placeholder="Select"
               class="select-box"
               popper-class="flatmap_dropdown"
@@ -1026,6 +1027,16 @@ export default {
           this.$emit('pan-zoom-callback', data)
         }
       }
+    },
+    /**
+     * @vuese
+     * Function triggered by viewing mode change.
+     * (e.g., from 'Exploration' to 'Annotation')
+     * All tooltips and popups currently showing on map will be closed
+     * when this function is triggered.
+     */
+     changeViewingMode: function () {
+      this.closeTooltip()
     },
     /**
      * @vuese
