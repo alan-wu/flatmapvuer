@@ -2142,7 +2142,7 @@ export default {
 :deep(.flatmapvuer-popover) {
   .maplibregl-popup-close-button {
     position: absolute;
-    right: 0.5em;
+    right: 0;
     top: 0;
     border: 0;
     border-radius: 0 3px 0 0;
@@ -2150,7 +2150,11 @@ export default {
     background-color: transparent;
     font-size: 2.5em;
     color: grey;
-    top: 0.95em;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $app-primary-color;
+    }
   }
 }
 
