@@ -2024,19 +2024,20 @@ export default {
   }
   &.maplibregl-popup-anchor-top {
     .maplibregl-popup-content {
-      margin-top: 18px;
+      margin-top: 12px;
       &::after,
       &::before {
-        top: calc(-100% - 4px);
+        top: auto;
+        bottom: 100%;
         border-width: 12px;
       }
       /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
       &::after {
-        margin-top: 1px;
         border-color: transparent transparent rgb(255, 255, 255) transparent;
       }
       &::before {
         margin: 0 auto;
+        margin-bottom: 1px;
         border-color: transparent transparent $app-primary-color transparent;
       }
     }
