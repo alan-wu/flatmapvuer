@@ -1,3 +1,4 @@
+import path from 'path'
 import { defineConfig } from 'vitepress'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
@@ -7,7 +8,7 @@ const versionNumber = process.env.npm_package_version
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "FlatmapVuer Docs",
+  title: "FlatmapVuer",
   description: "API documentation for FlatmapVuer",
   base: '/flatmapvuer/',
   themeConfig: {
@@ -67,6 +68,11 @@ export default defineConfig({
           additionalData: `@use '../src/assets/styles' as *;`
         },
       },
+    },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '../../src'),
+      }
     },
     plugins: [
       Components({

@@ -219,7 +219,6 @@
               class="pathway-container"
               :class="{ open: drawerOpen, close: !drawerOpen }"
               :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
-
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
@@ -378,6 +377,7 @@
             <el-select
               :teleported="false"
               v-model="viewingMode"
+              @change="changeViewingMode"
               placeholder="Select"
               class="select-box"
               popper-class="flatmap_dropdown"
@@ -534,6 +534,8 @@ import {
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
+import { mapState } from 'pinia'
+import { useMainStore } from '@/store/index'
 
 
 const processFTUs = (parent, key) => {
@@ -636,7 +638,7 @@ export default {
     setFlightPath3D: function (flag) {
       this.flightPath3DRadio = flag
       if (this.mapImp) {
-        this.mapImp.enable3dPaths(flag)
+        this.mapImp.enableFlightPaths(flag)
       }
     },
     /**
@@ -1029,6 +1031,16 @@ export default {
     },
     /**
      * @vuese
+     * Function triggered by viewing mode change.
+     * (e.g., from 'Exploration' to 'Annotation')
+     * All tooltips and popups currently showing on map will be closed
+     * when this function is triggered.
+     */
+     changeViewingMode: function () {
+      this.closeTooltip()
+    },
+    /**
+     * @vuese
      * Function to create/display tooltips from the provided ``data``.
      * _checkNeuronClicked shows a neuron path pop up if a path was recently clicked._
      * @arg data
@@ -1039,6 +1051,7 @@ export default {
         if (data.feature && data.feature.featureId && data.feature.models) {
           this.annotationEntry = {
             ...data.feature,
+            resource: this.serverURL,
             resourceId: this.serverUUID,
           }
           this.displayTooltip(data.feature.models)
@@ -1343,8 +1356,8 @@ export default {
       if (mapVersion === mapVersionForFlightPath || mapVersion > mapVersionForFlightPath) {
         // Show flight path option UI
         this.displayFlightPathOption = true
-        // Show 3D as default on FC type
-        this.setFlightPath3D(true)
+        // Show 2D as default on FC type
+        this.setFlightPath3D(false)
       }
     },
     /**
@@ -1418,6 +1431,7 @@ export default {
         promise1.then((returnedObject) => {
           this.mapImp = returnedObject
           this.serverUUID = this.mapImp.getIdentifier().uuid
+          this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
           this.onFlatmapReady()
@@ -1737,6 +1751,7 @@ export default {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
       getFeaturesAlert: () => this.featuresAlert,
+      userApiKey: this.userToken,
     }
   },
   data: function () {
@@ -1747,6 +1762,7 @@ export default {
       //undesired location.
       tooltipDisplay: false,
       serverUUID: undefined,
+      serverURL: undefined,
       layers: [],
       pathways: [],
       sckanDisplay: [
@@ -1803,6 +1819,9 @@ export default {
       backgroundIconRef: undefined,
     }
   },
+  computed: {
+    ...mapState(useMainStore, ['userToken']),
+  },
   watch: {
     entry: function () {
       if (!this.state) this.createFlatmap()
@@ -1832,11 +1851,7 @@ export default {
       }
     }
   },
-  created: function () {
-
-  },
   mounted: function () {
-
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait = []
@@ -2012,20 +2027,74 @@ export default {
   }
   &.maplibregl-popup-anchor-top {
     .maplibregl-popup-content {
-      margin-top: 18px;
+      margin-top: 12px;
       &::after,
       &::before {
-        top: calc(-100% + 6px);
+        top: auto;
+        bottom: 100%;
         border-width: 12px;
       }
       /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
       &::after {
-        margin-top: 1px;
         border-color: transparent transparent rgb(255, 255, 255) transparent;
       }
       &::before {
         margin: 0 auto;
+        margin-bottom: 1px;
         border-color: transparent transparent $app-primary-color transparent;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-left {
+    margin-left: 8px;
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        top: 50%;
+        left: 0;
+        border-width: 8px;
+        margin-top: -8px;
+        margin-left: -16px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        transform: translateX(1px);
+        border-color: transparent rgb(255, 255, 255) transparent transparent;
+      }
+      &::before {
+        border-color: transparent $app-primary-color transparent transparent;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-right {
+    margin-right: 8px;
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        top: 50%;
+        right: 0;
+        border-width: 8px;
+        margin-top: -8px;
+        margin-right: -16px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        transform: translateX(-1px);
+        border-color: transparent transparent transparent rgb(255, 255, 255);
+      }
+      &::before {
+        border-color: transparent transparent transparent $app-primary-color;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-top-left,
+  &.maplibregl-popup-anchor-top-right,
+  &.maplibregl-popup-anchor-bottom-left,
+  &.maplibregl-popup-anchor-bottom-right {
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        display: none;
       }
     }
   }
@@ -2088,7 +2157,7 @@ export default {
 :deep(.flatmapvuer-popover) {
   .maplibregl-popup-close-button {
     position: absolute;
-    right: 0.5em;
+    right: 0;
     top: 0;
     border: 0;
     border-radius: 0 3px 0 0;
@@ -2096,7 +2165,11 @@ export default {
     background-color: transparent;
     font-size: 2.5em;
     color: grey;
-    top: 0.95em;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $app-primary-color;
+    }
   }
 }
 
@@ -2523,6 +2596,9 @@ export default {
 
 .flatmap-container {
   --el-color-primary: #8300BF;
+  --el-color-primary-light-5: #CD99E5;
+  --el-color-primary-light-9: #F3E6F9;
+  --el-color-primary-dark-2: var(--el-color-primary);
 }
 
 </style>
