@@ -895,13 +895,20 @@ export default {
     return { annotator }
   },
   methods: {
-    // This should be called when create is confirmed or cancelled
+    /**
+     * @vuese
+     * Function to initialise drawing.
+     */
     initialiseDrawing: function () {
       this.inDrawing = false
       this.initialiseDialog()
       this.activeDrawTool = undefined
       this.createdEvent = undefined
     },
+    /**
+     * @vuese
+     * Function to cancel a newly drawn feature.
+     */
     cancelDrawnFeature: function () {
       if (this.createdEvent) {
         this.closePopup()
@@ -913,12 +920,21 @@ export default {
         this.initialiseDrawing()
       }
     },
+    /**
+     * @vuese
+     * Function to display connected features' tooltip for drawn connectivity.
+     * @arg id
+     */
     displayConnectedFeatureTooltip: function (id) {
       if (this.mapImp) {
         const data = this.mapImp.featureProperties(id)
         this.checkAndCreatePopups({ feature: data })
       }
     },
+    /**
+     * @vuese
+     * Function to confirm a newly drawn feature.
+     */
     confirmDrawnFeature: function () {
       if (this.createdEvent) {
         this.checkAndCreatePopups(this.createdEvent)
@@ -931,10 +947,18 @@ export default {
         this.initialiseDrawing()
       }
     },
+    /**
+     * @vuese
+     * Function to initialise connection dialog.
+     */
     initialiseDialog: function () {
       this.connectionDisplay = false
       this.connectionEntry = {}
     },
+    /**
+     * @vuese
+     * Function to display the connection dialog after finalising a drawing.
+     */
     connectionDialogPopup: function () {
       const inactive = this.$el.querySelector('.drawConnection').classList.contains('inactive')
       // disable click popup if icon inactive or in drawing
@@ -943,6 +967,11 @@ export default {
         this.connectionDisplay = !this.connectionDisplay
       }
     },
+    /**
+     * @vuese
+     * Function to process the annotation toolbar click events.
+     * @arg type
+     */
     drawingEvent: function (type) {
       this.closePopup()
       // disable mode icon click if any tool is active
@@ -986,12 +1015,20 @@ export default {
         }
       }
     },
+    /**
+     * @vuese
+     * Function to update the annotation draw mode.
+     * @arg mode
+     */
     changeAnnotationDrawMode: function (mode) {
       if (this.mapImp) {
         this.mapImp.changeAnnotationDrawMode(mode)
       }
     },
-    // Remove all drawn annotations from annotation layer
+    /**
+     * @vuese
+     * Function to remove all drawn annotations from flatmap annotation layer.
+     */
     clearAnnotationFeature: function () {
       if (
         this.mapImp &&
@@ -1001,6 +1038,11 @@ export default {
         this.mapImp.clearAnnotationFeature()
       }
     },
+    /**
+     * @vuese
+     * Function to fire the ``trash`` action.
+     * See https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#trash-draw for more details.
+     */
     deleteOrEditAnnotationFeature: function () {
       if (this.mapImp) {
         // Fire the 'trash' button
@@ -1009,6 +1051,10 @@ export default {
         this.mapImp.removeAnnotationFeature()
       }
     },
+    /**
+     * @vuese
+     * Function to rollback the failure drawn from flatmap annotation layer.
+     */
     rollbackAnnotationEvent: function () {
       // For 'updated' and 'deleted' callback
       if (
@@ -1018,6 +1064,11 @@ export default {
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
     },
+    /**
+     * @vuese
+     * Function to commit the emitted ``annotation`` data from successful new drawn to flatmap annotation layer.
+     * @arg annotation
+     */
     commitAnnotationEvent: function (annotation) {
       if (
         this.mapImp &&
@@ -1035,6 +1086,10 @@ export default {
         }
       }
     },
+    /**
+     * @vuese
+     * Function to add existing drawn annotations to flatmap.
+     */
     setFeatureAnnotated: function () {
       if (this.mapImp) {
         this.annotator.annotatedItemIds(this.userToken, this.serverURL)
@@ -1052,6 +1107,10 @@ export default {
           })
       }
     },
+    /**
+     * @vuese
+     * Function to draw existing drawn annotations based on selector.
+     */
     addAnnotationFeature: function () {
       if (this.mapImp) {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
@@ -1100,6 +1159,11 @@ export default {
         }
       }
     },
+    /**
+     * @vuese
+     * Function to display annotator toolbar.
+     * @arg flag
+     */
     showAnnotator: function (flag) {
       if (this.mapImp) {
         // Control the show/hide of the drawn annotations
@@ -1108,12 +1172,22 @@ export default {
         this.$el.querySelector('.maplibregl-ctrl-group').style.display = 'none'
       }
     },
+    /**
+     * @vuese
+     * Function to switch the type of annotation.
+     * @arg flag
+     */
     setDrawnType: function (flag) {
       this.drawnType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
       }
     },
+    /**
+     * @vuese
+     * Function to switch the type of person who annotated.
+     * @arg flag
+     */
     setAnnotatedType: function (flag) {
       this.annotatedType = flag
       if (this.mapImp) {
@@ -1449,6 +1523,12 @@ export default {
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
+    /**
+     * @vuese
+     * Function to process annotation callbacks, invoked when events occur with the map.
+     * @arg payload,
+     * @arg data
+     */
     annotationEventCallback: function (payload, data) {
       // Popup closed will trigger aborted event
       if (data.type === 'aborted') {
@@ -1591,7 +1671,9 @@ export default {
         }
       }
     },
-    // for dialog popup
+    /**
+     * A hack to implement connection dialog drag action and scope.
+     */
     dialogCssHacks: function () {
       this.$nextTick(() => {
         const dialog = this.$el.querySelector('.connection-dialog')
@@ -1615,6 +1697,9 @@ export default {
           `translate(${posX - this.dialogPosition.offsetX}px, ${posY - this.dialogPosition.offsetY}px)`
       })
     },
+    /**
+     * A hack to handle the status of annotation tools.
+     */
     drawIconCssHacks: function () {
       // set tool/mode icon status
       if (this.$el.querySelector('.iconSelected') || !this.connectionDisplay) {
@@ -1645,7 +1730,12 @@ export default {
         })
       }
     },
-    // Fire either update or delete event
+    /**
+     * @vuese
+     * Function to fire annotation event based on the provided ``data``.
+     * Either edit or delete event.
+     * @arg data
+     */
     drawModeEvent: function (data) {
       if (this.activeDrawMode) {
         // double click fires 'updated' callback
@@ -1671,7 +1761,9 @@ export default {
         }
       }
     },
-    // checkNeuronClicked shows a neuron path pop up if a path was recently clicked
+    /**
+     * Function to create connectivity body from existing entries.
+     */
     createConnectivityBody: function () {
       if (Object.keys(this.connectionEntry).length > 0) {
         const features = Object.values(this.connectionEntry)
@@ -1753,6 +1845,10 @@ export default {
         if (ftooltip) ftooltip.style.display = 'block'
       }
     },
+    /**
+     * @vuese
+     * Function to close popup.
+     */
     closePopup: function () {
       let cbutton = document.querySelector('.maplibregl-popup-close-button')
       if (cbutton) cbutton.click()
