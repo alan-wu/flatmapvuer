@@ -504,6 +504,7 @@ Please use `const` to assign meaningful names to them...
             <el-select
               :teleported="false"
               v-model="viewingMode"
+              @change="changeViewingMode"
               placeholder="Select"
               class="select-box"
               popper-class="flatmap_dropdown"
@@ -1778,6 +1779,16 @@ export default {
     },
     /**
      * @vuese
+     * Function triggered by viewing mode change.
+     * (e.g., from 'Exploration' to 'Annotation')
+     * All tooltips and popups currently showing on map will be closed
+     * when this function is triggered.
+     */
+     changeViewingMode: function () {
+      this.closeTooltip()
+    },
+    /**
+     * @vuese
      * Function to create/display tooltips from the provided ``data``.
      * _checkNeuronClicked shows a neuron path pop up if a path was recently clicked._
      * @arg data
@@ -1836,12 +1847,12 @@ export default {
      */
     popUpCssHacks: function () {
       // Below is a hack to remove flatmap tooltips while popup is open
-      let ftooltip = document.querySelector('.flatmap-tooltip-popup')
+      const ftooltip = document.querySelector('.flatmap-tooltip-popup')
+      const popupCloseButton = document.querySelector('.maplibregl-popup-close-button')
       if (ftooltip) ftooltip.style.display = 'none'
-      document.querySelector('.maplibregl-popup-close-button').style.display =
-        'block'
+      popupCloseButton.style.display = 'block'
       this.$refs.tooltip.$el.style.display = 'flex'
-      document.querySelector('.maplibregl-popup-close-button').onclick = () => {
+      popupCloseButton.onclick = () => {
         if (ftooltip) ftooltip.style.display = 'block'
       }
     },
@@ -2889,20 +2900,74 @@ export default {
   }
   &.maplibregl-popup-anchor-top {
     .maplibregl-popup-content {
-      margin-top: 18px;
+      margin-top: 12px;
       &::after,
       &::before {
-        top: calc(-100% + 6px);
+        top: auto;
+        bottom: 100%;
         border-width: 12px;
       }
       /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
       &::after {
-        margin-top: 1px;
         border-color: transparent transparent rgb(255, 255, 255) transparent;
       }
       &::before {
         margin: 0 auto;
+        margin-bottom: 1px;
         border-color: transparent transparent $app-primary-color transparent;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-left {
+    margin-left: 8px;
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        top: 50%;
+        left: 0;
+        border-width: 8px;
+        margin-top: -8px;
+        margin-left: -16px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        transform: translateX(1px);
+        border-color: transparent rgb(255, 255, 255) transparent transparent;
+      }
+      &::before {
+        border-color: transparent $app-primary-color transparent transparent;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-right {
+    margin-right: 8px;
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        top: 50%;
+        right: 0;
+        border-width: 8px;
+        margin-top: -8px;
+        margin-right: -16px;
+      }
+      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
+      &::after {
+        transform: translateX(-1px);
+        border-color: transparent transparent transparent rgb(255, 255, 255);
+      }
+      &::before {
+        border-color: transparent transparent transparent $app-primary-color;
+      }
+    }
+  }
+  &.maplibregl-popup-anchor-top-left,
+  &.maplibregl-popup-anchor-top-right,
+  &.maplibregl-popup-anchor-bottom-left,
+  &.maplibregl-popup-anchor-bottom-right {
+    .maplibregl-popup-content {
+      &::after,
+      &::before {
+        display: none;
       }
     }
   }
@@ -2965,7 +3030,7 @@ export default {
 :deep(.flatmapvuer-popover) {
   .maplibregl-popup-close-button {
     position: absolute;
-    right: 0.5em;
+    right: 0;
     top: 0;
     border: 0;
     border-radius: 0 3px 0 0;
@@ -2973,7 +3038,11 @@ export default {
     background-color: transparent;
     font-size: 2.5em;
     color: grey;
-    top: 0.95em;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $app-primary-color;
+    }
   }
 }
 
