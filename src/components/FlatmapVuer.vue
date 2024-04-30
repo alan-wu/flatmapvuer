@@ -1449,6 +1449,65 @@ export default {
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
+    annotationEventCallback: function (payload, data) {
+      // Popup closed will trigger aborted event
+      if (data.type === 'aborted') {
+        // Rollback drawing when no new annotation submitted
+        if (!this.annotationSubmitted) this.rollbackAnnotationEvent()
+        else this.annotationSubmitted = false
+      } else if (data.type === 'modeChanged') {
+        // 'modeChanged' event is before 'created' event
+        if (data.feature.mode.startsWith('draw_')) {
+          // Reset data entry for every draw
+          this.initialiseDialog()
+          this.inDrawing = true
+        } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
+          if (this.createdEvent) {
+            this.connectionDisplay = true
+          } else {
+            // Reset if a invalid draw
+            this.initialiseDrawing()
+          }
+        } else if (data.feature.mode === 'direct_select') {
+          this.doubleClickedFeature = true
+        }
+      } else if (data.type === 'selectionChanged') {
+        this.currentDrawnFeature =
+          data.feature.features.length === 0 ?
+            undefined :
+            data.feature.features[0]
+        payload.feature.feature = this.currentDrawnFeature
+        if (!this.inDrawing) {
+          this.initialiseDialog()
+          // For exist drawn annotation features
+          if (this.currentDrawnFeature) {
+            let feature = this.drawnAnnotationFeatures
+              .filter((feature) => feature.id === this.currentDrawnFeature.id)[0]
+            if (feature && feature.connection) {
+              this.connectionEntry = feature.connection
+            }
+            this.drawModeEvent(payload)
+          }
+        }
+      } else {
+        if (data.type === 'created' || data.type === 'updated') {
+          if (data.type === 'updated' && data.feature.action) {
+            data.positionUpdated = data.feature.action === 'move'
+          }
+          const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
+          payload.feature.feature = feature
+          // NB. this might now be `null` if user has deleted it (before OK/Submit)
+          // so maybe then no `service.addAnnotation` ??
+        }
+        // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
+        // Hence disable direct popup when 'created' event, dialog will be used instead.
+        if (data.type === 'created') {
+          this.createdEvent = payload
+        } else {
+          this.checkAndCreatePopups(payload)
+        }
+      }
+    },
     /**
      * @vuese
      * A callback function, invoked when events occur with the map.
@@ -1463,63 +1522,7 @@ export default {
             userData: args,
             eventType: eventType,
           }
-          // Popup closed will trigger aborted event
-          if (data.type === 'aborted') {
-            // Rollback drawing when no new annotation submitted
-            if (!this.annotationSubmitted) this.rollbackAnnotationEvent()
-            else this.annotationSubmitted = false
-          } else if (data.type === 'modeChanged') {
-            // 'modeChanged' event is before 'created' event
-            if (data.feature.mode.startsWith('draw_')) {
-              // Reset data entry for every draw
-              this.initialiseDialog()
-              this.inDrawing = true
-            } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-              if (this.createdEvent) {
-                this.connectionDisplay = true
-              } else {
-                // Reset if a invalid draw
-                this.initialiseDrawing()
-              }
-            } else if (data.feature.mode === 'direct_select') {
-              this.doubleClickedFeature = true
-            }
-          } else if (data.type === 'selectionChanged') {
-            this.currentDrawnFeature =
-              data.feature.features.length === 0 ?
-                undefined :
-                data.feature.features[0]
-            payload.feature.feature = this.currentDrawnFeature
-            if (!this.inDrawing) {
-              this.initialiseDialog()
-              // For exist drawn annotation features
-              if (this.currentDrawnFeature) {
-                let feature = this.drawnAnnotationFeatures
-                  .filter((feature) => feature.id === this.currentDrawnFeature.id)[0]
-                if (feature && feature.connection) {
-                  this.connectionEntry = feature.connection
-                }
-                this.drawModeEvent(payload)
-              }
-            }
-          } else {
-            if (data.type === 'created' || data.type === 'updated') {
-              if (data.type === 'updated' && data.feature.action) {
-                data.positionUpdated = data.feature.action === 'move'
-              }
-              const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
-              payload.feature.feature = feature
-              // NB. this might now be `null` if user has deleted it (before OK/Submit)
-              // so maybe then no `service.addAnnotation` ??
-            }
-            // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
-            // Hence disable direct popup when 'created' event, dialog will be used instead.
-            if (data.type === 'created') {
-              this.createdEvent = payload
-            } else {
-              this.checkAndCreatePopups(payload)
-            }
-          }
+          this.annotationEventCallback(payload, data)
         } else {
           if (eventType !== 'pan-zoom') {
             const label = data.label
