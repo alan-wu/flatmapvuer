@@ -67,7 +67,7 @@
                 <strong class="sub-title">Suggest changes:</strong>
               </el-row>
               <el-row class="dialog-text">
-                <strong>Evidvence:</strong>
+                <strong>Evidence:</strong>
               </el-row>
               <el-row v-for="(value, index) in evidence" :key="value">
                 <el-col :span="20">
