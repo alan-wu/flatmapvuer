@@ -270,6 +270,16 @@
                 @change-active="ftuSelected"
               />
               <selections-group
+                v-if="containsAlert && alertOptions"
+                title="Alert"
+                labelKey="label"
+                identifierKey="key"
+                :selections="alertOptions"
+                @changed="alertSelected"
+                ref="alertSelection"
+                key="alertSelection"
+              />
+              <selections-group
                 v-if="!isFC && centreLines && centreLines.length > 0"
                 title="Nerves"
                 labelKey="label"
@@ -844,6 +854,24 @@ export default {
         })
         // display connected paths
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable (show/hide) pathways with/without alert
+     * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
+     * @arg payload
+     */
+     alertSelected: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          this.mapImp.clearVisibilityFilter()
+        } else {
+          const ALERT_FILTER = {
+            NOT: {HAS: 'alert'}
+          }
+          this.mapImp.setVisibilityFilter(ALERT_FILTER)
+        }
       }
     },
     /**
@@ -1499,6 +1527,7 @@ export default {
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
       this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
@@ -1817,6 +1846,14 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      containsAlert: false,
+      alertOptions: [
+        {
+          label: 'Display Path With Alerts',
+          key: 'alert',
+          enabled: true,
+        },
+      ],
     }
   },
   computed: {
