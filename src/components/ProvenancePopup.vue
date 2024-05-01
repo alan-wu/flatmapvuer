@@ -15,6 +15,22 @@
     <div class="block" v-else>
       <div class="title">{{ entry.featureId }}</div>
     </div>
+    <div v-if="featuresAlert">
+      <span class="attribute-title">Alert</span>
+      <el-popover
+        width="250"
+        trigger="hover"
+        :teleported="false"
+        popper-class="popover-origin-help"
+      >
+        <template #reference>
+          <el-icon class="info"><el-icon-warning /></el-icon>
+        </template>
+        <span style="word-break: keep-all">
+          {{ featuresAlert }}
+        </span>
+      </el-popover>
+    </div>
     <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
       <el-icon><el-icon-arrow-up /></el-icon>
@@ -195,6 +211,7 @@ export default {
       }),
     },
   },
+  inject: ['getFeaturesAlert'],
   data: function () {
     return {
       controller: undefined,
@@ -212,6 +229,9 @@ export default {
     }
   },
   computed: {
+    featuresAlert() {
+      return this.getFeaturesAlert()
+    },
     resources: function () {
       let resources = []
       if (this.entry && this.entry.hyperlinks) {
@@ -315,8 +335,15 @@ export default {
   cursor: pointer;
 }
 
-.popover-origin-help {
+:deep(.popover-origin-help.el-popover) {
   text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #f3ecf6;
+    }
+  }
 }
 
 .info {

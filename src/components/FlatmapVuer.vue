@@ -397,6 +397,16 @@ Please use `const` to assign meaningful names to them...
                 @change-active="ftuSelected"
               />
               <selections-group
+                v-if="containsAlert && alertOptions"
+                title="Alert"
+                labelKey="label"
+                identifierKey="key"
+                :selections="alertOptions"
+                @changed="alertSelected"
+                ref="alertSelection"
+                key="alertSelection"
+              />
+              <selections-group
                 v-if="!isFC && centreLines && centreLines.length > 0"
                 title="Nerves"
                 labelKey="label"
@@ -1413,6 +1423,24 @@ export default {
     },
     /**
      * @vuese
+     * Function to enable/disable (show/hide) pathways with/without alert
+     * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
+     * @arg payload
+     */
+     alertSelected: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          this.mapImp.clearVisibilityFilter()
+        } else {
+          const ALERT_FILTER = {
+            NOT: {HAS: 'alert'}
+          }
+          this.mapImp.setVisibilityFilter(ALERT_FILTER)
+        }
+      }
+    },
+    /**
+     * @vuese
      * Function to enable/disable (show/hide) the system
      * by providing ``kay, value`` ``payload`` object ``{systemId, true/false}``.
      * @arg payload
@@ -1606,6 +1634,7 @@ export default {
           this.annotationEventCallback(payload, data)
         } else {
           if (eventType !== 'pan-zoom') {
+            this.featuresAlert = data.alert
             const label = data.label
             const resource = [data.models]
             const taxonomy = this.entry
@@ -2272,6 +2301,7 @@ export default {
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
       this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
@@ -2524,7 +2554,8 @@ export default {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
       $annotator: this.annotator,
-      userApiKey: this.userToken
+      userApiKey: this.userToken,
+      getFeaturesAlert: () => this.featuresAlert,
     }
   },
   data: function () {
@@ -2581,6 +2612,7 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
+      featuresAlert: undefined,
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
@@ -2616,7 +2648,15 @@ export default {
         offsetY: 0,
         x: undefined,
         y: undefined
-      }
+      },
+      containsAlert: false,
+      alertOptions: [
+        {
+          label: 'Display Path With Alerts',
+          key: 'alert',
+          enabled: true,
+        },
+      ],
     }
   },
   computed: {

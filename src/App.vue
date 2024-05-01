@@ -218,12 +218,12 @@ export default {
         position: 'absolute',
       },
       displayCloseButton: false,
-      initial: 'Rat (NPO)',
+      initial: 'Rat',
       helpMode: false,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
+      //flatmapAPI: "https://mapcoe-demo.org/current/flatmap/v3/",
       flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
