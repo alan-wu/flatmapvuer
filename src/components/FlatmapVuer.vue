@@ -1405,18 +1405,47 @@ export default {
      * by providing path model identifier, ``pathId``.
      * @arg pathId
      */
-    highlightConnectedPaths: function (payload) {
+    highlightConnectedPaths: async function (payload) {
       if (this.mapImp) {
         let paths = [...this.mapImp.pathModelNodes(payload)]
-        // The line below matches the paths to the annIdToFeatureId map to get the feature ids
 
+        // The line below is to get the path features from the geojson ids
         let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
+
+        // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
+        let connectivity = await this.flatmapQueries.queryForConnectivity(payload)
+
+        // Check and flatten the origins node graph
+        let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
+
+        // Remove the origin nodes from the path features so that we only see downstream nodes
+        pathFeatures = pathFeatures.filter((p) => !originsFlat.includes(p.models))
+
         let toHighlight = []
+        let highlight = false
+
+        // Loop through the path features and check if we have origin nodes
         pathFeatures.forEach((p) => {
+        
+          // Get the nodes from each path feature 
           this.mapImp.nodePathModels(p.featureId).forEach((f) => {
-            toHighlight.push(f)
+            highlight = true
+            // s2 here is the second level paths
+            let s2 = this.mapImp.pathModelNodes(f)
+            s2.forEach((s) => {
+              let s2Feature = this.mapImp.featureProperties([s]) // get the feature properties for s2
+              if (originsFlat.includes(s2Feature.models)) {
+                highlight = false // if we have an origin node, we don't want to highlight the path
+                return
+              }
+            })
+            
+            if (highlight) {
+              toHighlight.push(f)
+            }
           })
         })
+
         // display connected paths
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
