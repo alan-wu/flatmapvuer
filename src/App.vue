@@ -93,6 +93,7 @@ import './icons/mapicon-species-style.css'
 import imageThumbnail1 from './icons/imageThumbnail1'
 import imageThumbnail2 from './icons/imageThumbnail2'
 import imageThumbnail3 from './icons/imageThumbnail3'
+import scicrunchMixin from './services/scicrunchMixin'
 
 export default {
   name: 'app',
@@ -104,6 +105,7 @@ export default {
     Popover,
     Row,
   },
+  mixins: [scicrunchMixin],
   methods: {
     saveSettings: function () {
       this.mapSettings.push(this.$refs.multi.getState())
@@ -132,10 +134,21 @@ export default {
       const marker = component.mapImp.addMarker(id,)
       return marker
     },
-    FlatmapReady: function (component) {
+    FlatmapReady: async function (component) {
       console.log(component)
       let taxon = component.mapImp.describes
       let id = component.mapImp.addMarker('UBERON:0000948')
+
+      let images = await this.getImagesFromScicrunch()
+      console.log('images', images)
+
+      images.images.forEach((image) => {
+        if (image.anatomy && image.anatomy.length > 0) {
+          image.anatomy.forEach((anatomy) => {
+            this.createImageThumbnailMarker(component, anatomy.curie, imageThumbnail1)
+          })
+        }
+      })
 
       this.createImageThumbnailMarker(component, 'UBERON:0000948', imageThumbnail1)
       this.createImageThumbnailMarker(component, "UBERON:0016508", imageThumbnail2)
@@ -244,6 +257,7 @@ export default {
       initial: 'Rat (NPO)',
       helpMode: false,
       mapSettings: [],
+      sparcApi: "http://localhost:5000",
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/"
