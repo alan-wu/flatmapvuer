@@ -79,7 +79,7 @@ export default {
       defaultExpandedKeys: ['All'],
     }
   },
-  destroyed: function () {
+  unmounted: function () {
     this.sortedPrimitiveGroups = undefined
   },
   methods: {
@@ -118,9 +118,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/checkbox';
-@use 'element-plus/theme-chalk/src/row';
-@use 'element-plus/theme-chalk/src/tree';
 
 .checkbox-container {
   display: flex;

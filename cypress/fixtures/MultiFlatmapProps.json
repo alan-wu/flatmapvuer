@@ -1,0 +1,34 @@
+{
+  "minZoom": 4,
+  "availableSpecies": {
+    "Test": {
+      "taxo": "NCBITaxon:1",
+      "displayWarning": true
+    },
+    "Human Female": {
+      "taxo": "NCBITaxon:9606",
+      "biologicalSex": "PATO:0000383",
+      "iconClass": "mapicon-icon_human",
+      "displayWarning": true
+    },
+    "Rat (NPO)": {
+      "taxo": "NCBITaxon:10116",
+      "iconClass": "mapicon-icon_rat",
+      "displayWarning": true,
+      "displayLatestChanges": true
+    },
+    "Functional Connectivity": {
+      "taxo": "FunctionalConnectivity",
+      "displayWarning": true
+    }
+  },
+  "displayCloseButton": false,
+  "initial": "Test",
+  "displayMinimap": true,
+  "helpMode": false,
+  "pathControls": true,
+  "mapSettings": [],
+  "flatmapAPI": "https://mapcore-demo.org/devel/flatmap/v4/",
+  "featureInfo": true,
+  "layerControl": true
+}

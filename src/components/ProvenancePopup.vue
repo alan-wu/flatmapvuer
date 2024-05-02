@@ -1,7 +1,7 @@
 <template>
   <div v-if="entry" class="main" v-loading="loading">
     <div class="block" v-if="entry.title">
-      <span class="title">{{ capitalise(entry.title) }}</span>
+      <div class="title">{{ capitalise(entry.title) }}</div>
       <div
         v-if="
           entry.provenanceTaxonomyLabel &&
@@ -13,13 +13,13 @@
       </div>
     </div>
     <div class="block" v-else>
-      <span class="title">{{ entry.featureId }}</span>
+      <div class="title">{{ entry.featureId }}</div>
     </div>
-    <div v-show="showDetails" class="hide" @click="showDetails = false">
+    <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
       <el-icon><el-icon-arrow-up /></el-icon>
     </div>
-    <div v-show="!showDetails" class="hide" @click="showDetails = true">
+    <div v-show="!showDetails" class="hide" id="show-path-info" @click="showDetails = true">
       Show path information
       <el-icon><el-icon-arrow-down /></el-icon>
     </div>
@@ -37,15 +37,17 @@
             >
               <template #reference>
                 <el-icon class="info"><el-icon-warning /></el-icon>
-                <span style="word-break: keep-all">
-                  <i>Origin</i> {{ originDescription }}
-                </span>
               </template>
+              <span style="word-break: keep-all">
+                <i>Origin</i> {{ originDescription }}
+              </span>
+
             </el-popover>
           </div>
           <div
             v-for="(origin, i) in entry.origins"
             class="attribute-content"
+            :origin-item-label="origin"
             :key="origin"
           >
             {{ capitalise(origin) }}
@@ -56,6 +58,7 @@
               entry.originsWithDatasets && entry.originsWithDatasets.length > 0
             "
             class="button"
+            id="open-dendrites-button"
             @click="openDendrites"
           >
             Explore origin data
@@ -69,6 +72,7 @@
           <div
             v-for="(component, i) in entry.components"
             class="attribute-content"
+            :component-item-label="component"
             :key="component"
           >
             {{ capitalise(component) }}
@@ -92,15 +96,16 @@
             >
               <template #reference>
                 <el-icon class="info"><el-icon-warning /></el-icon>
-                <span style="word-break: keep-all">
-                  <i>Destination</i> is where the axons terminate
-                </span>
               </template>
+              <span style="word-break: keep-all">
+                <i>Destination</i> is where the axons terminate
+              </span>
             </el-popover>
           </div>
           <div
             v-for="(destination, i) in entry.destinations"
             class="attribute-content"
+            :destination-item-label="destination"
             :key="destination"
           >
             {{ capitalise(destination) }}
@@ -279,7 +284,7 @@ export default {
 
 .title {
   text-align: left;
-  width: 16em;
+  // width: 16em;
   line-height: 1.5em !important;
   font-size: 1em;
   font-family: Helvetica;
@@ -290,6 +295,10 @@ export default {
 
 .block {
   margin-bottom: 0.5em;
+
+  .main > &:first-of-type {
+    margin-right: 0.5em;
+  }
 }
 
 .pub {
@@ -463,6 +472,10 @@ export default {
   overflow-y: scroll;
   scrollbar-width: thin !important;
   max-height: 240px;
+
+  .block {
+    padding-top: 0.5em;
+  }
 }
 
 .scrollbar::-webkit-scrollbar-track {
