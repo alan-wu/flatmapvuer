@@ -134,20 +134,56 @@ export default {
       const marker = component.mapImp.addMarker(id,)
       return marker
     },
+    createImageThumbnailMarkerUrl: function (component, id, image) {
+      return new Promise((resolve, reject) => {
+        // create the image element
+        let wrapperElement = document.createElement("div");
+
+        // download image:
+        let img = new Image();
+        img.src = image;
+        img.style = "height: auto;width: 50px;margin-right: 80px;"
+        img.onload = function() {
+          wrapperElement.appendChild(img);
+
+          // add it to the flatmap
+          const markerIdentifier = component.mapImp.addMarker(id, {
+            element: wrapperElement,
+            className: "highlight-marker", 
+            type: "image",
+          });
+
+          const marker = component.mapImp.addMarker(id);
+          resolve(marker);
+        };
+
+        img.onerror = function() {
+          reject(new Error("Failed to load image at " + image));
+        };
+      });
+    },
     FlatmapReady: async function (component) {
       console.log(component)
       let taxon = component.mapImp.describes
       let id = component.mapImp.addMarker('UBERON:0000948')
 
-      let images = await this.getImagesFromScicrunch()
-      console.log('images', images)
+      let anatomyList = []
 
-      images.images.forEach((image) => {
-        if (image.anatomy && image.anatomy.length > 0) {
-          image.anatomy.forEach((anatomy) => {
-            this.createImageThumbnailMarker(component, anatomy.curie, imageThumbnail1)
+      this.getImagesFromScicrunch().then((images) => {
+        console.log(images)
+        images.images.forEach((image) => {
+          if (image.value && image.value.length > 0)
+          image.value.forEach((image) => {
+            if (image.anatomy && image.anatomy.length > 0) {
+              image.anatomy.forEach((anatomy) => {
+                if (!anatomyList.includes(anatomy.curie)) {
+                  anatomyList.push(anatomy.curie)
+                  this.createImageThumbnailMarkerUrl(component, anatomy.curie, image.thumbnail)
+                }
+              })
+            }
           })
-        }
+        })
       })
 
       this.createImageThumbnailMarker(component, 'UBERON:0000948', imageThumbnail1)
