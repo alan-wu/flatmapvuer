@@ -447,6 +447,7 @@ Please use `const` to assign meaningful names to them...
                 identifierKey="taxon"
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
+                @checkboxMouseEnter="checkboxMouseEnterEmitted"
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
@@ -1533,6 +1534,22 @@ export default {
     taxonsSelected: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
+      }
+    },
+    checkboxMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          let gid = this.mapImp.taxonFeatureIds(payload.key)  
+          this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
+          this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
+        } else {
+          // reset visibility of paths 
+          this.mapImp.selectGeoJSONFeatures("-1")
+          payload.selections.forEach((item) => {
+            let show = payload.checked.includes(item.taxon)
+            this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
+          })
+        }
       }
     },
     /**
