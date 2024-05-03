@@ -923,8 +923,9 @@ export default {
         } else {
           // reset visibility of paths 
           this.mapImp.selectGeoJSONFeatures("-1")
-          payload.state.forEach((stateItem) => {
-            this.mapImp.enableConnectivityByTaxonIds(stateItem.taxon, stateItem.value)
+          payload.selections.forEach((item) => {
+            let show = payload.checked.includes(item.taxon)
+            this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
           })
         }
       }

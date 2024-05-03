@@ -89,17 +89,11 @@ export default {
       })
     },
     visibilityToggle: function (key, value) {
-      // update the state
-      this.selections.forEach((item) => {
-        if (item[this.identifierKey] === key) {
-          item.value = value
-        }
-      })
       this.$emit('changed', { key, value })
     },
     checkboxMouseEnterEmit: function (key, value) {
       // Update the stated to send to the emit
-      this.$emit('checkboxMouseEnter', { key: key, value: value, state: this.selections})
+      this.$emit('checkboxMouseEnter', { key: key, value: value, selections: this.selections, checked: this.checkedItems})
     },
 
     handleCheckedItemsChange: function (value) {
@@ -111,10 +105,6 @@ export default {
         ? this.selections.map((a) => a[this.identifierKey])
         : []
       
-      // update the state
-      this.selections.forEach((item) => {
-        item.value = val
-      })
       this.$emit('checkAll', {
         keys: this.selections.map((a) => a[this.identifierKey]),
         value: val,
@@ -139,11 +129,6 @@ export default {
         }
       }
       return { display: 'None' }
-    },
-    addValueToSelections: function () {
-      this.selections.forEach((item) => {
-        item.value = true
-      })
     },
   },
   props: {
@@ -187,7 +172,6 @@ export default {
   },
   mounted: function () {
     this.reset()
-    this.addValueToSelections()
   },
 }
 </script>
