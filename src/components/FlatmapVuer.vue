@@ -141,127 +141,19 @@ Please use `const` to assign meaningful names to them...
         <el-icon-arrow-down />
       </el-icon>
 
-      <div class="bottom-draw-control"
-        v-show="viewingMode === 'Annotation' && userInformation && !disableUI"
-      >
-        <el-popover
-          content="Draw Connection"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          :visible="hoverVisibilities[10].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="connection"
-              class="icon-button drawConnection inactive"
-              @click="connectionDialogPopup"
-              @mouseover="showToolitip(10)"
-              @mouseout="hideToolitip(10)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Point"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          :visible="hoverVisibilities[11].value"
-          v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawPoint"
-              class="icon-button drawPoint"
-              @click="drawingEvent('Point')"
-              @mouseover="showToolitip(11)"
-              @mouseout="hideToolitip(11)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Line"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          :visible="hoverVisibilities[12].value"
-          v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawLine"
-              class="icon-button drawLineString"
-              @click="drawingEvent('LineString')"
-              @mouseover="showToolitip(12)"
-              @mouseout="hideToolitip(12)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Polygon"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          :visible="hoverVisibilities[13].value"
-          v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawPolygon"
-              class="icon-button drawPolygon"
-              @click="drawingEvent('Polygon')"
-              @mouseover="showToolitip(13)"
-              @mouseout="hideToolitip(13)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Delete"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          :visible="hoverVisibilities[14].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawTrash"
-              class="icon-button drawDelete"
-              @click="drawingEvent('Delete')"
-              @mouseover="showToolitip(14)"
-              @mouseout="hideToolitip(14)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Edit"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          :visible="hoverVisibilities[15].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="comment"
-              class="icon-button drawEdit"
-              @click="drawingEvent('Edit')"
-              @mouseover="showToolitip(15)"
-              @mouseout="hideToolitip(15)"
-            />
-          </template>
-        </el-popover>
-      </div>
+      <!-- v-show="viewingMode === 'Annotation' && userInformation && !disableUI" -->
+      <DrawTool
+        v-if="viewingMode == 'Annotation'"
+        :activeDrawTool="activeDrawTool"
+        :drawnType="drawnType"
+        :drawnTypes="drawnTypes"
+        :activeDrawMode="activeDrawMode"
+        :drawModes="drawModes"
+        :connectionDisplay="connectionDisplay"
+        @drawingEvent="drawingEvent"
+        @cssHacks="dialogCssHacks"
+        @display="connectionDialogPopup"
+      />
 
       <div class="bottom-right-control" v-show="!disableUI">
         <el-popover
@@ -726,6 +618,7 @@ import { AnnotationService } from '@abi-software/sparc-annotation'
 import ConnectionDialog from './ConnectionDialog.vue'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
+import DrawTool from './DrawTool.vue'
 
 /**
  * @param scopeElement    Draggable scope area (Optional)
@@ -882,6 +775,7 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
+    DrawTool
   },
   beforeCreate: function () {
     this.mapManager = undefined
@@ -1697,39 +1591,6 @@ export default {
         dialog.style.transform =
           `translate(${posX - this.dialogPosition.offsetX}px, ${posY - this.dialogPosition.offsetY}px)`
       })
-    },
-    /**
-     * A hack to handle the status of annotation tools.
-     */
-    drawIconCssHacks: function () {
-      // set tool/mode icon status
-      if (this.$el.querySelector('.iconSelected') || !this.connectionDisplay) {
-        this.drawnTypes.map((t) => {
-          const dtype = this.$el.querySelector(`.draw${t}`)
-          if (dtype) {
-            dtype.classList.remove('iconSelected');
-            dtype.classList.remove('inactive');
-          }
-        })
-        this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.remove('iconSelected');
-          this.$el.querySelector(`.draw${m}`).classList.remove('inactive');
-        })
-      }
-      if (this.activeDrawTool) {
-        this.$el.querySelector(`.draw${this.activeDrawTool}`).classList.add('iconSelected');
-        this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.add('inactive');
-        })
-      } else if (this.activeDrawMode || this.connectionDisplay) {
-        if (this.activeDrawMode) {
-          this.$el.querySelector(`.draw${this.activeDrawMode}`).classList.add('iconSelected');
-        }
-        this.drawnTypes.map((t) => {
-          const dtype = this.$el.querySelector(`.draw${t}`)
-          if (dtype) dtype.classList.add('inactive');
-        })
-      }
     },
     /**
      * @vuese
@@ -2648,12 +2509,6 @@ export default {
       immediate: true,
       deep: true,
     },
-    activeDrawTool: function () {
-      this.drawIconCssHacks()
-    },
-    activeDrawMode: function () {
-      this.drawIconCssHacks()
-    },
     /**
      * hide dialog when connectionEntry is empty
      */
@@ -2665,19 +2520,6 @@ export default {
       } else {
         connectionIcon.classList.remove('inactive')
       }
-    },
-    /**
-     * popup dialog via click icon
-     */
-    connectionDisplay: function (display) {
-      const connectionIcon = this.$el.querySelector('.drawConnection')
-      if (display) {
-        connectionIcon.classList.add('iconSelected')
-        this.dialogCssHacks()
-      } else {
-        connectionIcon.classList.remove('iconSelected')
-      }
-      this.drawIconCssHacks()
     },
     /**
      * Set dialog offset when flatmap annotator used
@@ -3046,19 +2888,8 @@ export default {
   }
 }
 
-.drawPoint, .drawLineString, .drawPolygon, 
-.drawDelete, .drawEdit, .drawConnection,
 .zoomIn, .zoomOut, .fitWindow {
   padding: 4px;
-}
-
-.iconSelected {
-  color: var(--el-color-primary-light-5) !important;
-}
-
-.inactive {
-  color: #DDDDDD !important;
-  cursor: not-allowed !important;
 }
 
 .yellow-star-legend {

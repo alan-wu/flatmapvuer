@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     ConnectionDialog: typeof import('./components/ConnectionDialog.vue')['default']
+    DrawTool: typeof import('./components/DrawTool.vue')['default']
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
