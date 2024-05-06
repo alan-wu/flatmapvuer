@@ -2978,18 +2978,6 @@ export default {
   padding: 0px;
 }
 
-.bottom-draw-control {
-  background-color: var(--el-color-primary-light-9);
-  padding: 4px 4px 2px 4px;
-  border-style: solid;
-  border-color: var(--el-color-primary-light-5);
-  border-radius: 1rem;
-  position: absolute;
-  right: calc(50vw - 100px);;
-  bottom: 16px;
-  z-index: 10;
-}
-
 .bottom-right-control {
   position: absolute;
   right: 16px;
@@ -3179,12 +3167,6 @@ export default {
       font-weight: normal;
     }
   }
-}
-
-.connection-dialog {
-  position: absolute;
-  z-index: 10;
-  cursor: move;
 }
 </style>
 
