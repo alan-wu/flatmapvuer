@@ -930,30 +930,56 @@ export default {
     },
     /**
      * @vuese
+     * Function to fetch annotated item id.
+     * @arg userId,
+     * @arg participated
+     */
+    fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
+      let annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
+      if ('resource' in annotatedItemIds) {
+        // The annotator has `resource` and `items` fields
+        annotatedItemIds = annotatedItemIds.itemIds
+      }
+      return annotatedItemIds
+    },
+    /**
+     * @vuese
      * Function to add existing drawn annotations to flatmap.
      */
-    setFeatureAnnotated: function () {
+    setFeatureAnnotated: async function () {
       if (this.mapImp) {
-        this.annotator.annotatedItemIds(this.userToken, this.serverURL)
-          .then((annotatedItemIds) => {
-              if ('resource' in annotatedItemIds) {
-                // The annotator has `resource` and `items` fields
-                annotatedItemIds = annotatedItemIds.itemIds
-              }
-            for (const id of annotatedItemIds) {
-              this.mapImp.setFeatureAnnotated(id)
-            }
-          })
-          .catch((reason) => {
-            console.log(reason) // Error!
-          })
+        const annotatedItemIds = await this.fetchAnnotatedItemIds()
+        for (const id of annotatedItemIds) {
+          this.mapImp.setFeatureAnnotated(id)
+        }
       }
+    },
+    /**
+     * @vuese
+     * Function to fetch drawn features.
+     * @arg userId,
+     * @arg participated
+     */
+    fetchDrawnFeatures: async function (userId, participated) {
+      const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
+      let drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
+      if ('resource' in drawnFeatures) {
+        // The annotator has `resource` and `features` fields
+        drawnFeatures = drawnFeatures.features
+      }
+      // Use to switch the displayed feature type
+      if (this.drawnType !== 'All tools') {
+        drawnFeatures = drawnFeatures.filter((feature) => {
+          return feature.geometry.type === this.drawnType
+        })
+      }
+      return drawnFeatures
     },
     /**
      * @vuese
      * Function to draw existing drawn annotations based on selector.
      */
-    addAnnotationFeature: function () {
+    addAnnotationFeature: async function () {
       if (this.mapImp) {
         if (!this.annotationSubmitted) this.clearAnnotationFeature()
         if (this.drawnType !== 'None') {
@@ -964,40 +990,14 @@ export default {
           const participated = this.annotatedType === 'Anyone' ?
             undefined : this.annotatedType === 'Me' ?
               true : false
-          this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
-            .then((annotatedItemIds) => {
-              if ('resource' in annotatedItemIds) {
-                // The annotator has `resource` and `items` fields
-                annotatedItemIds = annotatedItemIds.itemIds
-              }
-              this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
-                .then((drawnFeatures) => {
-                  if ('resource' in drawnFeatures) {
-                    // The annotator has `resource` and `features` fields
-                    drawnFeatures = drawnFeatures.features
-                  }
-                  // Use to switch the displayed feature type
-                  if (this.drawnType !== 'All tools') {
-                    drawnFeatures = drawnFeatures.filter((feature) => {
-                      return feature.geometry.type === this.drawnType
-                    })
-                  }
-                  this.drawnAnnotationFeatures = drawnFeatures
-                  this.loading = false
-                  // No need to call 'addAnnotationFeature' when a new feature created, as it is already on the map
-                  if (!this.annotationSubmitted) {
-                    for (const feature of drawnFeatures) {
-                      this.mapImp.addAnnotationFeature(feature)
-                    }
-                  }
-                })
-                .catch((reason) => {
-                  console.log(reason) // Error!
-                })
-            })
-            .catch((reason) => {
-              console.log(reason) // Error!
-            })
+          const drawnFeatures = await this.fetchDrawnFeatures(userId, participated)
+          this.drawnAnnotationFeatures = drawnFeatures
+          this.loading = false
+          if (!this.annotationSubmitted) {
+            for (const feature of drawnFeatures) {
+              this.mapImp.addAnnotationFeature(feature)
+            }
+          }
         }
       }
     },
