@@ -1,111 +1,184 @@
 <template>
-  <div class="drawtool-container">
-    <el-popover
-      content="Draw Connection"
-      placement="top"
-      :teleported="false"
-      trigger="manual"
-      width="80"
-      popper-class="flatmap-popper"
-    >
-      <template #reference>
-        <map-svg-icon
-          icon="connection"
-          class="icon-button drawConnection inactive"
-          @click="$emit('display', true)"
-        />
-      </template>
-    </el-popover>
-    <el-popover
-      content="Draw Point"
-      placement="top"
-      :teleported="false"
-      trigger="manual"
-      width="80"
-      popper-class="flatmap-popper"
-      v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
-    >
-      <template #reference>
-        <map-svg-icon
-          icon="drawPoint"
-          class="icon-button drawPoint"
-          @click="drawingEvent('Point')"
-        />
-      </template>
-    </el-popover>
-    <el-popover
-      content="Draw Line"
-      placement="top"
-      :teleported="false"
-      trigger="manual"
-      width="80"
-      popper-class="flatmap-popper"
-      v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
-    >
-      <template #reference>
-        <map-svg-icon
-          icon="drawLine"
-          class="icon-button drawLineString"
-          @click="drawingEvent('LineString')"
-        />
-      </template>
-    </el-popover>
-    <el-popover
-      content="Draw Polygon"
-      placement="top"
-      :teleported="false"
-      trigger="manual"
-      width="80"
-      popper-class="flatmap-popper"
-      v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
-    >
-      <template #reference>
-        <map-svg-icon
-          icon="drawPolygon"
-          class="icon-button drawPolygon"
-          @click="drawingEvent('Polygon')"
-        />
-      </template>
-    </el-popover>
-    <el-popover
-      content="Delete"
-      placement="top"
-      :teleported="false"
-      trigger="manual"
-      width="80"
-      popper-class="flatmap-popper"
-    >
-      <template #reference>
-        <map-svg-icon
-          icon="drawTrash"
-          class="icon-button drawDelete"
-          @click="drawingEvent('Delete')"
-        />
-      </template>
-    </el-popover>
-    <el-popover
-      content="Edit"
-      placement="top"
-      :teleported="false"
-      trigger="manual"
-      width="80"
-      popper-class="flatmap-popper"
-    >
-      <template #reference>
-        <map-svg-icon
-          icon="comment"
-          class="icon-button drawEdit"
-          @click="drawingEvent('Edit')"
-        />
-      </template>
-    </el-popover>
+  <div>
+    <div class="drawtool-container">
+      <el-popover
+        content="Draw Connection"
+        placement="top"
+        :teleported="false"
+        trigger="manual"
+        width="80"
+        popper-class="flatmap-popper"
+      >
+        <template #reference>
+          <map-svg-icon
+            icon="connection"
+            class="icon-button drawConnection inactive"
+            @click="$emit('display', true)"
+          />
+        </template>
+      </el-popover>
+      <el-popover
+        content="Draw Point"
+        placement="top"
+        :teleported="false"
+        trigger="manual"
+        width="80"
+        popper-class="flatmap-popper"
+        v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
+      >
+        <template #reference>
+          <map-svg-icon
+            icon="drawPoint"
+            class="icon-button drawPoint"
+            @click="drawingEvent('Point')"
+          />
+        </template>
+      </el-popover>
+      <el-popover
+        content="Draw Line"
+        placement="top"
+        :teleported="false"
+        trigger="manual"
+        width="80"
+        popper-class="flatmap-popper"
+        v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
+      >
+        <template #reference>
+          <map-svg-icon
+            icon="drawLine"
+            class="icon-button drawLineString"
+            @click="drawingEvent('LineString')"
+          />
+        </template>
+      </el-popover>
+      <el-popover
+        content="Draw Polygon"
+        placement="top"
+        :teleported="false"
+        trigger="manual"
+        width="80"
+        popper-class="flatmap-popper"
+        v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
+      >
+        <template #reference>
+          <map-svg-icon
+            icon="drawPolygon"
+            class="icon-button drawPolygon"
+            @click="drawingEvent('Polygon')"
+          />
+        </template>
+      </el-popover>
+      <el-popover
+        content="Delete"
+        placement="top"
+        :teleported="false"
+        trigger="manual"
+        width="80"
+        popper-class="flatmap-popper"
+      >
+        <template #reference>
+          <map-svg-icon
+            icon="drawTrash"
+            class="icon-button drawDelete"
+            @click="drawingEvent('Delete')"
+          />
+        </template>
+      </el-popover>
+      <el-popover
+        content="Edit"
+        placement="top"
+        :teleported="false"
+        trigger="manual"
+        width="80"
+        popper-class="flatmap-popper"
+      >
+        <template #reference>
+          <map-svg-icon
+            icon="comment"
+            class="icon-button drawEdit"
+            @click="drawingEvent('Edit')"
+          />
+        </template>
+      </el-popover>
+    </div>
+    <ConnectionDialog
+      class="connection-dialog"
+      v-show="connectionDisplay"
+      :entry="connectionEntry"
+      :drawing="inDrawing"
+      :connection="connection"
+      @display="$emit('display', $event)"
+      @confirm="$emit('confirm', $event)"
+      @cancel="$emit('cancel', $event)"
+      @popup="$emit('popup', $event)"
+      @tooltip="$emit('tooltip', $event)"
+    />
   </div>
 </template>
 
 <script>
 import { MapSvgIcon } from "@abi-software/svg-sprite";
 import "@abi-software/svg-sprite/dist/style.css";
+import ConnectionDialog from "./ConnectionDialog.vue";
 /* eslint-disable no-alert, no-console */
+
+/**
+ * @param scopeElement    Draggable scope area (Optional)
+ * @param dragElement     Draggable element
+ */
+const draggable = (scopeElement, dragElement) => {
+  let startX, startY, clickX, clickY, posX, posY;
+  // reset position in case previous pupped up dialog is dragged
+  dragElement.style.left = "";
+  dragElement.style.top = "";
+  // const scopeRect = scopeElement.getBoundingClientRect()
+  // const dragRect = dragElement.getBoundingClientRect()
+
+  dragElement.addEventListener(
+    "mousedown",
+    (e) => {
+      e.preventDefault();
+      startX = dragElement.offsetLeft;
+      startY = dragElement.offsetTop;
+      clickX = e.clientX;
+      clickY = e.clientY;
+
+      dragElement.addEventListener("mousemove", drag, false);
+      document.addEventListener(
+        "mouseup",
+        () => {
+          dragElement.removeEventListener("mousemove", drag, false);
+        },
+        false
+      );
+    },
+    false
+  );
+
+  function drag(e) {
+    e.preventDefault();
+    posX = startX - (clickX - e.clientX);
+    posY = startY - (clickY - e.clientY);
+    // if (
+    //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
+    //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
+    // ) {
+    dragElement.style.left = `${posX}px`;
+    dragElement.style.top = `${posY}px`;
+    // } else {
+    //   if (posX <= scopeRect.left) {
+    //     dragElement.style.left = '0px';
+    //   } else if (posX + dragRect.width >= scopeRect.right) {
+    //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
+    //   }
+    //   if (posY <= scopeRect.top) {
+    //     dragElement.style.top = '0px';
+    //   } else if (posY + dragRect.height >= scopeRect.bottom) {
+    //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
+    //   }
+    // }
+  }
+};
 
 export default {
   name: "DrawTool",
@@ -113,6 +186,13 @@ export default {
     MapSvgIcon,
   },
   props: {
+    draggableArea: undefined,
+    viewingMode: {
+      type: String,
+    },
+    inDrawing: {
+      type: Boolean,
+    },
     activeDrawTool: {
       type: String,
     },
@@ -131,9 +211,24 @@ export default {
     connectionDisplay: {
       type: Boolean,
     },
+    connectionEntry: {
+      type: Object,
+    },
   },
   data: function () {
-    return {};
+    return {
+      dialogPosition: {
+        offsetX: 0,
+        offsetY: 0,
+        x: undefined,
+        y: undefined,
+      },
+    };
+  },
+  computed: {
+    connection: function () {
+      return Object.keys(this.connectionEntry).length > 0;
+    },
   },
   watch: {
     activeDrawTool: function () {
@@ -142,11 +237,20 @@ export default {
     activeDrawMode: function () {
       this.drawIconCssHacks();
     },
+    connection: function (value) {
+      const connectionIcon = this.$el.querySelector(".drawConnection");
+      if (!value) {
+        this.$emit("connection", false);
+        connectionIcon.classList.add("inactive");
+      } else {
+        connectionIcon.classList.remove("inactive");
+      }
+    },
     connectionDisplay: function (display) {
       const connectionIcon = this.$el.querySelector(".drawConnection");
       if (display) {
         connectionIcon.classList.add("iconSelected");
-        this.$emit('cssHacks', true)
+        this.dialogCssHacks();
       } else {
         connectionIcon.classList.remove("iconSelected");
       }
@@ -191,6 +295,48 @@ export default {
         });
       }
     },
+    dialogCssHacks: function () {
+      this.$nextTick(() => {
+        const dialog = this.$el.querySelector(".connection-dialog");
+        draggable(this.draggableArea, dialog);
+        // dialog popup at the click position
+        // slightly change x or y if close to boundary
+        let posX, posY;
+        const containerRect = this.draggableArea.getBoundingClientRect();
+        const dialogRect = dialog.getBoundingClientRect();
+        if (this.dialogPosition.x > containerRect.width / 2) {
+          posX = this.dialogPosition.x - dialogRect.width;
+        } else {
+          posX = this.dialogPosition.x;
+        }
+        if (this.dialogPosition.y > containerRect.height / 2) {
+          posY = this.dialogPosition.y - dialogRect.height;
+        } else {
+          posY = this.dialogPosition.y;
+        }
+        dialog.style.transform = `translate(${
+          posX - this.dialogPosition.offsetX
+        }px, ${posY - this.dialogPosition.offsetY}px)`;
+      });
+    },
+  },
+  mounted: function () {
+    this.draggableArea.querySelector(".maplibregl-canvas").addEventListener(
+      "click",
+      (e) => {
+        e.preventDefault();
+        this.dialogPosition.x = e.clientX;
+        this.dialogPosition.y = e.clientY;
+        const containerRect = this.draggableArea.getBoundingClientRect();
+        this.dialogPosition.offsetX = containerRect.x;
+        this.dialogPosition.offsetY = containerRect.y;
+        // use to fix the draw point pop up position issue
+        if (this.activeDrawTool === "Point") {
+          this.dialogCssHacks();
+        }
+      },
+      false
+    );
   },
 };
 </script>
@@ -238,5 +384,11 @@ export default {
 .inactive {
   color: #dddddd !important;
   cursor: not-allowed !important;
+}
+
+.connection-dialog {
+  position: absolute;
+  z-index: 10;
+  cursor: move;
 }
 </style>

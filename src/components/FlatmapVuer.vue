@@ -141,18 +141,25 @@ Please use `const` to assign meaningful names to them...
         <el-icon-arrow-down />
       </el-icon>
 
-      <!-- v-show="viewingMode === 'Annotation' && userInformation && !disableUI" -->
       <DrawTool
-        v-if="viewingMode == 'Annotation'"
+        v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
+        :draggableArea="this.$el"
+        :viewingMode="viewingMode"
+        :inDrawing="inDrawing"
         :activeDrawTool="activeDrawTool"
         :drawnType="drawnType"
         :drawnTypes="drawnTypes"
         :activeDrawMode="activeDrawMode"
         :drawModes="drawModes"
         :connectionDisplay="connectionDisplay"
+        :connectionEntry="connectionEntry"
         @drawingEvent="drawingEvent"
-        @cssHacks="dialogCssHacks"
         @display="connectionDialogPopup"
+        @confirm="confirmDrawnFeature"
+        @cancel="cancelDrawnFeature"
+        @popup="closePopup"
+        @tooltip="displayConnectedFeatureTooltip"
+        @connection="(display) => connectionDisplay = display"
       />
 
       <div class="bottom-right-control" v-show="!disableUI">
@@ -566,18 +573,6 @@ Please use `const` to assign meaningful names to them...
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
-      <ConnectionDialog
-        class="connection-dialog"
-        v-show="connectionDisplay"
-        :entry="connectionEntry"
-        :drawing="inDrawing"
-        :connection="connection"
-        @display="connectionDialogPopup"
-        @confirm="confirmDrawnFeature"
-        @cancel="cancelDrawnFeature"
-        @popup="closePopup"
-        @tooltip="displayConnectedFeatureTooltip"
-      />
     </div>
   </div>
 </template>
@@ -619,56 +614,6 @@ import ConnectionDialog from './ConnectionDialog.vue'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import DrawTool from './DrawTool.vue'
-
-/**
- * @param scopeElement    Draggable scope area (Optional)
- * @param dragElement     Draggable element
- */
-const draggable = (scopeElement, dragElement) => {
-  let startX, startY, clickX, clickY, posX, posY
-  // reset position in case previous pupped up dialog is dragged
-  dragElement.style.left = ''
-  dragElement.style.top = ''
-  // const scopeRect = scopeElement.getBoundingClientRect()
-  // const dragRect = dragElement.getBoundingClientRect()
-
-  dragElement.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    startX = dragElement.offsetLeft
-    startY = dragElement.offsetTop
-    clickX = e.clientX
-    clickY = e.clientY
-
-    dragElement.addEventListener('mousemove', drag, false);
-    document.addEventListener('mouseup', () => {
-      dragElement.removeEventListener('mousemove', drag, false);
-    }, false);
-  }, false);
-
-  function drag(e) {
-    e.preventDefault();
-    posX = startX - (clickX - e.clientX)
-    posY = startY - (clickY - e.clientY)
-    // if (
-    //   (posX > scopeRect.left && ((posX + dragRect.width) < scopeRect.right)) &&
-    //   (posY > scopeRect.top && ((posY + dragRect.height) < scopeRect.bottom))
-    // ) {
-    dragElement.style.left = `${posX}px`;
-    dragElement.style.top = `${posY}px`;
-    // } else {
-    //   if (posX <= scopeRect.left) {
-    //     dragElement.style.left = '0px';
-    //   } else if (posX + dragRect.width >= scopeRect.right) {
-    //     dragElement.style.left = `${scopeRect.right - dragRect.width}px`;
-    //   }
-    //   if (posY <= scopeRect.top) {
-    //     dragElement.style.top = '0px';
-    //   } else if (posY + dragRect.height >= scopeRect.bottom) {
-    //     dragElement.style.top = `${scopeRect.bottom - dragRect.height}px`;
-    //   }
-    // }
-  }
-}
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -1565,32 +1510,6 @@ export default {
           }
         }
       }
-    },
-    /**
-     * A hack to implement connection dialog drag action and scope.
-     */
-    dialogCssHacks: function () {
-      this.$nextTick(() => {
-        const dialog = this.$el.querySelector('.connection-dialog')
-        draggable(this.$el, dialog)
-        // dialog popup at the click position
-        // slightly change x or y if close to boundary
-        let posX, posY
-        const containerRect = this.$el.getBoundingClientRect()
-        const dialogRect = dialog.getBoundingClientRect()
-        if (this.dialogPosition.x > containerRect.width / 2) {
-          posX = this.dialogPosition.x - dialogRect.width
-        } else {
-          posX = this.dialogPosition.x
-        }
-        if (this.dialogPosition.y > containerRect.height / 2) {
-          posY = this.dialogPosition.y - dialogRect.height
-        } else {
-          posY = this.dialogPosition.y
-        }
-        dialog.style.transform =
-          `translate(${posX - this.dialogPosition.offsetX}px, ${posY - this.dialogPosition.offsetY}px)`
-      })
     },
     /**
      * @vuese
@@ -2509,41 +2428,8 @@ export default {
       immediate: true,
       deep: true,
     },
-    /**
-     * hide dialog when connectionEntry is empty
-     */
-    connection: function (value) {
-      const connectionIcon = this.$el.querySelector('.drawConnection')
-      if (!value) {
-        this.connectionDisplay = false
-        connectionIcon.classList.add('inactive')
-      } else {
-        connectionIcon.classList.remove('inactive')
-      }
-    },
-    /**
-     * Set dialog offset when flatmap annotator used
-     */
-    dialogPosition: {
-      handler: function () {
-        const containerRect = this.$el.getBoundingClientRect()
-        this.dialogPosition.offsetX = containerRect.x
-        this.dialogPosition.offsetY = containerRect.y
-      },
-      deep: true,
-      once: true,
-    },
     viewingMode: function (mode) {
       if (mode === 'Annotation') {
-        this.$el.querySelector('.maplibregl-canvas').addEventListener('click', (e) => {
-          e.preventDefault();
-          this.dialogPosition.x = e.clientX
-          this.dialogPosition.y = e.clientY
-          // use to fix the draw point pop up position issue
-          if (this.activeDrawTool === 'Point') {
-            this.dialogCssHacks()
-          }
-        }, false)
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email) {
