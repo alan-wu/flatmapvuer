@@ -62,6 +62,7 @@
          * @arg $event
          */
         $emit('open-map', $event)"
+      @pathway-selection-changed="onSelectionsDataChanged"
       :minZoom="minZoom"
       :helpMode="helpMode"
       :renderAtMounted="renderAtMounted"
@@ -243,6 +244,9 @@ export default {
        * @arg payload
        */
       this.$emit('pan-zoom-callback', payload)
+    },
+    onSelectionsDataChanged: function (data) {
+      this.$emit('pathway-selection-changed', data);
     },
     /**
      * @vuese

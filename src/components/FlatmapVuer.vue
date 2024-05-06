@@ -276,6 +276,7 @@
                 identifierKey="key"
                 :selections="centreLines"
                 @changed="centreLinesSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 ref="centrelinesSelection"
                 key="centrelinesSelection"
               />
@@ -287,6 +288,7 @@
                   identifierKey="key"
                   :selections="sckanDisplay"
                   @changed="sckanSelected"
+                  @selections-data-changed="onSelectionsDataChanged"
                   @checkAll="checkAllSCKAN"
                   ref="skcanSelection"
                   key="skcanSelection"
@@ -298,6 +300,7 @@
                   identifierKey="id"
                   :selections="layers"
                   @changed="layersSelected"
+                  @selections-data-changed="onSelectionsDataChanged"
                   @checkAll="checkAllLayers"
                   ref="layersSelection"
                   key="layersSelection"
@@ -310,6 +313,7 @@
                 identifierKey="taxon"
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
@@ -322,6 +326,7 @@
                 colourStyle="line"
                 :selections="pathways"
                 @changed="pathwaysSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllPathways"
                 ref="pathwaysSelection"
                 key="pathwaysSelection"
@@ -800,6 +805,9 @@ export default {
       if (this.mapImp) {
         this.mapImp.enableCentrelines(payload.value)
       }
+    },
+    onSelectionsDataChanged: function (data) {
+      this.$emit('pathway-selection-changed', data);
     },
     /**
      * // Currently not in use
