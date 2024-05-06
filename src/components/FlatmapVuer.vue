@@ -2346,12 +2346,6 @@ export default {
         { value: false },
         { value: false },
         { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
       ],
       yellowstar: yellowstar,
       isFC: false,
@@ -2393,12 +2387,6 @@ export default {
       doubleClickedFeature: false,
       activeDrawMode: undefined,
       drawModes: ['Delete', 'Edit'],
-      dialogPosition: {
-        offsetX: 0,
-        offsetY: 0,
-        x: undefined,
-        y: undefined
-      }
     }
   },
   computed: {
