@@ -291,6 +291,15 @@ export default {
       }
       this.drawIconCssHacks();
     },
+    dialogPosition: {
+      handler: function () {
+        const containerRect = this.$el.getBoundingClientRect();
+        this.dialogPosition.offsetX = containerRect.x;
+        this.dialogPosition.offsetY = containerRect.y;
+      },
+      deep: true,
+      once: true,
+    },
   },
   methods: {
     drawingEvent: function (type) {
@@ -405,9 +414,6 @@ export default {
         e.preventDefault();
         this.dialogPosition.x = e.clientX;
         this.dialogPosition.y = e.clientY;
-        const containerRect = this.draggableArea.getBoundingClientRect();
-        this.dialogPosition.offsetX = containerRect.x;
-        this.dialogPosition.offsetY = containerRect.y;
         // use to fix the draw point pop up position issue
         if (this.activeDrawTool === "Point") {
           this.dialogCssHacks();
