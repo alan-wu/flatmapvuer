@@ -121,6 +121,15 @@ export default {
     EventBus.on('onActionClick', (action) => {
       this.resourceSelected(action)
     })
+    EventBus.on('open-pubmed-url', (url) => {
+      /**
+       * This event is emitted when the user clicks
+       * on "Open publications in pubmed" button
+       * from provenance popup.
+       * @arg url
+       */
+      this.$emit('open-pubmed-url', url);
+    });
   },
   methods: {
     /**
