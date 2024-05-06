@@ -2,18 +2,21 @@
   <div>
     <div class="drawtool-container">
       <el-popover
-        content="Draw Connection"
-        placement="top"
+        content="Connection"
+        placement="left"
         :teleported="false"
         trigger="manual"
-        width="80"
+        width="100"
         popper-class="flatmap-popper"
+        :visible="hoverVisibilities[0].value"
       >
         <template #reference>
           <map-svg-icon
             icon="connection"
             class="icon-button drawConnection inactive"
             @click="$emit('display', true)"
+            @mouseover="showTooltip(0)"
+            @mouseout="hideTooltip(0)"
           />
         </template>
       </el-popover>
@@ -24,6 +27,7 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
+        :visible="hoverVisibilities[1].value"
         v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
       >
         <template #reference>
@@ -31,6 +35,8 @@
             icon="drawPoint"
             class="icon-button drawPoint"
             @click="drawingEvent('Point')"
+            @mouseover="showTooltip(1)"
+            @mouseout="hideTooltip(1)"
           />
         </template>
       </el-popover>
@@ -41,6 +47,7 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
+        :visible="hoverVisibilities[2].value"
         v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
       >
         <template #reference>
@@ -48,6 +55,8 @@
             icon="drawLine"
             class="icon-button drawLineString"
             @click="drawingEvent('LineString')"
+            @mouseover="showTooltip(2)"
+            @mouseout="hideTooltip(2)"
           />
         </template>
       </el-popover>
@@ -58,6 +67,7 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
+        :visible="hoverVisibilities[3].value"
         v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
       >
         <template #reference>
@@ -65,6 +75,8 @@
             icon="drawPolygon"
             class="icon-button drawPolygon"
             @click="drawingEvent('Polygon')"
+            @mouseover="showTooltip(3)"
+            @mouseout="hideTooltip(3)"
           />
         </template>
       </el-popover>
@@ -75,12 +87,15 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
+        :visible="hoverVisibilities[4].value"
       >
         <template #reference>
           <map-svg-icon
             icon="drawTrash"
             class="icon-button drawDelete"
             @click="drawingEvent('Delete')"
+            @mouseover="showTooltip(4)"
+            @mouseout="hideTooltip(4)"
           />
         </template>
       </el-popover>
@@ -91,12 +106,15 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
+        :visible="hoverVisibilities[5].value"
       >
         <template #reference>
           <map-svg-icon
             icon="comment"
             class="icon-button drawEdit"
             @click="drawingEvent('Edit')"
+            @mouseover="showTooltip(5)"
+            @mouseout="hideTooltip(5)"
           />
         </template>
       </el-popover>
@@ -214,9 +232,21 @@ export default {
     connectionEntry: {
       type: Object,
     },
+    helpMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
+      hoverVisibilities: [
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+      ],
       dialogPosition: {
         offsetX: 0,
         offsetY: 0,
@@ -231,6 +261,11 @@ export default {
     },
   },
   watch: {
+    helpMode: function (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.setHelpMode(newVal)
+      }
+    },
     activeDrawTool: function () {
       this.drawIconCssHacks();
     },
@@ -319,8 +354,51 @@ export default {
         }px, ${posY - this.dialogPosition.offsetY}px)`;
       });
     },
+    /**
+     * @vuese
+     * Function to show tooltip
+     * by providing ``tooltipNumber``.
+     * @arg tooltipNumber
+     */
+    showTooltip: function (tooltipNumber) {
+      if (!this.inHelp) {
+        clearTimeout(this.tooltipWait[tooltipNumber]);
+        this.tooltipWait[tooltipNumber] = setTimeout(() => {
+          this.hoverVisibilities[tooltipNumber].value = true;
+        }, 500);
+      }
+    },
+    /**
+     * @vuese
+     * Function to hide tooltip
+     * by providing ``tooltipNumber``.
+     * @arg tooltipNumber
+     */
+    hideTooltip: function (tooltipNumber) {
+      if (!this.inHelp) {
+        clearTimeout(this.tooltipWait[tooltipNumber]);
+        this.tooltipWait[tooltipNumber] = setTimeout(() => {
+          this.hoverVisibilities[tooltipNumber].value = false;
+        }, 500);
+      }
+    },
+    setHelpMode: function (helpMode) {
+      if (helpMode) {
+        this.inHelp = true
+        this.hoverVisibilities.forEach((item) => {
+          item.value = true
+        })
+      } else {
+        this.inHelp = false
+        this.hoverVisibilities.forEach((item) => {
+          item.value = false
+        })
+      }
+    },
   },
   mounted: function () {
+    this.tooltipWait = [];
+    this.tooltipWait.length = this.hoverVisibilities.length;
     this.draggableArea.querySelector(".maplibregl-canvas").addEventListener(
       "click",
       (e) => {
