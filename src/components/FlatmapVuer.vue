@@ -276,18 +276,9 @@
                 identifierKey="key"
                 :selections="alertOptions"
                 @changed="alertSelected"
+                @checkboxMouseEnter="alertMouseEnterEmitted"
                 ref="alertSelection"
                 key="alertSelection"
-              />
-              <selections-group
-                v-if="!isFC && centreLines && centreLines.length > 0"
-                title="Nerves"
-                labelKey="label"
-                identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
-                ref="centrelinesSelection"
-                key="centrelinesSelection"
               />
               <!--
                 <selections-group
@@ -314,18 +305,6 @@
                 />
               -->
               <selections-group
-                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
-                title="Observed in"
-                labelKey="label"
-                identifierKey="taxon"
-                :selections="taxonConnectivity"
-                @changed="taxonsSelected"
-                @checkboxMouseEnter="checkboxMouseEnterEmitted"
-                @checkAll="checkAllTaxons"
-                ref="taxonSelection"
-                key="taxonSelection"
-              />
-              <selections-group
                 v-if="pathways && pathways.length > 0"
                 title="Pathways"
                 labelKey="label"
@@ -336,6 +315,28 @@
                 @checkAll="checkAllPathways"
                 ref="pathwaysSelection"
                 key="pathwaysSelection"
+              />
+              <selections-group
+                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+                title="Observed in"
+                labelKey="label"
+                identifierKey="taxon"
+                :selections="taxonConnectivity"
+                @changed="taxonsSelected"
+                @checkboxMouseEnter="taxonMouseEnterEmitted"
+                @checkAll="checkAllTaxons"
+                ref="taxonSelection"
+                key="taxonSelection"
+              />
+              <selections-group
+                v-if="!isFC && centreLines && centreLines.length > 0"
+                title="Nerves"
+                labelKey="label"
+                identifierKey="key"
+                :selections="centreLines"
+                @changed="centreLinesSelected"
+                ref="centrelinesSelection"
+                key="centrelinesSelection"
               />
             </div>
             <div
@@ -859,6 +860,27 @@ export default {
     },
     /**
      * @vuese
+     * Function to enable/disable mouse enter and leave event for
+     * alert checkbox
+     * @arg payload
+     */
+    alertMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          const ALERT_FILTER = {
+            HAS: 'alert',
+          }
+          this.mapImp.setVisibilityFilter(ALERT_FILTER)
+        } else {
+          this.mapImp.clearVisibilityFilter()
+          this.alertSelected({
+            value: (payload.checked.length > 0),
+          });
+        }
+      }
+    },
+    /**
+     * @vuese
      * Function to enable/disable (show/hide) pathways with/without alert
      * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
      * @arg payload
@@ -942,7 +964,7 @@ export default {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
       }
     },
-    checkboxMouseEnterEmitted: function (payload) {
+    taxonMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
           let gid = this.mapImp.taxonFeatureIds(payload.key)  
