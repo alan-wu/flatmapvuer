@@ -14,7 +14,7 @@
           <map-svg-icon
             icon="connection"
             class="icon-button drawConnection inactive"
-            @click="$emit('display', true)"
+            @click="$emit('dialogDisplay', true)"
             @mouseover="showTooltip(0)"
             @mouseout="hideTooltip(0)"
           />
@@ -34,7 +34,7 @@
           <map-svg-icon
             icon="drawPoint"
             class="icon-button drawPoint"
-            @click="drawingEvent('Point')"
+            @click="drawToolEvent('Point')"
             @mouseover="showTooltip(1)"
             @mouseout="hideTooltip(1)"
           />
@@ -54,7 +54,7 @@
           <map-svg-icon
             icon="drawLine"
             class="icon-button drawLineString"
-            @click="drawingEvent('LineString')"
+            @click="drawToolEvent('LineString')"
             @mouseover="showTooltip(2)"
             @mouseout="hideTooltip(2)"
           />
@@ -74,7 +74,7 @@
           <map-svg-icon
             icon="drawPolygon"
             class="icon-button drawPolygon"
-            @click="drawingEvent('Polygon')"
+            @click="drawToolEvent('Polygon')"
             @mouseover="showTooltip(3)"
             @mouseout="hideTooltip(3)"
           />
@@ -93,7 +93,7 @@
           <map-svg-icon
             icon="drawTrash"
             class="icon-button drawDelete"
-            @click="drawingEvent('Delete')"
+            @click="drawModeEvent('Delete')"
             @mouseover="showTooltip(4)"
             @mouseout="hideTooltip(4)"
           />
@@ -112,7 +112,7 @@
           <map-svg-icon
             icon="comment"
             class="icon-button drawEdit"
-            @click="drawingEvent('Edit')"
+            @click="drawModeEvent('Edit')"
             @mouseover="showTooltip(5)"
             @mouseout="hideTooltip(5)"
           />
@@ -122,14 +122,14 @@
     <ConnectionDialog
       class="connection-dialog"
       v-show="connectionDisplay"
-      :entry="connectionEntry"
-      :drawing="inDrawing"
+      :connectionEntry="connectionEntry"
+      :inDrawing="inDrawing"
       :connection="connection"
-      @display="$emit('display', $event)"
-      @confirm="$emit('confirm', $event)"
-      @cancel="$emit('cancel', $event)"
-      @popup="$emit('popup', $event)"
-      @tooltip="$emit('tooltip', $event)"
+      @dialogDisplay="$emit('dialogDisplay', $event)"
+      @confirmDrawn="$emit('confirmDrawn', $event)"
+      @cancelDrawn="$emit('cancelDrawn', $event)"
+      @showFeatureTooltip="$emit('showFeatureTooltip', $event)"
+      @hideFeatureTooltip="$emit('hideFeatureTooltip', $event)"
     />
   </div>
 </template>
@@ -204,10 +204,7 @@ export default {
     MapSvgIcon,
   },
   props: {
-    draggableArea: undefined,
-    viewingMode: {
-      type: String,
-    },
+    flatmapCanvas: undefined,
     inDrawing: {
       type: Boolean,
     },
@@ -239,6 +236,8 @@ export default {
   },
   data: function () {
     return {
+      activeTool: undefined,
+      activeMode: undefined,
       hoverVisibilities: [
         { value: false },
         { value: false },
@@ -302,8 +301,25 @@ export default {
     },
   },
   methods: {
-    drawingEvent: function (type) {
-      this.$emit("drawingEvent", type);
+    drawToolEvent: function (type) {
+      if (type === 'Point') {
+        const point = this.flatmapCanvas.querySelector('.mapbox-gl-draw_point')
+        point.click()
+        this.activeTool = point.classList.contains('active') ? 'Point' : undefined
+      } else if (type === 'LineString') {
+        const line = this.flatmapCanvas.querySelector('.mapbox-gl-draw_line')
+        line.click()
+        this.activeTool = line.classList.contains('active') ? 'LineString' : undefined
+      } else if (type === 'Polygon') {
+        const polygon = this.flatmapCanvas.querySelector('.mapbox-gl-draw_polygon')
+        polygon.click()
+        this.activeTool = polygon.classList.contains('active') ? 'Polygon' : undefined
+      }
+      this.$emit("drawToolbarEvent", this.activeTool);
+    },
+    drawModeEvent: function (type) {
+      this.activeMode = type
+      this.$emit("drawToolbarEvent", this.activeMode);
     },
     drawIconCssHacks: function () {
       // set tool/mode icon status
@@ -342,11 +358,11 @@ export default {
     dialogCssHacks: function () {
       this.$nextTick(() => {
         const dialog = this.$el.querySelector(".connection-dialog");
-        draggable(this.draggableArea, dialog);
+        draggable(this.flatmapCanvas, dialog);
         // dialog popup at the click position
         // slightly change x or y if close to boundary
         let posX, posY;
-        const containerRect = this.draggableArea.getBoundingClientRect();
+        const containerRect = this.flatmapCanvas.getBoundingClientRect();
         const dialogRect = dialog.getBoundingClientRect();
         if (this.dialogPosition.x > containerRect.width / 2) {
           posX = this.dialogPosition.x - dialogRect.width;
@@ -408,7 +424,7 @@ export default {
   mounted: function () {
     this.tooltipWait = [];
     this.tooltipWait.length = this.hoverVisibilities.length;
-    this.draggableArea.querySelector(".maplibregl-canvas").addEventListener(
+    this.flatmapCanvas.querySelector(".maplibregl-canvas").addEventListener(
       "click",
       (e) => {
         e.preventDefault();
