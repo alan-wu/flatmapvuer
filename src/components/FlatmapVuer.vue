@@ -843,9 +843,6 @@ export default {
         // Check and flatten the origins node graph
         let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
 
-        // Remove the origin nodes from the path features so that we only see downstream nodes
-        pathFeatures = pathFeatures.filter((p) => !originsFlat.includes(p.models))
-
         let toHighlight = []
         let highlight = false
 
