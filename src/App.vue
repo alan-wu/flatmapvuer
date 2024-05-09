@@ -73,6 +73,7 @@
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
       :disableUI="disableUI"
+      @open-pubmed-url="onOpenPubmedUrl"
     />
   </div>
 </template>
@@ -113,6 +114,9 @@ export default {
       if (resource.eventType === 'click') {
         console.log('resource', resource)
       }
+    },
+    onOpenPubmedUrl: function (url) {
+      console.log('open-pubmed-url', url);
     },
     FlatmapReady: function (component) {
       console.log(component)
