@@ -1825,7 +1825,7 @@ export default {
     },
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.setHelpMode(val)
+        this.setHelpMode(newVal)
       }
     },
     state: {
