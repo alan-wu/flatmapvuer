@@ -205,6 +205,7 @@
         placement="right"
         :teleported="false"
         trigger="manual"
+        :offset="-18"
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
@@ -228,7 +229,8 @@
                 :teleported="true"
                 trigger="manual"
                 width="max-content"
-                popper-class="flatmap-popper flatmap-teleport-popper popper-bump-right"
+                :offset="-10"
+                popper-class="flatmap-popper flatmap-teleport-popper"
                 :visible="hoverVisibilities[9].value && showStarInLegend"
                 ref="featuredMarkerPopover"
               >
@@ -250,7 +252,7 @@
                 :teleported="false"
                 width="max-content"
                 trigger="manual"
-                popper-class="flatmap-popper popper-bump-right"
+                popper-class="flatmap-popper"
                 :visible="hoverVisibilities[5].value"
                 ref="markerPopover"
               >
@@ -1184,11 +1186,16 @@ export default {
      */
     setHelpMode: function (helpMode) {
       if (helpMode) {
-        this.inHelp = true
-        this.hoverVisibilities.forEach((item) => {
-          item.value = true
-        })
-        this.openFlatmapHelpPopup()
+        // because some tooltips are inside drawer
+        this.drawerOpen = true;
+        // wait for CSS transition
+        setTimeout(() => {
+          this.inHelp = true;
+          this.hoverVisibilities.forEach((item) => {
+            item.value = true;
+          });
+          this.openFlatmapHelpPopup();
+        }, 300);
       } else {
         this.inHelp = false
         this.hoverVisibilities.forEach((item) => {
@@ -1882,6 +1889,14 @@ export default {
   font-size: 25px;
 }
 
+.warning-icon,
+.latest-changesicon {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 5px;
+}
+
 .warning-icon {
   color: $warning;
 
@@ -1906,6 +1921,7 @@ export default {
 }
 
 .latest-changesicon {
+  margin-top: 5px;
   color: $success;
 
   &:hover {
@@ -1927,7 +1943,7 @@ export default {
 .pathway-location {
   position: absolute;
   bottom: 0px;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     left: 0px;
   }
@@ -1954,8 +1970,7 @@ export default {
   background: #ffffff;
   overflow-x: hidden;
   scrollbar-width: thin;
-
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     opacity: 1;
     position: relative;
@@ -1985,10 +2000,6 @@ export default {
     width: 28px;
     height: 28px;
   }
-}
-
-:deep(.popper-bump-right) {
-  left: 30px;
 }
 
 .el-dropdown-link {
@@ -2203,7 +2214,7 @@ export default {
 .settings-group {
   bottom: 16px;
   position: absolute;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     left: 322px;
   }
@@ -2323,7 +2334,7 @@ export default {
       width: 300px !important;
     }
   }
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.shrink {
     transform: scale(0.5);
     transform: scale(0.5);
@@ -2340,7 +2351,7 @@ export default {
   width: 20px;
   height: 14px;
   z-index: 9;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.shrink {
     transform: rotate(0deg);
   }
@@ -2460,7 +2471,6 @@ export default {
     font-weight: 600;
     margin-top: 12px;
     color: $app-primary-color;
-    transition-delay: 0.9s;
   }
   &.open {
     i {
@@ -2631,10 +2641,6 @@ export default {
         border-color: $app-primary-color;
         background-color: #f3ecf6;
       }
-    }
-
-    &.popper-bump-right {
-      margin-left: -15px;
     }
   }
 }
