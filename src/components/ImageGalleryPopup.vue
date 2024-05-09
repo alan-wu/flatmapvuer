@@ -1,38 +1,22 @@
 <template>
-  <div v-if="galleryItems.length !== 0" class="main" v-loading="loading">
-    Image gallery baby!
-    <!-- <div class="block" v-if="entry.title">
-      <span class="title">{{ capitalise(entry.title) }}</span>
-      <div
-        v-if="
-          entry.provenanceTaxonomyLabel &&
-          entry.provenanceTaxonomyLabel.length > 0
-        "
-        class="subtitle"
-      >
-        {{ provSpeciesDescription }}
-      </div>
-    </div>
-    <div class="block" v-else>
-      <span class="title">{{ entry.featureId }}</span>
-    </div> -->
-    <div class="block">
-      <el-button
-        class="button"
-        @click="showImages = !showImages"
-      >
-        <span v-if="showImages">Hide images</span>
-        <span v-else>View images at this location (Gallery)</span>
-      </el-button>
-      <div v-if="showImages" class="image-gallery-container">
-        <Gallery :items="galleryItems" />
-      </div>
-      <el-button
-        class="button"
-        @click="viewImage(imageIframeURL)"
-      >
-        <span>View images at this location (iFrame)</span>
-      </el-button>
+  <div class="main" v-loading="loading">
+      <div class="block">
+        <el-button
+          class="button"
+          @click="showImages = !showImages"
+        >
+          <span v-if="showImages">Hide images</span>
+          <span v-else>View images at this location (Gallery)</span>
+        </el-button>
+        <div v-if="showImages" class="image-gallery-container">
+          <Gallery :items="galleryItems" />
+        </div>
+        <el-button
+          class="button"
+          @click="viewImage(imageIframeURL[this.entry.featureId[0]])"
+        >
+          <span>View images at this location (iFrame)</span>
+        </el-button>
     </div>
   </div>
 </template>
@@ -66,16 +50,14 @@ const capitalise = function (str) {
   return ''
 }
 
-
 const imageIframeURL = {
   'UBERON:0000948': 'https://sparc.biolucida.net/image?c=MjIzNzItY29sLTI1NA%3D%3D',
   'UBERON:0016508': 'https://sparc.biolucida.net/image?c=MjIzNzQtY29sLTI1NA%3D%3D',
   'ILX:0793082': 'https://sparc.biolucida.net/image?c=MjIzNzUtY29sLTI1NA%3D%3D'
 }
 
-
 export default {
-  name: 'ImagePopup',
+  name: 'ImageGalleryPopup',
   components: {
     Button,
     Container,
@@ -108,48 +90,10 @@ export default {
     return {
       controller: undefined,
       activeSpecies: undefined,
-      pubmedSearchUrl: '',
       loading: false,
-      showToolip: false,
-      showDetails: false,
       showImages: false,
       imageIframeURL: imageIframeURL,
-      originDescriptions: {
-        motor: 'is the location of the initial cell body of the circuit',
-        sensory: 'is the location of the initial cell body in the PNS circuit',
-      },
-      componentsWithDatasets: [],
-      uberons: [{ id: undefined, name: undefined }],
     }
-  },
-  computed: {
-    resources: function () {
-      let resources = []
-      if (this.entry && this.entry.hyperlinks) {
-        resources = this.entry.hyperlinks
-      }
-      return resources
-    },
-    originDescription: function () {
-      if (
-        this.entry &&
-        this.entry.title &&
-        this.entry.title.toLowerCase().includes('motor')
-      ) {
-        return this.originDescriptions.motor
-      } else {
-        return this.originDescriptions.sensory
-      }
-    },
-    provSpeciesDescription: function () {
-      let text = 'Observed in'
-      this.entry.provenanceTaxonomyLabel.forEach((label) => {
-        text += ` ${label},`
-      })
-      text = text.slice(0, -1) // remove last comma
-      text += ' species'
-      return text
-    },
   },
   methods: {
     titleCase: function (title) {
@@ -157,30 +101,6 @@ export default {
     },
     capitalise: function (text) {
       return capitalise(text)
-    },
-    openUrl: function (url) {
-      window.open(url, '_blank')
-    },
-    openAll: function () {
-      EventBus.emit('onActionClick', {
-        type: 'Facets',
-        labels: this.entry.componentsWithDatasets.map((a) => a.name),
-      })
-    },
-    openAxons: function () {
-      EventBus.emit('onActionClick', {
-        type: 'Facets',
-        labels: this.entry.destinationsWithDatasets.map((a) => a.name),
-      })
-    },
-    openDendrites: function () {
-      EventBus.emit('onActionClick', {
-        type: 'Facets',
-        labels: this.entry.originsWithDatasets.map((a) => a.name),
-      })
-    },
-    pubmedSearchUrlUpdate: function (val) {
-      this.pubmedSearchUrl = val
     },
     viewImage: function (url) {
       this.$emit('view-image', url)

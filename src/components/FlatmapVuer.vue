@@ -497,7 +497,8 @@
         v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
-        :annotationDisplay="viewingMode === 'Annotation'"
+        :tooltipType="tooltipType"
+        :galleryItems="galleryItems"
         @viewImage="viewIframeImage"
       />
       <IframeImageDialog
@@ -537,11 +538,14 @@ import {
   FlatmapQueries,
   findTaxonomyLabel,
 } from '../services/flatmapQueries.js'
+import scicrunchMixin from '../services/scicrunchMixin.js'
+import flatmapImageMixin from '../mixins/flatmapImageMixin.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
+import ImageGalleryPopup from './ImageGalleryPopup.vue'
 
 
 const processFTUs = (parent, key) => {
@@ -609,6 +613,7 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
+  mixins: [scicrunchMixin, flatmapImageMixin],
   components: {
     Button,
     Col,
@@ -626,6 +631,7 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
+    ImageGalleryPopup,
   },
   beforeCreate: function () {
     this.mapManager = undefined
@@ -1040,33 +1046,47 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
-      // Call flatmap database to get the connection data
-      if (this.viewingMode === 'Annotation') {
-        if (data.feature && data.feature.featureId && data.feature.models) {
-          this.annotationEntry = {
-            ...data.feature,
-            resource: this.serverURL,
-            resourceId: this.serverUUID,
-          }
-          this.displayTooltip(data.feature.models)
-        } else {
-          this.annotation = {}
-        }
+
+      if (data.feature.type === 'marker') {
+        this.tooltipType = 'image-gallery'
+        console.log('marker data', data)
+        console.log('saved images', this.images)
+        let filteredImages = this.findImagesForAnatomy(this.images, data.resource[0])
+        console.log('filtered images:',filteredImages)
+        this.galleryItems = filteredImages
+        this.displayTooltip(data.feature.models)
       } else {
-        let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
-        // The line below only creates the tooltip if some data was found on the path
-        // result 0 is the connection, result 1 is the pubmed results from flatmap
-        console.log(data)
-        if (
-          results[0] ||
-          results[1] ||
-          data.feature.type === 'marker' ||
-          (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
-        ) {
-          this.resourceForTooltip = data.resource[0]
-          data.resourceForTooltip = this.resourceForTooltip
-          this.createTooltipFromNeuronCuration(data)
+
+        // Call flatmap database to get the connection data
+        if (this.viewingMode === 'Annotation') {
+          if (data.feature && data.feature.featureId && data.feature.models) {
+            this.annotationEntry = {
+              ...data.feature,
+              resource: this.serverURL,
+              resourceId: this.serverUUID,
+            }
+            this.tooltipType = 'annotation'
+            this.displayTooltip(data.feature.models)
+            
+          } else {
+            this.annotation = {}
+          }
+        } else {
+          let results =
+            await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+          // The line below only creates the tooltip if some data was found on the path
+          // result 0 is the connection, result 1 is the pubmed results from flatmap
+          
+          if (
+            results[0] ||
+            results[1] ||
+            (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
+          ) {
+            this.tooltipType = 'provenance'
+            this.resourceForTooltip = data.resource[0]
+            data.resourceForTooltip = this.resourceForTooltip
+            this.createTooltipFromNeuronCuration(data)
+          }
         }
       }
     },
@@ -1500,6 +1520,7 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
+      this.addImagesToMap()
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -1585,6 +1606,15 @@ export default {
     closeImageIframe: function () {
       this.imageIframeURL = ''
       this.imageIframeOpen = false
+    },
+    addImagesToMap: async function () {
+      if (this.mapImp) {
+        let images = await this.getImagesFromScicrunch()
+        if (images) {
+          this.images = images
+          this.populateFlatmapWithImages(this.mapImp, images)
+        }
+      }
     },
   },
   props: {
@@ -1770,6 +1800,8 @@ export default {
       pathways: [],
       imageIframeOpen: false,
       imageIframeURL: '',
+      galleryItems: [],
+      tooltipType: 'provenance',
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',

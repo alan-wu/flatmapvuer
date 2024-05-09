@@ -1,10 +1,16 @@
 <template>
   <div class="tooltip-container" id="tooltip-container">
-    <template v-if="annotationDisplay">
+    <template v-if="tooltipType === 'annotation'">
       <annotation-tool :annotationEntry="annotationEntry" />
     </template>
-    <template v-else>
+    <template v-if="tooltipType === 'provenance'">
       <provenance-popup :entry="entry" @view-image="viewImage"/>
+    </template>
+    <template v-if="tooltipType === 'image-gallery'">
+      <image-gallery-popup
+        :galleryItems="galleryItems"
+        @viewImage="viewImage"
+      />
     </template>
   </div>
 </template>
@@ -13,6 +19,7 @@
 /* eslint-disable no-alert, no-console */
 import AnnotationTool from './AnnotationTool.vue'
 import ProvenancePopup from './ProvenancePopup.vue'
+import ImageGalleryPopup from './ImageGalleryPopup.vue'
 
 export default {
   name: 'Tooltip',
@@ -24,13 +31,17 @@ export default {
     entry: {
       type: Object,
     },
-    annotationDisplay: {
-      type: Boolean,
-      default: false,
+    tooltipType: {
+      type: String,
+      default: 'provenance',
     },
     annotationEntry: {
       type: Object,
-    }
+    },
+    galleryItems: {
+      type: Array,
+      default: () => [],
+    },
   },
   methods: {
     viewImage: function (url) {
