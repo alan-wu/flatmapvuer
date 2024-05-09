@@ -63,7 +63,7 @@
          */
         $emit('open-map', $event)"
       :minZoom="minZoom"
-      :helpMode="helpMode"
+      :helpMode="activeSpecies == key && helpMode"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
       :showStarInLegend="showStarInLegend"

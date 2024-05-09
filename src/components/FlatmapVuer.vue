@@ -225,10 +225,11 @@
               <el-popover
                 content="Location of the featured dataset"
                 placement="right"
-                :teleported="false"
-                trigger="hover"
-                popper-class="flatmap-popper popper-bump-right"
-                :visible="hoverVisibilities[9].value"
+                :teleported="true"
+                trigger="manual"
+                width="max-content"
+                popper-class="flatmap-popper flatmap-teleport-popper popper-bump-right"
+                :visible="hoverVisibilities[9].value && showStarInLegend"
                 ref="featuredMarkerPopover"
               >
                 <template #reference>
@@ -237,6 +238,8 @@
                     v-popover:featuredMarkerPopover
                     class="yellow-star-legend"
                     v-html="yellowstar"
+                    @mouseover="showToolitip(9)"
+                    @mouseout="hideToolitip(9)"
                   ></div>
                 </template>
               </el-popover>
@@ -245,6 +248,7 @@
                 content="Find these markers for data"
                 placement="right"
                 :teleported="false"
+                width="max-content"
                 trigger="manual"
                 popper-class="flatmap-popper popper-bump-right"
                 :visible="hoverVisibilities[5].value"
@@ -1825,7 +1829,7 @@ export default {
     },
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.setHelpMode(val)
+        this.setHelpMode(newVal)
       }
     },
     state: {
@@ -1972,7 +1976,15 @@ export default {
 }
 
 .flatmap-marker-help {
-  display: inline-block;
+  display: block;
+  width: max-content;
+  margin: 0.5rem;
+
+  :deep(.flatmap-marker svg) {
+    display: block;
+    width: 28px;
+    height: 28px;
+  }
 }
 
 :deep(.popper-bump-right) {
@@ -2179,8 +2191,13 @@ export default {
 }
 
 .yellow-star-legend {
-  width: 130px;
-  cursor: pointer;
+  display: block;
+  width: max-content;
+  cursor: default;
+
+  :deep(svg) {
+    display: block;
+  }
 }
 
 .settings-group {
@@ -2596,6 +2613,30 @@ export default {
   --el-color-primary-light-5: #CD99E5;
   --el-color-primary-light-9: #F3E6F9;
   --el-color-primary-dark-2: var(--el-color-primary);
+}
+
+.flatmap-teleport-popper {
+  &.flatmap-popper.el-popper {
+    padding: 6px 4px;
+    font-family: Asap, sans-serif;
+    font-size: 12px;
+    color: rgb(48, 49, 51);
+    background-color: #f3ecf6;
+    border: 1px solid $app-primary-color;
+    white-space: nowrap;
+    min-width: unset;
+
+    .el-popper__arrow {
+      &:before {
+        border-color: $app-primary-color;
+        background-color: #f3ecf6;
+      }
+    }
+
+    &.popper-bump-right {
+      margin-left: -15px;
+    }
+  }
 }
 
 </style>
