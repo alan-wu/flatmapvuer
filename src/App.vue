@@ -74,6 +74,7 @@
       :flatmapAPI="flatmapAPI"
       :disableUI="disableUI"
       @open-pubmed-url="onOpenPubmedUrl"
+      @pathway-selection-changed="onPathwaySelectionChanged"
     />
   </div>
 </template>
@@ -117,6 +118,9 @@ export default {
     },
     onOpenPubmedUrl: function (url) {
       console.log('open-pubmed-url', url);
+    },
+    onPathwaySelectionChanged: function (data) {
+      console.log('pathway-selection-changed', data);
     },
     FlatmapReady: function (component) {
       console.log(component)
