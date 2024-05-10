@@ -71,6 +71,7 @@
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
     />
+    <HelpModeDialog v-if="helpMode"/>
   </div>
 </template>
 
@@ -87,6 +88,7 @@ import {
   ElRow as Row,
   ElPopover as Popover,
 } from 'element-plus'
+import HelpModeDialog from './HelpModeDialog.vue';
 
 const TAXON_UUID = {
   'NCBITaxon:10114': '01fedbf9-d783-509c-a10c-827941ab13da',
@@ -108,6 +110,7 @@ export default {
     Select,
     Popover,
     FlatmapVuer,
+    HelpModeDialog,
   },
   beforeMount() {
     //List for resolving the promise in initialise
