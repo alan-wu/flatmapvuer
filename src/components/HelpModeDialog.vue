@@ -66,9 +66,9 @@
     background: white;
     box-shadow: 0px 0px 160px 80px rgba(0,0,0,0.5);
     position: absolute;
-    top: 50%;
+    top: 0;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     z-index: 2;
 
     &.finish {
@@ -108,19 +108,29 @@
 
   @keyframes shake {
     0% {
-      transform: translate(-50%, -50%) rotate(2deg);
+      transform: translateX(-50%) rotate(2deg);
     }
     25% {
-      transform: translate(-50%, -50%) rotate(-2deg);
+      transform: translateX(-50%) rotate(-2deg);
     }
     50% {
-      transform: translate(-50%, -50%) rotate(2deg);
+      transform: translateX(-50%) rotate(2deg);
     }
     75% {
-      transform: translate(-50%, -50%) rotate(-2deg);
+      transform: translateX(-50%) rotate(-2deg);
     }
     100% {
-      transform: translate(-50%, -50%) rotate(2deg);
+      transform: translateX(-50%) rotate(2deg);
+    }
+  }
+
+  // Just for App.vue with options popover on top
+  .help-mode-dialog {
+    .options-popover + .multi-container & {
+      margin-top: 40px;
+    }
+    .options-popover:not([style*="display: none"]) + .multi-container & {
+      margin-top: 175px;
     }
   }
 </style>
