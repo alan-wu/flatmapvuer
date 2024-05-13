@@ -1,27 +1,33 @@
 <template>
   <div class="help-mode-dialog">
     <h4>Help Mode</h4>
-    <p>Click "Next" to see the next item.</p>
 
-    <div>
-      <el-button class="button" v-if="lastItem"
-        @click="finishHelp"
-      >
-        Finish
-      </el-button>
-      <el-button class="button" v-else
-        @click="showNext"
-      >
-        Next
-      </el-button>
-    </div>
+    <template v-if="lastItem">
+      <p>
+        All caught up! <br>
+        Click 'Help mode' to restart.
+      </p>
+      <div>
+        <el-button class="button" @click="finishHelpMode">
+          Finish
+        </el-button>
+      </div>
+    </template>
+    <template v-else>
+      <p>Click "Next" to see the next item.</p>
+      <div>
+        <el-button class="button" @click="showNext">
+          Next
+        </el-button>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
   import {
     ElButton as Button,
-  } from 'element-plus'
+  } from 'element-plus';
 
   export default {
     name: 'HelpModeDialog',
@@ -37,10 +43,10 @@
     },
     methods: {
       showNext: function () {
-        console.log('show next')
+        this.$emit('show-next');
       },
-      finishHelp: function () {
-        console.log('finish help')
+      finishHelpMode: function () {
+        this.$emit('finish-help-mode');
       },
     }
   }
@@ -69,6 +75,10 @@
 
     h4, p {
       margin: 0;
+    }
+
+    p {
+      line-height: 1.5;
     }
 
     .button {

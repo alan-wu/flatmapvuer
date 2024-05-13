@@ -69,6 +69,7 @@
       @ready="FlatmapReady"
       :initial="initial"
       :helpMode="helpMode"
+      @finish-help-mode="onFinishHelpMode"
       :displayMinimap="true"
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
@@ -165,6 +166,9 @@ export default {
       this.$refs.multi
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
+    },
+    onFinishHelpMode: function () {
+      this.helpMode = false;
     },
   },
   data: function () {

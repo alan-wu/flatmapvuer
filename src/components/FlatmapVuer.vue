@@ -1193,15 +1193,26 @@ export default {
      * @arg helpMode
      */
     setHelpMode: function (helpMode) {
-      if (helpMode) {
+      const toolTipsLength = this.hoverVisibilities.length;
+      const lastIndex = toolTipsLength - 1;
+
+      if (this.helpModeActiveItem === lastIndex) {
+        /**
+         * This event is emitted when the tooltips in help mode reach the last item.
+         */
+        this.$emit('help-mode-last-item', true);
+      }
+
+      if (helpMode && toolTipsLength > this.helpModeActiveItem) {
         // because some tooltips are inside drawer
         this.drawerOpen = true;
         // wait for CSS transition
         setTimeout(() => {
-          this.inHelp = true;
+          this.inHelp = false;
           this.hoverVisibilities.forEach((item) => {
-            item.value = true;
+            item.value = false;
           });
+          this.showToolitip(this.helpModeActiveItem, 200);
           this.openFlatmapHelpPopup();
         }, 300);
       } else {
@@ -1218,12 +1229,12 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    showToolitip: function (tooltipNumber) {
+    showToolitip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true
-        }, 500)
+        }, timeout)
       }
     },
     /**
@@ -1646,6 +1657,20 @@ export default {
       default: false,
     },
     /**
+     * The active item index of help mode.
+     */
+    helpModeActiveItem: {
+      type: Number,
+      default: 0,
+    },
+    /**
+     * The last item of help mode.
+     */
+    helpModeLastItem: {
+      type: Boolean,
+      default: false,
+    },
+    /**
      * The option to create map on component mounted.
      */
     renderAtMounted: {
@@ -1846,6 +1871,9 @@ export default {
       if (newVal !== oldVal) {
         this.setHelpMode(newVal)
       }
+    },
+    helpModeActiveItem: function () {
+      this.setHelpMode(this.helpMode);
     },
     state: {
       handler: function (state, oldVal) {

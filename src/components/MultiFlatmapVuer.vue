@@ -8,7 +8,7 @@
         trigger="manual"
         popper-class="flatmap-popper flatmap-teleport-popper right-popper"
         width="max-content"
-        :visible="helpMode"
+        :visible="activateTooltipByIndex(0)"
         :teleported="false"
         ref="selectPopover"
       >
@@ -66,6 +66,8 @@
       @pathway-selection-changed="onSelectionsDataChanged"
       :minZoom="minZoom"
       :helpMode="activeSpecies == key && helpMode"
+      :helpModeActiveItem="helpModeActiveItem"
+      @help-mode-last-item="onHelpModeLastItem"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
       :showStarInLegend="showStarInLegend"
@@ -73,7 +75,12 @@
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
     />
-    <HelpModeDialog v-if="helpMode"/>
+    <HelpModeDialog
+      v-if="helpMode"
+      :lastItem="helpModeLastItem"
+      @show-next="onShowNext"
+      @finish-help-mode="onFinishHelpMode"
+    />
   </div>
 </template>
 
@@ -466,6 +473,46 @@ export default {
         })
       }
     },
+    /**
+     * @vuese
+     * Function to activate help mode tooltip by item index number
+     */
+    activateTooltipByIndex: function (index) {
+      return (
+        index === this.helpModeActiveItem
+        && this.helpMode
+      );
+    },
+    /**
+     * @vuese
+     * Function to check the last item of help mode
+     */
+    onHelpModeLastItem: function (isLastItem) {
+      if (isLastItem) {
+        this.helpModeLastItem = true;
+      }
+    },
+    /**
+     * @vuese
+     * Function to show next tooltip for help mode
+     */
+    onShowNext: function () {
+      this.helpModeActiveItem += 1;
+    },
+    /**
+     * @vuese
+     * Function to finish help mode
+     */
+    onFinishHelpMode: function () {
+      /**
+       * This event is emitted when the help mode is finished.
+       */
+      this.$emit('finish-help-mode');
+
+      // reset help mode to default values
+      this.helpModeActiveItem = 0;
+      this.helpModeLastItem = false;
+    },
   },
   props: {
     /**
@@ -639,6 +686,8 @@ export default {
       activeSpecies: undefined,
       speciesList: {},
       requireInitialisation: true,
+      helpModeActiveItem: 0,
+      helpModeLastItem: false,
     }
   },
   watch: {
