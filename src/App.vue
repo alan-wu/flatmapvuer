@@ -4,7 +4,7 @@
       placement="bottom"
       trigger="click"
       width="500"
-      class="popover"
+      popper-class="popover options-popover"
       :teleported="false"
     >
       <div class="options-container">
@@ -310,6 +310,8 @@ body {
 .options-button {
   z-index:100;
   position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .options-container {
