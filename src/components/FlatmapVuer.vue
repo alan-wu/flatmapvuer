@@ -1196,25 +1196,42 @@ export default {
       const toolTipsLength = this.hoverVisibilities.length;
       const lastIndex = toolTipsLength - 1;
 
-      if (this.helpModeActiveItem === lastIndex) {
+      // this.hoverVisibilities index 9 is star marker
+      // skip if there has no start marker available
+      if (this.helpModeActiveIndex === 9 && !this.showStarInLegend) {
+        // to skip star marker index
+        // this.helpModeActiveIndex += 1;
+      }
+
+      if (this.helpModeActiveIndex === lastIndex) {
         /**
          * This event is emitted when the tooltips in help mode reach the last item.
          */
         this.$emit('help-mode-last-item', true);
+        // reset to iniital state
+        // this.helpModeActiveIndex = this.helpModeInitialIndex;
       }
 
-      if (helpMode && toolTipsLength > this.helpModeActiveItem) {
-        // because some tooltips are inside drawer
-        this.drawerOpen = true;
-        // wait for CSS transition
-        setTimeout(() => {
-          this.inHelp = false;
-          this.hoverVisibilities.forEach((item) => {
-            item.value = false;
-          });
-          this.showTooltip(this.helpModeActiveItem, 200);
+      if (helpMode && toolTipsLength > this.helpModeActiveIndex) {
+
+        // Show the map tooltip as first item
+        if (this.helpModeActiveIndex > -1) {
+          this.closeFlatmapHelpPopup();
+
+          // because some tooltips are inside drawer
+          this.drawerOpen = true;
+          // wait for CSS transition
+          setTimeout(() => {
+            this.inHelp = false;
+            this.hoverVisibilities.forEach((item) => {
+              item.value = false;
+            });
+
+            this.showTooltip(this.helpModeActiveIndex, 200);
+          }, 300);
+        } else if (this.helpModeActiveIndex === -1) {
           this.openFlatmapHelpPopup();
-        }, 300);
+        }
       } else {
         this.inHelp = false
         this.hoverVisibilities.forEach((item) => {
@@ -1671,6 +1688,14 @@ export default {
       default: false,
     },
     /**
+     * The initial index number for help mode tooltips
+     * minus two tooltips which are not in `hoverVisibilities`
+     */
+    helpModeInitialIndex: {
+      type: Number,
+      default: -2,
+    },
+    /**
      * The option to create map on component mounted.
      */
     renderAtMounted: {
@@ -1835,6 +1860,7 @@ export default {
         { value: false },
         { value: false },
       ],
+      helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
       isFC: false,
       inHelp: false,
@@ -1873,6 +1899,9 @@ export default {
       }
     },
     helpModeActiveItem: function () {
+      // just take the action from helpModeActiveItem
+      // work with local value since the indexing is different
+      this.helpModeActiveIndex += 1;
       this.setHelpMode(this.helpMode);
     },
     state: {
