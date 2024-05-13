@@ -22,15 +22,15 @@
           >
             <p
               v-if="isLegacy"
-              @mouseover="showToolitip(6)"
-              @mouseout="hideToolitip(6)"
+              @mouseover="showTooltip(6)"
+              @mouseout="hideTooltip(6)"
             >
               This is a legacy map, you may view the latest map instead.
             </p>
             <p
               v-else-if="isFC"
-              @mouseover="showToolitip(6)"
-              @mouseout="hideToolitip(6)"
+              @mouseover="showTooltip(6)"
+              @mouseout="hideTooltip(6)"
             >
               This map displays the connectivity of individual neurons.
               Specifically, those which align with (parts of) the neuron
@@ -49,7 +49,7 @@
                 SCKAN </a
               >.
             </p>
-            <p v-else @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+            <p v-else @mouseover="showTooltip(6)" @mouseout="hideTooltip(6)">
               This map displays the connectivity of neuron populations.
               Specifically, those from the primarily rat-based
               <a
@@ -71,8 +71,8 @@
               <div
                 class="warning-icon"
                 v-if="displayWarning"
-                @mouseover="showToolitip(6)"
-                @mouseout="hideToolitip(6)"
+                @mouseover="showTooltip(6)"
+                @mouseout="hideTooltip(6)"
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
@@ -100,8 +100,8 @@
             <div
               class="latest-changesicon"
               v-if="displayLatestChanges"
-              @mouseover="showToolitip(7)"
-              @mouseout="hideToolitip(7)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               <el-icon><el-icon-warning-filled /></el-icon>
               <span class="warning-text">What's new?</span>
@@ -151,8 +151,8 @@
               icon="zoomIn"
               class="icon-button zoomIn"
               @click="zoomIn()"
-              @mouseover="showToolitip(0)"
-              @mouseout="hideToolitip(0)"
+              @mouseover="showTooltip(0)"
+              @mouseout="hideTooltip(0)"
             />
           </template>
         </el-popover>
@@ -170,8 +170,8 @@
               icon="zoomOut"
               class="icon-button zoomOut"
               @click="zoomOut()"
-              @mouseover="showToolitip(1)"
-              @mouseout="hideToolitip(1)"
+              @mouseover="showTooltip(1)"
+              @mouseout="hideTooltip(1)"
             />
           </template>
         </el-popover>
@@ -194,8 +194,8 @@
               icon="fitWindow"
               class="icon-button fitWindow"
               @click="resetView()"
-              @mouseover="showToolitip(2)"
-              @mouseout="hideToolitip(2)"
+              @mouseover="showTooltip(2)"
+              @mouseout="hideTooltip(2)"
             />
           </template>
         </el-popover>
@@ -240,8 +240,8 @@
                     v-popover:featuredMarkerPopover
                     class="yellow-star-legend"
                     v-html="yellowstar"
-                    @mouseover="showToolitip(9)"
-                    @mouseout="hideToolitip(9)"
+                    @mouseover="showTooltip(9)"
+                    @mouseout="hideTooltip(9)"
                   ></div>
                 </template>
               </el-popover>
@@ -476,8 +476,8 @@
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showToolitip(8)"
-                @mouseout="hideToolitip(8)"
+                @mouseover="showTooltip(8)"
+                @mouseout="hideTooltip(8)"
               />
             </template>
           </el-popover>
@@ -496,8 +496,8 @@
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showToolitip(3)"
-                @mouseout="hideToolitip(3)"
+                @mouseover="showTooltip(3)"
+                @mouseout="hideTooltip(3)"
               />
             </template>
           </el-popover>
@@ -1212,7 +1212,7 @@ export default {
           this.hoverVisibilities.forEach((item) => {
             item.value = false;
           });
-          this.showToolitip(this.helpModeActiveItem, 200);
+          this.showTooltip(this.helpModeActiveItem, 200);
           this.openFlatmapHelpPopup();
         }, 300);
       } else {
@@ -1229,7 +1229,7 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    showToolitip: function (tooltipNumber, timeout = 500) {
+    showTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
@@ -1243,7 +1243,7 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    hideToolitip: function (tooltipNumber) {
+    hideTooltip: function (tooltipNumber) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
