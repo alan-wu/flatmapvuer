@@ -1,5 +1,5 @@
 <template>
-  <div class="help-mode-dialog">
+  <div class="help-mode-dialog" :class="{'finish': lastItem}">
     <h4>Help Mode</h4>
 
     <template v-if="lastItem">
@@ -61,6 +61,8 @@
     gap: 1rem;
     width: 300px;
     padding: 1rem;
+    font-family: inherit;
+    font-size: 14px;
     background: white;
     box-shadow: 0px 0px 160px 80px rgba(0,0,0,0.5);
     position: absolute;
@@ -68,6 +70,10 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
+
+    &.finish {
+      animation: shake 0.35s;
+    }
 
     h4 {
       color: $app-primary-color;
@@ -84,12 +90,37 @@
     .button {
       color: #fff;
       background-color: $app-primary-color;
+      transform: scale(1);
+      transform-origin: 50% 50%;
+      transition: transform var(--el-transition-duration);
 
       &:hover {
         color: #fff !important;
         background: #ac76c5 !important;
         border: 1px solid #ac76c5 !important;
       }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+
+  @keyframes shake {
+    0% {
+      transform: translate(-50%, -50%) rotate(2deg);
+    }
+    25% {
+      transform: translate(-50%, -50%) rotate(-2deg);
+    }
+    50% {
+      transform: translate(-50%, -50%) rotate(2deg);
+    }
+    75% {
+      transform: translate(-50%, -50%) rotate(-2deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(2deg);
     }
   }
 </style>
