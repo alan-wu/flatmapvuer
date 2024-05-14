@@ -28,6 +28,7 @@
   import {
     ElButton as Button,
   } from 'element-plus';
+  import EventBus from './EventBus';
 
   export default {
     name: 'HelpModeDialog',
@@ -41,12 +42,101 @@
         required: false,
       }
     },
+    mounted: function () {
+      this.toggleHelpModeHighlight(true);
+      // 'shown-tooltip' is emitted from FlatmapVuer component
+      EventBus.on('shown-tooltip', this.toggleTooltipHighlight);
+    },
+    unmounted: function () {
+      this.toggleHelpModeHighlight(false);
+    },
     methods: {
       showNext: function () {
         this.$emit('show-next');
       },
       finishHelpMode: function () {
         this.$emit('finish-help-mode');
+      },
+      toggleTooltipHighlight: function () {
+        this.$nextTick(() => {
+          const activePoppers = document.querySelectorAll('.el-popper:not([style*="none"])');
+          activePoppers.forEach((activePopper) => {
+            if (activePopper.classList.contains('el-fade-in-linear-enter-active')) {
+              this.toggleOpacity(activePopper);
+            }
+          });
+        });
+      },
+      toggleOpacity: function (el) {
+        const prevEl = el.previousElementSibling;
+        const popperId = el.id;
+        const targetPin = document.querySelector(`[aria-describedby="${popperId}"]`);
+        const currentFlatmapEl = this.getCurrentFlatmapContainer();
+        const classNames = ['bottom-right-control', 'settings-group', 'pathway-location', 'beta-popovers'];
+
+        classNames.forEach((className) => {
+          const classNameSelector = '.' + className;
+          const otherEls = currentFlatmapEl.querySelectorAll(classNameSelector);
+          const targetEl = el.closest(classNameSelector);
+
+          otherEls.forEach((otherEl) => {
+            if (otherEl) {
+              if (otherEl !== targetEl) {
+                otherEl.classList.remove('in-help-highlight');
+              } else {
+                otherEl.classList.add('in-help-highlight');
+              }
+
+              // for pathway-location popover
+              if (prevEl && prevEl.classList.contains(className)) {
+                prevEl.classList.add('in-help-highlight');
+              }
+            }
+          });
+
+          // for teleported popover
+          if (targetPin && targetPin.closest(classNameSelector)) {
+            targetPin.closest(classNameSelector).classList.add('in-help-highlight');
+          }
+        });
+      },
+      getCurrentContainer: function () {
+        const multiContainer = this.$parent;
+        const multiContainerEl = multiContainer?.$el || null;
+        return multiContainerEl;
+      },
+      getCurrentFlatmapContainer: function () {
+        const multiContainer = this.$parent;
+        const currentFlatmap = multiContainer?.getCurrentFlatmap() || null;
+        const currentFlatmapEl = currentFlatmap?.$el || null;
+        return currentFlatmapEl;
+      },
+      toggleHelpModeHighlight: function (option) {
+        const multiContainerEl = this.getCurrentContainer();
+        const currentFlatmapEl = this.getCurrentFlatmapContainer();
+        const allHighlightedItems = document.querySelectorAll('.in-help-highlight');
+
+        if (multiContainerEl) {
+          if (option) {
+            multiContainerEl.classList.add('in-help');
+          } else {
+            multiContainerEl.classList.remove('in-help');
+          }
+        }
+
+        if (currentFlatmapEl) {
+          if (option) {
+            currentFlatmapEl.classList.add('in-help');
+          } else {
+            currentFlatmapEl.classList.remove('in-help');
+          }
+        }
+
+        if (!option) {
+          allHighlightedItems.forEach((el) => {
+            el.classList.remove('in-help-highlight');
+          });
+        }
       },
     }
   }
@@ -64,6 +154,8 @@
     font-family: inherit;
     font-size: 14px;
     background: white;
+    border-radius: 4px 4px;
+    border: 1px solid $app-primary-color;
     box-shadow: 0px 0px 160px 80px rgba(0,0,0,0.5);
     position: absolute;
     top: 0;
@@ -73,6 +165,7 @@
 
     &.finish {
       animation: shake 0.35s;
+      animation-delay: 0.7s;
     }
 
     h4 {
@@ -132,5 +225,37 @@
     .options-popover:not([style*="display: none"]) + .multi-container & {
       margin-top: 175px;
     }
+  }
+</style>
+
+<style lang="scss">
+  .multi-container.in-help {
+    background: rgba(0,0,0,0.3);
+  }
+
+  .flatmap-container.in-help {
+    .beta-popovers,
+    .bottom-right-control,
+    .pathway-location,
+    .settings-group,
+    .maplibregl-canvas,
+    .maplibregl-ctrl-minimap {
+      opacity: 0.3;
+    }
+
+    .maplibregl-canvas {
+      pointer-events: none;
+    }
+  }
+
+  .in-help .el-popper:not([style*="none"]) {
+    opacity: 1 !important;
+  }
+
+  .in-help-highlight {
+    opacity: 1 !important;
+    background: white !important;
+    box-shadow: 0px 0px 128px 128px white !important;
+    animation: highlight-area 0.1s;
   }
 </style>
