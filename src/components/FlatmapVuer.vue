@@ -547,6 +547,7 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
+import EventBus from './EventBus';
 
 
 const processFTUs = (parent, key) => {
@@ -1251,6 +1252,10 @@ export default {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true
+          /**
+           * This event is emitted after a tooltip in Flatmap is shown.
+           */
+          EventBus.emit('shown-tooltip');
         }, timeout)
       }
     },
