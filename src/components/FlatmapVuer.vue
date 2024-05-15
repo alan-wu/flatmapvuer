@@ -2468,7 +2468,21 @@ export default {
 
 :deep(.flatmap-popup-popper) {
   .maplibregl-popup-tip {
+    margin-bottom: -1px;
     border-bottom-color: $app-primary-color;
+    position: relative;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-bottom-color: #f3ecf6;
+      position: absolute;
+      top: -9px;
+      left: -10px;
+    }
   }
   .maplibregl-popup-content {
     padding: 6px 4px;
