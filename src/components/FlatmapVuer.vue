@@ -1204,13 +1204,16 @@ export default {
         // this.helpModeActiveIndex += 1;
       }
 
-      if (this.helpModeActiveIndex === lastIndex) {
+      if (!helpMode) {
+        // reset to iniital state
+        this.helpModeActiveIndex = this.helpModeInitialIndex;
+      }
+
+      if (helpMode && this.helpModeActiveIndex === lastIndex) {
         /**
          * This event is emitted when the tooltips in help mode reach the last item.
          */
         this.$emit('help-mode-last-item', true);
-        // reset to iniital state
-        // this.helpModeActiveIndex = this.helpModeInitialIndex;
       }
 
       if (helpMode && toolTipsLength > this.helpModeActiveIndex) {
