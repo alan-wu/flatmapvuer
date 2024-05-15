@@ -698,6 +698,11 @@ export default {
       immediate: true,
       deep: true,
     },
+    helpMode: function (newVal) {
+      if (!newVal) {
+        this.helpModeActiveItem = 0;
+      }
+    }
   },
 }
 </script>
