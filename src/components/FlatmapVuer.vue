@@ -1205,12 +1205,28 @@ export default {
       const lastIndex = toolTipsLength - 1;
       const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
 
-      // skip the unavailable tooltips
       if (activePopoverObj) {
         const popoverRefId = activePopoverObj?.ref;
         const popoverRef = this.$refs[popoverRefId];
 
-        if (!popoverRef) {
+        if (popoverRef) {
+          // Open pathway drawer if the tooltip is inside or beside
+          const { parentElement, nextElementSibling } = popoverRef.$el;
+          const isPathwayContainer = (element) => {
+            return element && (
+              element.classList.contains('pathway-container') ||
+              element.classList.contains('pathway-location')
+            );
+          };
+
+          if (
+            isPathwayContainer(parentElement) ||
+            isPathwayContainer(nextElementSibling)
+          ) {
+            this.drawerOpen = true;
+          }
+        } else {
+          // skip the unavailable tooltips
           this.helpModeActiveIndex += 1;
         }
       }
@@ -1233,8 +1249,6 @@ export default {
         if (this.helpModeActiveIndex > -1) {
           this.closeFlatmapHelpPopup();
 
-          // because some tooltips are inside drawer
-          this.drawerOpen = true;
           // wait for CSS transition
           setTimeout(() => {
             this.inHelp = false;
