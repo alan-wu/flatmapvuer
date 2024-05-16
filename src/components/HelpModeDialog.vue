@@ -57,6 +57,15 @@
     },
     unmounted: function () {
       this.toggleHelpModeHighlight(false);
+      EventBus.off('shown-tooltip', this.toggleTooltipHighlight);
+      EventBus.off('shown-map-tooltip', this.toggleTooltipPinHighlight);
+    },
+    watch: {
+      lastItem: function (isLastItem) {
+        if (isLastItem) {
+          this.toggleTooltipHighlight();
+        }
+      }
     },
     methods: {
       showNext: function () {
@@ -66,10 +75,11 @@
         this.$emit('finish-help-mode');
       },
       toggleTooltipPinHighlight: function () {
+        const currentFlatmapEl = this.getCurrentFlatmapContainer();
         this.resetHighlightedItems();
 
         this.$nextTick(() => {
-          const mapPin = document.querySelector('.maplibregl-marker');
+          const mapPin = currentFlatmapEl.querySelector('.maplibregl-marker');
 
           if (mapPin) {
             mapPin.classList.add('in-help-highlight');

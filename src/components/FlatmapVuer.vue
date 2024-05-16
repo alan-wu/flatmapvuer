@@ -95,6 +95,7 @@
           trigger="manual"
           popper-class="warning-popper flatmap-popper"
           :visible="hoverVisibilities[7].value"
+          ref="whatsNewPopover"
         >
           <template #reference>
             <div
@@ -145,6 +146,7 @@
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[0].value"
+          ref="zoomInPopover"
         >
           <template #reference>
             <map-svg-icon
@@ -164,6 +166,7 @@
           width="70"
           popper-class="flatmap-popper popper-zoomout"
           :visible="hoverVisibilities[1].value"
+          ref="zoomOutPopover"
         >
           <template #reference>
             <map-svg-icon
@@ -183,6 +186,7 @@
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[2].value"
+          ref="zoomFitPopover"
         >
           <div>
             Fit to
@@ -223,6 +227,7 @@
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
+              <template v-if="showStarInLegend">
               <el-popover
                 content="Location of the featured dataset"
                 placement="right"
@@ -231,12 +236,11 @@
                 width="max-content"
                 :offset="-10"
                 popper-class="flatmap-popper flatmap-teleport-popper"
-                :visible="hoverVisibilities[9].value && showStarInLegend"
+                :visible="hoverVisibilities[9].value"
                 ref="featuredMarkerPopover"
               >
                 <template #reference>
                   <div
-                    v-show="showStarInLegend"
                     v-popover:featuredMarkerPopover
                     class="yellow-star-legend"
                     v-html="yellowstar"
@@ -245,6 +249,7 @@
                   ></div>
                 </template>
               </el-popover>
+              </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
                 content="Find these markers for data"
@@ -469,6 +474,7 @@
             placement="right"
             :teleported="false"
             popper-class="flatmap-popper"
+            ref="openMapPopover"
           >
             <template #reference>
               <map-svg-icon
@@ -490,6 +496,7 @@
             :teleported="false"
             trigger="manual"
             popper-class="flatmap-popper"
+            ref="settingsPopover"
           >
             <template #reference>
               <map-svg-icon
@@ -1196,12 +1203,16 @@ export default {
     setHelpMode: function (helpMode) {
       const toolTipsLength = this.hoverVisibilities.length;
       const lastIndex = toolTipsLength - 1;
+      const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
 
-      // this.hoverVisibilities index 9 is star marker
-      // skip if there has no start marker available
-      if (this.helpModeActiveIndex === 9 && !this.showStarInLegend) {
-        // to skip star marker index
-        // this.helpModeActiveIndex += 1;
+      // skip the unavailable tooltips
+      if (activePopoverObj) {
+        const popoverRefId = activePopoverObj?.ref;
+        const popoverRef = this.$refs[popoverRefId];
+
+        if (!popoverRef) {
+          this.helpModeActiveIndex += 1;
+        }
       }
 
       if (!helpMode) {
@@ -1209,7 +1220,7 @@ export default {
         this.helpModeActiveIndex = this.helpModeInitialIndex;
       }
 
-      if (helpMode && this.helpModeActiveIndex === lastIndex) {
+      if (helpMode && this.helpModeActiveIndex >= lastIndex) {
         /**
          * This event is emitted when the tooltips in help mode reach the last item.
          */
@@ -1858,16 +1869,16 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
+        { value: false, ref: 'zoomInPopover' }, // 0
+        { value: false, ref: 'zoomOutPopover' }, // 1
+        { value: false, ref: 'zoomFitPopover' }, // 2
+        { value: false, ref: 'settingsPopover' }, // 3
+        { value: false, ref: 'checkBoxPopover' }, // 4
+        { value: false, ref: 'markerPopover' }, // 5
+        { value: false, ref: 'warningPopover' }, // 6
+        { value: false, ref: 'whatsNewPopover' }, // 7
+        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'featuredMarkerPopover' }, // 9
       ],
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
@@ -1910,8 +1921,10 @@ export default {
     helpModeActiveItem: function () {
       // just take the action from helpModeActiveItem
       // work with local value since the indexing is different
-      this.helpModeActiveIndex += 1;
-      this.setHelpMode(this.helpMode);
+      if (this.helpMode) {
+        this.helpModeActiveIndex += 1;
+        this.setHelpMode(this.helpMode);
+      }
     },
     state: {
       handler: function (state, oldVal) {
