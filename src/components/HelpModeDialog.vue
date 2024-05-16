@@ -79,11 +79,20 @@
         this.resetHighlightedItems();
 
         this.$nextTick(() => {
-          const mapPin = currentFlatmapEl.querySelector('.maplibregl-marker');
+          // Temporary solution to find the position of map marker from popover
+          const mapPins = currentFlatmapEl.querySelectorAll('.maplibregl-marker');
+          const mapPinPopover = currentFlatmapEl.querySelector('.flatmap-popup-popper');
+          const styleVal = mapPinPopover.style.transform;
+          const mapPopoverPosition = this.extractMarkerPosition(styleVal);
 
-          if (mapPin) {
-            mapPin.classList.add('in-help-highlight');
-          }
+          mapPins.forEach((mapPin) => {
+            const mapPinStyleVal = mapPin.style.transform;
+            const mapPinPosition = this.extractMarkerPosition(mapPinStyleVal);
+
+            if (mapPinPosition === mapPopoverPosition) {
+              mapPin.classList.add('in-help-highlight');
+            }
+          });
         });
       },
       toggleTooltipHighlight: function () {
@@ -153,6 +162,19 @@
             el.classList.remove('in-help-highlight');
           });
         }
+      },
+      /**
+       * Temporary solution to find the position of map marker from popover
+       */
+      extractMarkerPosition: function (str) {
+        const translateRegex = /translate\((.*?)\)/g;
+        const matches = str.match(translateRegex);
+        if (!matches) {
+          return '';
+        }
+        const lastMatch = matches[matches.length - 1];
+        const values = lastMatch.slice(10, -1);
+        return values;
       },
     }
   }
