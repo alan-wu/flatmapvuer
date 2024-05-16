@@ -44,8 +44,16 @@
     },
     mounted: function () {
       this.toggleHelpModeHighlight(true);
-      // 'shown-tooltip' is emitted from FlatmapVuer component
+      // For tooltips outside of Flatmap
+      this.toggleTooltipHighlight();
+
+      // The event is emitted from FlatmapVuer component
+      // For tooltips inside Flatmap
       EventBus.on('shown-tooltip', this.toggleTooltipHighlight);
+
+      // The event is emitted from FlatmapVuer component
+      // For tooltips on the map
+      EventBus.on('shown-map-tooltip', this.toggleTooltipPinHighlight);
     },
     unmounted: function () {
       this.toggleHelpModeHighlight(false);
@@ -57,47 +65,45 @@
       finishHelpMode: function () {
         this.$emit('finish-help-mode');
       },
+      toggleTooltipPinHighlight: function () {
+        this.resetHighlightedItems();
+
+        this.$nextTick(() => {
+          const mapPin = document.querySelector('.maplibregl-marker');
+
+          if (mapPin) {
+            mapPin.classList.add('in-help-highlight');
+          }
+        });
+      },
       toggleTooltipHighlight: function () {
+        this.resetHighlightedItems();
+
         this.$nextTick(() => {
           const activePoppers = document.querySelectorAll('.el-popper:not([style*="none"])');
+
           activePoppers.forEach((activePopper) => {
-            if (activePopper.classList.contains('el-fade-in-linear-enter-active')) {
-              this.toggleOpacity(activePopper);
+            const multiFlatmapTooltip = activePopper.classList.contains('flatmap-popper');
+            const flatmapTooltip = activePopper.classList.contains('el-fade-in-linear-enter-active');
+
+            if (multiFlatmapTooltip || flatmapTooltip) {
+              this.toggleHighlight(activePopper);
             }
           });
         });
       },
-      toggleOpacity: function (el) {
-        const prevEl = el.previousElementSibling;
-        const popperId = el.id;
-        const targetPin = document.querySelector(`[aria-describedby="${popperId}"]`);
-        const currentFlatmapEl = this.getCurrentFlatmapContainer();
-        const classNames = ['bottom-right-control', 'settings-group', 'pathway-location', 'beta-popovers'];
+      toggleHighlight: function (activePopper) {
+        const popperId = activePopper?.id || '';
+        const popperTrigger = document.querySelector(`[aria-describedby="${popperId}"]`);
 
-        classNames.forEach((className) => {
-          const classNameSelector = '.' + className;
-          const otherEls = currentFlatmapEl.querySelectorAll(classNameSelector);
-          const targetEl = el.closest(classNameSelector);
-
-          otherEls.forEach((otherEl) => {
-            if (otherEl) {
-              if (otherEl !== targetEl) {
-                otherEl.classList.remove('in-help-highlight');
-              } else {
-                otherEl.classList.add('in-help-highlight');
-              }
-
-              // for pathway-location popover
-              if (prevEl && prevEl.classList.contains(className)) {
-                prevEl.classList.add('in-help-highlight');
-              }
-            }
-          });
-
-          // for teleported popover
-          if (targetPin && targetPin.closest(classNameSelector)) {
-            targetPin.closest(classNameSelector).classList.add('in-help-highlight');
-          }
+        if (popperTrigger) {
+          popperTrigger.classList.add('in-help-highlight');
+        }
+      },
+      resetHighlightedItems: function () {
+        const allHighlightedItems = document.querySelectorAll('.in-help-highlight');
+        allHighlightedItems.forEach((el) => {
+          el.classList.remove('in-help-highlight');
         });
       },
       getCurrentContainer: function () {
@@ -234,15 +240,29 @@
   }
 
   .flatmap-container.in-help {
-    .beta-popovers,
-    .bottom-right-control,
-    .pathway-location,
-    .settings-group,
+    .el-tooltip__trigger,
+    .el-popover {
+      opacity: 0.3;
+    }
+    .pathway-location:has(.in-help-highlight) {
+      opacity: 1;
+
+      .pathway-container {
+        background: transparent;
+      }
+
+      .legends-container,
+      .selections-container {
+        opacity: 0.3;
+      }
+    }
+
     .maplibregl-canvas,
     .maplibregl-ctrl-minimap {
       opacity: 0.3;
     }
 
+    .maplibregl-map,
     .maplibregl-canvas {
       pointer-events: none;
     }
@@ -257,5 +277,10 @@
     background: white !important;
     box-shadow: 0px 0px 128px 128px white !important;
     animation: highlight-area 0.1s;
+
+    &.maplibregl-marker {
+      background: none !important;
+      box-shadow: 0px 0px 128px 128px rgba(255,255,255,0.5) !important;
+    }
   }
 </style>

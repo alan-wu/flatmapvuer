@@ -1317,6 +1317,7 @@ export default {
             anchor: 'top',
             className: 'flatmap-popup-popper',
           })
+          EventBus.emit('shown-map-tooltip');
         }
       }
     },
