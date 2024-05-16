@@ -66,7 +66,7 @@
       @pathway-selection-changed="onSelectionsDataChanged"
       :minZoom="minZoom"
       :helpMode="activeSpecies == key && helpMode"
-      :helpModeActiveItem="(helpModeActiveItem - 1)"
+      :helpModeActiveItem="helpModeActiveItem"
       @help-mode-last-item="onHelpModeLastItem"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
