@@ -76,6 +76,7 @@
       :disableUI="disableUI"
       @open-pubmed-url="onOpenPubmedUrl"
       @pathway-selection-changed="onPathwaySelectionChanged"
+      @flatmapChanged="onFlatmapChanged"
     />
   </div>
 </template>
@@ -166,6 +167,9 @@ export default {
       this.$refs.multi
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
+    },
+    onFlatmapChanged: function () {
+      this.helpMode = false;
     },
     onFinishHelpMode: function () {
       this.helpMode = false;
