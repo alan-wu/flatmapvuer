@@ -44,6 +44,10 @@
         type: Object,
         default: null,
       },
+      currentScaffoldRef: {
+        type: Object,
+        default: null,
+      },
       lastItem: {
         type: Boolean,
         default: false,
@@ -133,6 +137,11 @@
           el.classList.remove('in-help-highlight');
         });
       },
+      getCurrentScaffold: function () {
+        const scaffoldContainer = this.currentScaffoldRef;
+        const scaffoldEl = scaffoldContainer?.$el || null;
+        return scaffoldEl;
+      },
       getCurrentContainer: function () {
         const multiContainer = this.multiflatmapRef;
         const multiContainerEl = multiContainer?.$el || null;
@@ -147,6 +156,7 @@
       toggleHelpModeHighlight: function (option) {
         const multiContainerEl = this.getCurrentContainer();
         const currentFlatmapEl = this.getCurrentFlatmapContainer();
+        const currentScaffoldEl = this.getCurrentScaffold();
         const allHighlightedItems = document.querySelectorAll('.in-help-highlight');
 
         if (multiContainerEl) {
@@ -162,6 +172,14 @@
             currentFlatmapEl.classList.add('in-help');
           } else {
             currentFlatmapEl.classList.remove('in-help');
+          }
+        }
+
+        if (currentScaffoldEl) {
+          if (option) {
+            currentScaffoldEl.classList.add('in-help');
+          } else {
+            currentScaffoldEl.classList.remove('in-help');
           }
         }
 
@@ -277,6 +295,13 @@
 <style lang="scss">
   .multi-container.in-help {
 
+  }
+  .scaffold-container.in-help {
+    background: rgba(0,0,0,0.3);
+
+    canvas {
+      opacity: 0.3;
+    }
   }
 
   .flatmap-container.in-help {
