@@ -5,7 +5,7 @@
     <template v-if="lastItem">
       <p>
         All caught up! <br>
-        Click 'Help mode' to restart.
+        Click 'Help' to restart.
       </p>
       <div>
         <el-button class="button" @click="finishHelpMode">
@@ -36,6 +36,14 @@
       Button,
     },
     props: {
+      multiflatmapRef: {
+        type: Object,
+        default: null,
+      },
+      currentFlatmapRef: {
+        type: Object,
+        default: null,
+      },
       lastItem: {
         type: Boolean,
         default: false,
@@ -82,7 +90,7 @@
           // Temporary solution to find the position of map marker from popover
           const mapPins = currentFlatmapEl.querySelectorAll('.maplibregl-marker');
           const mapPinPopover = currentFlatmapEl.querySelector('.flatmap-popup-popper');
-          const styleVal = mapPinPopover.style.transform;
+          const styleVal = mapPinPopover?.style?.transform || '';
           const mapPopoverPosition = this.extractMarkerPosition(styleVal);
 
           mapPins.forEach((mapPin) => {
@@ -126,13 +134,13 @@
         });
       },
       getCurrentContainer: function () {
-        const multiContainer = this.$parent;
+        const multiContainer = this.multiflatmapRef;
         const multiContainerEl = multiContainer?.$el || null;
         return multiContainerEl;
       },
       getCurrentFlatmapContainer: function () {
-        const multiContainer = this.$parent;
-        const currentFlatmap = multiContainer?.getCurrentFlatmap() || null;
+        const multiContainer = this.multiflatmapRef;
+        const currentFlatmap = this.currentFlatmapRef || multiContainer?.getCurrentFlatmap();
         const currentFlatmapEl = currentFlatmap?.$el || null;
         return currentFlatmapEl;
       },
@@ -257,10 +265,10 @@
 
   // Just for App.vue with options popover on top
   .help-mode-dialog {
-    .options-popover + .multi-container & {
+    .options-popover + .multi-container + & {
       margin-top: 40px;
     }
-    .options-popover:not([style*="display: none"]) + .multi-container & {
+    .options-popover:not([style*="display: none"]) + .multi-container + & {
       margin-top: 175px;
     }
   }
@@ -268,10 +276,12 @@
 
 <style lang="scss">
   .multi-container.in-help {
-    background: rgba(0,0,0,0.3);
+
   }
 
   .flatmap-container.in-help {
+    background: rgba(0,0,0,0.3);
+
     .el-tooltip__trigger,
     .el-popover {
       opacity: 0.3;
