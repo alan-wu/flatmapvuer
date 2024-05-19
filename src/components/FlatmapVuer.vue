@@ -1283,7 +1283,7 @@ export default {
           /**
            * This event is emitted after a tooltip in Flatmap is shown.
            */
-          EventBus.emit('shown-tooltip');
+          this.$emit('shown-tooltip');
         }, timeout)
       }
     },
@@ -1293,12 +1293,12 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    hideTooltip: function (tooltipNumber) {
+    hideTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = false
-        }, 500)
+        }, timeout)
       }
     },
     /**
@@ -1342,7 +1342,7 @@ export default {
             anchor: 'top',
             className: 'flatmap-popup-popper',
           })
-          EventBus.emit('shown-map-tooltip');
+          this.$emit('shown-map-tooltip');
         }
       }
     },

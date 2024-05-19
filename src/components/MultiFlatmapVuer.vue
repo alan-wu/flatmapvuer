@@ -68,18 +68,14 @@
       :helpMode="activeSpecies == key && helpMode"
       :helpModeActiveItem="helpModeActiveItem"
       @help-mode-last-item="onHelpModeLastItem"
+      @shown-tooltip="onTooltipShown"
+      @shown-map-tooltip="onMapTooltipShown"
       :renderAtMounted="renderAtMounted"
       :displayMinimap="displayMinimap"
       :showStarInLegend="showStarInLegend"
       style="height: 100%"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
-    />
-    <HelpModeDialog
-      v-if="helpMode"
-      :lastItem="helpModeLastItem"
-      @show-next="onShowNext"
-      @finish-help-mode="onFinishHelpMode"
     />
   </div>
 </template>
@@ -97,7 +93,6 @@ import {
   ElRow as Row,
   ElPopover as Popover,
 } from 'element-plus'
-import HelpModeDialog from './HelpModeDialog.vue';
 
 const TAXON_UUID = {
   'NCBITaxon:10114': '01fedbf9-d783-509c-a10c-827941ab13da',
@@ -119,7 +114,6 @@ export default {
     Select,
     Popover,
     FlatmapVuer,
-    HelpModeDialog,
   },
   beforeMount() {
     //List for resolving the promise in initialise
@@ -489,29 +483,8 @@ export default {
      */
     onHelpModeLastItem: function (isLastItem) {
       if (isLastItem) {
-        this.helpModeLastItem = true;
+        this.$emit('help-mode-last-item', true);
       }
-    },
-    /**
-     * @vuese
-     * Function to show next tooltip for help mode
-     */
-    onShowNext: function () {
-      this.helpModeActiveItem += 1;
-    },
-    /**
-     * @vuese
-     * Function to finish help mode
-     */
-    onFinishHelpMode: function () {
-      /**
-       * This event is emitted when the help mode is finished.
-       */
-      this.$emit('finish-help-mode');
-
-      // reset help mode to default values
-      this.helpModeActiveItem = 0;
-      this.helpModeLastItem = false;
     },
   },
   props: {
@@ -541,6 +514,20 @@ export default {
      * The option to show tooltips for help mode.
      */
     helpMode: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The active item index of help mode.
+     */
+     helpModeActiveItem: {
+      type: Number,
+      default: 0,
+    },
+    /**
+     * The last item of help mode.
+     */
+     helpModeLastItem: {
       type: Boolean,
       default: false,
     },
@@ -686,8 +673,6 @@ export default {
       activeSpecies: undefined,
       speciesList: {},
       requireInitialisation: true,
-      helpModeActiveItem: 0,
-      helpModeLastItem: false,
     }
   },
   watch: {
@@ -698,11 +683,6 @@ export default {
       immediate: true,
       deep: true,
     },
-    helpMode: function (newVal) {
-      if (!newVal) {
-        this.helpModeActiveItem = 0;
-      }
-    }
   },
 }
 </script>
