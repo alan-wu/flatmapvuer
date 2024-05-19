@@ -71,6 +71,8 @@
       :helpMode="helpMode"
       :helpModeActiveItem="helpModeActiveItem"
       @help-mode-last-item="onHelpModeLastItem"
+      @shown-tooltip="onTooltipShown"
+      @shown-map-tooltip="onMapTooltipShown"
       :displayMinimap="true"
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
@@ -104,6 +106,7 @@ import {
   ElRow as Row,
 } from 'element-plus'
 import './icons/mapicon-species-style.css'
+import EventBus from './components/EventBus';
 
 export default {
   name: 'app',
@@ -195,6 +198,12 @@ export default {
       // reset help mode to default values
       this.helpModeActiveItem = 0;
       this.helpModeLastItem = false;
+    },
+    onTooltipShown: function () {
+      EventBus.emit('shown-tooltip');
+    },
+    onMapTooltipShown: function () {
+      EventBus.emit('shown-map-tooltip');
     },
   },
   data: function () {

@@ -486,6 +486,26 @@ export default {
         this.$emit('help-mode-last-item', true);
       }
     },
+    /**
+     * @vuese
+     * Function to emit event after a tooltip is shown.
+     */
+    onTooltipShown: function () {
+      /**
+       * This event is emitted after a tooltip in Flatmap is shown.
+       */
+      this.$emit('shown-tooltip');
+    },
+    /**
+     * @vuese
+     * Function to emit event after a tooltip on the map is shown.
+     */
+    onMapTooltipShown: function () {
+      /**
+       * This event is emitted after a tooltip on Flatmap's map is shown.
+       */
+      this.$emit('shown-map-tooltip');
+    },
   },
   props: {
     /**

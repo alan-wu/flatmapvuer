@@ -1342,6 +1342,9 @@ export default {
             anchor: 'top',
             className: 'flatmap-popup-popper',
           })
+          /**
+           * This event is emitted after a tooltip on Flatmap's map is shown.
+           */
           this.$emit('shown-map-tooltip');
         }
       }
