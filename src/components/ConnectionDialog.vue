@@ -32,7 +32,7 @@
           </el-col>
           <el-col :span="4" v-if="key === tooltipId">
             <el-icon>
-              <el-icon-circle-close @click="handleTooltipClose" />
+              <el-icon-circle-close @click="handleTooltipClose(key)" />
             </el-icon>
           </el-col>
         </el-row>
@@ -84,9 +84,9 @@ export default {
       this.tooltipId = value;
       this.$emit("showFeatureTooltip", value);
     },
-    handleTooltipClose: function () {
+    handleTooltipClose: function (value) {
       this.tooltipId = undefined;
-      this.$emit("hideFeatureTooltip", true);
+      this.$emit("hideFeatureTooltip", value);
     },
   },
 };

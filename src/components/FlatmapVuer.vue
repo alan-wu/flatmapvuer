@@ -157,8 +157,8 @@ Please use `const` to assign meaningful names to them...
         @dialogDisplay="connectionDialogDisplay"
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
-        @showFeatureTooltip="displayConnectedFeatureTooltip"
-        @hideFeatureTooltip="closeTooltip"
+        @showFeatureTooltip="showConnectedFeatureTooltip"
+        @hideFeatureTooltip="hideConnectedFeatureTooltip"
         @connection="(display) => connectionDisplay = display"
       />
 
@@ -762,13 +762,41 @@ export default {
     },
     /**
      * @vuese
-     * Function to display connected features' tooltip for drawn connectivity.
+     * Function to show connected features' tooltip for drawn connectivity.
      * @arg id
      */
-    displayConnectedFeatureTooltip: function (id) {
+    showConnectedFeatureTooltip: function (id) {
       if (this.mapImp) {
-        const data = this.mapImp.featureProperties(id)
-        this.checkAndCreatePopups({ feature: data })
+        // if (this.inDrawing && this.annotationEntry) {
+        //   this.rollbackAnnotationEvent()
+        // }
+        const numericId = Number(id)
+        if (numericId) {
+          const data = this.mapImp.featureProperties(numericId)
+          this.checkAndCreatePopups({ feature: data })
+        } else {
+          this.closeTooltip()
+        //   const drawnId = id.replace(' ', '')         
+        //   this.changeAnnotationDrawMode({
+        //     mode: 'direct_select',
+        //     options: { featureId: drawnId }
+        //   })
+        //   this.modifyAnnotationFeature()
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to hide connected features' tooltip for drawn connectivity.
+     * @arg id
+     */
+    hideConnectedFeatureTooltip: function (id) {
+      // const numericId = Number(id)
+      if (this.mapImp) {
+        this.closeTooltip()
+        // if (!numericId) {
+        //   this.rollbackAnnotationEvent()
+        // }
       }
     },
     /**
@@ -1443,7 +1471,9 @@ export default {
                   let nodeLabel = data.label ? data.label : `Feature ${data.id}`
                   // only the linestring will have connection at the current stage
                   if (this.activeDrawTool === 'LineString') {
-                    this.connectionEntry[data.featureId] = Object.assign({label: nodeLabel},
+                    const key = data.featureId ? data.featureId : data.id
+                    // add space before key to make sure properties follows adding order
+                    this.connectionEntry[` ${key}`] = Object.assign({label: nodeLabel},
                       Object.fromEntries(
                         Object.entries(data)
                               .filter(([key]) => ['featureId', 'models'].includes(key))
