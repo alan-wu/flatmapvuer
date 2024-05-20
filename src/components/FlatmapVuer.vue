@@ -766,16 +766,20 @@ export default {
      */
     showConnectedFeatureTooltip: function (id) {
       if (this.mapImp) {
-        const numericId = Number(id)
-        let payload = { feature: {} }
-        if (numericId) {
-          const data = this.mapImp.featureProperties(numericId)
-          payload.feature = data
+        if (id) {
+          const numericId = Number(id)
+          let payload = { feature: {} }
+          if (numericId) {
+            const data = this.mapImp.featureProperties(numericId)
+            payload.feature = data
+          } else {
+            const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === id.replace(' ', ''))[0]
+            payload.feature.feature = drawnFeature
+          }
+          this.checkAndCreatePopups(payload)
         } else {
-          const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === id.replace(' ', ''))[0]
-          payload.feature.feature = drawnFeature
+          this.closeTooltip()
         }
-        this.checkAndCreatePopups(payload)
       }
     },
     /**
@@ -1365,9 +1369,8 @@ export default {
       // Popup closed will trigger aborted event this is used to control the tooltip
       if (data.type === 'aborted') {
         // Rollback drawing when no new annotation submitted
-        if (!this.featureAnnotationSubmitted && this.annotationEntry.type !== 'created') {
-          this.rollbackAnnotationEvent()
-        } else this.featureAnnotationSubmitted = false
+        if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
+        else this.featureAnnotationSubmitted = false
       } else if (data.type === 'modeChanged') {
         // 'modeChanged' event is before 'created' event
         if (data.feature.mode.startsWith('draw_')) {

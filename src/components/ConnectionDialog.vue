@@ -26,7 +26,10 @@
         <b><span>Related Features</span></b>
         <el-row v-for="(value, key) in connectionEntry" :key="key">
           <el-col :span="20">
-            <el-card shadow="hover" @click="handleTooltipOpen(key)">
+            <el-card
+              :shadow="activeShadow(key)"
+              @click="handleTooltipOpen(key)"
+            >
               <span>{{ capitalise(value.label) }}</span>
             </el-card>
           </el-col>
@@ -77,12 +80,18 @@ export default {
     },
   },
   methods: {
+    activeShadow: function (value) {
+      if (this.inDrawing && !Number(value)) return "never";
+      return "hover";
+    },
     capitalise: function (label) {
       return label[0].toUpperCase() + label.slice(1);
     },
     handleTooltipOpen: function (value) {
       this.tooltipId = value;
-      this.$emit("showFeatureTooltip", value);
+      // temp solution, not allow to check drawn feature while drawing
+      if (this.inDrawing && !Number(value)) this.tooltipId = undefined;
+      this.$emit("showFeatureTooltip", this.tooltipId);
     },
     handleTooltipClose: function (value) {
       this.tooltipId = undefined;
