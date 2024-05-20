@@ -107,7 +107,6 @@ import {
   ElRow as Row,
 } from 'element-plus'
 import './icons/mapicon-species-style.css'
-import EventBus from './components/EventBus';
 
 export default {
   name: 'app',
