@@ -79,7 +79,7 @@
        * This function must be called on 'shown-map-tooltip' event.
        */
       toggleTooltipPinHighlight: function () {
-        const currentFlatmapEl = this.getCurrentFlatmapContainer();
+        const currentFlatmapEl = this.getCurrentFlatmap();
         this.resetHighlightedItems();
 
         this.$nextTick(() => {
@@ -133,32 +133,29 @@
         });
       },
       getCurrentScaffold: function () {
-        const scaffoldContainer = this.scaffoldRef;
-        const scaffoldEl = scaffoldContainer?.$el || null;
+        const scaffoldEl = this.scaffoldRef?.$el || null;
         return scaffoldEl;
       },
-      getCurrentContainer: function () {
-        const multiContainer = this.multiflatmapRef;
-        const multiContainerEl = multiContainer?.$el || null;
-        return multiContainerEl;
+      getCurrentMultiflatmap: function () {
+        const multiflatmapEl = this.multiflatmapRef?.$el || null;
+        return multiflatmapEl;
       },
-      getCurrentFlatmapContainer: function () {
-        const multiContainer = this.multiflatmapRef;
-        const currentFlatmap = this.flatmapRef || multiContainer?.getCurrentFlatmap();
-        const currentFlatmapEl = currentFlatmap?.$el || null;
-        return currentFlatmapEl;
+      getCurrentFlatmap: function () {
+        const flatmap = this.flatmapRef || this.multiflatmapRef?.getCurrentFlatmap();
+        const flatmapEl = flatmap?.$el || null;
+        return flatmapEl;
       },
       toggleHelpModeHighlight: function (option) {
-        const multiContainerEl = this.getCurrentContainer();
-        const currentFlatmapEl = this.getCurrentFlatmapContainer();
+        const currentMultiflatmapEl = this.getCurrentMultiflatmap();
+        const currentFlatmapEl = this.getCurrentFlatmap();
         const currentScaffoldEl = this.getCurrentScaffold();
         const allHighlightedItems = document.querySelectorAll('.in-help-highlight');
 
-        if (multiContainerEl) {
+        if (currentMultiflatmapEl) {
           if (option) {
-            multiContainerEl.classList.add('in-help');
+            currentMultiflatmapEl.classList.add('in-help');
           } else {
-            multiContainerEl.classList.remove('in-help');
+            currentMultiflatmapEl.classList.remove('in-help');
           }
         }
 
