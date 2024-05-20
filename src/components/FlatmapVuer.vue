@@ -610,7 +610,6 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
-import ConnectionDialog from './ConnectionDialog.vue'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import DrawTool from './DrawTool.vue'
@@ -767,22 +766,16 @@ export default {
      */
     showConnectedFeatureTooltip: function (id) {
       if (this.mapImp) {
-        // if (this.inDrawing && this.annotationEntry) {
-        //   this.rollbackAnnotationEvent()
-        // }
         const numericId = Number(id)
+        let payload = { feature: {} }
         if (numericId) {
           const data = this.mapImp.featureProperties(numericId)
-          this.checkAndCreatePopups({ feature: data })
+          payload.feature = data
         } else {
-          this.closeTooltip()
-        //   const drawnId = id.replace(' ', '')         
-        //   this.changeAnnotationDrawMode({
-        //     mode: 'direct_select',
-        //     options: { featureId: drawnId }
-        //   })
-        //   this.modifyAnnotationFeature()
+          const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === id.replace(' ', ''))[0]
+          payload.feature.feature = drawnFeature
         }
+        this.checkAndCreatePopups(payload)
       }
     },
     /**
@@ -791,12 +784,9 @@ export default {
      * @arg id
      */
     hideConnectedFeatureTooltip: function (id) {
-      // const numericId = Number(id)
       if (this.mapImp) {
+        // const numericId = Number(id)
         this.closeTooltip()
-        // if (!numericId) {
-        //   this.rollbackAnnotationEvent()
-        // }
       }
     },
     /**
@@ -1375,8 +1365,9 @@ export default {
       // Popup closed will trigger aborted event this is used to control the tooltip
       if (data.type === 'aborted') {
         // Rollback drawing when no new annotation submitted
-        if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
-        else this.featureAnnotationSubmitted = false
+        if (!this.featureAnnotationSubmitted && this.annotationEntry.type !== 'created') {
+          this.rollbackAnnotationEvent()
+        } else this.featureAnnotationSubmitted = false
       } else if (data.type === 'modeChanged') {
         // 'modeChanged' event is before 'created' event
         if (data.feature.mode.startsWith('draw_')) {
@@ -1575,7 +1566,7 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            if (this.inDrawing || this.activeDrawMode) {
+            if (this.inDrawing || this.activeDrawMode || this.connectionDisplay) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
               if (this.inDrawing) this.createConnectivityBody()
