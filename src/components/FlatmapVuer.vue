@@ -231,6 +231,7 @@ Please use `const` to assign meaningful names to them...
         placement="right"
         :teleported="false"
         trigger="manual"
+        :offset="-18"
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
@@ -251,10 +252,12 @@ Please use `const` to assign meaningful names to them...
               <el-popover
                 content="Location of the featured dataset"
                 placement="right"
-                :teleported="false"
-                trigger="hover"
-                popper-class="flatmap-popper popper-bump-right"
-                :visible="hoverVisibilities[9].value"
+                :teleported="true"
+                trigger="manual"
+                width="max-content"
+                :offset="-10"
+                popper-class="flatmap-popper flatmap-teleport-popper"
+                :visible="hoverVisibilities[9].value && showStarInLegend"
                 ref="featuredMarkerPopover"
               >
                 <template #reference>
@@ -263,6 +266,8 @@ Please use `const` to assign meaningful names to them...
                     v-popover:featuredMarkerPopover
                     class="yellow-star-legend"
                     v-html="yellowstar"
+                    @mouseover="showToolitip(9)"
+                    @mouseout="hideToolitip(9)"
                   ></div>
                 </template>
               </el-popover>
@@ -271,8 +276,9 @@ Please use `const` to assign meaningful names to them...
                 content="Find these markers for data"
                 placement="right"
                 :teleported="false"
+                width="max-content"
                 trigger="manual"
-                popper-class="flatmap-popper popper-bump-right"
+                popper-class="flatmap-popper"
                 :visible="hoverVisibilities[5].value"
                 ref="markerPopover"
               >
@@ -302,6 +308,7 @@ Please use `const` to assign meaningful names to them...
                 identifierKey="key"
                 :selections="centreLines"
                 @changed="centreLinesSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 ref="centrelinesSelection"
                 key="centrelinesSelection"
               />
@@ -313,6 +320,7 @@ Please use `const` to assign meaningful names to them...
                   identifierKey="key"
                   :selections="sckanDisplay"
                   @changed="sckanSelected"
+                  @selections-data-changed="onSelectionsDataChanged"
                   @checkAll="checkAllSCKAN"
                   ref="skcanSelection"
                   key="skcanSelection"
@@ -324,6 +332,7 @@ Please use `const` to assign meaningful names to them...
                   identifierKey="id"
                   :selections="layers"
                   @changed="layersSelected"
+                  @selections-data-changed="onSelectionsDataChanged"
                   @checkAll="checkAllLayers"
                   ref="layersSelection"
                   key="layersSelection"
@@ -336,6 +345,7 @@ Please use `const` to assign meaningful names to them...
                 identifierKey="taxon"
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
@@ -348,6 +358,7 @@ Please use `const` to assign meaningful names to them...
                 colourStyle="line"
                 :selections="pathways"
                 @changed="pathwaysSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllPathways"
                 ref="pathwaysSelection"
                 key="pathwaysSelection"
@@ -1179,6 +1190,9 @@ export default {
         this.mapImp.enableCentrelines(payload.value)
       }
     },
+    onSelectionsDataChanged: function (data) {
+      this.$emit('pathway-selection-changed', data);
+    },
     /**
      * // Currently not in use
      * Function to show or hide paths valid in SCKAN
@@ -1688,11 +1702,16 @@ export default {
      */
     setHelpMode: function (helpMode) {
       if (helpMode) {
-        this.inHelp = true
-        this.hoverVisibilities.forEach((item) => {
-          item.value = true
-        })
-        this.openFlatmapHelpPopup()
+        // because some tooltips are inside drawer
+        this.drawerOpen = true;
+        // wait for CSS transition
+        setTimeout(() => {
+          this.inHelp = true;
+          this.hoverVisibilities.forEach((item) => {
+            item.value = true;
+          });
+          this.openFlatmapHelpPopup();
+        }, 300);
       } else {
         this.inHelp = false
         this.hoverVisibilities.forEach((item) => {
@@ -2419,6 +2438,14 @@ export default {
   font-size: 25px;
 }
 
+.warning-icon,
+.latest-changesicon {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 5px;
+}
+
 .warning-icon {
   color: $warning;
 
@@ -2443,6 +2470,7 @@ export default {
 }
 
 .latest-changesicon {
+  margin-top: 5px;
   color: $success;
 
   &:hover {
@@ -2464,8 +2492,7 @@ export default {
 .pathway-location {
   position: absolute;
   bottom: 0px;
-  transition: all 1s ease;
-  z-index: 8;
+  transition: all var(--el-transition-duration);
   &.open {
     left: 0px;
   }
@@ -2492,8 +2519,7 @@ export default {
   background: #ffffff;
   overflow-x: hidden;
   scrollbar-width: thin;
-
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     opacity: 1;
     position: relative;
@@ -2514,11 +2540,15 @@ export default {
 }
 
 .flatmap-marker-help {
-  display: inline-block;
-}
+  display: block;
+  width: max-content;
+  margin: 0.5rem;
 
-:deep(.popper-bump-right) {
-  left: 30px;
+  :deep(.flatmap-marker svg) {
+    display: block;
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .el-dropdown-link {
@@ -2718,15 +2748,19 @@ export default {
 }
 
 .yellow-star-legend {
-  width: 130px;
-  cursor: pointer;
+  display: block;
+  width: max-content;
+  cursor: default;
+
+  :deep(svg) {
+    display: block;
+  }
 }
 
 .settings-group {
   bottom: 16px;
   position: absolute;
-  transition: all 1s ease;
-  z-index: 10;
+  transition: all var(--el-transition-duration);
   &.open {
     left: 322px;
   }
@@ -2846,7 +2880,7 @@ export default {
       width: 300px !important;
     }
   }
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.shrink {
     transform: scale(0.5);
     transform: scale(0.5);
@@ -2863,7 +2897,7 @@ export default {
   width: 20px;
   height: 14px;
   z-index: 9;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.shrink {
     transform: rotate(0deg);
   }
@@ -2973,7 +3007,6 @@ export default {
     font-weight: 600;
     margin-top: 12px;
     color: $app-primary-color;
-    transition-delay: 0.9s;
   }
   &.open {
     i {
@@ -3126,6 +3159,26 @@ export default {
   --el-color-primary-light-5: #CD99E5;
   --el-color-primary-light-9: #F3E6F9;
   --el-color-primary-dark-2: var(--el-color-primary);
+}
+
+.flatmap-teleport-popper {
+  &.flatmap-popper.el-popper {
+    padding: 6px 4px;
+    font-family: Asap, sans-serif;
+    font-size: 12px;
+    color: rgb(48, 49, 51);
+    background-color: #f3ecf6;
+    border: 1px solid $app-primary-color;
+    white-space: nowrap;
+    min-width: unset;
+
+    .el-popper__arrow {
+      &:before {
+        border-color: $app-primary-color;
+        background-color: #f3ecf6;
+      }
+    }
+  }
 }
 
 </style>
