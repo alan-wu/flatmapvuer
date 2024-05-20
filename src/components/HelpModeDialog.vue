@@ -304,6 +304,7 @@
     }
   }
 
+  .scaffold-container.in-help,
   .flatmap-container.in-help {
     background: rgba(0,0,0,0.3);
 
