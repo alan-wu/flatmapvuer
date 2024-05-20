@@ -1725,12 +1725,12 @@ export default {
       default: false,
     },
     /**
-     * The initial index number for help mode tooltips
-     * minus two tooltips which are not in `hoverVisibilities`
+     * The initial index number for help mode tooltips.
+     * Set negative (e.g. -2) if there are other tooltips outside of `hoverVisibilities`.
      */
     helpModeInitialIndex: {
       type: Number,
-      default: -2,
+      default: 0,
     },
     /**
      * The option to create map on component mounted.

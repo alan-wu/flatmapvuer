@@ -40,11 +40,11 @@
         type: Object,
         default: null,
       },
-      currentFlatmapRef: {
+      flatmapRef: {
         type: Object,
         default: null,
       },
-      currentScaffoldRef: {
+      scaffoldRef: {
         type: Object,
         default: null,
       },
@@ -138,7 +138,7 @@
         });
       },
       getCurrentScaffold: function () {
-        const scaffoldContainer = this.currentScaffoldRef;
+        const scaffoldContainer = this.scaffoldRef;
         const scaffoldEl = scaffoldContainer?.$el || null;
         return scaffoldEl;
       },
@@ -149,7 +149,7 @@
       },
       getCurrentFlatmapContainer: function () {
         const multiContainer = this.multiflatmapRef;
-        const currentFlatmap = this.currentFlatmapRef || multiContainer?.getCurrentFlatmap();
+        const currentFlatmap = this.flatmapRef || multiContainer?.getCurrentFlatmap();
         const currentFlatmapEl = currentFlatmap?.$el || null;
         return currentFlatmapEl;
       },

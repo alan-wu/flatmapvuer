@@ -67,6 +67,7 @@
       :minZoom="minZoom"
       :helpMode="activeSpecies == key && helpMode"
       :helpModeActiveItem="helpModeActiveItem"
+      :helpModeInitialIndex="-2"
       @help-mode-last-item="onHelpModeLastItem"
       @shown-tooltip="onTooltipShown"
       @shown-map-tooltip="onMapTooltipShown"
