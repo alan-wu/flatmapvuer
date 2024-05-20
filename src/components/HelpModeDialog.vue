@@ -319,6 +319,7 @@
         background: transparent;
       }
 
+      .container,
       .legends-container,
       .selections-container {
         opacity: 0.3;
