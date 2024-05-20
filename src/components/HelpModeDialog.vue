@@ -28,7 +28,6 @@
   import {
     ElButton as Button,
   } from 'element-plus';
-  import EventBus from './EventBus';
 
   export default {
     name: 'HelpModeDialog',
@@ -58,19 +57,9 @@
       this.toggleHelpModeHighlight(true);
       // For tooltips outside of Flatmap
       this.toggleTooltipHighlight();
-
-      // The event is emitted from FlatmapVuer component
-      // For tooltips inside Flatmap
-      EventBus.on('shown-tooltip', this.toggleTooltipHighlight);
-
-      // The event is emitted from FlatmapVuer component
-      // For tooltips on the map
-      EventBus.on('shown-map-tooltip', this.toggleTooltipPinHighlight);
     },
     unmounted: function () {
       this.toggleHelpModeHighlight(false);
-      EventBus.off('shown-tooltip', this.toggleTooltipHighlight);
-      EventBus.off('shown-map-tooltip', this.toggleTooltipPinHighlight);
     },
     watch: {
       lastItem: function (isLastItem) {
@@ -86,6 +75,9 @@
       finishHelpMode: function () {
         this.$emit('finish-help-mode');
       },
+      /**
+       * This function must be called on 'shown-map-tooltip' event.
+       */
       toggleTooltipPinHighlight: function () {
         const currentFlatmapEl = this.getCurrentFlatmapContainer();
         this.resetHighlightedItems();
@@ -107,6 +99,9 @@
           });
         });
       },
+      /**
+       * This function must be called on 'shown-tooltip' event.
+       */
       toggleTooltipHighlight: function () {
         this.resetHighlightedItems();
 

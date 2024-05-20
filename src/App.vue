@@ -84,6 +84,7 @@
 
     <HelpModeDialog
       v-if="helpMode"
+      ref="multiflatmapHelp"
       :multiflatmapRef="multiflatmapRef"
       :lastItem="helpModeLastItem"
       @show-next="onHelpModeShowNext"
@@ -200,10 +201,14 @@ export default {
       this.helpModeLastItem = false;
     },
     onTooltipShown: function () {
-      EventBus.emit('shown-tooltip');
+      if (this.$refs.multi && this.$refs.multiflatmapHelp) {
+        this.$refs.multiflatmapHelp.toggleTooltipHighlight();
+      }
     },
     onMapTooltipShown: function () {
-      EventBus.emit('shown-map-tooltip');
+      if (this.$refs.multi && this.$refs.multiflatmapHelp) {
+        this.$refs.multiflatmapHelp.toggleTooltipPinHighlight();
+      }
     },
   },
   data: function () {
