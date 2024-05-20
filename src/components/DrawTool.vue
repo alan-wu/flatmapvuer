@@ -461,6 +461,7 @@ export default {
 .drawEdit,
 .drawConnection {
   padding: 4px;
+  color: var(--el-color-primary-light-5) !important;
 }
 
 .icon-button {
@@ -478,7 +479,7 @@ export default {
 }
 
 .iconSelected {
-  color: var(--el-color-primary-light-5) !important;
+  color: var(--el-color-primary) !important;
 }
 
 .inactive {
