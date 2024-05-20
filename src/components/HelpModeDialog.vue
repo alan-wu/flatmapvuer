@@ -293,12 +293,12 @@
 </style>
 
 <style lang="scss">
-  .multi-container.in-help {
-
-  }
-  .scaffold-container.in-help {
+  .scaffold-container.in-help,
+  .flatmap-container.in-help {
     background: rgba(0,0,0,0.3);
+  }
 
+  .scaffold-container.in-help {
     canvas {
       opacity: 0.3;
     }
@@ -306,12 +306,11 @@
 
   .scaffold-container.in-help,
   .flatmap-container.in-help {
-    background: rgba(0,0,0,0.3);
-
     .el-tooltip__trigger,
     .el-popover {
       opacity: 0.3;
     }
+
     .pathway-location:has(.in-help-highlight) {
       opacity: 1;
 
