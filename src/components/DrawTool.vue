@@ -262,7 +262,7 @@ export default {
   watch: {
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.setHelpMode(newVal)
+        this.setHelpMode(newVal);
       }
     },
     activeDrawTool: function () {
@@ -302,24 +302,38 @@ export default {
   },
   methods: {
     drawToolEvent: function (type) {
-      if (type === 'Point') {
-        const point = this.flatmapCanvas.querySelector('.mapbox-gl-draw_point')
-        point.click()
-        this.activeTool = point.classList.contains('active') ? 'Point' : undefined
-      } else if (type === 'LineString') {
-        const line = this.flatmapCanvas.querySelector('.mapbox-gl-draw_line')
-        line.click()
-        this.activeTool = line.classList.contains('active') ? 'LineString' : undefined
-      } else if (type === 'Polygon') {
-        const polygon = this.flatmapCanvas.querySelector('.mapbox-gl-draw_polygon')
-        polygon.click()
-        this.activeTool = polygon.classList.contains('active') ? 'Polygon' : undefined
+      if (!this.activeDrawMode && !this.connectionDisplay) {
+        if (type === "Point") {
+          const point = this.flatmapCanvas.querySelector(
+            ".mapbox-gl-draw_point"
+          );
+          point.click();
+          this.activeTool = point.classList.contains("active")
+            ? "Point"
+            : undefined;
+        } else if (type === "LineString") {
+          const line = this.flatmapCanvas.querySelector(".mapbox-gl-draw_line");
+          line.click();
+          this.activeTool = line.classList.contains("active")
+            ? "LineString"
+            : undefined;
+        } else if (type === "Polygon") {
+          const polygon = this.flatmapCanvas.querySelector(
+            ".mapbox-gl-draw_polygon"
+          );
+          polygon.click();
+          this.activeTool = polygon.classList.contains("active")
+            ? "Polygon"
+            : undefined;
+        }
+        this.$emit("drawToolbarEvent", this.activeTool);
       }
-      this.$emit("drawToolbarEvent", this.activeTool);
     },
     drawModeEvent: function (type) {
-      this.activeMode = type
-      this.$emit("drawToolbarEvent", this.activeMode);
+      if (!this.activeDrawTool) {
+        this.activeMode = type;
+        this.$emit("drawToolbarEvent", this.activeMode);
+      }
     },
     drawIconCssHacks: function () {
       // set tool/mode icon status
@@ -409,15 +423,15 @@ export default {
     },
     setHelpMode: function (helpMode) {
       if (helpMode) {
-        this.inHelp = true
+        this.inHelp = true;
         this.hoverVisibilities.forEach((item) => {
-          item.value = true
-        })
+          item.value = true;
+        });
       } else {
-        this.inHelp = false
+        this.inHelp = false;
         this.hoverVisibilities.forEach((item) => {
-          item.value = false
-        })
+          item.value = false;
+        });
       }
     },
   },
