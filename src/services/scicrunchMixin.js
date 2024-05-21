@@ -63,6 +63,7 @@ export default {
               },
               title: 'Image',
               anatomy: result.organs,
+              species: result.organisms,
               datasetId: datasetId,
               datasetVersion: datasetVersion,
               link: bioImage.share_link,

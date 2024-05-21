@@ -31,6 +31,7 @@ declare module 'vue' {
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
+    ElTag: typeof import('element-plus/es')['ElTag']
     ElTree: typeof import('element-plus/es')['ElTree']
     ExternalResourceCard: typeof import('./components/ExternalResourceCard.vue')['default']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']

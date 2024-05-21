@@ -1,5 +1,8 @@
 <template>
   <div class="main" v-loading="loading">
+      <!-- <div class="block" v-if="entry.title">
+        <span class="title">{{ capitalise(entry.title) }}</span>
+      </div> -->
       <div class="block">
         <el-button
           class="button"
@@ -8,8 +11,20 @@
           <span v-if="showImages">Hide images</span>
           <span v-else>View images at this location (Gallery)</span>
         </el-button>
+        <template :key="index" v-for="(species, index) in speciesFilterTags">
+          <el-tag
+            type="info"
+            class="tag"
+            :class="{ 'active-tag': species.taxon === activeSpecies.taxon}"
+            @close="removeSpeciesFilterTag(species)"
+            @click="filterBySpecies(species)"
+            :closable="species.taxon === activeSpecies.taxon"
+          >
+            {{ species.name }} ({{ species.count }})
+          </el-tag>
+        </template>
         <div v-if="showImages" class="image-gallery-container">
-          <Gallery :items="galleryItems" />
+          <Gallery  class="gallery" :items="filteredItems" />
         </div>
         <el-button
           class="button"
@@ -34,10 +49,11 @@ import {
   ElButton as Button,
   ElContainer as Container,
   ElIcon as Icon,
+  ElTag as Tag,
 } from 'element-plus'
 
 import EventBus from './EventBus'
-import ExternalResourceCard from './ExternalResourceCard.vue'
+import flatmapImageMixin from '../mixins/flatmapImageMixin';
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => {
@@ -58,11 +74,12 @@ const imageIframeURL = {
 
 export default {
   name: 'ImageGalleryPopup',
+  mixins: [flatmapImageMixin],
   components: {
     Button,
     Container,
     Icon,
-    ExternalResourceCard,
+    Tag,
     ElIconArrowUp,
     ElIconArrowDown,
     ElIconWarning,
@@ -92,10 +109,32 @@ export default {
       activeSpecies: undefined,
       loading: false,
       showImages: false,
+      activeSpecies: { taxon: '', name: ''},
       imageIframeURL: imageIframeURL,
+      speciesFilterTags: [],
+      filteredItems: [],
     }
   },
+  watch: {
+    galleryItems: {
+      handler: function () {
+        this.populateSpeciesFilterTags()
+      },
+      deep: true,
+    },
+  },
   methods: {
+    removeSpeciesFilterTag: function (species) {
+      this.activeSpecies = { taxon: '', name: '' }
+      this.filteredItems = this.galleryItems
+    },
+    populateSpeciesFilterTags: function () {
+      this.speciesFilterTags = this.findAllSpeciesFromGalleryItems(this.galleryItems)
+    },
+    filterBySpecies: function (species) {
+      this.activeSpecies = species
+      this.filteredItems = this.findImagesForSpeciesFromGalleryItems(this.galleryItems, species.taxon)
+    },
     titleCase: function (title) {
       return titleCase(title)
     },
@@ -105,6 +144,10 @@ export default {
     viewImage: function (url) {
       this.$emit('view-image', url)
     }
+  },
+  mounted: function () {
+    this.populateSpeciesFilterTags()
+    this.filteredItems = this.galleryItems
   },
 }
 </script>
@@ -131,8 +174,15 @@ export default {
   margin-bottom: 0.5em;
 }
 
-.pub {
-  width: 16rem;
+.tag {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.active-tag {
+  background-color: $app-primary-color;
+  color: #fff;
 }
 
 .icon {
@@ -145,39 +195,6 @@ export default {
   cursor: pointer;
 }
 
-.popover-origin-help {
-  text-transform: none !important; // need to overide the tooltip text transform
-}
-
-.info {
-  transform: rotate(180deg);
-  color: #8300bf;
-  margin-left: 8px;
-}
-
-.seperator {
-  width: 90%;
-  height: 1px;
-  background-color: #bfbec2;
-}
-
-.hide {
-  color: $app-primary-color;
-  cursor: pointer;
-  margin-right: 6px;
-  margin-top: 3px;
-}
-
-.slide-fade-enter-active {
-  transition: opacity 0.5s, transform 0.5s;
-}
-.slide-fade-leave-active {
-  transition: opacity 0.2s, transform 0.2s;
-}
-.slide-fade-enter, .slide-fade-leave-to /* .slide-fade-leave-active in <2.1.8 */ {
-  opacity: 0;
-  transform: translateY(-8px);
-}
 
 .main {
   font-size: 14px;
@@ -188,7 +205,7 @@ export default {
   /* outline: thin red solid; */
   padding: 1em !important;
   overflow: hidden;
-  min-width: 16rem;
+  min-width: 18rem;
 }
 
 .title {
@@ -209,20 +226,6 @@ export default {
 .attribute-content {
   font-size: 14px;
   font-weight: 500;
-}
-
-.popover-container {
-  height: 100%;
-  width: 100%;
-}
-
-.main {
-  .el-button.is-round {
-    border-radius: 4px;
-    padding: 9px 20px 10px 20px;
-    display: flex;
-    height: 36px;
-  }
 }
 
 .button {
