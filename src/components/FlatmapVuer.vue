@@ -157,8 +157,8 @@ Please use `const` to assign meaningful names to them...
         @dialogDisplay="connectionDialogDisplay"
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
-        @showFeatureTooltip="displayConnectedFeatureTooltip"
-        @hideFeatureTooltip="closeTooltip"
+        @showFeatureTooltip="showConnectedFeatureTooltip"
+        @hideFeatureTooltip="hideConnectedFeatureTooltip"
         @connection="(display) => connectionDisplay = display"
       />
 
@@ -621,7 +621,6 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
-import ConnectionDialog from './ConnectionDialog.vue'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import DrawTool from './DrawTool.vue'
@@ -773,13 +772,36 @@ export default {
     },
     /**
      * @vuese
-     * Function to display connected features' tooltip for drawn connectivity.
+     * Function to show connected features' tooltip for drawn connectivity.
      * @arg id
      */
-    displayConnectedFeatureTooltip: function (id) {
+    showConnectedFeatureTooltip: function (id) {
       if (this.mapImp) {
-        const data = this.mapImp.featureProperties(id)
-        this.checkAndCreatePopups({ feature: data })
+        if (id) {
+          const numericId = Number(id)
+          let payload = { feature: {} }
+          if (numericId) {
+            const data = this.mapImp.featureProperties(numericId)
+            payload.feature = data
+          } else {
+            const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === id.replace(' ', ''))[0]
+            payload.feature.feature = drawnFeature
+          }
+          this.checkAndCreatePopups(payload)
+        } else {
+          this.closeTooltip()
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to hide connected features' tooltip for drawn connectivity.
+     * @arg id
+     */
+    hideConnectedFeatureTooltip: function (id) {
+      if (this.mapImp) {
+        // const numericId = Number(id)
+        this.closeTooltip()
       }
     },
     /**
@@ -1457,7 +1479,9 @@ export default {
                   let nodeLabel = data.label ? data.label : `Feature ${data.id}`
                   // only the linestring will have connection at the current stage
                   if (this.activeDrawTool === 'LineString') {
-                    this.connectionEntry[data.featureId] = Object.assign({label: nodeLabel},
+                    const key = data.featureId ? data.featureId : data.id
+                    // add space before key to make sure properties follows adding order
+                    this.connectionEntry[` ${key}`] = Object.assign({label: nodeLabel},
                       Object.fromEntries(
                         Object.entries(data)
                               .filter(([key]) => ['featureId', 'models'].includes(key))
@@ -1559,7 +1583,7 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            if (this.inDrawing || this.activeDrawMode) {
+            if (this.inDrawing || this.activeDrawMode || this.connectionDisplay) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
               if (this.inDrawing) this.createConnectivityBody()
