@@ -1477,15 +1477,17 @@ export default {
                 if (this.inDrawing && !this.connectionDisplay) {
                   // Only clicked connection data will be added
                   let nodeLabel = data.label ? data.label : `Feature ${data.id}`
+                  const validDrawnFeature = data.featureId ||
+                    this.allDrawnFeatures.find((feature) => feature.id === data.id)
                   // only the linestring will have connection at the current stage
-                  if (this.activeDrawTool === 'LineString') {
+                  if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
                     const key = data.featureId ? data.featureId : data.id
                     // add space before key to make sure properties follows adding order
-                    this.connectionEntry[` ${key}`] = Object.assign({label: nodeLabel},
+                    this.connectionEntry[` ${key}`] = Object.assign({ label: nodeLabel },
                       Object.fromEntries(
                         Object.entries(data)
-                              .filter(([key]) => ['featureId', 'models'].includes(key))
-                              .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
+                          .filter(([key]) => ['featureId', 'models'].includes(key))
+                          .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
                   }
                 }
               }
