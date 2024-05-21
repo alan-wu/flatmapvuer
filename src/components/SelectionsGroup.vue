@@ -28,7 +28,10 @@
           :key="item[identifierKey]"
           :label="item[identifierKey]"
         >
-          <div class="checkbox-container">
+          <div class="checkbox-container" 
+            @mouseenter="checkboxMouseEnterEmit(item[identifierKey], true)"
+            @mouseleave="checkboxMouseEnterEmit(item[identifierKey], false)"
+            >
             <el-checkbox
               class="my-checkbox"
               :label="item[identifierKey]"
@@ -134,6 +137,11 @@ export default {
       }
       this.$emit('selections-data-changed', this.checkboxActionData);
     },
+    checkboxMouseEnterEmit: function (key, value) {
+      // Update the stated to send to the emit
+      this.$emit('checkboxMouseEnter', { key: key, value: value, selections: this.selections, checked: this.checkedItems})
+    },
+
     handleCheckedItemsChange: function (value) {
       let checkedCount = value.length
       this.checkAll = checkedCount === this.selections.length
@@ -142,6 +150,7 @@ export default {
       this.checkedItems = val
         ? this.selections.map((a) => a[this.identifierKey])
         : []
+      
       this.$emit('checkAll', {
         keys: this.selections.map((a) => a[this.identifierKey]),
         value: val,
