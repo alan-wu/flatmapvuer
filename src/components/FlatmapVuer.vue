@@ -289,6 +289,7 @@
                 @changed="alertSelected"
                 @checkboxMouseEnter="alertMouseEnterEmitted"
                 @selections-data-changed="onSelectionsDataChanged"
+                @checkAll="checkAllAlerts"
                 ref="alertSelection"
                 key="alertSelection"
               />
@@ -536,7 +537,7 @@
 </template>
 
 <script>
-import { shallowRef } from 'vue'
+import { markRaw, shallowRef } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -567,8 +568,6 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import EventBus from './EventBus';
-
 
 const processFTUs = (parent, key) => {
   const ftus = []
@@ -881,6 +880,33 @@ export default {
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
     },
+    resetMapFilter: function() {
+      const alert = this.mapFilters.alert;
+      let filter = undefined;
+      if (alert.with) {
+        if (!alert.without) {
+          filter = {
+            HAS: 'alert',
+          };
+        }
+      } else {
+        if (alert.without) {
+          filter = {
+            NOT: { HAS: 'alert'},
+          };
+        } else {
+          filter = {
+            AND: [ {NOT: { HAS: 'alert'}}, { HAS: 'alert'}]
+          }
+        }
+      }
+      console.log(this.mapFilters.alert, filter)
+      if (filter) {
+        this.mapImp.setVisibilityFilter(filter)
+      } else {
+        this.mapImp.clearVisibilityFilter()
+      }
+    },
     /**
      * @vuese
      * Function to enable/disable mouse enter and leave event for
@@ -890,15 +916,19 @@ export default {
     alertMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
-          const ALERT_FILTER = {
-            HAS: 'alert',
+          let filter = undefined;
+          if (payload.key === "alert") {
+            filter = {
+              HAS: 'alert',
+            }
+          } else if (payload.key === "withoutAlert") {
+            filter = {
+              NOT: {HAS: 'alert'},
+            }
           }
-          this.mapImp.setVisibilityFilter(ALERT_FILTER)
+          this.mapImp.setVisibilityFilter(filter)
         } else {
-          this.mapImp.clearVisibilityFilter()
-          this.alertSelected({
-            value: (payload.checked.length > 0),
-          });
+          this.resetMapFilter()
         }
       }
     },
@@ -910,14 +940,38 @@ export default {
      */
      alertSelected: function (payload) {
       if (this.mapImp) {
-        if (payload.value) {
-          this.mapImp.clearVisibilityFilter()
-        } else {
-          const ALERT_FILTER = {
-            NOT: {HAS: 'alert'}
+        if (payload.key === "alert") {
+          if (payload.value) {
+            this.mapFilters.alert.with = true
+          } else {
+            this.mapFilters.alert.with = false
           }
-          this.mapImp.setVisibilityFilter(ALERT_FILTER)
+        } else if (payload.key === "withoutAlert") {
+          if (payload.value) {
+            this.mapFilters.alert.without = true
+          } else {
+            this.mapFilters.alert.without = false
+          }
         }
+        this.resetMapFilter()
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable (show/hide) all alerts
+     * option by providing ``flag`` (true/false).
+     * @arg flag
+     */
+     checkAllAlerts: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          this.mapFilters.alert.without = true
+          this.mapFilters.alert.with = true
+        } else {
+          this.mapFilters.alert.without = false
+          this.mapFilters.alert.with = false
+        }
+        this.resetMapFilter()
       }
     },
     /**
@@ -1837,22 +1891,6 @@ export default {
      */
     openMapOptions: {
       type: Array,
-      /**
-       * ```[
-          {
-            display: 'Open AC Map',
-            key: 'AC',
-          },
-          {
-            display: 'Open FC Map',
-            key: 'FC',
-          },
-          {
-            display: 'Open 3D Human Map',
-            key: '3D',
-          },
-        ]```
-       */
       default: function () {
         return [
           {
@@ -2000,7 +2038,18 @@ export default {
           key: 'alert',
           enabled: true,
         },
+        {
+          label: 'Display Path Without Alerts',
+          key: 'withoutAlert',
+          enabled: true,
+        },
       ],
+      mapFilters: markRaw({
+        alert: {
+          with: true,
+          without: true,
+        }
+      })
     }
   },
   computed: {
