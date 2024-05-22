@@ -328,12 +328,12 @@
               />
               <selections-group
                 v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
-                title="Observed in"
+                title="Studied in"
                 labelKey="label"
                 identifierKey="taxon"
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
-                @checkboxMouseEnter="checkboxMouseEnterEmitted"
+                @checkboxMouseEnter="taxonMouseEnterEmitted"
                 @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
@@ -970,7 +970,7 @@ export default {
     },
     /**
      * @vuese
-     * Function to show or hide connectivity features observed in particular species
+     * Function to show or hide connectivity features studied in particular species
      * by providing ``{taxonId, true/false}`` in ``payload.key, payload.value``.
      * @arg payload
      */
@@ -997,7 +997,7 @@ export default {
     },
     /**
      * @vuese
-     * Function to show or hide connectivity features observed in particular species
+     * Function to show or hide connectivity features studied in particular species
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
      * @arg payload
      */
