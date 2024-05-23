@@ -145,12 +145,10 @@ Please use `const` to assign meaningful names to them...
         v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
         :helpMode="helpMode"
         :flatmapCanvas="this.$el"
+        :drawnType="drawnType"
         :inDrawing="inDrawing"
         :activeDrawTool="activeDrawTool"
-        :drawnType="drawnType"
-        :drawnTypes="drawnTypes"
         :activeDrawMode="activeDrawMode"
-        :drawModes="drawModes"
         :connectionDisplay="connectionDisplay"
         :connectionEntry="connectionEntry"
         @drawToolbarEvent="drawToolbarEvent"
@@ -1593,8 +1591,8 @@ export default {
                 data.feature.feature.id,
                 centroid(data.feature.feature.geometry)
               )
-              // Hide dialog when updated or deleted event is fired and tooltip is displayed
-              if (this.activeDrawMode) this.initialiseDialog()
+              // Hide dialog when delete event is fired
+              if (this.activeDrawMode === 'Delete') this.initialiseDialog()
             } else {
               // Not allowed to update feature if not on edit mode
               if (data.feature.type === 'updated') {
@@ -2384,10 +2382,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useMainStore, ['userToken']),
-    connection: function () {
-      return Object.keys(this.connectionEntry).length > 0
-    }
+    ...mapState(useMainStore, ['userToken'])
   },
   watch: {
     entry: function () {

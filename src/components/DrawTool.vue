@@ -13,8 +13,8 @@
         <template #reference>
           <map-svg-icon
             icon="connection"
-            class="icon-button drawConnection inactive"
-            @click="$emit('dialogDisplay', true)"
+            class="icon-button drawConnection"
+            @click="drawConnectionEvent()"
             @mouseover="showTooltip(0)"
             @mouseout="hideTooltip(0)"
           />
@@ -205,23 +205,17 @@ export default {
   },
   props: {
     flatmapCanvas: undefined,
+    drawnType: {
+      type: String,
+    },
     inDrawing: {
       type: Boolean,
     },
     activeDrawTool: {
       type: String,
     },
-    drawnType: {
-      type: String,
-    },
-    drawnTypes: {
-      type: Array,
-    },
     activeDrawMode: {
       type: String,
-    },
-    drawModes: {
-      type: Array,
     },
     connectionDisplay: {
       type: Boolean,
@@ -252,6 +246,18 @@ export default {
         x: undefined,
         y: undefined,
       },
+      toolbarIcons: {
+        supports: [{ name: "Connection", active: false, disabled: true }],
+        tools: [
+          { name: "Point", active: false, disabled: false },
+          { name: "LineString", active: false, disabled: false },
+          { name: "Polygon", active: false, disabled: false },
+        ],
+        modes: [
+          { name: "Edit", active: false, disabled: false },
+          { name: "Delete", active: false, disabled: false },
+        ],
+      },
     };
   },
   computed: {
@@ -265,30 +271,19 @@ export default {
         this.setHelpMode(newVal);
       }
     },
-    activeDrawTool: function () {
-      this.drawIconCssHacks();
+    activeDrawTool: function (value) {
+      this.updateToolbarIcons({ value: value }, "tools", "modes");
     },
-    activeDrawMode: function () {
-      this.drawIconCssHacks();
+    activeDrawMode: function (value) {
+      this.updateToolbarIcons({ value: value }, "modes", "tools");
     },
     connection: function (value) {
-      const connectionIcon = this.$el.querySelector(".drawConnection");
-      if (!value) {
-        this.$emit("connection", false);
-        connectionIcon.classList.add("inactive");
-      } else {
-        connectionIcon.classList.remove("inactive");
-      }
+      this.updateToolbarIcons({ value: value, type: "disabled" }, "supports");
+      if (!value) this.$emit("connection", false);
     },
-    connectionDisplay: function (display) {
-      const connectionIcon = this.$el.querySelector(".drawConnection");
-      if (display) {
-        connectionIcon.classList.add("iconSelected");
-        this.dialogCssHacks();
-      } else {
-        connectionIcon.classList.remove("iconSelected");
-      }
-      this.drawIconCssHacks();
+    connectionDisplay: function (value) {
+      this.updateToolbarIcons({ value: value, type: "active" }, "supports");
+      if (value) this.dialogCssHacks();
     },
     dialogPosition: {
       handler: function () {
@@ -301,6 +296,31 @@ export default {
     },
   },
   methods: {
+    drawConnectionEvent: function () {
+      if (this.connection) {
+        this.$emit("dialogDisplay", true);
+      }
+    },
+    updateToolbarIcons: function (input, primary, secondary = undefined) {
+      if (!input.type || input.type === "active") {
+        this.toolbarIcons[primary].map((icon) => {
+          const activeCondition = secondary
+            ? icon.name === input.value
+            : input.value;
+          if (activeCondition) icon.active = true;
+          else icon.active = false;
+        });
+      }
+      if (!input.type || input.type === "disabled") {
+        const disabledTarget = secondary ? secondary : primary;
+        this.toolbarIcons[disabledTarget].map((icon) => {
+          const disabledBool = secondary ? true : false;
+          if (input.value) icon.disabled = disabledBool;
+          else icon.disabled = !disabledBool;
+        });
+      }
+      this.toolbarCssHacks();
+    },
     drawToolEvent: function (type) {
       if (!this.activeDrawMode && !this.connectionDisplay) {
         if (type === "Point") {
@@ -335,39 +355,19 @@ export default {
         this.$emit("drawToolbarEvent", this.activeMode);
       }
     },
-    drawIconCssHacks: function () {
-      // set tool/mode icon status
-      if (this.$el.querySelector(".iconSelected") || !this.connectionDisplay) {
-        this.drawnTypes.map((t) => {
-          const dtype = this.$el.querySelector(`.draw${t}`);
-          if (dtype) {
-            dtype.classList.remove("iconSelected");
-            dtype.classList.remove("inactive");
-          }
+    toolbarCssHacks: function () {
+      // set toolbar icon style
+      Object.values(this.toolbarIcons).forEach((icons) => {
+        icons.map((icon) => {
+          const iconClassList = this.$el.querySelector(
+            `.draw${icon.name}`
+          ).classList;
+          if (icon.active) iconClassList.add("active");
+          else iconClassList.remove("active");
+          if (icon.disabled) iconClassList.add("disabled");
+          else iconClassList.remove("disabled");
         });
-        this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.remove("iconSelected");
-          this.$el.querySelector(`.draw${m}`).classList.remove("inactive");
-        });
-      }
-      if (this.activeDrawTool) {
-        this.$el
-          .querySelector(`.draw${this.activeDrawTool}`)
-          .classList.add("iconSelected");
-        this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.add("inactive");
-        });
-      } else if (this.activeDrawMode || this.connectionDisplay) {
-        if (this.activeDrawMode) {
-          this.$el
-            .querySelector(`.draw${this.activeDrawMode}`)
-            .classList.add("iconSelected");
-        }
-        this.drawnTypes.map((t) => {
-          const dtype = this.$el.querySelector(`.draw${t}`);
-          if (dtype) dtype.classList.add("inactive");
-        });
-      }
+      });
     },
     dialogCssHacks: function () {
       this.$nextTick(() => {
@@ -436,6 +436,7 @@ export default {
     },
   },
   mounted: function () {
+    this.toolbarCssHacks();
     this.tooltipWait = [];
     this.tooltipWait.length = this.hoverVisibilities.length;
     this.flatmapCanvas.querySelector(".maplibregl-canvas").addEventListener(
@@ -492,11 +493,11 @@ export default {
   }
 }
 
-.iconSelected {
+.active {
   color: var(--el-color-primary) !important;
 }
 
-.inactive {
+.disabled {
   color: #dddddd !important;
   cursor: not-allowed !important;
 }
