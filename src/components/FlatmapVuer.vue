@@ -900,7 +900,6 @@ export default {
           }
         }
       }
-      console.log(this.mapFilters.alert, filter)
       if (filter) {
         this.mapImp.setVisibilityFilter(filter)
       } else {
