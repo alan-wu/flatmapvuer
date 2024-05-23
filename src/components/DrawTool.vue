@@ -128,8 +128,7 @@
       @dialogDisplay="$emit('dialogDisplay', $event)"
       @confirmDrawn="$emit('confirmDrawn', $event)"
       @cancelDrawn="$emit('cancelDrawn', $event)"
-      @showFeatureTooltip="$emit('showFeatureTooltip', $event)"
-      @hideFeatureTooltip="$emit('hideFeatureTooltip', $event)"
+      @featureTooltip="$emit('featureTooltip', $event)"
     />
   </div>
 </template>

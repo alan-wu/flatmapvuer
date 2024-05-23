@@ -155,8 +155,7 @@ Please use `const` to assign meaningful names to them...
         @dialogDisplay="connectionDialogDisplay"
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
-        @showFeatureTooltip="showConnectedFeatureTooltip"
-        @hideFeatureTooltip="hideConnectedFeatureTooltip"
+        @featureTooltip="connectedFeatureTooltip"
         @connection="(display) => connectionDisplay = display"
       />
 
@@ -770,36 +769,25 @@ export default {
     },
     /**
      * @vuese
-     * Function to show connected features' tooltip for drawn connectivity.
+     * Function to display connected features' tooltip for drawn connectivity.
      * @arg id
      */
-    showConnectedFeatureTooltip: function (id) {
+    connectedFeatureTooltip: function (value) {
       if (this.mapImp) {
-        if (id) {
-          const numericId = Number(id)
+        if (value) {
+          const numericId = Number(value)
           let payload = { feature: {} }
           if (numericId) {
             const data = this.mapImp.featureProperties(numericId)
             payload.feature = data
           } else {
-            const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === id.replace(' ', ''))[0]
+            const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === value.replace(' ', ''))[0]
             payload.feature.feature = drawnFeature
           }
           this.checkAndCreatePopups(payload)
         } else {
           this.closeTooltip()
         }
-      }
-    },
-    /**
-     * @vuese
-     * Function to hide connected features' tooltip for drawn connectivity.
-     * @arg id
-     */
-    hideConnectedFeatureTooltip: function (id) {
-      if (this.mapImp) {
-        // const numericId = Number(id)
-        this.closeTooltip()
       }
     },
     /**

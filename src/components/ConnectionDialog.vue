@@ -1,43 +1,41 @@
 <template>
   <div class="dialog-container">
     <el-row>
-      <span class="dialog-title" v-if="inDrawing">Finalise drawing</span>
-      <span class="dialog-title" v-else>Visualise connection</span>
-      <el-row v-if="inDrawing">
-        <el-col :span="13">
-          <el-button type="primary" plain @click="$emit('confirmDrawn', true)">
-            Confirm
+      <el-col>
+        <span class="dialog-title">Visualise connection</span>
+        <el-row v-if="inDrawing">
+          <span class="dialog-subtitle">Finalise drawing</span>
+          <el-button-group>
+            <el-button
+              type="primary"
+              plain
+              @click="$emit('confirmDrawn', true)"
+            >
+              Confirm
+            </el-button>
+            <el-button type="primary" plain @click="$emit('cancelDrawn', true)">
+              Cancel
+            </el-button>
+          </el-button-group>
+        </el-row>
+        <el-row v-else>
+          <el-button
+            type="primary"
+            plain
+            @click="$emit('dialogDisplay', false)"
+          >
+            Close
           </el-button>
-        </el-col>
-        <el-col :span="11">
-          <el-button type="primary" plain @click="$emit('cancelDrawn', true)">
-            Cancel
-          </el-button>
-        </el-col>
-      </el-row>
-      <el-row v-else>
-        <el-button type="primary" plain @click="$emit('dialogDisplay', false)">
-          Close
-        </el-button>
-      </el-row>
+        </el-row>
+      </el-col>
     </el-row>
     <el-row v-if="connection">
       <el-col>
         <b><span>Related Features</span></b>
         <el-row v-for="(value, key) in connectionEntry" :key="key">
-          <el-col :span="20">
-            <el-card
-              :shadow="activeShadow(key)"
-              @click="handleTooltipOpen(key)"
-            >
-              <span>{{ capitalise(value.label) }}</span>
-            </el-card>
-          </el-col>
-          <el-col :span="4" v-if="key === tooltipId">
-            <el-icon>
-              <el-icon-circle-close @click="handleTooltipClose(key)" />
-            </el-icon>
-          </el-col>
+          <el-card :shadow="shadowDisplay(key)" @click="handleTooltip(key)">
+            <span>{{ capitalise(value.label) }}</span>
+          </el-card>
         </el-row>
       </el-col>
     </el-row>
@@ -46,14 +44,21 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { CircleClose as ElIconCircleClose } from "@element-plus/icons-vue";
-import { ElRow as Row, ElCol as Col, ElCard as Card } from "element-plus";
+import {
+  ElRow as Row,
+  ElCol as Col,
+  ElCard as Card,
+  ElButton as Button,
+  ElButtonGroup as ButtonGroup,
+} from "element-plus";
 
 export default {
   name: "ConnectionDialog",
   components: {
     Row,
     Col,
+    ButtonGroup,
+    Button,
     Card,
   },
   props: {
@@ -74,28 +79,24 @@ export default {
       tooltipId: undefined,
     };
   },
-  watch: {
-    connection: function () {
-      this.tooltipId = undefined;
-    },
-  },
   methods: {
-    activeShadow: function (value) {
-      if (this.inDrawing && !Number(value)) return "never";
-      return "hover";
+    shadowDisplay: function (value) {
+      if (value === this.tooltipId) {
+        return "always";
+      } else {
+        return "hover";
+      }
     },
     capitalise: function (label) {
       return label[0].toUpperCase() + label.slice(1);
     },
-    handleTooltipOpen: function (value) {
-      this.tooltipId = value;
-      // temp solution, not allow to check drawn feature while drawing
-      if (this.inDrawing && !Number(value)) this.tooltipId = undefined;
-      this.$emit("showFeatureTooltip", this.tooltipId);
-    },
-    handleTooltipClose: function (value) {
-      this.tooltipId = undefined;
-      this.$emit("hideFeatureTooltip", value);
+    handleTooltip: function (value) {
+      if (this.tooltipId !== value) {
+        this.tooltipId = value;
+      } else {
+        this.tooltipId = undefined;
+      }
+      this.$emit("featureTooltip", this.tooltipId);
     },
   },
 };
@@ -122,11 +123,18 @@ export default {
   color: rgb(131, 0, 191);
 }
 
-.el-icon {
-  cursor: pointer;
+.dialog-subtitle {
+  margin-top: 5px;
+  font-size: 15px;
+  color: rgb(131, 0, 191);
+}
+
+.el-button {
+  margin: 5px 0px;
 }
 
 :deep(.el-card) {
+  width: 100%;
   --el-card-padding: 8px;
   border: 0;
   cursor: pointer;
