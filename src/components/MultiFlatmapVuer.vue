@@ -67,6 +67,7 @@
       :minZoom="minZoom"
       :helpMode="activeSpecies == key && helpMode"
       :helpModeActiveItem="helpModeActiveItem"
+      :helpModeDialog="helpModeDialog"
       :helpModeInitialIndex="-2"
       @help-mode-last-item="onHelpModeLastItem"
       @shown-tooltip="onTooltipShown"
@@ -541,14 +542,23 @@ export default {
     /**
      * The active item index of help mode.
      */
-     helpModeActiveItem: {
+    helpModeActiveItem: {
       type: Number,
       default: 0,
     },
     /**
+     * The option to use helpModeDialog.
+     * On default, `false`, clicking help will show all tooltips.
+     * If `true`, clicking help will show the help-mode-dialog.
+     */
+    helpModeDialog: {
+      type: Boolean,
+      default: false,
+    },
+    /**
      * The last item of help mode.
      */
-     helpModeLastItem: {
+    helpModeLastItem: {
       type: Boolean,
       default: false,
     },

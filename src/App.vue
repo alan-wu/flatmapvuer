@@ -69,6 +69,7 @@
       @ready="FlatmapReady"
       :initial="initial"
       :helpMode="helpMode"
+      :helpModeDialog="useHelpModeDialog"
       :helpModeActiveItem="helpModeActiveItem"
       @help-mode-last-item="onHelpModeLastItem"
       @shown-tooltip="onTooltipShown"
@@ -83,7 +84,7 @@
     />
 
     <HelpModeDialog
-      v-if="helpMode"
+      v-if="helpMode && useHelpModeDialog"
       ref="multiflatmapHelp"
       :multiflatmapRef="multiflatmapRef"
       :lastItem="helpModeLastItem"
@@ -273,6 +274,7 @@ export default {
       helpMode: false,
       helpModeActiveItem: 0,
       helpModeLastItem: false,
+      useHelpModeDialog: true,
       multiflatmapRef: null,
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
