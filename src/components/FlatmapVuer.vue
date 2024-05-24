@@ -144,6 +144,7 @@ Please use `const` to assign meaningful names to them...
       <DrawTool
         v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
         :helpMode="helpMode"
+        :hoverVisibilities=hoverVisibilities
         :flatmapCanvas="this.$el"
         :drawnType="drawnType"
         :activeDrawTool="activeDrawTool"
@@ -154,6 +155,8 @@ Please use `const` to assign meaningful names to them...
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
         @featureTooltip="connectedFeatureTooltip"
+        @showTooltip="showToolitip"
+        @hideTooltip="hideToolitip"
       />
 
       <div class="bottom-right-control" v-show="!disableUI">
@@ -2273,6 +2276,12 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
         { value: false },
         { value: false },
         { value: false },

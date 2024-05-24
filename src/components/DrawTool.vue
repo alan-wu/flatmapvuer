@@ -8,15 +8,15 @@
         trigger="manual"
         width="100"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[0].value"
+        :visible="hoverVisibilities[10].value"
       >
         <template #reference>
           <map-svg-icon
             icon="connection"
             class="icon-button drawConnection"
             @click="drawConnectionEvent()"
-            @mouseover="showTooltip(0)"
-            @mouseout="hideTooltip(0)"
+            @mouseover="showTooltip(10)"
+            @mouseout="hideTooltip(10)"
           />
         </template>
       </el-popover>
@@ -27,7 +27,7 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[1].value"
+        :visible="hoverVisibilities[11].value"
         v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
       >
         <template #reference>
@@ -35,8 +35,8 @@
             icon="drawPoint"
             class="icon-button drawPoint"
             @click="drawToolEvent('Point')"
-            @mouseover="showTooltip(1)"
-            @mouseout="hideTooltip(1)"
+            @mouseover="showTooltip(11)"
+            @mouseout="hideTooltip(11)"
           />
         </template>
       </el-popover>
@@ -47,7 +47,7 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[2].value"
+        :visible="hoverVisibilities[12].value"
         v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
       >
         <template #reference>
@@ -55,8 +55,8 @@
             icon="drawLine"
             class="icon-button drawLineString"
             @click="drawToolEvent('LineString')"
-            @mouseover="showTooltip(2)"
-            @mouseout="hideTooltip(2)"
+            @mouseover="showTooltip(12)"
+            @mouseout="hideTooltip(12)"
           />
         </template>
       </el-popover>
@@ -67,7 +67,7 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[3].value"
+        :visible="hoverVisibilities[13].value"
         v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
       >
         <template #reference>
@@ -75,8 +75,8 @@
             icon="drawPolygon"
             class="icon-button drawPolygon"
             @click="drawToolEvent('Polygon')"
-            @mouseover="showTooltip(3)"
-            @mouseout="hideTooltip(3)"
+            @mouseover="showTooltip(13)"
+            @mouseout="hideTooltip(13)"
           />
         </template>
       </el-popover>
@@ -87,15 +87,15 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[14].value"
       >
         <template #reference>
           <map-svg-icon
             icon="drawTrash"
             class="icon-button drawDelete"
             @click="drawModeEvent('Delete')"
-            @mouseover="showTooltip(4)"
-            @mouseout="hideTooltip(4)"
+            @mouseover="showTooltip(14)"
+            @mouseout="hideTooltip(14)"
           />
         </template>
       </el-popover>
@@ -106,15 +106,15 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[5].value"
+        :visible="hoverVisibilities[15].value"
       >
         <template #reference>
           <map-svg-icon
             icon="comment"
             class="icon-button drawEdit"
             @click="drawModeEvent('Edit')"
-            @mouseover="showTooltip(5)"
-            @mouseout="hideTooltip(5)"
+            @mouseover="showTooltip(15)"
+            @mouseout="hideTooltip(15)"
           />
         </template>
       </el-popover>
@@ -219,9 +219,8 @@ export default {
     connectionEntry: {
       type: Object,
     },
-    helpMode: {
-      type: Boolean,
-      default: false,
+    hoverVisibilities: {
+      type: Array,
     },
   },
   data: function () {
@@ -229,14 +228,6 @@ export default {
       activeTool: undefined,
       activeMode: undefined,
       connectionDisplay: false,
-      hoverVisibilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-      ],
       dialogPosition: {
         offsetX: 0,
         offsetY: 0,
@@ -269,11 +260,6 @@ export default {
     },
   },
   watch: {
-    helpMode: function (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.setHelpMode(newVal);
-      }
-    },
     activeDrawTool: function (value) {
       this.updateToolbarIcons({ value: value }, "tools", "modes");
       if (!value) this.connectionDisplay = false
@@ -401,52 +387,15 @@ export default {
         }px, ${posY - this.dialogPosition.offsetY}px)`;
       });
     },
-    /**
-     * @vuese
-     * Function to show tooltip
-     * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
-     */
     showTooltip: function (tooltipNumber) {
-      if (!this.inHelp) {
-        clearTimeout(this.tooltipWait[tooltipNumber]);
-        this.tooltipWait[tooltipNumber] = setTimeout(() => {
-          this.hoverVisibilities[tooltipNumber].value = true;
-        }, 500);
-      }
+      this.$emit('showTooltip', tooltipNumber)
     },
-    /**
-     * @vuese
-     * Function to hide tooltip
-     * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
-     */
     hideTooltip: function (tooltipNumber) {
-      if (!this.inHelp) {
-        clearTimeout(this.tooltipWait[tooltipNumber]);
-        this.tooltipWait[tooltipNumber] = setTimeout(() => {
-          this.hoverVisibilities[tooltipNumber].value = false;
-        }, 500);
-      }
-    },
-    setHelpMode: function (helpMode) {
-      if (helpMode) {
-        this.inHelp = true;
-        this.hoverVisibilities.forEach((item) => {
-          item.value = true;
-        });
-      } else {
-        this.inHelp = false;
-        this.hoverVisibilities.forEach((item) => {
-          item.value = false;
-        });
-      }
+      this.$emit('hideTooltip', tooltipNumber)
     },
   },
   mounted: function () {
     this.toolbarCssHacks();
-    this.tooltipWait = [];
-    this.tooltipWait.length = this.hoverVisibilities.length;
     this.flatmapCanvas.querySelector(".maplibregl-canvas").addEventListener(
       "click",
       (e) => {
