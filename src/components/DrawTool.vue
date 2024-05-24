@@ -234,18 +234,14 @@ export default {
         x: undefined,
         y: undefined,
       },
-      toolbarIcons: {
-        supports: [{ name: "Connection", active: false, disabled: true }],
-        tools: [
-          { name: "Point", active: false, disabled: false },
-          { name: "LineString", active: false, disabled: false },
-          { name: "Polygon", active: false, disabled: false },
-        ],
-        modes: [
-          { name: "Edit", active: false, disabled: false },
-          { name: "Delete", active: false, disabled: false },
-        ],
-      },
+      toolbarIcons: [
+        { name: "Connection", type: "connect", active: false, disabled: true },
+        { name: "Point", type: "tool", active: false, disabled: false },
+        { name: "LineString", type: "tool", active: false, disabled: false },
+        { name: "Polygon", type: "tool", active: false, disabled: false },
+        { name: "Edit", type: "mode", active: false, disabled: false },
+        { name: "Delete", type: "mode", active: false, disabled: false },
+      ],
     };
   },
   computed: {
@@ -253,7 +249,7 @@ export default {
       return this.activeDrawTool !== undefined;
     },
     isFeatureDrawn: function () {
-      return this.drawnCreatedEvent !== undefined
+      return this.drawnCreatedEvent !== undefined;
     },
     hasConnection: function () {
       return Object.keys(this.connectionEntry).length > 0;
@@ -261,21 +257,21 @@ export default {
   },
   watch: {
     activeDrawTool: function (value) {
-      this.updateToolbarIcons({ value: value }, "tools", "modes");
-      if (!value) this.connectionDisplay = false
+      this.updateToolbarIcons(value, "tool");
+      if (!value) this.connectionDisplay = false;
     },
     activeDrawMode: function (value) {
-      this.updateToolbarIcons({ value: value }, "modes", "tools");
-      if (value === 'Delete') this.connectionDisplay = false
+      this.updateToolbarIcons(value, "mode");
+      if (value === "Delete") this.connectionDisplay = false;
     },
     hasConnection: function (value) {
-      this.updateToolbarIcons({ value: value, type: "disabled" }, "supports");
+      this.updateToolbarConnectionIcon(value, "disabled");
     },
     isFeatureDrawn: function (value) {
-      if (value) this.connectionDisplay = true
+      if (value) this.connectionDisplay = true;
     },
     connectionDisplay: function (value) {
-      this.updateToolbarIcons({ value: value, type: "active" }, "supports");
+      this.updateToolbarConnectionIcon(value, "active");
       if (value) this.dialogCssHacks();
       else this.$emit("featureTooltip", undefined);
     },
@@ -292,27 +288,38 @@ export default {
   methods: {
     drawConnectionEvent: function () {
       if (this.hasConnection && !this.activeDrawTool) {
-        this.connectionDisplay = !this.connectionDisplay
+        this.connectionDisplay = !this.connectionDisplay;
       }
     },
-    updateToolbarIcons: function (input, primary, secondary = undefined) {
-      if (!input.type || input.type === "active") {
-        this.toolbarIcons[primary].map((icon) => {
-          const activeCondition = secondary
-            ? icon.name === input.value
-            : input.value;
-          if (activeCondition) icon.active = true;
+    updateToolbarConnectionIcon: function (value, type) {
+      this.toolbarIcons
+        .filter((icon) => icon.type === "connect")
+        .map((icon) => {
+          if (type === "active") {
+            if (value) icon.active = true;
+            else icon.active = false;
+          }
+          if (type === "disabled") {
+            if (value) icon.disabled = false;
+            else icon.disabled = true;
+          }
+        });
+      this.toolbarCssHacks();
+    },
+    updateToolbarIcons: function (value, type) {
+      this.toolbarIcons
+        .filter((icon) => icon.type === type)
+        .map((icon) => {
+          if (icon.name === value) icon.active = true;
           else icon.active = false;
         });
-      }
-      if (!input.type || input.type === "disabled") {
-        const disabledTarget = secondary ? secondary : primary;
-        this.toolbarIcons[disabledTarget].map((icon) => {
-          const disabledBool = secondary ? true : false;
-          if (input.value) icon.disabled = disabledBool;
-          else icon.disabled = !disabledBool;
+      this.toolbarIcons
+        .filter((icon) => icon.type !== "connect")
+        .filter((icon) => icon.type !== type)
+        .map((icon) => {
+          if (value) icon.disabled = true;
+          else icon.disabled = false;
         });
-      }
       this.toolbarCssHacks();
     },
     drawToolEvent: function (type) {
@@ -351,16 +358,14 @@ export default {
     },
     toolbarCssHacks: function () {
       // set toolbar icon style
-      Object.values(this.toolbarIcons).forEach((icons) => {
-        icons.map((icon) => {
-          const iconClassList = this.$el.querySelector(
-            `.draw${icon.name}`
-          ).classList;
-          if (icon.active) iconClassList.add("active");
-          else iconClassList.remove("active");
-          if (icon.disabled) iconClassList.add("disabled");
-          else iconClassList.remove("disabled");
-        });
+      this.toolbarIcons.map((icon) => {
+        const iconClassList = this.$el.querySelector(
+          `.draw${icon.name}`
+        ).classList;
+        if (icon.active) iconClassList.add("active");
+        else iconClassList.remove("active");
+        if (icon.disabled) iconClassList.add("disabled");
+        else iconClassList.remove("disabled");
       });
     },
     dialogCssHacks: function () {
@@ -388,10 +393,10 @@ export default {
       });
     },
     showTooltip: function (tooltipNumber) {
-      this.$emit('showTooltip', tooltipNumber)
+      this.$emit("showTooltip", tooltipNumber);
     },
     hideTooltip: function (tooltipNumber) {
-      this.$emit('hideTooltip', tooltipNumber)
+      this.$emit("hideTooltip", tooltipNumber);
     },
   },
   mounted: function () {
