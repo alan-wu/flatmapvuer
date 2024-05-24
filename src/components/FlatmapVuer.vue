@@ -337,6 +337,7 @@
                 title="Studied in"
                 labelKey="label"
                 identifierKey="taxon"
+                helpMessage="Evidence exists that this set of neuron populations have been studied in the given species."
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
                 @checkboxMouseEnter="taxonMouseEnterEmitted"

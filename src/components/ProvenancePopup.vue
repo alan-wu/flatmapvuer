@@ -251,7 +251,7 @@ export default {
       }
     },
     provSpeciesDescription: function () {
-      let text = 'Observed in'
+      let text = 'Studied in'
       this.entry.provenanceTaxonomyLabel.forEach((label) => {
         text += ` ${label},`
       })
@@ -341,7 +341,7 @@ export default {
   .el-popper__arrow {
     &:before {
       border-color: $app-primary-color;
-      background-color: #f3ecf6;
+      background-color: #ffffff;
     }
   }
 }
