@@ -29,7 +29,7 @@
         </el-row>
       </el-col>
     </el-row>
-    <el-row v-if="connection">
+    <el-row v-if="hasConnection">
       <el-col>
         <b><span>Related Features</span></b>
         <el-row v-for="(value, key) in connectionEntry" :key="key">
@@ -69,7 +69,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    connection: {
+    hasConnection: {
       type: Boolean,
       default: false,
     },

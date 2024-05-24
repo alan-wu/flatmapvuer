@@ -124,8 +124,8 @@
       v-show="connectionDisplay"
       :connectionEntry="connectionEntry"
       :inDrawing="inDrawing"
-      :connection="connection"
-      @dialogDisplay="$emit('dialogDisplay', $event)"
+      :hasConnection="hasConnection"
+      @dialogDisplay="drawConnectionEvent()"
       @confirmDrawn="$emit('confirmDrawn', $event)"
       @cancelDrawn="$emit('cancelDrawn', $event)"
       @featureTooltip="$emit('featureTooltip', $event)"
@@ -207,17 +207,14 @@ export default {
     drawnType: {
       type: String,
     },
-    inDrawing: {
-      type: Boolean,
-    },
     activeDrawTool: {
       type: String,
     },
     activeDrawMode: {
       type: String,
     },
-    connectionDisplay: {
-      type: Boolean,
+    drawnCreatedEvent: {
+      type: Object,
     },
     connectionEntry: {
       type: Object,
@@ -231,6 +228,7 @@ export default {
     return {
       activeTool: undefined,
       activeMode: undefined,
+      connectionDisplay: false,
       hoverVisibilities: [
         { value: false },
         { value: false },
@@ -260,7 +258,13 @@ export default {
     };
   },
   computed: {
-    connection: function () {
+    inDrawing: function () {
+      return this.activeDrawTool !== undefined;
+    },
+    isFeatureDrawn: function () {
+      return this.drawnCreatedEvent !== undefined
+    },
+    hasConnection: function () {
       return Object.keys(this.connectionEntry).length > 0;
     },
   },
@@ -272,17 +276,22 @@ export default {
     },
     activeDrawTool: function (value) {
       this.updateToolbarIcons({ value: value }, "tools", "modes");
+      if (!value) this.connectionDisplay = false
     },
     activeDrawMode: function (value) {
       this.updateToolbarIcons({ value: value }, "modes", "tools");
+      if (value === 'Delete') this.connectionDisplay = false
     },
-    connection: function (value) {
+    hasConnection: function (value) {
       this.updateToolbarIcons({ value: value, type: "disabled" }, "supports");
-      if (!value) this.$emit("connection", false);
+    },
+    isFeatureDrawn: function (value) {
+      if (value) this.connectionDisplay = true
     },
     connectionDisplay: function (value) {
       this.updateToolbarIcons({ value: value, type: "active" }, "supports");
       if (value) this.dialogCssHacks();
+      else this.$emit("featureTooltip", undefined);
     },
     dialogPosition: {
       handler: function () {
@@ -296,8 +305,8 @@ export default {
   },
   methods: {
     drawConnectionEvent: function () {
-      if (this.connection) {
-        this.$emit("dialogDisplay", true);
+      if (this.hasConnection && !this.activeDrawTool) {
+        this.connectionDisplay = !this.connectionDisplay
       }
     },
     updateToolbarIcons: function (input, primary, secondary = undefined) {
