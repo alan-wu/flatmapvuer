@@ -27,15 +27,15 @@ Please use `const` to assign meaningful names to them...
  -->
             <p
               v-if="isLegacy"
-              @mouseover="showToolitip(6)"
-              @mouseout="hideToolitip(6)"
+              @mouseover="showTooltip(6)"
+              @mouseout="hideTooltip(6)"
             >
               This is a legacy map, you may view the latest map instead.
             </p>
             <p
               v-else-if="isFC"
-              @mouseover="showToolitip(6)"
-              @mouseout="hideToolitip(6)"
+              @mouseover="showTooltip(6)"
+              @mouseout="hideTooltip(6)"
             >
               This map displays the connectivity of individual neurons.
               Specifically, those which align with (parts of) the neuron
@@ -54,7 +54,7 @@ Please use `const` to assign meaningful names to them...
                 SCKAN </a
               >.
             </p>
-            <p v-else @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+            <p v-else @mouseover="showTooltip(6)" @mouseout="hideTooltip(6)">
               This map displays the connectivity of neuron populations.
               Specifically, those from the primarily rat-based
               <a
@@ -76,8 +76,8 @@ Please use `const` to assign meaningful names to them...
               <div
                 class="warning-icon"
                 v-if="displayWarning"
-                @mouseover="showToolitip(6)"
-                @mouseout="hideToolitip(6)"
+                @mouseover="showTooltip(6)"
+                @mouseout="hideTooltip(6)"
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
@@ -100,13 +100,14 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           popper-class="warning-popper flatmap-popper"
           :visible="hoverVisibilities[7].value"
+          ref="whatsNewPopover"
         >
           <template #reference>
             <div
               class="latest-changesicon"
               v-if="displayLatestChanges"
-              @mouseover="showToolitip(7)"
-              @mouseout="hideToolitip(7)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               <el-icon><el-icon-warning-filled /></el-icon>
               <span class="warning-text">What's new?</span>
@@ -171,14 +172,15 @@ Please use `const` to assign meaningful names to them...
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[0].value"
+          ref="zoomInPopover"
         >
           <template #reference>
             <map-svg-icon
               icon="zoomIn"
               class="icon-button zoomIn"
               @click="zoomIn()"
-              @mouseover="showToolitip(0)"
-              @mouseout="hideToolitip(0)"
+              @mouseover="showTooltip(0)"
+              @mouseout="hideTooltip(0)"
             />
           </template>
         </el-popover>
@@ -190,14 +192,15 @@ Please use `const` to assign meaningful names to them...
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[1].value"
+          ref="zoomOutPopover"
         >
           <template #reference>
             <map-svg-icon
               icon="zoomOut"
               class="icon-button zoomOut"
               @click="zoomOut()"
-              @mouseover="showToolitip(1)"
-              @mouseout="hideToolitip(1)"
+              @mouseover="showTooltip(1)"
+              @mouseout="hideTooltip(1)"
             />
           </template>
         </el-popover>
@@ -209,6 +212,7 @@ Please use `const` to assign meaningful names to them...
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[2].value"
+          ref="zoomFitPopover"
         >
           <div>
             Fit to
@@ -220,8 +224,8 @@ Please use `const` to assign meaningful names to them...
               icon="fitWindow"
               class="icon-button fitWindow"
               @click="resetView()"
-              @mouseover="showToolitip(2)"
-              @mouseout="hideToolitip(2)"
+              @mouseover="showTooltip(2)"
+              @mouseout="hideTooltip(2)"
             />
           </template>
         </el-popover>
@@ -249,6 +253,7 @@ Please use `const` to assign meaningful names to them...
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
+              <template v-if="showStarInLegend">
               <el-popover
                 content="Location of the featured dataset"
                 placement="right"
@@ -257,20 +262,20 @@ Please use `const` to assign meaningful names to them...
                 width="max-content"
                 :offset="-10"
                 popper-class="flatmap-popper flatmap-teleport-popper"
-                :visible="hoverVisibilities[9].value && showStarInLegend"
+                :visible="hoverVisibilities[9].value"
                 ref="featuredMarkerPopover"
               >
                 <template #reference>
                   <div
-                    v-show="showStarInLegend"
                     v-popover:featuredMarkerPopover
                     class="yellow-star-legend"
                     v-html="yellowstar"
-                    @mouseover="showToolitip(9)"
-                    @mouseout="hideToolitip(9)"
+                    @mouseover="showTooltip(9)"
+                    @mouseout="hideTooltip(9)"
                   ></div>
                 </template>
               </el-popover>
+              </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
                 content="Find these markers for data"
@@ -345,6 +350,7 @@ Please use `const` to assign meaningful names to them...
                 identifierKey="taxon"
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
+                @checkboxMouseEnter="checkboxMouseEnterEmitted"
                 @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
@@ -541,6 +547,7 @@ Please use `const` to assign meaningful names to them...
             placement="right"
             :teleported="false"
             popper-class="flatmap-popper"
+            ref="openMapPopover"
           >
             <template #reference>
               <map-svg-icon
@@ -548,8 +555,8 @@ Please use `const` to assign meaningful names to them...
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showToolitip(8)"
-                @mouseout="hideToolitip(8)"
+                @mouseover="showTooltip(8)"
+                @mouseout="hideTooltip(8)"
               />
             </template>
           </el-popover>
@@ -562,14 +569,15 @@ Please use `const` to assign meaningful names to them...
             :teleported="false"
             trigger="manual"
             popper-class="flatmap-popper"
+            ref="settingsPopover"
           >
             <template #reference>
               <map-svg-icon
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showToolitip(3)"
-                @mouseout="hideToolitip(3)"
+                @mouseover="showTooltip(3)"
+                @mouseout="hideTooltip(3)"
               />
             </template>
           </el-popover>
@@ -624,6 +632,7 @@ import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import DrawTool from './DrawTool.vue'
+import EventBus from './EventBus';
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -1327,6 +1336,22 @@ export default {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
       }
     },
+    checkboxMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          let gid = this.mapImp.taxonFeatureIds(payload.key)  
+          this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
+          this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
+        } else {
+          // reset visibility of paths 
+          this.mapImp.selectGeoJSONFeatures("-1")
+          payload.selections.forEach((item) => {
+            let show = payload.checked.includes(item.taxon)
+            this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
+          })
+        }
+      }
+    },
     /**
      * @vuese
      * Function to show or hide connectivity features observed in particular species
@@ -1727,17 +1752,71 @@ export default {
      * @arg helpMode
      */
     setHelpMode: function (helpMode) {
-      if (helpMode) {
-        // because some tooltips are inside drawer
-        this.drawerOpen = true;
-        // wait for CSS transition
-        setTimeout(() => {
-          this.inHelp = true;
-          this.hoverVisibilities.forEach((item) => {
-            item.value = true;
-          });
+      const toolTipsLength = this.hoverVisibilities.length;
+      const lastIndex = toolTipsLength - 1;
+      const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
+
+      if (activePopoverObj) {
+        const popoverRefId = activePopoverObj?.ref;
+        const popoverRef = this.$refs[popoverRefId];
+
+        if (popoverRef) {
+          // Open pathway drawer if the tooltip is inside or beside
+          const { parentElement, nextElementSibling } = popoverRef.$el;
+          const isPathwayContainer = (element) => {
+            return element && (
+              element.classList.contains('pathway-container') ||
+              element.classList.contains('pathway-location')
+            );
+          };
+
+          if (
+            isPathwayContainer(parentElement) ||
+            isPathwayContainer(nextElementSibling)
+          ) {
+            this.drawerOpen = true;
+          }
+        } else {
+          // skip the unavailable tooltips
+          this.helpModeActiveIndex += 1;
+        }
+      }
+
+      if (!helpMode) {
+        // reset to iniital state
+        this.helpModeActiveIndex = this.helpModeInitialIndex;
+      }
+
+      if (helpMode && this.helpModeActiveIndex >= lastIndex) {
+        /**
+         * This event is emitted when the tooltips in help mode reach the last item.
+         */
+        this.$emit('help-mode-last-item', true);
+      }
+
+      if (helpMode && !this.helpModeDialog) {
+        this.inHelp = true;
+        this.hoverVisibilities.forEach((item) => {
+          item.value = true;
+        });
+      } else if (helpMode && this.helpModeDialog && toolTipsLength > this.helpModeActiveIndex) {
+
+        // Show the map tooltip as first item
+        if (this.helpModeActiveIndex > -1) {
+          this.closeFlatmapHelpPopup();
+
+          // wait for CSS transition
+          setTimeout(() => {
+            this.inHelp = false;
+            this.hoverVisibilities.forEach((item) => {
+              item.value = false;
+            });
+
+            this.showTooltip(this.helpModeActiveIndex, 200);
+          }, 300);
+        } else if (this.helpModeActiveIndex === -1) {
           this.openFlatmapHelpPopup();
-        }, 300);
+        }
       } else {
         this.inHelp = false
         this.hoverVisibilities.forEach((item) => {
@@ -1752,12 +1831,16 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    showToolitip: function (tooltipNumber) {
+    showTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true
-        }, 500)
+          /**
+           * This event is emitted after a tooltip in Flatmap is shown.
+           */
+          this.$emit('shown-tooltip');
+        }, timeout)
       }
     },
     /**
@@ -1766,12 +1849,12 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    hideToolitip: function (tooltipNumber) {
+    hideTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = false
-        }, 500)
+        }, timeout)
       }
     },
     /**
@@ -1813,6 +1896,10 @@ export default {
             anchor: 'top',
             className: 'flatmap-popup-popper',
           })
+          /**
+           * This event is emitted after a tooltip on Flatmap's map is shown.
+           */
+          this.$emit('shown-map-tooltip');
         }
       }
     },
@@ -2177,6 +2264,37 @@ export default {
       default: false,
     },
     /**
+     * The active item index of help mode.
+     */
+    helpModeActiveItem: {
+      type: Number,
+      default: 0,
+    },
+    /**
+     * The option to use helpModeDialog.
+     * On default, `false`, clicking help will show all tooltips.
+     * If `true`, clicking help will show the help-mode-dialog.
+     */
+     helpModeDialog: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The last item of help mode.
+     */
+    helpModeLastItem: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The initial index number for help mode tooltips.
+     * Set negative (e.g. -2) if there are other tooltips outside of `hoverVisibilities`.
+     */
+    helpModeInitialIndex: {
+      type: Number,
+      default: 0,
+    },
+    /**
      * The option to create map on component mounted.
      */
     renderAtMounted: {
@@ -2330,17 +2448,18 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
+        { value: false, ref: 'zoomInPopover' }, // 0
+        { value: false, ref: 'zoomOutPopover' }, // 1
+        { value: false, ref: 'zoomFitPopover' }, // 2
+        { value: false, ref: 'settingsPopover' }, // 3
+        { value: false, ref: 'checkBoxPopover' }, // 4
+        { value: false, ref: 'markerPopover' }, // 5
+        { value: false, ref: 'warningPopover' }, // 6
+        { value: false, ref: 'whatsNewPopover' }, // 7
+        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'featuredMarkerPopover' }, // 9
       ],
+      helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
       isFC: false,
       inHelp: false,
@@ -2396,6 +2515,14 @@ export default {
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.setHelpMode(newVal)
+      }
+    },
+    helpModeActiveItem: function () {
+      // just take the action from helpModeActiveItem
+      // work with local value since the indexing is different
+      if (this.helpMode) {
+        this.helpModeActiveIndex += 1;
+        this.setHelpMode(this.helpMode);
       }
     },
     state: {
@@ -2967,7 +3094,21 @@ export default {
 
 :deep(.flatmap-popup-popper) {
   .maplibregl-popup-tip {
+    margin-bottom: -1px;
     border-bottom-color: $app-primary-color;
+    position: relative;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-bottom-color: #f3ecf6;
+      position: absolute;
+      top: -9px;
+      left: -10px;
+    }
   }
   .maplibregl-popup-content {
     padding: 6px 4px;
