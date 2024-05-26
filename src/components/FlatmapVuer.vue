@@ -156,8 +156,8 @@ Please use `const` to assign meaningful names to them...
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
         @featureTooltip="connectedFeatureTooltip"
-        @showTooltip="showToolitip"
-        @hideTooltip="hideToolitip"
+        @showTooltip="showTooltip"
+        @hideTooltip="hideTooltip"
       />
 
       <div class="bottom-right-control" v-show="!disableUI">

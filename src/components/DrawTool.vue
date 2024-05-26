@@ -9,6 +9,7 @@
         width="100"
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[10].value"
+        ref="connectionPopover"
       >
         <template #reference>
           <map-svg-icon
@@ -29,6 +30,7 @@
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[11].value"
         v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
+        ref="drawPointPopover"
       >
         <template #reference>
           <map-svg-icon
@@ -49,6 +51,7 @@
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[12].value"
         v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
+        ref="drawLinePopover"
       >
         <template #reference>
           <map-svg-icon
@@ -69,6 +72,7 @@
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[13].value"
         v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
+        ref="drawPolygonPopover"
       >
         <template #reference>
           <map-svg-icon
@@ -88,6 +92,7 @@
         width="80"
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[14].value"
+        ref="deletePopover"
       >
         <template #reference>
           <map-svg-icon
@@ -107,6 +112,7 @@
         width="80"
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[15].value"
+        ref="editPopover"
       >
         <template #reference>
           <map-svg-icon
