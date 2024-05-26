@@ -287,7 +287,11 @@ export default {
   },
   methods: {
     drawConnectionEvent: function () {
-      if (this.hasConnection && !this.activeDrawTool) {
+      if (
+        this.hasConnection &&
+        !this.activeDrawTool && // disable connection icon in drawing
+        this.activeDrawMode !== "Delete" // disable connection icon in delete mode
+      ) {
         this.connectionDisplay = !this.connectionDisplay;
       }
     },
@@ -314,8 +318,7 @@ export default {
           else icon.active = false;
         });
       this.toolbarIcons
-        .filter((icon) => icon.type !== "connect")
-        .filter((icon) => icon.type !== type)
+        .filter((icon) => icon.type !== "connect" && icon.type !== type)
         .map((icon) => {
           if (value) icon.disabled = true;
           else icon.disabled = false;
@@ -323,7 +326,11 @@ export default {
       this.toolbarCssHacks();
     },
     drawToolEvent: function (type) {
-      if (!this.activeDrawMode && !this.connectionDisplay) {
+      if (
+        (!this.activeDrawTool || this.activeDrawTool === type) && // disable other tool icon when one is on
+        !this.activeDrawMode && // disable tool icon in edit or delete mode
+        !this.connectionDisplay // disable tool icon when connection displayed
+      ) {
         if (type === "Point") {
           const point = this.flatmapCanvas.querySelector(
             ".mapbox-gl-draw_point"
@@ -351,7 +358,10 @@ export default {
       }
     },
     drawModeEvent: function (type) {
-      if (!this.activeDrawTool) {
+      if (
+        (!this.activeDrawMode || this.activeDrawMode === type) && // disable other mode icon when one is on
+        !this.activeDrawTool // disable tool icon in drawing
+      ) {
         this.activeMode = type;
         this.$emit("drawToolbarEvent", this.activeMode);
       }
