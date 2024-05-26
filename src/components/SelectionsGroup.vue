@@ -2,7 +2,21 @@
   <div class="selections-container">
     <el-row>
       <el-col :span="12">
-        <div class="checkall-display-text">{{ title }}</div>
+        <span class="checkall-display-text">{{ title }}</span>
+        <el-popover
+          width="250"
+          trigger="hover"
+          :teleported="false"
+          popper-class="popover-origin-help"
+          v-if="helpMessage"
+        >
+        <template v-if="helpMessage" #reference>
+          <el-icon class="info"><el-icon-warning /></el-icon>
+        </template>
+        <span style="word-break: keep-all">
+          {{ helpMessage }}
+        </span>
+      </el-popover>
       </el-col>
       <el-col :span="12">
         <el-checkbox
@@ -60,8 +74,12 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import {
+  Warning as ElIconWarning,
+} from '@element-plus/icons-vue'
+import {
   ElCheckbox as Checkbox,
   ElCheckboxGroup as CheckboxGroup,
+  ElIcon as Icon,
   ElCol as Col,
   ElRow as Row,
 } from 'element-plus'
@@ -72,7 +90,9 @@ export default {
     Checkbox,
     CheckboxGroup,
     Col,
+    Icon,
     Row,
+    ElIconWarning,
   },
   methods: {
     /**
@@ -186,6 +206,10 @@ export default {
     colourStyle: {
       type: String,
       default: 'line',
+    },
+    helpMessage: {
+      type: String,
+      default: '',
     },
     identifierKey: {
       type: String,
@@ -317,5 +341,23 @@ export default {
 .checkbox-row {
   width: 100%;
   top: 2px;
+}
+
+.info {
+  transform: rotate(180deg);
+  color: #8300bf;
+  margin-left: 8px;
+}
+
+
+:deep(.popover-origin-help.el-popover) {
+  text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #ffffff;
+    }
+  }
 }
 </style>

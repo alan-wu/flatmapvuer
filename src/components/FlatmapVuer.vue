@@ -281,15 +281,17 @@
                 @change-active="ftuSelected"
               />
               <selections-group
-                v-if="!isFC && centreLines && centreLines.length > 0"
-                title="Nerves"
+                v-if="containsAlert && alertOptions"
+                title="Alert"
                 labelKey="label"
                 identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
+                :selections="alertOptions"
+                @changed="alertSelected"
+                @checkboxMouseEnter="alertMouseEnterEmitted"
                 @selections-data-changed="onSelectionsDataChanged"
-                ref="centrelinesSelection"
-                key="centrelinesSelection"
+                @checkAll="checkAllAlerts"
+                ref="alertSelection"
+                key="alertSelection"
               />
               <!--
                 <selections-group
@@ -318,19 +320,6 @@
                 />
               -->
               <selections-group
-                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
-                title="Observed in"
-                labelKey="label"
-                identifierKey="taxon"
-                :selections="taxonConnectivity"
-                @changed="taxonsSelected"
-                @checkboxMouseEnter="checkboxMouseEnterEmitted"
-                @selections-data-changed="onSelectionsDataChanged"
-                @checkAll="checkAllTaxons"
-                ref="taxonSelection"
-                key="taxonSelection"
-              />
-              <selections-group
                 v-if="pathways && pathways.length > 0"
                 title="Pathways"
                 labelKey="label"
@@ -342,6 +331,31 @@
                 @checkAll="checkAllPathways"
                 ref="pathwaysSelection"
                 key="pathwaysSelection"
+              />
+              <selections-group
+                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+                title="Studied in"
+                labelKey="label"
+                identifierKey="taxon"
+                helpMessage="Evidence exists that this set of neuron populations have been studied in the given species."
+                :selections="taxonConnectivity"
+                @changed="taxonsSelected"
+                @checkboxMouseEnter="taxonMouseEnterEmitted"
+                @selections-data-changed="onSelectionsDataChanged"
+                @checkAll="checkAllTaxons"
+                ref="taxonSelection"
+                key="taxonSelection"
+              />
+              <selections-group
+                v-if="!isFC && centreLines && centreLines.length > 0"
+                title="Nerves"
+                labelKey="label"
+                identifierKey="key"
+                :selections="centreLines"
+                @changed="centreLinesSelected"
+                @selections-data-changed="onSelectionsDataChanged"
+                ref="centrelinesSelection"
+                key="centrelinesSelection"
               />
             </div>
             <div
@@ -524,7 +538,7 @@
 </template>
 
 <script>
-import { shallowRef } from 'vue'
+import { markRaw, shallowRef } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -555,8 +569,6 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import EventBus from './EventBus';
-
 
 const processFTUs = (parent, key) => {
   const ftus = []
@@ -869,6 +881,99 @@ export default {
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
     },
+    resetMapFilter: function() {
+      const alert = this.mapFilters.alert;
+      let filter = undefined;
+      if (alert.with) {
+        if (!alert.without) {
+          filter = {
+            HAS: 'alert',
+          };
+        }
+      } else {
+        if (alert.without) {
+          filter = {
+            NOT: { HAS: 'alert'},
+          };
+        } else {
+          filter = {
+            AND: [ {NOT: { HAS: 'alert'}}, { HAS: 'alert'}]
+          }
+        }
+      }
+      if (filter) {
+        this.mapImp.setVisibilityFilter(filter)
+      } else {
+        this.mapImp.clearVisibilityFilter()
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable mouse enter and leave event for
+     * alert checkbox
+     * @arg payload
+     */
+    alertMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          let filter = undefined;
+          if (payload.key === "alert") {
+            filter = {
+              HAS: 'alert',
+            }
+          } else if (payload.key === "withoutAlert") {
+            filter = {
+              NOT: {HAS: 'alert'},
+            }
+          }
+          this.mapImp.setVisibilityFilter(filter)
+        } else {
+          this.resetMapFilter()
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable (show/hide) pathways with/without alert
+     * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
+     * @arg payload
+     */
+     alertSelected: function (payload) {
+      if (this.mapImp) {
+        if (payload.key === "alert") {
+          if (payload.value) {
+            this.mapFilters.alert.with = true
+          } else {
+            this.mapFilters.alert.with = false
+          }
+        } else if (payload.key === "withoutAlert") {
+          if (payload.value) {
+            this.mapFilters.alert.without = true
+          } else {
+            this.mapFilters.alert.without = false
+          }
+        }
+        this.resetMapFilter()
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable (show/hide) all alerts
+     * option by providing ``flag`` (true/false).
+     * @arg flag
+     */
+     checkAllAlerts: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          this.mapFilters.alert.without = true
+          this.mapFilters.alert.with = true
+        } else {
+          this.mapFilters.alert.without = false
+          this.mapFilters.alert.with = false
+        }
+        this.resetMapFilter()
+      }
+    },
     /**
      * @vuese
      * Function to enable/disable (show/hide) the system
@@ -927,7 +1032,7 @@ export default {
     },
     /**
      * @vuese
-     * Function to show or hide connectivity features observed in particular species
+     * Function to show or hide connectivity features studied in particular species
      * by providing ``{taxonId, true/false}`` in ``payload.key, payload.value``.
      * @arg payload
      */
@@ -936,7 +1041,7 @@ export default {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
       }
     },
-    checkboxMouseEnterEmitted: function (payload) {
+    taxonMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
           let gid = this.mapImp.taxonFeatureIds(payload.key)  
@@ -954,7 +1059,7 @@ export default {
     },
     /**
      * @vuese
-     * Function to show or hide connectivity features observed in particular species
+     * Function to show or hide connectivity features studied in particular species
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
      * @arg payload
      */
@@ -1032,6 +1137,7 @@ export default {
             provenanceTaxonomy: taxons,
           }
           if (eventType === 'click') {
+            this.featuresAlert = data.alert
             if (this.viewingMode === 'Network Discovery') {
               this.highlightConnectedPaths([data.models])
             } else {
@@ -1604,6 +1710,7 @@ export default {
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
       this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
@@ -1798,22 +1905,6 @@ export default {
      */
     openMapOptions: {
       type: Array,
-      /**
-       * ```[
-          {
-            display: 'Open AC Map',
-            key: 'AC',
-          },
-          {
-            display: 'Open FC Map',
-            key: 'FC',
-          },
-          {
-            display: 'Open 3D Human Map',
-            key: '3D',
-          },
-        ]```
-       */
       default: function () {
         return [
           {
@@ -1886,7 +1977,8 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      userApiKey: this.userToken
+      getFeaturesAlert: () => this.featuresAlert,
+      userApiKey: this.userToken,
     }
   },
   data: function () {
@@ -1940,6 +2032,7 @@ export default {
       connectivityTooltipVisible: false,
       drawerOpen: false,
       annotationRadio: false,
+      featuresAlert: undefined,
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
@@ -1952,6 +2045,25 @@ export default {
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      containsAlert: false,
+      alertOptions: [
+        {
+          label: 'Display Path With Alerts',
+          key: 'alert',
+          enabled: true,
+        },
+        {
+          label: 'Display Path Without Alerts',
+          key: 'withoutAlert',
+          enabled: true,
+        },
+      ],
+      mapFilters: markRaw({
+        alert: {
+          with: true,
+          without: true,
+        }
+      })
     }
   },
   computed: {
