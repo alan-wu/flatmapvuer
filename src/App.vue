@@ -130,30 +130,30 @@ export default {
     },
     FlatmapSelected: function (resource) {
       if (resource.eventType === 'click') {
-        console.log('resource', resource)
+        if (this.consoleOn) console.log('resource', resource)
       }
     },
     onOpenPubmedUrl: function (url) {
-      console.log('open-pubmed-url', url);
+      if (this.consoleOn) console.log('open-pubmed-url', url);
     },
     onPathwaySelectionChanged: function (data) {
-      console.log('pathway-selection-changed', data);
+      if (this.consoleOn) console.log('pathway-selection-changed', data);
     },
     FlatmapReady: function (component) {
-      console.log(component)
+      if (this.consoleOn) console.log(component)
       let taxon = component.mapImp.describes
       let id = component.mapImp.addMarker('UBERON:0000948')
       window.flatmapImp = component.mapImp
       component.enablePanZoomEvents(true)
       //component.showPathwaysDrawer(false);
-      console.log(taxon, id)
+      if (this.consoleOn) console.log(taxon, id)
       //component.searchAndShowResult("heart");
     },
     panZoomcallback: function (payload) {
       this.payload = payload
     },
     openMap: function (map) {
-      console.log(map)
+      if (this.consoleOn) console.log(map)
     },
     fetchSuggestions: function (term, cb) {
       if (term === '') {
@@ -178,7 +178,7 @@ export default {
       }
     },
     search: function () {
-      console.log(this.searchText)
+      if (this.consoleOn) console.log(this.searchText)
       this.$refs.multi
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
@@ -213,6 +213,7 @@ export default {
   },
   data: function () {
     return {
+      consoleOn: true,
       searchText: '',
       disableUI: false,
       minZoom: 4,
