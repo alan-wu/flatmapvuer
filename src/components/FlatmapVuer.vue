@@ -772,6 +772,7 @@ export default {
     initialiseDrawing: function () {
       this.connectionEntry = {}
       this.activeDrawTool = undefined
+      this.activeDrawMode = undefined
       this.drawnCreatedEvent = undefined
     },
     /**
@@ -1049,6 +1050,7 @@ export default {
       this.drawnType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
+        this.initialiseDrawing()
       }
     },
     /**
