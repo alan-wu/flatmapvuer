@@ -1813,8 +1813,9 @@ export default {
       const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
 
       if (activePopoverObj) {
+        const popoverRefsId = activePopoverObj?.refs;
         const popoverRefId = activePopoverObj?.ref;
-        const popoverRef = this.$refs[popoverRefId];
+        const popoverRef = this.$refs[popoverRefsId ? popoverRefsId : popoverRefId];
 
         if (popoverRef) {
           // Open pathway drawer if the tooltip is inside or beside
@@ -2500,12 +2501,12 @@ export default {
         { value: false, ref: 'whatsNewPopover' }, // 7
         { value: false, ref: 'openMapPopover' }, // 8
         { value: false, ref: 'featuredMarkerPopover' }, // 9
-        { value: false, ref: 'drawToolPopover' }, // 10 connectionPopover
-        { value: false, ref: 'drawToolPopover' }, // 11 drawPointPopover
-        { value: false, ref: 'drawToolPopover' },// 12 drawLinePopover
-        { value: false, ref: 'drawToolPopover' }, // 13 drawPolygonPopover
-        { value: false, ref: 'drawToolPopover' }, // 14 deletePopover
-        { value: false, ref: 'drawToolPopover' }, // 15 editPopover
+        { value: false, refs: 'drawToolPopover', ref: 'connectionPopover' }, // 10
+        { value: false, refs: 'drawToolPopover', ref: 'drawPointPopover' }, // 11
+        { value: false, refs: 'drawToolPopover', ref: 'drawLinePopover' }, // 12
+        { value: false, refs: 'drawToolPopover', ref: 'drawPolygonPopover' }, // 13
+        { value: false, refs: 'drawToolPopover', ref: 'deletePopover' }, // 14
+        { value: false, refs: 'drawToolPopover', ref: 'editPopover' }, // 15
       ],
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
