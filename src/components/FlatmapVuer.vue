@@ -845,6 +845,9 @@ export default {
       } else {
         this.activeDrawTool = type
       }
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
+      }
     },
         /**
      * @vuese
@@ -934,6 +937,7 @@ export default {
         ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
       ) {
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
+        this.annotationEntry = {}
       }
     },
     /**
@@ -2622,13 +2626,10 @@ export default {
         })
       } else this.showAnnotator(false)
     },
-    activeDrawMode: function (value) {
+    activeDrawMode: function () {
       // Deselect any feature when draw mode is changed 
       this.changeAnnotationDrawMode({ mode: 'simple_select' })
-      // Clear connection dialog when delete event is fired
-      if (value === 'Delete') {
-        this.connectionEntry = {}
-      }
+      this.connectionEntry = {}
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
