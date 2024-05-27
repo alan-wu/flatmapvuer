@@ -244,12 +244,12 @@ export default {
         y: undefined,
       },
       toolbarIcons: [
-        { name: "Connection", type: "connect", active: false, disabled: true },
-        { name: "Point", type: "tool", active: false, disabled: false },
-        { name: "LineString", type: "tool", active: false, disabled: false },
-        { name: "Polygon", type: "tool", active: false, disabled: false },
-        { name: "Edit", type: "mode", active: false, disabled: false },
-        { name: "Delete", type: "mode", active: false, disabled: false },
+        { name: "Connection", active: false, disabled: true },
+        { name: "Point", active: false, disabled: false },
+        { name: "LineString", active: false, disabled: false },
+        { name: "Polygon", active: false, disabled: false },
+        { name: "Edit", active: false, disabled: false },
+        { name: "Delete", active: false, disabled: false },
       ],
     };
   },
@@ -266,15 +266,16 @@ export default {
   },
   watch: {
     activeDrawTool: function (value) {
-      this.updateToolbarIcons(value, "tool");
+      this.updateToolbarIcons(value);
       if (!value) this.connectionDisplay = false;
     },
     activeDrawMode: function (value) {
-      this.updateToolbarIcons(value, "mode");
+      this.updateToolbarIcons(value);
       if (value === "Delete") this.connectionDisplay = false;
     },
     hasConnection: function (value) {
       this.updateToolbarConnectionIcon(value, "disabled");
+      if (!value) this.connectionDisplay = false;
     },
     isFeatureDrawn: function (value) {
       if (value) this.connectionDisplay = true;
@@ -306,28 +307,31 @@ export default {
     },
     updateToolbarConnectionIcon: function (value, type) {
       this.toolbarIcons
-        .filter((icon) => icon.type === "connect")
+        .filter((icon) => icon.name === "Connection")
         .map((icon) => {
-          if (type === "active") {
-            if (value) icon.active = true;
-            else icon.active = false;
-          }
-          if (type === "disabled") {
-            if (value) icon.disabled = false;
-            else icon.disabled = true;
+          // Disable connection icon when delete mode is on
+          if (this.activeDrawMode === "Delete") {
+            icon.disabled = true;
+          } else {
+            if (type === "active") {
+              if (value) icon.active = true;
+              else icon.active = false;
+            }
+            if (type === "disabled") {
+              if (value) icon.disabled = false;
+              else icon.disabled = true;
+            }
           }
         });
       this.toolbarCssHacks();
     },
-    updateToolbarIcons: function (value, type) {
+    updateToolbarIcons: function (value) {
+      this.toolbarIcons.map((icon) => {
+        if (icon.name === value) icon.active = true;
+        else icon.active = false;
+      });
       this.toolbarIcons
-        .filter((icon) => icon.type === type)
-        .map((icon) => {
-          if (icon.name === value) icon.active = true;
-          else icon.active = false;
-        });
-      this.toolbarIcons
-        .filter((icon) => icon.type !== "connect" && icon.type !== type)
+        .filter((icon) => icon.name !== "Connection" && icon.name !== value)
         .map((icon) => {
           if (value) icon.disabled = true;
           else icon.disabled = false;
