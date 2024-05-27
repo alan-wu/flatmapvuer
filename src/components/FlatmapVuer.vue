@@ -869,7 +869,7 @@ export default {
           type: 'connectivity',
           source: features[0],
           target: features[features.length - 1],
-          intermediates: features.slice(1, -1),
+          intermediates: features.filter((f, index) => index !== 0 && index !== features.length - 1),
         }
         this.annotationEntry.body = body
       }
@@ -993,9 +993,11 @@ export default {
         if (this.drawnType !== 'None') {
           if (!this.featureAnnotationSubmitted) this.loading = true
           const userId = this.annotatedType === 'Anyone' ?
-            undefined : this.userInformation.orcid ? this.userInformation.orcid : '0000-0000-0000-0000'
+            undefined : this.userInformation.orcid ?
+              this.userInformation.orcid : '0000-0000-0000-0000'
           const participated = this.annotatedType === 'Anyone' ?
-            undefined : this.annotatedType === 'Me' ? true : false
+            undefined : this.annotatedType === 'Me' ?
+              true : false
           const drawnFeatures = await this.fetchDrawnFeatures(userId, participated)
           this.existDrawnFeatures = drawnFeatures
           this.loading = false
@@ -1487,16 +1489,17 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                // Stop adding features if dialog displayed
+                // Drawing connectivity between features
                 if (this.activeDrawTool && !this.drawnCreatedEvent) {
-                  // Only clicked connection data will be added
-                  let nodeLabel = data.label ? data.label : `Feature ${data.id}`
-                  const validDrawnFeature = data.featureId ||
-                    this.existDrawnFeatures.find((feature) => feature.id === data.id)
-                  // only the linestring will have connection at the current stage
+                  // Check if flatmap features or existing drawn features
+                  const validDrawnFeature = data.featureId || this.existDrawnFeatures.find(
+                    (feature) => feature.id === data.id
+                  )
+                  // Only the linestring will have connection
                   if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
                     const key = data.featureId ? data.featureId : data.id
-                    // add space before key to make sure properties follows adding order
+                    const nodeLabel = data.label ? data.label : `Feature ${data.id}`
+                    // Add space before key to make sure properties follows adding order
                     this.connectionEntry[` ${key}`] = Object.assign({ label: nodeLabel },
                       Object.fromEntries(
                         Object.entries(data)

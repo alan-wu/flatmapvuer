@@ -81,21 +81,13 @@ export default {
   },
   methods: {
     shadowDisplay: function (value) {
-      if (value === this.tooltipId) {
-        return "always";
-      } else {
-        return "hover";
-      }
+      return this.tooltipId === value ? "always" : "hover";
     },
     capitalise: function (label) {
       return label[0].toUpperCase() + label.slice(1);
     },
     handleTooltip: function (value) {
-      if (this.tooltipId !== value) {
-        this.tooltipId = value;
-      } else {
-        this.tooltipId = undefined;
-      }
+      this.tooltipId = this.tooltipId === value ? undefined : value;
       this.$emit("featureTooltip", this.tooltipId);
     },
   },
