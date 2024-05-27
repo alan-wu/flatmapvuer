@@ -209,7 +209,10 @@ export default {
     MapSvgIcon,
   },
   props: {
-    flatmapCanvas: undefined,
+    flatmapCanvas: {
+      type: Object,
+      default: null,
+    },
     drawnType: {
       type: String,
     },
@@ -414,22 +417,29 @@ export default {
     hideTooltip: function (tooltipNumber) {
       this.$emit("hideTooltip", tooltipNumber);
     },
+    clickHandler: function (e) {
+      e.preventDefault();
+      this.dialogPosition.x = e.clientX;
+      this.dialogPosition.y = e.clientY;
+      if (this.activeDrawTool === "Point") {
+        this.dialogCssHacks();
+      }
+    },
   },
   mounted: function () {
     this.toolbarCssHacks();
-    this.flatmapCanvas.querySelector(".maplibregl-canvas").addEventListener(
-      "click",
-      (e) => {
-        e.preventDefault();
-        this.dialogPosition.x = e.clientX;
-        this.dialogPosition.y = e.clientY;
-        // use to fix the draw point pop up position issue
-        if (this.activeDrawTool === "Point") {
-          this.dialogCssHacks();
-        }
-      },
-      false
-    );
+    if (this.flatmapCanvas) {
+      this.flatmapCanvas
+        .querySelector(".maplibregl-canvas")
+        .addEventListener("click", this.clickHandler, false)
+    }
+  },
+  destroyed: function () {
+    if (this.flatmapCanvas) {
+      this.flatmapCanvas
+        .querySelector(".maplibregl-canvas")
+        .removeEventListener("click", this.clickHandler, false);
+    }
   },
 };
 </script>
