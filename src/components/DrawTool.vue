@@ -8,15 +8,16 @@
         trigger="manual"
         width="100"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[0].value"
+        :visible="hoverVisibilities[10].value"
+        ref="connectionPopover"
       >
         <template #reference>
           <map-svg-icon
             icon="connection"
-            class="icon-button drawConnection inactive"
-            @click="$emit('dialogDisplay', true)"
-            @mouseover="showTooltip(0)"
-            @mouseout="hideTooltip(0)"
+            class="icon-button drawConnection"
+            @click="drawConnectionEvent()"
+            @mouseover="showTooltip(10)"
+            @mouseout="hideTooltip(10)"
           />
         </template>
       </el-popover>
@@ -27,16 +28,17 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[1].value"
+        :visible="hoverVisibilities[11].value"
         v-if="drawnType !== 'LineString' && drawnType !== 'Polygon'"
+        ref="drawPointPopover"
       >
         <template #reference>
           <map-svg-icon
             icon="drawPoint"
             class="icon-button drawPoint"
             @click="drawToolEvent('Point')"
-            @mouseover="showTooltip(1)"
-            @mouseout="hideTooltip(1)"
+            @mouseover="showTooltip(11)"
+            @mouseout="hideTooltip(11)"
           />
         </template>
       </el-popover>
@@ -47,16 +49,17 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[2].value"
+        :visible="hoverVisibilities[12].value"
         v-if="drawnType !== 'Point' && drawnType !== 'Polygon'"
+        ref="drawLinePopover"
       >
         <template #reference>
           <map-svg-icon
             icon="drawLine"
             class="icon-button drawLineString"
             @click="drawToolEvent('LineString')"
-            @mouseover="showTooltip(2)"
-            @mouseout="hideTooltip(2)"
+            @mouseover="showTooltip(12)"
+            @mouseout="hideTooltip(12)"
           />
         </template>
       </el-popover>
@@ -67,16 +70,17 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[3].value"
+        :visible="hoverVisibilities[13].value"
         v-if="drawnType !== 'Point' && drawnType !== 'LineString'"
+        ref="drawPolygonPopover"
       >
         <template #reference>
           <map-svg-icon
             icon="drawPolygon"
             class="icon-button drawPolygon"
             @click="drawToolEvent('Polygon')"
-            @mouseover="showTooltip(3)"
-            @mouseout="hideTooltip(3)"
+            @mouseover="showTooltip(13)"
+            @mouseout="hideTooltip(13)"
           />
         </template>
       </el-popover>
@@ -87,15 +91,16 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[14].value"
+        ref="deletePopover"
       >
         <template #reference>
           <map-svg-icon
             icon="drawTrash"
             class="icon-button drawDelete"
             @click="drawModeEvent('Delete')"
-            @mouseover="showTooltip(4)"
-            @mouseout="hideTooltip(4)"
+            @mouseover="showTooltip(14)"
+            @mouseout="hideTooltip(14)"
           />
         </template>
       </el-popover>
@@ -106,15 +111,16 @@
         trigger="manual"
         width="80"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[5].value"
+        :visible="hoverVisibilities[15].value"
+        ref="editPopover"
       >
         <template #reference>
           <map-svg-icon
             icon="comment"
             class="icon-button drawEdit"
             @click="drawModeEvent('Edit')"
-            @mouseover="showTooltip(5)"
-            @mouseout="hideTooltip(5)"
+            @mouseover="showTooltip(15)"
+            @mouseout="hideTooltip(15)"
           />
         </template>
       </el-popover>
@@ -124,12 +130,11 @@
       v-show="connectionDisplay"
       :connectionEntry="connectionEntry"
       :inDrawing="inDrawing"
-      :connection="connection"
-      @dialogDisplay="$emit('dialogDisplay', $event)"
+      :hasConnection="hasConnection"
+      @dialogDisplay="drawConnectionEvent()"
       @confirmDrawn="$emit('confirmDrawn', $event)"
       @cancelDrawn="$emit('cancelDrawn', $event)"
-      @showFeatureTooltip="$emit('showFeatureTooltip', $event)"
-      @hideFeatureTooltip="$emit('hideFeatureTooltip', $event)"
+      @featureTooltip="$emit('featureTooltip', $event)"
     />
   </div>
 </template>
@@ -204,91 +209,80 @@ export default {
     MapSvgIcon,
   },
   props: {
-    flatmapCanvas: undefined,
-    inDrawing: {
-      type: Boolean,
-    },
-    activeDrawTool: {
-      type: String,
+    flatmapCanvas: {
+      type: Object,
+      default: null,
     },
     drawnType: {
       type: String,
     },
-    drawnTypes: {
-      type: Array,
+    activeDrawTool: {
+      type: String,
     },
     activeDrawMode: {
       type: String,
     },
-    drawModes: {
-      type: Array,
-    },
-    connectionDisplay: {
-      type: Boolean,
+    drawnCreatedEvent: {
+      type: Object,
     },
     connectionEntry: {
       type: Object,
     },
-    helpMode: {
-      type: Boolean,
-      default: false,
+    hoverVisibilities: {
+      type: Array,
     },
   },
   data: function () {
     return {
       activeTool: undefined,
       activeMode: undefined,
-      hoverVisibilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-      ],
+      connectionDisplay: false,
       dialogPosition: {
         offsetX: 0,
         offsetY: 0,
         x: undefined,
         y: undefined,
       },
+      toolbarIcons: [
+        { name: "Connection", type: "connect", active: false, disabled: true },
+        { name: "Point", type: "tool", active: false, disabled: false },
+        { name: "LineString", type: "tool", active: false, disabled: false },
+        { name: "Polygon", type: "tool", active: false, disabled: false },
+        { name: "Edit", type: "mode", active: false, disabled: false },
+        { name: "Delete", type: "mode", active: false, disabled: false },
+      ],
     };
   },
   computed: {
-    connection: function () {
+    inDrawing: function () {
+      return this.activeDrawTool !== undefined;
+    },
+    isFeatureDrawn: function () {
+      return this.drawnCreatedEvent !== undefined;
+    },
+    hasConnection: function () {
       return Object.keys(this.connectionEntry).length > 0;
     },
   },
   watch: {
-    helpMode: function (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.setHelpMode(newVal);
-      }
+    activeDrawTool: function (value) {
+      this.updateToolbarIcons(value, "tool");
+      if (!value) this.connectionDisplay = false;
     },
-    activeDrawTool: function () {
-      this.drawIconCssHacks();
+    activeDrawMode: function (value) {
+      this.updateToolbarIcons(value, "mode");
+      if (value === "Delete") this.connectionDisplay = false;
     },
-    activeDrawMode: function () {
-      this.drawIconCssHacks();
+    hasConnection: function (value) {
+      this.updateToolbarConnectionIcon(value, "disabled");
     },
-    connection: function (value) {
-      const connectionIcon = this.$el.querySelector(".drawConnection");
-      if (!value) {
-        this.$emit("connection", false);
-        connectionIcon.classList.add("inactive");
-      } else {
-        connectionIcon.classList.remove("inactive");
-      }
+    isFeatureDrawn: function (value) {
+      if (value) this.connectionDisplay = true;
     },
-    connectionDisplay: function (display) {
-      const connectionIcon = this.$el.querySelector(".drawConnection");
-      if (display) {
-        connectionIcon.classList.add("iconSelected");
-        this.dialogCssHacks();
-      } else {
-        connectionIcon.classList.remove("iconSelected");
-      }
-      this.drawIconCssHacks();
+    connectionDisplay: function (value) {
+      this.updateToolbarConnectionIcon(value, "active");
+      if (value) this.dialogCssHacks();
+      else this.$emit("featureTooltip", undefined);
     },
     dialogPosition: {
       handler: function () {
@@ -301,8 +295,51 @@ export default {
     },
   },
   methods: {
+    drawConnectionEvent: function () {
+      if (
+        this.hasConnection &&
+        !this.activeDrawTool && // disable connection icon in drawing
+        this.activeDrawMode !== "Delete" // disable connection icon in delete mode
+      ) {
+        this.connectionDisplay = !this.connectionDisplay;
+      }
+    },
+    updateToolbarConnectionIcon: function (value, type) {
+      this.toolbarIcons
+        .filter((icon) => icon.type === "connect")
+        .map((icon) => {
+          if (type === "active") {
+            if (value) icon.active = true;
+            else icon.active = false;
+          }
+          if (type === "disabled") {
+            if (value) icon.disabled = false;
+            else icon.disabled = true;
+          }
+        });
+      this.toolbarCssHacks();
+    },
+    updateToolbarIcons: function (value, type) {
+      this.toolbarIcons
+        .filter((icon) => icon.type === type)
+        .map((icon) => {
+          if (icon.name === value) icon.active = true;
+          else icon.active = false;
+        });
+      this.toolbarIcons
+        .filter((icon) => icon.type !== "connect" && icon.type !== type)
+        .map((icon) => {
+          if (value) icon.disabled = true;
+          else icon.disabled = false;
+        });
+      this.toolbarCssHacks();
+    },
     drawToolEvent: function (type) {
-      if (!this.activeDrawMode && !this.connectionDisplay) {
+      if (
+        (!this.activeDrawTool || this.activeDrawTool === type) && // disable other tool icon when one is on
+        !this.activeDrawMode && // disable tool icon in edit or delete mode
+        !this.connectionDisplay // disable tool icon when connection displayed
+      ) {
         if (type === "Point") {
           const point = this.flatmapCanvas.querySelector(
             ".mapbox-gl-draw_point"
@@ -330,44 +367,25 @@ export default {
       }
     },
     drawModeEvent: function (type) {
-      if (!this.activeDrawTool) {
+      if (
+        (!this.activeDrawMode || this.activeDrawMode === type) && // disable other mode icon when one is on
+        !this.activeDrawTool // disable tool icon in drawing
+      ) {
         this.activeMode = type;
         this.$emit("drawToolbarEvent", this.activeMode);
       }
     },
-    drawIconCssHacks: function () {
-      // set tool/mode icon status
-      if (this.$el.querySelector(".iconSelected") || !this.connectionDisplay) {
-        this.drawnTypes.map((t) => {
-          const dtype = this.$el.querySelector(`.draw${t}`);
-          if (dtype) {
-            dtype.classList.remove("iconSelected");
-            dtype.classList.remove("inactive");
-          }
-        });
-        this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.remove("iconSelected");
-          this.$el.querySelector(`.draw${m}`).classList.remove("inactive");
-        });
-      }
-      if (this.activeDrawTool) {
-        this.$el
-          .querySelector(`.draw${this.activeDrawTool}`)
-          .classList.add("iconSelected");
-        this.drawModes.map((m) => {
-          this.$el.querySelector(`.draw${m}`).classList.add("inactive");
-        });
-      } else if (this.activeDrawMode || this.connectionDisplay) {
-        if (this.activeDrawMode) {
-          this.$el
-            .querySelector(`.draw${this.activeDrawMode}`)
-            .classList.add("iconSelected");
-        }
-        this.drawnTypes.map((t) => {
-          const dtype = this.$el.querySelector(`.draw${t}`);
-          if (dtype) dtype.classList.add("inactive");
-        });
-      }
+    toolbarCssHacks: function () {
+      // set toolbar icon style
+      this.toolbarIcons.map((icon) => {
+        const iconClassList = this.$el.querySelector(
+          `.draw${icon.name}`
+        ).classList;
+        if (icon.active) iconClassList.add("active");
+        else iconClassList.remove("active");
+        if (icon.disabled) iconClassList.add("disabled");
+        else iconClassList.remove("disabled");
+      });
     },
     dialogCssHacks: function () {
       this.$nextTick(() => {
@@ -393,64 +411,35 @@ export default {
         }px, ${posY - this.dialogPosition.offsetY}px)`;
       });
     },
-    /**
-     * @vuese
-     * Function to show tooltip
-     * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
-     */
     showTooltip: function (tooltipNumber) {
-      if (!this.inHelp) {
-        clearTimeout(this.tooltipWait[tooltipNumber]);
-        this.tooltipWait[tooltipNumber] = setTimeout(() => {
-          this.hoverVisibilities[tooltipNumber].value = true;
-        }, 500);
-      }
+      this.$emit("showTooltip", tooltipNumber);
     },
-    /**
-     * @vuese
-     * Function to hide tooltip
-     * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
-     */
     hideTooltip: function (tooltipNumber) {
-      if (!this.inHelp) {
-        clearTimeout(this.tooltipWait[tooltipNumber]);
-        this.tooltipWait[tooltipNumber] = setTimeout(() => {
-          this.hoverVisibilities[tooltipNumber].value = false;
-        }, 500);
-      }
+      this.$emit("hideTooltip", tooltipNumber);
     },
-    setHelpMode: function (helpMode) {
-      if (helpMode) {
-        this.inHelp = true;
-        this.hoverVisibilities.forEach((item) => {
-          item.value = true;
-        });
-      } else {
-        this.inHelp = false;
-        this.hoverVisibilities.forEach((item) => {
-          item.value = false;
-        });
+    clickHandler: function (e) {
+      e.preventDefault();
+      this.dialogPosition.x = e.clientX;
+      this.dialogPosition.y = e.clientY;
+      if (this.activeDrawTool === "Point") {
+        this.dialogCssHacks();
       }
     },
   },
   mounted: function () {
-    this.tooltipWait = [];
-    this.tooltipWait.length = this.hoverVisibilities.length;
-    this.flatmapCanvas.querySelector(".maplibregl-canvas").addEventListener(
-      "click",
-      (e) => {
-        e.preventDefault();
-        this.dialogPosition.x = e.clientX;
-        this.dialogPosition.y = e.clientY;
-        // use to fix the draw point pop up position issue
-        if (this.activeDrawTool === "Point") {
-          this.dialogCssHacks();
-        }
-      },
-      false
-    );
+    this.toolbarCssHacks();
+    if (this.flatmapCanvas) {
+      this.flatmapCanvas
+        .querySelector(".maplibregl-canvas")
+        .addEventListener("click", this.clickHandler, false)
+    }
+  },
+  destroyed: function () {
+    if (this.flatmapCanvas) {
+      this.flatmapCanvas
+        .querySelector(".maplibregl-canvas")
+        .removeEventListener("click", this.clickHandler, false);
+    }
   },
 };
 </script>
@@ -492,11 +481,11 @@ export default {
   }
 }
 
-.iconSelected {
+.active {
   color: var(--el-color-primary) !important;
 }
 
-.inactive {
+.disabled {
   color: #dddddd !important;
   cursor: not-allowed !important;
 }

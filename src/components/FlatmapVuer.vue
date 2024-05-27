@@ -145,22 +145,19 @@ Please use `const` to assign meaningful names to them...
       <DrawTool
         v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
         :helpMode="helpMode"
+        :hoverVisibilities=hoverVisibilities
         :flatmapCanvas="this.$el"
-        :inDrawing="inDrawing"
-        :activeDrawTool="activeDrawTool"
         :drawnType="drawnType"
-        :drawnTypes="drawnTypes"
+        :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
-        :drawModes="drawModes"
-        :connectionDisplay="connectionDisplay"
+        :drawnCreatedEvent="drawnCreatedEvent"
         :connectionEntry="connectionEntry"
         @drawToolbarEvent="drawToolbarEvent"
-        @dialogDisplay="connectionDialogDisplay"
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
-        @showFeatureTooltip="showConnectedFeatureTooltip"
-        @hideFeatureTooltip="hideConnectedFeatureTooltip"
-        @connection="(display) => connectionDisplay = display"
+        @featureTooltip="connectedFeatureTooltip"
+        @showTooltip="showTooltip"
+        @hideTooltip="hideTooltip"
       />
 
       <div class="bottom-right-control" v-show="!disableUI">
@@ -772,8 +769,7 @@ export default {
      * Function to initialise drawing.
      */
     initialiseDrawing: function () {
-      this.inDrawing = false
-      this.initialiseDialog()
+      this.connectionEntry = {}
       this.activeDrawTool = undefined
       this.drawnCreatedEvent = undefined
     },
@@ -794,36 +790,27 @@ export default {
     },
     /**
      * @vuese
-     * Function to show connected features' tooltip for drawn connectivity.
+     * Function to display connected features' tooltip for drawn connectivity.
      * @arg id
      */
-    showConnectedFeatureTooltip: function (id) {
+    connectedFeatureTooltip: function (value) {
       if (this.mapImp) {
-        if (id) {
-          const numericId = Number(id)
+        if (value) {
+          const numericId = Number(value)
           let payload = { feature: {} }
           if (numericId) {
             const data = this.mapImp.featureProperties(numericId)
             payload.feature = data
           } else {
-            const drawnFeature = this.allDrawnFeatures.filter((feature) => feature.id === id.replace(' ', ''))[0]
+            const drawnFeature = this.existDrawnFeatures.find(
+              (feature) => feature.id === value.replace(' ', '')
+            )
             payload.feature.feature = drawnFeature
           }
           this.checkAndCreatePopups(payload)
         } else {
           this.closeTooltip()
         }
-      }
-    },
-    /**
-     * @vuese
-     * Function to hide connected features' tooltip for drawn connectivity.
-     * @arg id
-     */
-    hideConnectedFeatureTooltip: function (id) {
-      if (this.mapImp) {
-        // const numericId = Number(id)
-        this.closeTooltip()
       }
     },
     /**
@@ -844,54 +831,60 @@ export default {
     },
     /**
      * @vuese
-     * Function to initialise connection dialog.
-     */
-    initialiseDialog: function () {
-      this.connectionDisplay = false
-      this.connectionEntry = {}
-    },
-    /**
-     * @vuese
-     * Function to display the connection dialog after finalising a drawing.
-     */
-    connectionDialogDisplay: function () {
-      const inactive = this.$el.querySelector('.drawConnection').classList.contains('inactive')
-      // disable click popup if icon inactive or in drawing
-      if (!inactive && !this.inDrawing) { 
-        this.closeTooltip()
-        this.connectionDisplay = !this.connectionDisplay
-      }
-    },
-    /**
-     * @vuese
      * Function to process the annotation toolbar click events.
      * @arg type
      */
     drawToolbarEvent: function (type) {
       this.closeTooltip()
-      if (this.drawnTypes.includes(type) && !this.activeDrawMode && !this.connectionDisplay) {
+      this.doubleClickedFeature = false
+      if (type === 'Delete') {
+        this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
+      } else if (type === 'Edit') {
+        this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
+      } else {
         this.activeDrawTool = type
-      } else if (this.drawModes.includes(type) && !this.activeDrawTool) {
-        if (type === 'Delete') {
-          if (
-            this.selectedDrawnFeature &&
-            // For either no mode is on or edit is on
-            (!this.activeDrawMode || this.activeDrawMode === 'Edit')
-          ) {
-            // Force simple_select a feature for delete event
-            this.doubleClickedFeature = false
+      }
+    },
+        /**
+     * @vuese
+     * Function to fire annotation event based on the provided ``data``.
+     * Either edit or delete event.
+     * @arg data
+     */
+    drawModeEvent: function (data) {
+      if (this.activeDrawMode === 'Edit') {
+        if (this.doubleClickedFeature) {
+          if (data.feature.feature.geometry.type !== 'Point') {
             this.changeAnnotationDrawMode({
-              mode: 'simple_select',
-              options: { featureIds: [this.selectedDrawnFeature.id] }
+              mode: 'direct_select',
+              options: { featureId: data.feature.feature.id }
             })
             this.modifyAnnotationFeature()
           }
-          this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
-          // clear selectedDrawnFeature when quit delete mode
-          if (!this.activeDrawMode) this.selectedDrawnFeature = undefined
-        } else if (type === 'Edit') {
-          this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
+          this.doubleClickedFeature = false
         }
+      }
+      if (this.activeDrawMode === 'Delete') {
+        this.changeAnnotationDrawMode({
+          mode: 'simple_select',
+          options: { featureIds: [data.feature.feature.id] }
+        })
+        this.modifyAnnotationFeature()
+      }
+    },
+    /**
+     * Function to create connectivity body from existing entries.
+     */
+    createConnectivityBody: function () {
+      if (Object.keys(this.connectionEntry).length > 0) {
+        const features = Object.values(this.connectionEntry)
+        const body = {
+          type: 'connectivity',
+          source: features[0],
+          target: features[features.length - 1],
+          intermediates: features.filter((f, index) => index !== 0 && index !== features.length - 1),
+        }
+        this.annotationEntry.body = body
       }
     },
     /**
@@ -911,8 +904,7 @@ export default {
     clearAnnotationFeature: function () {
       if (
         this.mapImp &&
-        this.allDrawnFeatures &&
-        this.allDrawnFeatures.length > 0
+        this.existDrawnFeatures.length > 0
       ) {
         this.mapImp.clearAnnotationFeature()
       }
@@ -938,7 +930,7 @@ export default {
       // For 'updated' and 'deleted' callback
       if (
         this.mapImp &&
-        this.drawnAnnotationEvent.includes(this.annotationEntry.type)
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
       ) {
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
       }
@@ -951,14 +943,14 @@ export default {
     commitAnnotationEvent: function (annotation) {
       if (
         this.mapImp &&
-        this.drawnAnnotationEvent.includes(this.annotationEntry.type) &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type) &&
         // Only when annotation comments stored successfully
         annotation
       ) {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
         if (this.annotationEntry.type === 'deleted') this.closeTooltip()
-        else this.addAnnotationFeature() // Update 'allDrawnFeatures' when created or updated event
+        else this.addAnnotationFeature() // Update 'existDrawnFeatures' when created or updated event
       }
     },
     /**
@@ -1014,11 +1006,13 @@ export default {
         if (this.drawnType !== 'None') {
           if (!this.featureAnnotationSubmitted) this.loading = true
           const userId = this.annotatedType === 'Anyone' ?
-            undefined : this.userInformation.orcid ? this.userInformation.orcid : '0000-0000-0000-0000'
+            undefined : this.userInformation.orcid ?
+              this.userInformation.orcid : '0000-0000-0000-0000'
           const participated = this.annotatedType === 'Anyone' ?
-            undefined : this.annotatedType === 'Me' ? true : false
+            undefined : this.annotatedType === 'Me' ?
+              true : false
           const drawnFeatures = await this.fetchDrawnFeatures(userId, participated)
-          this.allDrawnFeatures = drawnFeatures
+          this.existDrawnFeatures = drawnFeatures
           this.loading = false
           if (!this.featureAnnotationSubmitted) {
             for (const feature of drawnFeatures) {
@@ -1517,28 +1511,25 @@ export default {
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
       } else if (data.type === 'modeChanged') {
-        // 'modeChanged' event is before 'created' event
-        if (data.feature.mode.startsWith('draw_')) {
-          // Reset data entry for every draw
-          this.initialiseDialog()
-          this.inDrawing = true
-        } else if (data.feature.mode === 'simple_select' && this.inDrawing) {
-          if (this.drawnCreatedEvent) this.connectionDisplay = true
-          else this.initialiseDrawing() // Reset if invalid linestring or polygon
+        if (data.feature.mode === 'simple_select' && this.activeDrawTool) {
+          if (!this.drawnCreatedEvent) this.initialiseDrawing() // Reset if invalid linestring or polygon
         } else if (data.feature.mode === 'direct_select') {
           this.doubleClickedFeature = true
         }
       } else if (data.type === 'selectionChanged') {
-        this.selectedDrawnFeature =
-          data.feature.features.length === 0 ? undefined :  data.feature.features[0]
+        this.selectedDrawnFeature = data.feature.features.length === 0 ?
+          undefined : data.feature.features[0]
         payload.feature.feature = this.selectedDrawnFeature
-        if (!this.inDrawing) { // Make sure dialog content doesn't change
-          this.initialiseDialog()
+        if (!this.activeDrawTool) { // Make sure dialog content doesn't change
+          this.connectionEntry = {}
           // For exist drawn annotation features
           if (this.selectedDrawnFeature) {
-            let feature = this.allDrawnFeatures
-              .filter((feature) => feature.id === this.selectedDrawnFeature.id)[0]
-            if (feature && feature.connection) this.connectionEntry = feature.connection
+            const drawnFeature = this.existDrawnFeatures.find(
+              (feature) => feature.id === this.selectedDrawnFeature.id
+            )
+            if (drawnFeature && drawnFeature.connection) {
+              this.connectionEntry = drawnFeature.connection
+            }
             this.drawModeEvent(payload)
           }
         }
@@ -1605,16 +1596,17 @@ export default {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
-                // Stop adding features if dialog displayed
-                if (this.inDrawing && !this.connectionDisplay) {
-                  // Only clicked connection data will be added
-                  let nodeLabel = data.label ? data.label : `Feature ${data.id}`
-                  const validDrawnFeature = data.featureId ||
-                    this.allDrawnFeatures.find((feature) => feature.id === data.id)
-                  // only the linestring will have connection at the current stage
+                // Drawing connectivity between features
+                if (this.activeDrawTool && !this.drawnCreatedEvent) {
+                  // Check if flatmap features or existing drawn features
+                  const validDrawnFeature = data.featureId || this.existDrawnFeatures.find(
+                    (feature) => feature.id === data.id
+                  )
+                  // Only the linestring will have connection
                   if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
                     const key = data.featureId ? data.featureId : data.id
-                    // add space before key to make sure properties follows adding order
+                    const nodeLabel = data.label ? data.label : `Feature ${data.id}`
+                    // Add space before key to make sure properties follows adding order
                     this.connectionEntry[` ${key}`] = Object.assign({ label: nodeLabel },
                       Object.fromEntries(
                         Object.entries(data)
@@ -1635,7 +1627,7 @@ export default {
               eventType === 'click' &&
               !(this.viewingMode === 'Network Discovery') &&
               // Disable popup when drawing
-              !this.inDrawing
+              !this.activeDrawTool
             ) {
               this.checkAndCreatePopups(payload)
             }
@@ -1644,50 +1636,6 @@ export default {
             this.$emit('pan-zoom-callback', data)
           }
         }
-      }
-    },
-    /**
-     * @vuese
-     * Function to fire annotation event based on the provided ``data``.
-     * Either edit or delete event.
-     * @arg data
-     */
-    drawModeEvent: function (data) {
-      if (this.activeDrawMode) {
-        if (this.doubleClickedFeature) { // double click fires 'updated' callback
-          if (data.feature.feature.geometry.type !== 'Point') {
-            // show tooltip and enter edit mode
-            this.changeAnnotationDrawMode({
-              mode: 'direct_select',
-              options: { featureId: data.feature.feature.id }
-            })
-            this.modifyAnnotationFeature()
-          }
-          this.doubleClickedFeature = false
-        } else { // single click fires delete
-          if (this.activeDrawMode === 'Delete') {
-            this.changeAnnotationDrawMode({
-              mode: 'simple_select',
-              options: { featureIds: [data.feature.feature.id] }
-            })
-            this.modifyAnnotationFeature()
-          }
-        }
-      }
-    },
-    /**
-     * Function to create connectivity body from existing entries.
-     */
-    createConnectivityBody: function () {
-      if (Object.keys(this.connectionEntry).length > 0) {
-        const features = Object.values(this.connectionEntry)
-        const body = {
-          type: 'connectivity',
-          source: features[0],
-          target: features[features.length - 1],
-          intermediates: features.slice(1, -1),
-        }
-        this.annotationEntry.body = body
       }
     },
     /**
@@ -1717,21 +1665,21 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            if (this.inDrawing || this.activeDrawMode || this.connectionDisplay) {
+            // in drawing or edit/delete mode is on or has connectivity
+            if (
+              this.activeDrawTool ||
+              this.activeDrawMode ||
+              Object.keys(this.connectionEntry).length > 0
+            ) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
-              if (this.inDrawing) this.createConnectivityBody()
+              if (this.activeDrawTool) this.createConnectivityBody()
               this.displayTooltip(
                 data.feature.feature.id,
                 centroid(data.feature.feature.geometry)
               )
-              // Hide dialog when updated or deleted event is fired and tooltip is displayed
-              if (this.activeDrawMode) this.initialiseDialog()
             } else {
-              // Not allowed to update feature if not on edit mode
-              if (data.feature.type === 'updated') {
-                this.rollbackAnnotationEvent()
-              }
+              this.rollbackAnnotationEvent()
             }
           }
         } else {
@@ -1979,7 +1927,7 @@ export default {
         options.annotationFeatureGeometry = geometry
       } else {
         featureId = this.mapImp.modelFeatureIds(feature)[0]
-        if (!this.inDrawing) {
+        if (!this.activeDrawTool) {
           options.positionAtLastClick = true
         }
       }
@@ -2551,6 +2499,12 @@ export default {
         { value: false, ref: 'whatsNewPopover' }, // 7
         { value: false, ref: 'openMapPopover' }, // 8
         { value: false, ref: 'featuredMarkerPopover' }, // 9
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
       ],
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
@@ -2584,13 +2538,10 @@ export default {
       annotator: undefined,
       userInformation: undefined,
       activeDrawTool: undefined,
-      drawnAnnotationEvent: ['created', 'updated', 'deleted'],
       drawnCreatedEvent: undefined,
       featureAnnotationSubmitted: false,
-      inDrawing: false,
-      connectionDisplay: false,
       connectionEntry: {},
-      allDrawnFeatures: undefined, // Store all exist drawn features
+      existDrawnFeatures: [], // Store all exist drawn features
       doubleClickedFeature: false,
       activeDrawMode: undefined,
       drawModes: ['Delete', 'Edit'],
@@ -2616,10 +2567,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useMainStore, ['userToken']),
-    connection: function () {
-      return Object.keys(this.connectionEntry).length > 0
-    }
+    ...mapState(useMainStore, ['userToken'])
   },
   watch: {
     entry: function () {
@@ -2660,13 +2608,21 @@ export default {
             this.showAnnotator(true)
             this.userInformation = userData
             this.setFeatureAnnotated()
-            if (!this.allDrawnFeatures) {
+            if (this.existDrawnFeatures.length === 0) {
               this.addAnnotationFeature()
             }
           }
           this.loading = false
         })
       } else this.showAnnotator(false)
+    },
+    activeDrawMode: function (value) {
+      // Deselect any feature when draw mode is changed 
+      this.changeAnnotationDrawMode({ mode: 'simple_select' })
+      // Clear connection dialog when delete event is fired
+      if (value === 'Delete') {
+        this.connectionEntry = {}
+      }
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
