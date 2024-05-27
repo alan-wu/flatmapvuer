@@ -378,13 +378,13 @@ export default {
     toolbarCssHacks: function () {
       // set toolbar icon style
       this.toolbarIcons.map((icon) => {
-        const iconClassList = this.$el.querySelector(
-          `.draw${icon.name}`
-        ).classList;
-        if (icon.active) iconClassList.add("active");
-        else iconClassList.remove("active");
-        if (icon.disabled) iconClassList.add("disabled");
-        else iconClassList.remove("disabled");
+        const iconElement = this.$el.querySelector(`.draw${icon.name}`);
+        if (iconElement) {
+          if (icon.active) iconElement.classList.add("active");
+          else iconElement.classList.remove("active");
+          if (icon.disabled) iconElement.classList.add("disabled");
+          else iconElement.classList.remove("disabled");
+        }
       });
     },
     dialogCssHacks: function () {
@@ -431,7 +431,7 @@ export default {
     if (this.flatmapCanvas) {
       this.flatmapCanvas
         .querySelector(".maplibregl-canvas")
-        .addEventListener("click", this.clickHandler, false)
+        .addEventListener("click", this.clickHandler, false);
     }
   },
   destroyed: function () {
