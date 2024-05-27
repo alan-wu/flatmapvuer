@@ -1844,6 +1844,10 @@ export default {
         this.helpModeActiveIndex = this.helpModeInitialIndex;
       }
 
+      if (this.viewingMode !== 'Annotation' && this.helpModeActiveIndex > 9) {
+        this.helpModeActiveIndex = lastIndex
+      }
+
       if (helpMode && this.helpModeActiveIndex >= lastIndex) {
         /**
          * This event is emitted when the tooltips in help mode reach the last item.
