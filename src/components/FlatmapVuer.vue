@@ -158,6 +158,7 @@ Please use `const` to assign meaningful names to them...
         @featureTooltip="connectedFeatureTooltip"
         @showTooltip="showTooltip"
         @hideTooltip="hideTooltip"
+        ref="drawToolPopover"
       />
 
       <div class="bottom-right-control" v-show="!disableUI">
@@ -2499,12 +2500,12 @@ export default {
         { value: false, ref: 'whatsNewPopover' }, // 7
         { value: false, ref: 'openMapPopover' }, // 8
         { value: false, ref: 'featuredMarkerPopover' }, // 9
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
+        { value: false, ref: 'drawToolPopover' }, // 10 connectionPopover
+        { value: false, ref: 'drawToolPopover' }, // 11 drawPointPopover
+        { value: false, ref: 'drawToolPopover' },// 12 drawLinePopover
+        { value: false, ref: 'drawToolPopover' }, // 13 drawPolygonPopover
+        { value: false, ref: 'drawToolPopover' }, // 14 deletePopover
+        { value: false, ref: 'drawToolPopover' }, // 15 editPopover
       ],
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
