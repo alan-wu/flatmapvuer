@@ -60,52 +60,70 @@
           <template v-if="isEditable">
             <el-row class="dialog-spacer"></el-row>
             <el-row v-if="!editing">
-              <el-icon class="standard-icon"><el-icon-edit @click="editing = true"/></el-icon>
+              <el-icon class="standard-icon">
+                <el-icon-edit @click="editing = true" />
+              </el-icon>
+              <el-icon
+                class="standard-icon"
+                v-if="isDeleted"
+              >
+                <el-icon-delete @click="submit"/>
+              </el-icon>
+              <el-icon
+                class="standard-icon"
+                v-else-if="isPositionUpdated"
+              >
+                <el-icon-finished @click="submit" />
+              </el-icon>
             </el-row>
             <template v-else>
               <el-row class="dialog-text">
                 <strong class="sub-title">Suggest changes:</strong>
               </el-row>
-              <el-row class="dialog-text">
-                <strong>Evidence:</strong>
-              </el-row>
-              <el-row v-for="(value, index) in evidence" :key="value">
-                <el-col :span="20">
-                  {{ evidence[index] }}
-                </el-col>
-                <el-col :span="4">
-                  <el-icon class="standard-icon"><el-icon-close @click="removeEvidence(index)" /></el-icon>
-                </el-col>
-              </el-row>
-              <el-row>
-                <el-input
-                  size="small"
-                  placeholder="Enter"
-                  v-model="newEvidence"
-                  @change="evidenceEntered($event)"
-                >
-                  <template #prepend>
-                    <el-select
-                      :teleported="false"
-                      v-model="evidencePrefix"
-                      placeholder="Select"
-                      class="select-box"
-                      popper-class="flatmap_dropdown"
-                    >
-                      <el-option
-                        v-for="item in evidencePrefixes"
-                        :key="item"
-                        :label="item"
-                        :value="item"
+              <template v-if="!isDeleted">
+                <el-row class="dialog-text">
+                  <strong>Evidence:</strong>
+                </el-row>
+                <el-row v-for="(value, index) in evidence" :key="value">
+                  <el-col :span="20">
+                    {{ evidence[index] }}
+                  </el-col>
+                  <el-col :span="4">
+                    <el-icon class="standard-icon">
+                      <el-icon-close @click="removeEvidence(index)" />
+                    </el-icon>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-input
+                    size="small"
+                    placeholder="Enter"
+                    v-model="newEvidence"
+                    @change="evidenceEntered($event)"
+                  >
+                    <template #prepend>
+                      <el-select
+                        :teleported="false"
+                        v-model="evidencePrefix"
+                        placeholder="Select"
+                        class="select-box"
+                        popper-class="flatmap_dropdown"
                       >
-                        <el-row>
-                          <el-col :span="12">{{ item }}</el-col>
-                        </el-row>
-                      </el-option>
-                    </el-select>
-                  </template>
-                </el-input>
-              </el-row>
+                        <el-option
+                          v-for="item in evidencePrefixes"
+                          :key="item"
+                          :label="item"
+                          :value="item"
+                        >
+                          <el-row>
+                            <el-col :span="12">{{ item }}</el-col>
+                          </el-row>
+                        </el-option>
+                      </el-select>
+                    </template>
+                  </el-input>
+                </el-row>
+              </template>
               <el-row>
                 <strong>Comment:</strong>
               </el-row>
@@ -139,10 +157,10 @@ import {
   ArrowDown as ElIconArrowDown,
   Edit as ElIconEdit,
   Close as ElIconClose,
+  Delete as ElIconDelete,
+  Finished as ElIconFinished,
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
-/* eslint-disable no-alert, no-console */
-import { AnnotationService } from '@abi-software/sparc-annotation'
 import {
   ElButton as Button,
   ElCol as Col,
@@ -171,7 +189,7 @@ export default {
       type: Object,
     },
   },
-  inject: ['flatmapAPI', 'userApiKey'],
+  inject: ['flatmapAPI', '$annotator', 'userApiKey'],
   data: function () {
     return {
       displayPair: {
@@ -191,15 +209,29 @@ export default {
       prevSubs: [],
       showSubmissions: true,
       errorMessage: '',
-      creator: undefined,
+      creator: undefined
     }
   },
   computed: {
     isEditable: function () {
       return (
-        this.annotationEntry['resource'] && this.annotationEntry['featureId']
+        this.annotationEntry['resourceId'] &&
+        this.annotationEntry['featureId']
       )
     },
+    isPositionUpdated: function () {
+      return (
+        this.annotationEntry['resourceId'] &&
+        this.annotationEntry['type'] === 'updated' &&
+        this.annotationEntry['positionUpdated']
+      )
+    },
+    isDeleted: function () {
+      return (
+        this.annotationEntry['resourceId'] &&
+        this.annotationEntry['type'] === 'deleted'
+      )
+    }
   },
   methods: {
     evidenceEntered: function (value) {
@@ -222,13 +254,13 @@ export default {
     updatePrevSubmissions: function () {
       if (this.$annotator && this.authenticated) {
         if (
-          this.annotationEntry['resource'] &&
+          this.annotationEntry['resourceId'] &&
           this.annotationEntry['featureId']
         ) {
           this.$annotator
             .itemAnnotations(
               this.userApiKey,
-              this.annotationEntry['resource'],
+              this.annotationEntry['resourceId'],
               this.annotationEntry['featureId']
             )
             .then((value) => {
@@ -241,9 +273,24 @@ export default {
       }
     },
     submit: function () {
+      // User can either update/delete annotation directly 
+      // or provide extra comments for update/delete action
+      if (
+        this.annotationEntry['type'] === 'updated' &&
+        this.annotationEntry['positionUpdated']
+      ) {
+        this.comment = this.comment ?
+          `Position Updated: ${this.comment}` :
+          'Position Updated'
+      } else if (this.annotationEntry['type'] === 'deleted') {
+        this.comment = this.comment ?
+          `Feature Deleted: ${this.comment}` :
+          'Feature Deleted'
+      }
+
       if (this.evidence.length > 0 || this.comment) {
         if (
-          this.annotationEntry['resource'] &&
+          this.annotationEntry['resourceId'] &&
           this.annotationEntry['featureId']
         ) {
           const evidenceURLs = []
@@ -260,17 +307,26 @@ export default {
             }
           })
           const userAnnotation = {
-            resource: this.annotationEntry['resource'],
-            item: this.annotationEntry['featureId'],
+            resource: this.annotationEntry['resourceId'],
+            item: Object.assign({id: this.annotationEntry['featureId']},
+                    Object.fromEntries(
+                      Object.entries(this.annotationEntry)
+                            .filter(([key]) => ['label', 'models'].includes(key)))),
             body: {
               evidence: evidenceURLs,
               comment: this.comment,
             },
+            feature: this.annotationEntry['feature']
+          }
+          Object.assign(userAnnotation.body, this.annotationEntry['body'])
+          if (this.annotationEntry['type'] === 'deleted') {
+            userAnnotation.feature = undefined
           }
           if (this.creator) userAnnotation.creator = this.creator
           this.$annotator
             .addAnnotation(this.userApiKey, userAnnotation)
             .then(() => {
+              this.$emit('annotation', userAnnotation)
               this.errorMessage = ''
               this.resetSubmission()
               this.updatePrevSubmissions()
@@ -305,11 +361,6 @@ export default {
     },
   },
   mounted: function () {
-    if (!this.$annotator) {
-      this.$annotator = new AnnotationService(
-        `${this.flatmapAPI}annotator`
-      )
-    }
     this.$annotator.authenticate(this.userApiKey).then((userData) => {
       if (userData.name && userData.email) {
         this.creator = userData

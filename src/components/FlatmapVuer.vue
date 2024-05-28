@@ -20,17 +20,22 @@
             :visible="hoverVisibilities[6].value"
             ref="warningPopover"
           >
+<!--
+What magic meaning do the numbers 6, 7, etc have?
+
+Please use `const` to assign meaningful names to them...
+ -->
             <p
               v-if="isLegacy"
-              @mouseover="showToolitip(6)"
-              @mouseout="hideToolitip(6)"
+              @mouseover="showTooltip(6)"
+              @mouseout="hideTooltip(6)"
             >
               This is a legacy map, you may view the latest map instead.
             </p>
             <p
               v-else-if="isFC"
-              @mouseover="showToolitip(6)"
-              @mouseout="hideToolitip(6)"
+              @mouseover="showTooltip(6)"
+              @mouseout="hideTooltip(6)"
             >
               This map displays the connectivity of individual neurons.
               Specifically, those which align with (parts of) the neuron
@@ -49,7 +54,7 @@
                 SCKAN </a
               >.
             </p>
-            <p v-else @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)">
+            <p v-else @mouseover="showTooltip(6)" @mouseout="hideTooltip(6)">
               This map displays the connectivity of neuron populations.
               Specifically, those from the primarily rat-based
               <a
@@ -71,8 +76,8 @@
               <div
                 class="warning-icon"
                 v-if="displayWarning"
-                @mouseover="showToolitip(6)"
-                @mouseout="hideToolitip(6)"
+                @mouseover="showTooltip(6)"
+                @mouseout="hideTooltip(6)"
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
@@ -95,13 +100,14 @@
           trigger="manual"
           popper-class="warning-popper flatmap-popper"
           :visible="hoverVisibilities[7].value"
+          ref="whatsNewPopover"
         >
           <template #reference>
             <div
               class="latest-changesicon"
               v-if="displayLatestChanges"
-              @mouseover="showToolitip(7)"
-              @mouseout="hideToolitip(7)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               <el-icon><el-icon-warning-filled /></el-icon>
               <span class="warning-text">What's new?</span>
@@ -136,6 +142,25 @@
         <el-icon-arrow-down />
       </el-icon>
 
+      <DrawTool
+        v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
+        :helpMode="helpMode"
+        :hoverVisibilities=hoverVisibilities
+        :flatmapCanvas="this.$el"
+        :drawnType="drawnType"
+        :activeDrawTool="activeDrawTool"
+        :activeDrawMode="activeDrawMode"
+        :drawnCreatedEvent="drawnCreatedEvent"
+        :connectionEntry="connectionEntry"
+        @drawToolbarEvent="drawToolbarEvent"
+        @confirmDrawn="confirmDrawnFeature"
+        @cancelDrawn="cancelDrawnFeature"
+        @featureTooltip="connectedFeatureTooltip"
+        @showTooltip="showTooltip"
+        @hideTooltip="hideTooltip"
+        ref="drawToolPopover"
+      />
+
       <div class="bottom-right-control" v-show="!disableUI">
         <el-popover
           content="Zoom in"
@@ -145,14 +170,15 @@
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[0].value"
+          ref="zoomInPopover"
         >
           <template #reference>
             <map-svg-icon
               icon="zoomIn"
               class="icon-button zoomIn"
               @click="zoomIn()"
-              @mouseover="showToolitip(0)"
-              @mouseout="hideToolitip(0)"
+              @mouseover="showTooltip(0)"
+              @mouseout="hideTooltip(0)"
             />
           </template>
         </el-popover>
@@ -162,16 +188,17 @@
           :teleported="false"
           trigger="manual"
           width="70"
-          popper-class="flatmap-popper popper-zoomout"
+          popper-class="flatmap-popper"
           :visible="hoverVisibilities[1].value"
+          ref="zoomOutPopover"
         >
           <template #reference>
             <map-svg-icon
               icon="zoomOut"
               class="icon-button zoomOut"
               @click="zoomOut()"
-              @mouseover="showToolitip(1)"
-              @mouseout="hideToolitip(1)"
+              @mouseover="showTooltip(1)"
+              @mouseout="hideTooltip(1)"
             />
           </template>
         </el-popover>
@@ -183,6 +210,7 @@
           width="70"
           popper-class="flatmap-popper"
           :visible="hoverVisibilities[2].value"
+          ref="zoomFitPopover"
         >
           <div>
             Fit to
@@ -194,8 +222,8 @@
               icon="fitWindow"
               class="icon-button fitWindow"
               @click="resetView()"
-              @mouseover="showToolitip(2)"
-              @mouseout="hideToolitip(2)"
+              @mouseover="showTooltip(2)"
+              @mouseout="hideTooltip(2)"
             />
           </template>
         </el-popover>
@@ -205,6 +233,7 @@
         placement="right"
         :teleported="false"
         trigger="manual"
+        :offset="-18"
         popper-class="flatmap-popper"
         :visible="hoverVisibilities[4].value"
         ref="checkBoxPopover"
@@ -222,31 +251,37 @@
               v-popover:checkBoxPopover
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
+              <template v-if="showStarInLegend">
               <el-popover
                 content="Location of the featured dataset"
                 placement="right"
-                :teleported="false"
-                trigger="hover"
-                popper-class="flatmap-popper popper-bump-right"
+                :teleported="true"
+                trigger="manual"
+                width="max-content"
+                :offset="-10"
+                popper-class="flatmap-popper flatmap-teleport-popper"
                 :visible="hoverVisibilities[9].value"
                 ref="featuredMarkerPopover"
               >
                 <template #reference>
                   <div
-                    v-show="showStarInLegend"
                     v-popover:featuredMarkerPopover
                     class="yellow-star-legend"
                     v-html="yellowstar"
+                    @mouseover="showTooltip(9)"
+                    @mouseout="hideTooltip(9)"
                   ></div>
                 </template>
               </el-popover>
+              </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
                 content="Find these markers for data"
                 placement="right"
                 :teleported="false"
+                width="max-content"
                 trigger="manual"
-                popper-class="flatmap-popper popper-bump-right"
+                popper-class="flatmap-popper"
                 :visible="hoverVisibilities[5].value"
                 ref="markerPopover"
               >
@@ -270,14 +305,17 @@
                 @change-active="ftuSelected"
               />
               <selections-group
-                v-if="!isFC && centreLines && centreLines.length > 0"
-                title="Nerves"
+                v-if="containsAlert && alertOptions"
+                title="Alert"
                 labelKey="label"
                 identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
-                ref="centrelinesSelection"
-                key="centrelinesSelection"
+                :selections="alertOptions"
+                @changed="alertSelected"
+                @checkboxMouseEnter="alertMouseEnterEmitted"
+                @selections-data-changed="onSelectionsDataChanged"
+                @checkAll="checkAllAlerts"
+                ref="alertSelection"
+                key="alertSelection"
               />
               <!--
                 <selections-group
@@ -287,6 +325,7 @@
                   identifierKey="key"
                   :selections="sckanDisplay"
                   @changed="sckanSelected"
+                  @selections-data-changed="onSelectionsDataChanged"
                   @checkAll="checkAllSCKAN"
                   ref="skcanSelection"
                   key="skcanSelection"
@@ -298,22 +337,12 @@
                   identifierKey="id"
                   :selections="layers"
                   @changed="layersSelected"
+                  @selections-data-changed="onSelectionsDataChanged"
                   @checkAll="checkAllLayers"
                   ref="layersSelection"
                   key="layersSelection"
                 />
               -->
-              <selections-group
-                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
-                title="Observed in"
-                labelKey="label"
-                identifierKey="taxon"
-                :selections="taxonConnectivity"
-                @changed="taxonsSelected"
-                @checkAll="checkAllTaxons"
-                ref="taxonSelection"
-                key="taxonSelection"
-              />
               <selections-group
                 v-if="pathways && pathways.length > 0"
                 title="Pathways"
@@ -322,9 +351,35 @@
                 colourStyle="line"
                 :selections="pathways"
                 @changed="pathwaysSelected"
+                @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllPathways"
                 ref="pathwaysSelection"
                 key="pathwaysSelection"
+              />
+              <selections-group
+                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+                title="Studied in"
+                labelKey="label"
+                identifierKey="taxon"
+                helpMessage="Evidence exists that this set of neuron populations have been studied in the given species."
+                :selections="taxonConnectivity"
+                @changed="taxonsSelected"
+                @checkboxMouseEnter="taxonMouseEnterEmitted"
+                @selections-data-changed="onSelectionsDataChanged"
+                @checkAll="checkAllTaxons"
+                ref="taxonSelection"
+                key="taxonSelection"
+              />
+              <selections-group
+                v-if="!isFC && centreLines && centreLines.length > 0"
+                title="Nerves"
+                labelKey="label"
+                identifierKey="key"
+                :selections="centreLines"
+                @changed="centreLinesSelected"
+                @selections-data-changed="onSelectionsDataChanged"
+                ref="centrelinesSelection"
+                key="centrelinesSelection"
               />
             </div>
             <div
@@ -394,6 +449,52 @@
               </el-option>
             </el-select>
           </el-row>
+          <template v-if="viewingMode === 'Annotation' && userInformation">
+            <el-row class="backgroundText">Drawn By*</el-row>
+            <el-row class="backgroundControl">
+              <el-select
+                :teleported="false"
+                v-model="drawnType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setDrawnType"
+              >
+                <el-option
+                  v-for="item in drawnTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-row>
+            <el-row class="backgroundText">Annotated By*</el-row>
+            <el-row class="backgroundControl">
+              <el-select
+                :teleported="false"
+                v-model="annotatedType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setAnnotatedType"
+              >
+                <el-option
+                  v-for="item in annotatedTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-row>
+          </template>
           <el-row class="backgroundSpacer" v-if="displayFlightPathOption"></el-row>
           <el-row class="backgroundText" v-if="displayFlightPathOption">Flight path display</el-row>
           <el-row class="backgroundControl" v-if="displayFlightPathOption">
@@ -458,6 +559,7 @@
             placement="right"
             :teleported="false"
             popper-class="flatmap-popper"
+            ref="openMapPopover"
           >
             <template #reference>
               <map-svg-icon
@@ -465,8 +567,8 @@
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showToolitip(8)"
-                @mouseout="hideToolitip(8)"
+                @mouseover="showTooltip(8)"
+                @mouseout="hideTooltip(8)"
               />
             </template>
           </el-popover>
@@ -479,14 +581,15 @@
             :teleported="false"
             trigger="manual"
             popper-class="flatmap-popper"
+            ref="settingsPopover"
           >
             <template #reference>
               <map-svg-icon
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showToolitip(3)"
-                @mouseout="hideToolitip(3)"
+                @mouseover="showTooltip(3)"
+                @mouseout="hideTooltip(3)"
               />
             </template>
           </el-popover>
@@ -499,23 +602,25 @@
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
+        @annotation="commitAnnotationEvent"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { shallowRef } from 'vue'
+/* eslint-disable no-alert, no-console */
+import { shallowRef, markRaw } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
-/* eslint-disable no-alert, no-console */
 import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
 import TreeControls from './TreeControls.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
+import '@abi-software/svg-sprite/dist/style.css'
 import SvgLegends from './legends/SvgLegends.vue'
 import {
   ElButton as Button,
@@ -525,6 +630,7 @@ import {
   ElRadioGroup as RadioGroup,
   ElRow as Row,
   ElSelect as Select,
+  ElDialog as Dialog,
 } from 'element-plus'
 import flatmapMarker from '../icons/flatmap-marker'
 import {
@@ -534,9 +640,32 @@ import {
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
+import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
+import DrawTool from './DrawTool.vue'
 
+const centroid = (geometry) => {
+  let featureGeometry = { lng: 0, lat: 0, }
+  let coordinates
+  if (geometry.type === "Polygon") {
+    coordinates = geometry.coordinates[0]
+  } else {
+    coordinates = geometry.coordinates
+  }
+  if (!(geometry.type === 'Point')) {
+    coordinates.map((coor) => {
+      featureGeometry.lng += parseFloat(coor[0])
+      featureGeometry.lat += parseFloat(coor[1])
+    })
+    featureGeometry.lng = featureGeometry.lng / coordinates.length
+    featureGeometry.lat = featureGeometry.lat / coordinates.length
+  } else {
+    featureGeometry.lng += parseFloat(coordinates[0])
+    featureGeometry.lat += parseFloat(coordinates[1])
+  }
+  return featureGeometry
+}
 
 const processFTUs = (parent, key) => {
   const ftus = []
@@ -611,6 +740,7 @@ export default {
     RadioGroup,
     Row,
     Select,
+    Dialog,
     MapSvgIcon,
     MapSvgSpriteColor,
     Tooltip,
@@ -620,6 +750,7 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
+    DrawTool
   },
   beforeCreate: function () {
     this.mapManager = undefined
@@ -629,7 +760,310 @@ export default {
     //resolve this issue.
     this.setStateRequired = false
   },
+  setup(props) {
+    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+    return { annotator }
+  },
   methods: {
+    /**
+     * @vuese
+     * Function to initialise drawing.
+     */
+    initialiseDrawing: function () {
+      this.connectionEntry = {}
+      this.activeDrawTool = undefined
+      this.activeDrawMode = undefined
+      this.drawnCreatedEvent = undefined
+    },
+    /**
+     * @vuese
+     * Function to cancel a newly drawn feature.
+     */
+    cancelDrawnFeature: function () {
+      if (this.drawnCreatedEvent) {
+        this.closeTooltip()
+        this.annotationEntry = {
+          ...this.drawnCreatedEvent.feature,
+          resourceId: this.serverURL,
+        }
+        this.rollbackAnnotationEvent()
+        this.initialiseDrawing()
+      }
+    },
+    /**
+     * @vuese
+     * Function to display connected features' tooltip for drawn connectivity.
+     * @arg id
+     */
+    connectedFeatureTooltip: function (value) {
+      if (this.mapImp) {
+        if (value) {
+          const numericId = Number(value)
+          let payload = { feature: {} }
+          if (numericId) {
+            const data = this.mapImp.featureProperties(numericId)
+            payload.feature = data
+          } else {
+            const drawnFeature = this.existDrawnFeatures.find(
+              (feature) => feature.id === value.replace(' ', '')
+            )
+            payload.feature.feature = drawnFeature
+          }
+          this.checkAndCreatePopups(payload)
+        } else {
+          this.closeTooltip()
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to confirm a newly drawn feature.
+     */
+    confirmDrawnFeature: function () {
+      if (this.drawnCreatedEvent) {
+        this.checkAndCreatePopups(this.drawnCreatedEvent)
+        // Add connection if exist to annotationEntry
+        // Connection will only be added in creating new drawn feature annotation
+        // And will not be updated if move drawn features
+        if (Object.keys(this.connectionEntry).length > 0) {
+          this.annotationEntry.feature.connection = this.connectionEntry
+        }
+        this.initialiseDrawing()
+      }
+    },
+    /**
+     * @vuese
+     * Function to process the annotation toolbar click events.
+     * @arg type
+     */
+    drawToolbarEvent: function (type) {
+      this.closeTooltip()
+      this.doubleClickedFeature = false
+      if (type === 'Delete') {
+        this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
+      } else if (type === 'Edit') {
+        this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
+      } else {
+        this.activeDrawTool = type
+      }
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
+      }
+    },
+        /**
+     * @vuese
+     * Function to fire annotation event based on the provided ``data``.
+     * Either edit or delete event.
+     * @arg data
+     */
+    drawModeEvent: function (data) {
+      if (this.activeDrawMode === 'Edit') {
+        if (this.doubleClickedFeature) {
+          if (data.feature.feature.geometry.type !== 'Point') {
+            this.changeAnnotationDrawMode({
+              mode: 'direct_select',
+              options: { featureId: data.feature.feature.id }
+            })
+            this.modifyAnnotationFeature()
+          }
+          this.doubleClickedFeature = false
+        }
+      }
+      if (this.activeDrawMode === 'Delete') {
+        this.changeAnnotationDrawMode({
+          mode: 'simple_select',
+          options: { featureIds: [data.feature.feature.id] }
+        })
+        this.modifyAnnotationFeature()
+      }
+    },
+    /**
+     * Function to create connectivity body from existing entries.
+     */
+    createConnectivityBody: function () {
+      if (Object.keys(this.connectionEntry).length > 0) {
+        const features = Object.values(this.connectionEntry)
+        const body = {
+          type: 'connectivity',
+          source: features[0],
+          target: features[features.length - 1],
+          intermediates: features.filter((f, index) => index !== 0 && index !== features.length - 1),
+        }
+        this.annotationEntry.body = body
+      }
+    },
+    /**
+     * @vuese
+     * Function to update the annotation draw mode.
+     * @arg mode
+     */
+    changeAnnotationDrawMode: function (mode) {
+      if (this.mapImp) {
+        this.mapImp.changeAnnotationDrawMode(mode)
+      }
+    },
+    /**
+     * @vuese
+     * Function to remove all drawn annotations from flatmap annotation layer.
+     */
+    clearAnnotationFeature: function () {
+      if (
+        this.mapImp &&
+        this.existDrawnFeatures.length > 0
+      ) {
+        this.mapImp.clearAnnotationFeature()
+      }
+    },
+    /**
+     * @vuese
+     * Function to fire the ``trash`` action.
+     * See https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#trash-draw for more details.
+     */
+    modifyAnnotationFeature: function () {
+      if (this.mapImp) {
+        // Fire the 'trash' button
+        // Not only use to remove features
+        // 'simple_select' for DELETE and 'direct_select' for EDIT
+        this.mapImp.removeAnnotationFeature()
+      }
+    },
+    /**
+     * @vuese
+     * Function to rollback the failure drawn from flatmap annotation layer.
+     */
+    rollbackAnnotationEvent: function () {
+      // For 'updated' and 'deleted' callback
+      if (
+        this.mapImp &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
+      ) {
+        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
+        this.annotationEntry = {}
+      }
+    },
+    /**
+     * @vuese
+     * Function to commit the emitted ``annotation`` data from successful new drawn to flatmap annotation layer.
+     * @arg annotation
+     */
+    commitAnnotationEvent: function (annotation) {
+      if (
+        this.mapImp &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type) &&
+        // Only when annotation comments stored successfully
+        annotation
+      ) {
+        this.featureAnnotationSubmitted = true
+        this.mapImp.commitAnnotationEvent(this.annotationEntry)
+        if (this.annotationEntry.type === 'deleted') this.closeTooltip()
+        else this.addAnnotationFeature() // Update 'existDrawnFeatures' when created or updated event
+      }
+    },
+    /**
+     * @vuese
+     * Function to fetch annotated item id.
+     * @arg userId,
+     * @arg participated
+     */
+    fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
+      let annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
+      // The annotator has `resource` and `items` fields
+      if ('resource' in annotatedItemIds) annotatedItemIds = annotatedItemIds.itemIds
+      return annotatedItemIds
+    },
+    /**
+     * @vuese
+     * Function to add existing drawn annotations to flatmap.
+     */
+    setFeatureAnnotated: async function () {
+      if (this.mapImp) {
+        const annotatedItemIds = await this.fetchAnnotatedItemIds()
+        for (const id of annotatedItemIds) {
+          this.mapImp.setFeatureAnnotated(id)
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to fetch drawn features.
+     * @arg userId,
+     * @arg participated
+     */
+    fetchDrawnFeatures: async function (userId, participated) {
+      const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
+      let drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
+      // The annotator has `resource` and `features` fields
+      if ('resource' in drawnFeatures) drawnFeatures = drawnFeatures.features
+      // Use to switch the displayed feature type
+      if (this.drawnType !== 'All tools') {
+        drawnFeatures = drawnFeatures.filter((feature) => {
+          return feature.geometry.type === this.drawnType
+        })
+      }
+      return drawnFeatures
+    },
+    /**
+     * @vuese
+     * Function to draw existing drawn annotations based on selector.
+     */
+    addAnnotationFeature: async function () {
+      if (this.mapImp) {
+        if (!this.featureAnnotationSubmitted) this.clearAnnotationFeature()
+        if (this.drawnType !== 'None') {
+          if (!this.featureAnnotationSubmitted) this.loading = true
+          const userId = this.annotatedType === 'Anyone' ?
+            undefined : this.userInformation.orcid ?
+              this.userInformation.orcid : '0000-0000-0000-0000'
+          const participated = this.annotatedType === 'Anyone' ?
+            undefined : this.annotatedType === 'Me' ?
+              true : false
+          const drawnFeatures = await this.fetchDrawnFeatures(userId, participated)
+          this.existDrawnFeatures = drawnFeatures
+          this.loading = false
+          if (!this.featureAnnotationSubmitted) {
+            for (const feature of drawnFeatures) {
+              this.mapImp.addAnnotationFeature(feature)
+            }
+          }
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to display annotator toolbar.
+     * @arg flag
+     */
+    showAnnotator: function (flag) {
+      if (this.mapImp) {
+        // Control the show/hide of the drawn annotations
+        this.mapImp.showAnnotator(flag)
+        // Hide default toolbar, we will use customised SVG icons instead
+        this.$el.querySelector('.maplibregl-ctrl-group').style.display = 'none'
+      }
+    },
+    /**
+     * @vuese
+     * Function to switch the type of annotation.
+     * @arg flag
+     */
+    setDrawnType: function (flag) {
+      this.drawnType = flag
+      if (this.mapImp) {
+        this.addAnnotationFeature()
+        this.initialiseDrawing()
+      }
+    },
+    /**
+     * @vuese
+     * Function to switch the type of person who annotated.
+     * @arg flag
+     */
+    setAnnotatedType: function (flag) {
+      this.annotatedType = flag
+      if (this.mapImp) {
+        this.addAnnotationFeature()
+      }
+    },
     /**
      * @vuese
      * Function to switch from 2D to 3D
@@ -801,6 +1235,9 @@ export default {
         this.mapImp.enableCentrelines(payload.value)
       }
     },
+    onSelectionsDataChanged: function (data) {
+      this.$emit('pathway-selection-changed', data);
+    },
     /**
      * // Currently not in use
      * Function to show or hide paths valid in SCKAN
@@ -872,6 +1309,99 @@ export default {
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
     },
+    resetMapFilter: function() {
+      const alert = this.mapFilters.alert;
+      let filter = undefined;
+      if (alert.with) {
+        if (!alert.without) {
+          filter = {
+            HAS: 'alert',
+          };
+        }
+      } else {
+        if (alert.without) {
+          filter = {
+            NOT: { HAS: 'alert'},
+          };
+        } else {
+          filter = {
+            AND: [ {NOT: { HAS: 'alert'}}, { HAS: 'alert'}]
+          }
+        }
+      }
+      if (filter) {
+        this.mapImp.setVisibilityFilter(filter)
+      } else {
+        this.mapImp.clearVisibilityFilter()
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable mouse enter and leave event for
+     * alert checkbox
+     * @arg payload
+     */
+    alertMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          let filter = undefined;
+          if (payload.key === "alert") {
+            filter = {
+              HAS: 'alert',
+            }
+          } else if (payload.key === "withoutAlert") {
+            filter = {
+              NOT: {HAS: 'alert'},
+            }
+          }
+          this.mapImp.setVisibilityFilter(filter)
+        } else {
+          this.resetMapFilter()
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable (show/hide) pathways with/without alert
+     * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
+     * @arg payload
+     */
+     alertSelected: function (payload) {
+      if (this.mapImp) {
+        if (payload.key === "alert") {
+          if (payload.value) {
+            this.mapFilters.alert.with = true
+          } else {
+            this.mapFilters.alert.with = false
+          }
+        } else if (payload.key === "withoutAlert") {
+          if (payload.value) {
+            this.mapFilters.alert.without = true
+          } else {
+            this.mapFilters.alert.without = false
+          }
+        }
+        this.resetMapFilter()
+      }
+    },
+    /**
+     * @vuese
+     * Function to enable/disable (show/hide) all alerts
+     * option by providing ``flag`` (true/false).
+     * @arg flag
+     */
+     checkAllAlerts: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          this.mapFilters.alert.without = true
+          this.mapFilters.alert.with = true
+        } else {
+          this.mapFilters.alert.without = false
+          this.mapFilters.alert.with = false
+        }
+        this.resetMapFilter()
+      }
+    },
     /**
      * @vuese
      * Function to enable/disable (show/hide) the system
@@ -930,7 +1460,7 @@ export default {
     },
     /**
      * @vuese
-     * Function to show or hide connectivity features observed in particular species
+     * Function to show or hide connectivity features studied in particular species
      * by providing ``{taxonId, true/false}`` in ``payload.key, payload.value``.
      * @arg payload
      */
@@ -939,9 +1469,25 @@ export default {
         this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value)
       }
     },
+    taxonMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (payload.value) {
+          let gid = this.mapImp.taxonFeatureIds(payload.key)  
+          this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
+          this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
+        } else {
+          // reset visibility of paths 
+          this.mapImp.selectGeoJSONFeatures("-1")
+          payload.selections.forEach((item) => {
+            let show = payload.checked.includes(item.taxon)
+            this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
+          })
+        }
+      }
+    },
     /**
      * @vuese
-     * Function to show or hide connectivity features observed in particular species
+     * Function to show or hide connectivity features studied in particular species
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
      * @arg payload
      */
@@ -987,70 +1533,141 @@ export default {
     },
     /**
      * @vuese
+     * Function to process annotation callbacks, invoked when events occur with the map.
+     * @arg payload,
+     * @arg data
+     */
+    annotationEventCallback: function (payload, data) {
+      // Popup closed will trigger aborted event this is used to control the tooltip
+      if (data.type === 'aborted') {
+        // Rollback drawing when no new annotation submitted
+        if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
+        else this.featureAnnotationSubmitted = false
+      } else if (data.type === 'modeChanged') {
+        if (data.feature.mode === 'simple_select' && this.activeDrawTool) {
+          if (!this.drawnCreatedEvent) this.initialiseDrawing() // Reset if invalid linestring or polygon
+        } else if (data.feature.mode === 'direct_select') {
+          this.doubleClickedFeature = true
+        }
+      } else if (data.type === 'selectionChanged') {
+        this.selectedDrawnFeature = data.feature.features.length === 0 ?
+          undefined : data.feature.features[0]
+        payload.feature.feature = this.selectedDrawnFeature
+        if (!this.activeDrawTool) { // Make sure dialog content doesn't change
+          this.connectionEntry = {}
+          // For exist drawn annotation features
+          if (this.selectedDrawnFeature) {
+            const drawnFeature = this.existDrawnFeatures.find(
+              (feature) => feature.id === this.selectedDrawnFeature.id
+            )
+            if (drawnFeature && drawnFeature.connection) {
+              this.connectionEntry = drawnFeature.connection
+            }
+            this.drawModeEvent(payload)
+          }
+        }
+      } else {
+        if (data.type === 'created' || data.type === 'updated') {
+          if (data.type === 'updated' && data.feature.action) {
+            data.positionUpdated = data.feature.action === 'move'
+          }
+          const feature = this.mapImp.refreshAnnotationFeatureGeometry(data.feature)
+          payload.feature.feature = feature
+          // NB. this might now be `null` if user has deleted it (before OK/Submit)
+          // so maybe then no `service.addAnnotation` ??
+        }
+        // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
+        // Hence disable direct popup when 'created' event, dialog will be used instead.
+        if (data.type === 'created') this.drawnCreatedEvent = payload
+        else this.checkAndCreatePopups(payload)
+      }
+    },
+    /**
+     * @vuese
      * A callback function, invoked when events occur with the map.
      * The first parameter gives the type of event, the second provides details about the event.
      * _(This is the ``callback`` function from ``MapManager.loadMap()``)_.
      */
     eventCallback: function () {
       return (eventType, data, ...args) => {
-        if (eventType !== 'pan-zoom') {
-          const label = data.label
-          const resource = [data.models]
-          const taxonomy = this.entry
-          const biologicalSex = this.biologicalSex
-          let taxons = undefined
-          if (data.taxons) {
-            // check if data.taxons is string or array
-            if (typeof data.taxons !== 'object') {
-              taxons = JSON.parse(data.taxons)
-            } else {
-              taxons = data.taxons
-            }
-          }
+        if (eventType === 'annotation') {
           const payload = {
-            dataset: data.dataset,
-            biologicalSex: biologicalSex,
-            taxonomy: taxonomy,
-            resource: resource,
-            label: label,
             feature: data,
             userData: args,
             eventType: eventType,
-            provenanceTaxonomy: taxons,
           }
-          if (eventType === 'click') {
-            if (this.viewingMode === 'Network Discovery') {
-              this.highlightConnectedPaths([data.models])
-            } else {
-              this.currentActive = data.models ? data.models : ''
-            }
-          } else if (
-            eventType === 'mouseenter' &&
-            !(this.viewingMode === 'Network Discovery')
-          ) {
-            this.currentHover = data.models ? data.models : ''
-          }
-          if (
-            data &&
-            data.type !== 'marker' &&
-            eventType === 'click' &&
-            !(this.viewingMode === 'Network Discovery')
-          ) {
-            this.checkAndCreatePopups(payload)
-          }
-          /**
-           * The event emitted from the mouse event callbacks that come from flatmap-viewer. The payload
-           * argument provides an object with information on the feature where the mouse event takes place.
-           * @arg payload
-           */
-          this.$emit('resource-selected', payload)
+          this.annotationEventCallback(payload, data)
         } else {
-          /**
-           * The event emitted in ``callback`` function from ``MapManager.loadMap()``
-           * if ``eventType`` is ``pan-zoom``.
-           * @arg data
-           */
-          this.$emit('pan-zoom-callback', data)
+          if (eventType !== 'pan-zoom') {
+            const label = data.label
+            const resource = [data.models]
+            const taxonomy = this.entry
+            const biologicalSex = this.biologicalSex
+            let taxons = undefined
+            if (data.taxons) {
+              // check if data.taxons is string or array
+              if (typeof data.taxons !== 'object') {
+                taxons = JSON.parse(data.taxons)
+              } else {
+                taxons = data.taxons
+              }
+            }
+            const payload = {
+              dataset: data.dataset,
+              biologicalSex: biologicalSex,
+              taxonomy: taxonomy,
+              resource: resource,
+              label: label,
+              feature: data,
+              userData: args,
+              eventType: eventType,
+              provenanceTaxonomy: taxons,
+            }
+            if (eventType === 'click') {
+              this.featuresAlert = data.alert
+              if (this.viewingMode === 'Network Discovery') {
+                this.highlightConnectedPaths([data.models])
+              } else {
+                this.currentActive = data.models ? data.models : ''
+                // Drawing connectivity between features
+                if (this.activeDrawTool && !this.drawnCreatedEvent) {
+                  // Check if flatmap features or existing drawn features
+                  const validDrawnFeature = data.featureId || this.existDrawnFeatures.find(
+                    (feature) => feature.id === data.id
+                  )
+                  // Only the linestring will have connection
+                  if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
+                    const key = data.featureId ? data.featureId : data.id
+                    const nodeLabel = data.label ? data.label : `Feature ${data.id}`
+                    // Add space before key to make sure properties follows adding order
+                    this.connectionEntry[` ${key}`] = Object.assign({ label: nodeLabel },
+                      Object.fromEntries(
+                        Object.entries(data)
+                          .filter(([key]) => ['featureId', 'models'].includes(key))
+                          .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
+                  }
+                }
+              }
+            } else if (
+              eventType === 'mouseenter' &&
+              !(this.viewingMode === 'Network Discovery')
+            ) {
+              this.currentHover = data.models ? data.models : ''
+            }
+            if (
+              data &&
+              data.type !== 'marker' &&
+              eventType === 'click' &&
+              !(this.viewingMode === 'Network Discovery') &&
+              // Disable popup when drawing
+              !this.activeDrawTool
+            ) {
+              this.checkAndCreatePopups(payload)
+            }
+            this.$emit('resource-selected', payload)
+          } else {
+            this.$emit('pan-zoom-callback', data)
+          }
         }
       }
     },
@@ -1073,13 +1690,31 @@ export default {
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
-        if (data.feature && data.feature.featureId && data.feature.models) {
+        if (data.feature) {
           this.annotationEntry = {
             ...data.feature,
-            resource: this.serverURL,
-            resourceId: this.serverUUID,
+            resourceId: this.serverURL,
           }
-          this.displayTooltip(data.feature.models)
+          if (data.feature.featureId && data.feature.models) {
+            this.displayTooltip(data.feature.models)
+          } else if (data.feature.feature) {
+            // in drawing or edit/delete mode is on or has connectivity
+            if (
+              this.activeDrawTool ||
+              this.activeDrawMode ||
+              Object.keys(this.connectionEntry).length > 0
+            ) {
+              this.featureAnnotationSubmitted = false
+              this.annotationEntry.featureId = data.feature.feature.id
+              if (this.activeDrawTool) this.createConnectivityBody()
+              this.displayTooltip(
+                data.feature.feature.id,
+                centroid(data.feature.feature.geometry)
+              )
+            } else {
+              this.rollbackAnnotationEvent()
+            }
+          }
         } else {
           this.annotation = {}
         }
@@ -1205,12 +1840,76 @@ export default {
      * @arg helpMode
      */
     setHelpMode: function (helpMode) {
-      if (helpMode) {
-        this.inHelp = true
+      const toolTipsLength = this.hoverVisibilities.length;
+      const lastIndex = toolTipsLength - 1;
+      const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
+
+      if (activePopoverObj) {
+        const popoverRefsId = activePopoverObj?.refs;
+        const popoverRefId = activePopoverObj?.ref;
+        const popoverRef = this.$refs[popoverRefsId ? popoverRefsId : popoverRefId];
+
+        if (popoverRef) {
+          // Open pathway drawer if the tooltip is inside or beside
+          const { parentElement, nextElementSibling } = popoverRef.$el;
+          const isPathwayContainer = (element) => {
+            return element && (
+              element.classList.contains('pathway-container') ||
+              element.classList.contains('pathway-location')
+            );
+          };
+
+          if (
+            isPathwayContainer(parentElement) ||
+            isPathwayContainer(nextElementSibling)
+          ) {
+            this.drawerOpen = true;
+          }
+        } else {
+          // skip the unavailable tooltips
+          this.helpModeActiveIndex += 1;
+        }
+      }
+
+      if (!helpMode) {
+        // reset to iniital state
+        this.helpModeActiveIndex = this.helpModeInitialIndex;
+      }
+
+      if (this.viewingMode !== 'Annotation' && this.helpModeActiveIndex > 9) {
+        this.helpModeActiveIndex = lastIndex
+      }
+
+      if (helpMode && this.helpModeActiveIndex >= lastIndex) {
+        /**
+         * This event is emitted when the tooltips in help mode reach the last item.
+         */
+        this.$emit('help-mode-last-item', true);
+      }
+
+      if (helpMode && !this.helpModeDialog) {
+        this.inHelp = true;
         this.hoverVisibilities.forEach((item) => {
-          item.value = true
-        })
-        this.openFlatmapHelpPopup()
+          item.value = true;
+        });
+      } else if (helpMode && this.helpModeDialog && toolTipsLength > this.helpModeActiveIndex) {
+
+        // Show the map tooltip as first item
+        if (this.helpModeActiveIndex > -1) {
+          this.closeFlatmapHelpPopup();
+
+          // wait for CSS transition
+          setTimeout(() => {
+            this.inHelp = false;
+            this.hoverVisibilities.forEach((item) => {
+              item.value = false;
+            });
+
+            this.showTooltip(this.helpModeActiveIndex, 200);
+          }, 300);
+        } else if (this.helpModeActiveIndex === -1) {
+          this.openFlatmapHelpPopup();
+        }
       } else {
         this.inHelp = false
         this.hoverVisibilities.forEach((item) => {
@@ -1225,12 +1924,16 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    showToolitip: function (tooltipNumber) {
+    showTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = true
-        }, 500)
+          /**
+           * This event is emitted after a tooltip in Flatmap is shown.
+           */
+          this.$emit('shown-tooltip');
+        }, timeout)
       }
     },
     /**
@@ -1239,12 +1942,12 @@ export default {
      * by providing ``tooltipNumber``.
      * @arg tooltipNumber
      */
-    hideToolitip: function (tooltipNumber) {
+    hideTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
         clearTimeout(this.tooltipWait[tooltipNumber])
         this.tooltipWait[tooltipNumber] = setTimeout(() => {
           this.hoverVisibilities[tooltipNumber].value = false
-        }, 500)
+        }, timeout)
       }
     },
     /**
@@ -1253,27 +1956,25 @@ export default {
      * by providing featureId (``feature``).
      * @arg feature
      */
-    displayTooltip: function (feature) {
+    displayTooltip: function (feature, geometry = undefined) {
       this.tooltipDisplay = true
+      let featureId = undefined
+      let options = { className: 'flatmapvuer-popover' }
+      if (geometry) {
+        featureId = feature
+        options.annotationFeatureGeometry = geometry
+      } else {
+        featureId = this.mapImp.modelFeatureIds(feature)[0]
+        if (!this.activeDrawTool) {
+          options.positionAtLastClick = true
+        }
+      }
       if (!this.disableUI) {
         this.$nextTick(() => {
-          this.displayPopup(feature)
-        });
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
+          this.popUpCssHacks()
+        })
       }
-    },
-    /**
-     * @vuese
-     * Function to display popup
-     * by providing featureId (``feature``).
-     * @arg feature
-     */
-    displayPopup: function (feature) {
-      this.mapImp.showPopup(
-        this.mapImp.modelFeatureIds(feature)[0],
-        this.$refs.tooltip.$el,
-        { className: 'flatmapvuer-popover', positionAtLastClick: true }
-      )
-      this.popUpCssHacks()
     },
     /**
      * @vuese
@@ -1288,6 +1989,10 @@ export default {
             anchor: 'top',
             className: 'flatmap-popup-popper',
           })
+          /**
+           * This event is emitted after a tooltip on Flatmap's map is shown.
+           */
+          this.$emit('shown-map-tooltip');
         }
       }
     },
@@ -1455,7 +2160,6 @@ export default {
         )
         promise1.then((returnedObject) => {
           this.mapImp = returnedObject
-          this.serverUUID = this.mapImp.getIdentifier().uuid
           this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
@@ -1524,6 +2228,7 @@ export default {
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
       this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
@@ -1653,6 +2358,37 @@ export default {
       default: false,
     },
     /**
+     * The active item index of help mode.
+     */
+    helpModeActiveItem: {
+      type: Number,
+      default: 0,
+    },
+    /**
+     * The option to use helpModeDialog.
+     * On default, `false`, clicking help will show all tooltips.
+     * If `true`, clicking help will show the help-mode-dialog.
+     */
+     helpModeDialog: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The last item of help mode.
+     */
+    helpModeLastItem: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The initial index number for help mode tooltips.
+     * Set negative (e.g. -2) if there are other tooltips outside of `hoverVisibilities`.
+     */
+    helpModeInitialIndex: {
+      type: Number,
+      default: 0,
+    },
+    /**
      * The option to create map on component mounted.
      */
     renderAtMounted: {
@@ -1687,22 +2423,6 @@ export default {
      */
     openMapOptions: {
       type: Array,
-      /**
-       * ```[
-          {
-            display: 'Open AC Map',
-            key: 'AC',
-          },
-          {
-            display: 'Open FC Map',
-            key: 'FC',
-          },
-          {
-            display: 'Open 3D Human Map',
-            key: '3D',
-          },
-        ]```
-       */
       default: function () {
         return [
           {
@@ -1775,7 +2495,9 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      userApiKey: this.userToken
+      $annotator: this.annotator,
+      getFeaturesAlert: () => this.featuresAlert,
+      userApiKey: this.userToken,
     }
   },
   data: function () {
@@ -1785,7 +2507,6 @@ export default {
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
       tooltipDisplay: false,
-      serverUUID: undefined,
       serverURL: undefined,
       layers: [],
       pathways: [],
@@ -1806,17 +2527,24 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
+        { value: false, ref: 'zoomInPopover' }, // 0
+        { value: false, ref: 'zoomOutPopover' }, // 1
+        { value: false, ref: 'zoomFitPopover' }, // 2
+        { value: false, ref: 'settingsPopover' }, // 3
+        { value: false, ref: 'checkBoxPopover' }, // 4
+        { value: false, ref: 'markerPopover' }, // 5
+        { value: false, ref: 'warningPopover' }, // 6
+        { value: false, ref: 'whatsNewPopover' }, // 7
+        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'featuredMarkerPopover' }, // 9
+        { value: false, refs: 'drawToolPopover', ref: 'connectionPopover' }, // 10
+        { value: false, refs: 'drawToolPopover', ref: 'drawPointPopover' }, // 11
+        { value: false, refs: 'drawToolPopover', ref: 'drawLinePopover' }, // 12
+        { value: false, refs: 'drawToolPopover', ref: 'drawPolygonPopover' }, // 13
+        { value: false, refs: 'drawToolPopover', ref: 'deletePopover' }, // 14
+        { value: false, refs: 'drawToolPopover', ref: 'editPopover' }, // 15
       ],
+      helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
       isFC: false,
       inHelp: false,
@@ -1827,7 +2555,7 @@ export default {
       tooltipEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      annotationRadio: false,
+      featuresAlert: undefined,
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
@@ -1835,15 +2563,49 @@ export default {
       minimapResizeShow: false,
       minimapSmall: false,
       currentActive: '',
+      selectedDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
       viewingMode: 'Exploration',
       viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
+      drawnType: 'All tools',
+      drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
+      annotatedType: 'Anyone',
+      annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      annotator: undefined,
+      userInformation: undefined,
+      activeDrawTool: undefined,
+      drawnCreatedEvent: undefined,
+      featureAnnotationSubmitted: false,
+      connectionEntry: {},
+      existDrawnFeatures: [], // Store all exist drawn features
+      doubleClickedFeature: false,
+      activeDrawMode: undefined,
+      drawModes: ['Delete', 'Edit'],
+      containsAlert: false,
+      alertOptions: [
+        {
+          label: 'Display Path With Alerts',
+          key: 'alert',
+          enabled: true,
+        },
+        {
+          label: 'Display Path Without Alerts',
+          key: 'withoutAlert',
+          enabled: true,
+        },
+      ],
+      mapFilters: markRaw({
+        alert: {
+          with: true,
+          without: true,
+        }
+      })
     }
   },
   computed: {
-    ...mapState(useMainStore, ['userToken']),
+    ...mapState(useMainStore, ['userToken'])
   },
   watch: {
     entry: function () {
@@ -1851,7 +2613,15 @@ export default {
     },
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.setHelpMode(val)
+        this.setHelpMode(newVal)
+      }
+    },
+    helpModeActiveItem: function () {
+      // just take the action from helpModeActiveItem
+      // work with local value since the indexing is different
+      if (this.helpMode) {
+        this.helpModeActiveIndex += 1;
+        this.setHelpMode(this.helpMode);
       }
     },
     state: {
@@ -1867,6 +2637,27 @@ export default {
       },
       immediate: true,
       deep: true,
+    },
+    viewingMode: function (mode) {
+      if (mode === 'Annotation') {
+        this.loading = true
+        this.annotator.authenticate(this.userToken).then((userData) => {
+          if (userData.name && userData.email) {
+            this.showAnnotator(true)
+            this.userInformation = userData
+            this.setFeatureAnnotated()
+            if (this.existDrawnFeatures.length === 0) {
+              this.addAnnotationFeature()
+            }
+          }
+          this.loading = false
+        })
+      } else this.showAnnotator(false)
+    },
+    activeDrawMode: function () {
+      // Deselect any feature when draw mode is changed 
+      this.changeAnnotationDrawMode({ mode: 'simple_select' })
+      this.connectionEntry = {}
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
@@ -1904,6 +2695,14 @@ export default {
   font-size: 25px;
 }
 
+.warning-icon,
+.latest-changesicon {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 5px;
+}
+
 .warning-icon {
   color: $warning;
 
@@ -1928,6 +2727,7 @@ export default {
 }
 
 .latest-changesicon {
+  margin-top: 5px;
   color: $success;
 
   &:hover {
@@ -1949,7 +2749,7 @@ export default {
 .pathway-location {
   position: absolute;
   bottom: 0px;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     left: 0px;
   }
@@ -1976,8 +2776,7 @@ export default {
   background: #ffffff;
   overflow-x: hidden;
   scrollbar-width: thin;
-
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     opacity: 1;
     position: relative;
@@ -1998,11 +2797,15 @@ export default {
 }
 
 .flatmap-marker-help {
-  display: inline-block;
-}
+  display: block;
+  width: max-content;
+  margin: 0.5rem;
 
-:deep(.popper-bump-right) {
-  left: 30px;
+  :deep(.flatmap-marker svg) {
+    display: block;
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .el-dropdown-link {
@@ -2024,7 +2827,8 @@ export default {
 }
 
 :deep(.maplibregl-popup) {
-  max-width: 300px !important;
+  z-index: 10;
+  max-width: 330px !important;
 }
 
 :deep(.flatmap-tooltip-popup) {
@@ -2196,23 +3000,24 @@ export default {
   }
 }
 
-.zoomOut {
-  padding-left: 8px;
-}
-
-.fitWindow {
-  padding-left: 8px;
+.zoomIn, .zoomOut, .fitWindow {
+  padding: 4px;
 }
 
 .yellow-star-legend {
-  width: 130px;
-  cursor: pointer;
+  display: block;
+  width: max-content;
+  cursor: default;
+
+  :deep(svg) {
+    display: block;
+  }
 }
 
 .settings-group {
   bottom: 16px;
   position: absolute;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.open {
     left: 322px;
   }
@@ -2226,7 +3031,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 290px;
+  height: fit-content;
   min-width: 200px;
   .el-popper__arrow {
     &:before {
@@ -2332,7 +3137,7 @@ export default {
       width: 300px !important;
     }
   }
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.shrink {
     transform: scale(0.5);
     transform: scale(0.5);
@@ -2349,7 +3154,7 @@ export default {
   width: 20px;
   height: 14px;
   z-index: 9;
-  transition: all 1s ease;
+  transition: all var(--el-transition-duration);
   &.shrink {
     transform: rotate(0deg);
   }
@@ -2393,7 +3198,21 @@ export default {
 
 :deep(.flatmap-popup-popper) {
   .maplibregl-popup-tip {
+    margin-bottom: -1px;
     border-bottom-color: $app-primary-color;
+    position: relative;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-bottom-color: #f3ecf6;
+      position: absolute;
+      top: -9px;
+      left: -10px;
+    }
   }
   .maplibregl-popup-content {
     padding: 6px 4px;
@@ -2409,17 +3228,6 @@ export default {
   }
 }
 
-:deep(.popper-zoomout) {
-  padding-right: 13px !important;
-  left: -21px !important;
-}
-
-:deep(.popper-zoomout) {
-  .popper__arrow {
-    left: 53px !important;
-  }
-}
-
 :deep(.maplibregl-popup-content) {
   padding: 0px;
 }
@@ -2428,6 +3236,7 @@ export default {
   position: absolute;
   right: 16px;
   bottom: 16px;
+  z-index: 10;
 }
 
 :deep(.my-drawer) {
@@ -2469,7 +3278,6 @@ export default {
     font-weight: 600;
     margin-top: 12px;
     color: $app-primary-color;
-    transition-delay: 0.9s;
   }
   &.open {
     i {
@@ -2622,6 +3430,26 @@ export default {
   --el-color-primary-light-5: #CD99E5;
   --el-color-primary-light-9: #F3E6F9;
   --el-color-primary-dark-2: var(--el-color-primary);
+}
+
+.flatmap-teleport-popper {
+  &.flatmap-popper.el-popper {
+    padding: 6px 4px;
+    font-family: Asap, sans-serif;
+    font-size: 12px;
+    color: rgb(48, 49, 51);
+    background-color: #f3ecf6;
+    border: 1px solid $app-primary-color;
+    white-space: nowrap;
+    min-width: unset;
+
+    .el-popper__arrow {
+      &:before {
+        border-color: $app-primary-color;
+        background-color: #f3ecf6;
+      }
+    }
+  }
 }
 
 </style>

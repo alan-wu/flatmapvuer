@@ -2,7 +2,21 @@
   <div class="selections-container">
     <el-row>
       <el-col :span="12">
-        <div class="checkall-display-text">{{ title }}</div>
+        <span class="checkall-display-text">{{ title }}</span>
+        <el-popover
+          width="250"
+          trigger="hover"
+          :teleported="false"
+          popper-class="popover-origin-help"
+          v-if="helpMessage"
+        >
+        <template v-if="helpMessage" #reference>
+          <el-icon class="info"><el-icon-warning /></el-icon>
+        </template>
+        <span style="word-break: keep-all">
+          {{ helpMessage }}
+        </span>
+      </el-popover>
       </el-col>
       <el-col :span="12">
         <el-checkbox
@@ -11,6 +25,7 @@
           :indeterminate="isIndeterminate"
           v-model="checkAll"
           @change="handleCheckAllChange"
+          @click="onAllCheckboxNativeChange"
           >Display all</el-checkbox
         >
       </el-col>
@@ -27,11 +42,15 @@
           :key="item[identifierKey]"
           :label="item[identifierKey]"
         >
-          <div class="checkbox-container">
+          <div class="checkbox-container" 
+            @mouseenter="checkboxMouseEnterEmit(item[identifierKey], true)"
+            @mouseleave="checkboxMouseEnterEmit(item[identifierKey], false)"
+            >
             <el-checkbox
               class="my-checkbox"
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
+              @click="onCheckboxNativeChange"
               :checked="!('enabled' in item) || item.enabled === true"
             >
               <el-row class="checkbox-row">
@@ -55,8 +74,12 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import {
+  Warning as ElIconWarning,
+} from '@element-plus/icons-vue'
+import {
   ElCheckbox as Checkbox,
   ElCheckboxGroup as CheckboxGroup,
+  ElIcon as Icon,
   ElCol as Col,
   ElRow as Row,
 } from 'element-plus'
@@ -67,7 +90,9 @@ export default {
     Checkbox,
     CheckboxGroup,
     Col,
+    Icon,
     Row,
+    ElIconWarning,
   },
   methods: {
     /**
@@ -85,9 +110,58 @@ export default {
         }
       })
     },
+    setCheckboxActionData: function (containerEl, option) {
+      // option = 'individual' or 'all'
+      if (containerEl) {
+        const checkboxEl = containerEl.querySelector('input[type="checkbox"]');
+        const checkboxLabelEl = containerEl.querySelector('.el-checkbox__label');
+        const selectionsContainerEl = containerEl.closest('.selections-container');
+        const selectionsTitleEl = selectionsContainerEl.querySelector('.checkall-display-text');
+
+        // change true/false to checked/unchecked for readability
+        let checkedLabel = '';
+        if (checkboxEl) {
+          checkedLabel = checkboxEl.checked ? 'checked' : 'unchecked';
+        }
+
+        this.checkboxActionData = {
+          selectionsTitle: selectionsTitleEl ? selectionsTitleEl.innerText : '',
+          property: (checkboxEl && option !== 'all') ? checkboxEl.value : '',
+          label: checkboxLabelEl ? checkboxLabelEl.innerText : '',
+          checked: checkedLabel
+        };
+      } else {
+        // reset if no checkbox container found
+        this.checkboxActionData = {
+          selectionsTitle: '',
+          property: '',
+          label: '',
+          checked: '',
+        };
+      }
+    },
+    onCheckboxNativeChange: function (event) {
+      const checkboxContainerEl = event.target.closest('.checkbox-container');
+      this.setCheckboxActionData(checkboxContainerEl, 'individual');
+    },
+    onAllCheckboxNativeChange: function (event) {
+      const checkboxContainerEl = event.target.closest('.all-checkbox');
+      this.setCheckboxActionData(checkboxContainerEl, 'all');
+    },
     visibilityToggle: function (key, value) {
       this.$emit('changed', { key, value })
+      // emit event with checkbox data for tracking
+      if (key === this.checkboxActionData.property) {
+        // change true/false to checked/unchecked for readability
+        this.checkboxActionData.checked = value ? 'checked' : 'unchecked';
+      }
+      this.$emit('selections-data-changed', this.checkboxActionData);
     },
+    checkboxMouseEnterEmit: function (key, value) {
+      // Update the stated to send to the emit
+      this.$emit('checkboxMouseEnter', { key: key, value: value, selections: this.selections, checked: this.checkedItems})
+    },
+
     handleCheckedItemsChange: function (value) {
       let checkedCount = value.length
       this.checkAll = checkedCount === this.selections.length
@@ -96,10 +170,16 @@ export default {
       this.checkedItems = val
         ? this.selections.map((a) => a[this.identifierKey])
         : []
+      
       this.$emit('checkAll', {
         keys: this.selections.map((a) => a[this.identifierKey]),
         value: val,
       })
+      // emit event with checkbox data for tracking
+      this.checkboxActionData.property = this.identifierKey;
+      // change true/false to checked/unchecked for readability
+      this.checkboxActionData.checked = val ? 'checked' : 'unchecked';
+      this.$emit('selections-data-changed', this.checkboxActionData);
     },
     getBackgroundStyles: function (item) {
       if ('colour' in item && this.colourStyle === 'background') {
@@ -126,6 +206,10 @@ export default {
     colourStyle: {
       type: String,
       default: 'line',
+    },
+    helpMessage: {
+      type: String,
+      default: '',
     },
     identifierKey: {
       type: String,
@@ -159,6 +243,12 @@ export default {
     return {
       checkedItems: [],
       checkAll: true,
+      checkboxActionData: {
+        selectionsTitle: '',
+        property: '',
+        label: '',
+        checked: '',
+      },
     }
   },
   mounted: function () {
@@ -251,5 +341,23 @@ export default {
 .checkbox-row {
   width: 100%;
   top: 2px;
+}
+
+.info {
+  transform: rotate(180deg);
+  color: #8300bf;
+  margin-left: 8px;
+}
+
+
+:deep(.popover-origin-help.el-popover) {
+  text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #ffffff;
+    }
+  }
 }
 </style>

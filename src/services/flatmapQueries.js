@@ -231,7 +231,6 @@ let FlatmapQueries = function () {
 
   this.queryForConnectivity = function (keastIds, signal, processConnectivity=true) {
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
-    
     const headers = {
       method: 'POST',
       headers: {
@@ -365,29 +364,6 @@ let FlatmapQueries = function () {
       }
     })
     return found.flat()
-  }
-
-  this.findComponents = function (connectivity) {
-    let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-    let nodes = removeDuplicates(dnodes)
-
-    let found = []
-    let terminal = false
-    nodes.forEach((node) => {
-      terminal = false
-      // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-      if (inArray(connectivity.axons, node)) {
-        terminal = true
-      }
-      if (inArray(connectivity.dendrites, node)) {
-        terminal = true
-      }
-      if (!terminal) {
-        found.push(node)
-      }
-    })
-
-    return found
   }
 
   this.stripPMIDPrefix = function (pubmedId) {
