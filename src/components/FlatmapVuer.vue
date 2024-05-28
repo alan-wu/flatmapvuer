@@ -772,6 +772,7 @@ export default {
     initialiseDrawing: function () {
       this.connectionEntry = {}
       this.activeDrawTool = undefined
+      this.activeDrawMode = undefined
       this.drawnCreatedEvent = undefined
     },
     /**
@@ -844,6 +845,9 @@ export default {
         this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
       } else {
         this.activeDrawTool = type
+      }
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
       }
     },
         /**
@@ -934,6 +938,7 @@ export default {
         ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
       ) {
         this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
+        this.annotationEntry = {}
       }
     },
     /**
@@ -1045,6 +1050,7 @@ export default {
       this.drawnType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
+        this.initialiseDrawing()
       }
     },
     /**
@@ -2622,13 +2628,10 @@ export default {
         })
       } else this.showAnnotator(false)
     },
-    activeDrawMode: function (value) {
+    activeDrawMode: function () {
       // Deselect any feature when draw mode is changed 
       this.changeAnnotationDrawMode({ mode: 'simple_select' })
-      // Clear connection dialog when delete event is fired
-      if (value === 'Delete') {
-        this.connectionEntry = {}
-      }
+      this.connectionEntry = {}
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
