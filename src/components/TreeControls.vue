@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="selections-container">
     <el-row>
       <el-col :span="12">
         <div class="title-text">Systems</div>
