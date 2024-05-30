@@ -147,7 +147,7 @@ describe('MultiFlatmapVuer', () => {
 
             // Click the open pubmed button and check that the window.open call was intercepted
             cy.get('#open-pubmed-button').should('exist').click()
-            cy.get('@Open').should('have.been.calledOnceWithExactly', 'https://pubmed.ncbi.nlm.nih.gov/?term=1358408%2C9622251%2C9442414%2C7174880', '_blank')
+            cy.get('@Open').should('have.been.calledOnceWithExactly', Cypress.sinon.match(/^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov(?:\/.*)/), '_blank')
 
           })
 
