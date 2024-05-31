@@ -2584,7 +2584,7 @@ export default {
           description:'View detail of neural pathways by selecting a pathway to view its connections and data sources.'
         },
         1: {
-          name: 'Neuron Curation',
+          name: 'Neuron Connection',
           description: 'Discover Neuron connections by selecting a neuron and viewing its associated network connections'
         },
         2: {
@@ -3157,6 +3157,7 @@ export default {
   color: $app-primary-color;
   margin: 8px;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .viewing-mode-unselected {
