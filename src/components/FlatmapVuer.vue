@@ -429,7 +429,7 @@ Please use `const` to assign meaningful names to them...
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
-            <div>
+            <div style="margin-bottom: 2px;">
               <template
                   v-for="(item, i) in viewingModes"
                   :key="item + i"
@@ -3172,7 +3172,8 @@ export default {
   font-size: 12px;
   color: rgb(48, 49, 51);
   text-align: left;
-  margin: 0 8px 8px 8px;
+  padding-bottom: 4px;
+  margin-left: 8px;
 }
 
 :deep(.maplibregl-ctrl-minimap) {
