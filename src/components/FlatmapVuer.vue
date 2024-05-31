@@ -114,7 +114,7 @@ Please use `const` to assign meaningful names to them...
             </div>
           </template>
           <template #default>
-            <b>Network discovery mode</b>
+            <b>Neuron Connection mode</b>
             <p>
               You can now view the network of neurons connected to a selected
               neuron. This mode is located in the settings at the bottom right.
@@ -444,7 +444,23 @@ Please use `const` to assign meaningful names to them...
                 :value="item"
               >
                 <el-row>
-                  <el-col :span="12">{{ item }}</el-col>
+                  <el-col :span="12">
+                    {{ item }} 
+                    <el-popover
+                      v-if="item === 'Neuron Connection'"
+                      content="Discover neuron connections by selecting a neuron and viewing its associated network connections"
+                      placement="right"
+                      trigger="hover"
+                      popper-class="flatmap-popper"
+                    >
+                      <template #reference>
+                        <el-icon-warning 
+                        class="convert-warning-icon-to-info"
+                        @hover="showNeuronConnectionHelp"
+                        /> 
+                      </template>
+                    </el-popover>
+                  </el-col>
                 </el-row>
               </el-option>
             </el-select>
@@ -631,6 +647,7 @@ import {
   ElRow as Row,
   ElSelect as Select,
   ElDialog as Dialog,
+  ElIcon as Icon,
 } from 'element-plus'
 import flatmapMarker from '../icons/flatmap-marker'
 import {
@@ -737,6 +754,7 @@ export default {
     Col,
     Loading,
     Radio,
+    Icon,
     RadioGroup,
     Row,
     Select,
@@ -1625,7 +1643,7 @@ export default {
             }
             if (eventType === 'click') {
               this.featuresAlert = data.alert
-              if (this.viewingMode === 'Network Discovery') {
+              if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
@@ -1650,7 +1668,7 @@ export default {
               }
             } else if (
               eventType === 'mouseenter' &&
-              !(this.viewingMode === 'Network Discovery')
+              !(this.viewingMode === 'Neuron Connection')
             ) {
               this.currentHover = data.models ? data.models : ''
             }
@@ -1658,7 +1676,7 @@ export default {
               data &&
               data.type !== 'marker' &&
               eventType === 'click' &&
-              !(this.viewingMode === 'Network Discovery') &&
+              !(this.viewingMode === 'Neuron Connection') &&
               // Disable popup when drawing
               !this.activeDrawTool
             ) {
@@ -1936,6 +1954,7 @@ export default {
         }, timeout)
       }
     },
+
     /**
      * @vuese
      * Function to hide tooltip
@@ -2566,7 +2585,7 @@ export default {
       selectedDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
       viewingMode: 'Exploration',
-      viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
+      viewingModes: ['Annotation', 'Exploration', 'Neuron Connection'],
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       annotatedType: 'Anyone',
@@ -2794,6 +2813,13 @@ export default {
     border-radius: 10px;
     box-shadow: inset 0 0 6px #c0c4cc;
   }
+}
+
+.convert-warning-icon-to-info {
+  transform: rotate(180deg);
+  color: #8300bf;
+  height: 10px;
+  width: auto;
 }
 
 .flatmap-marker-help {
