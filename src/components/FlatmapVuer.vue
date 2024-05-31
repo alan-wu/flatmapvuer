@@ -420,7 +420,7 @@ Please use `const` to assign meaningful names to them...
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="200"
+        width="320"
         :teleported="false"
         trigger="click"
         popper-class="background-popper h-auto"
@@ -429,41 +429,24 @@ Please use `const` to assign meaningful names to them...
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
-            <el-select
-              :teleported="false"
-              v-model="viewingMode"
-              @change="changeViewingMode"
-              placeholder="Select"
-              class="select-box"
-              popper-class="flatmap_dropdown"
-            >
-              <el-option
-                v-for="(item, i) in viewingModes"
-                :key="item + i"
-                :label="item"
-                :value="item"
-              >
-                <el-row>
-                  <el-col :span="12">
-                    {{ item }} 
-                    <el-popover
-                      v-if="item === 'Neuron Connection'"
-                      content="Discover neuron connections by selecting a neuron and viewing its associated network connections"
-                      placement="right"
-                      trigger="hover"
-                      popper-class="flatmap-popper"
-                    >
-                      <template #reference>
-                        <el-icon-warning 
-                        class="convert-warning-icon-to-info"
-                        @hover="showNeuronConnectionHelp"
-                        /> 
-                      </template>
-                    </el-popover>
-                  </el-col>
-                </el-row>
-              </el-option>
-            </el-select>
+            <div>
+              <template
+                  v-for="(item, i) in viewingModes"
+                  :key="item + i"
+                >
+                  <template v-if="item.name === viewingMode">
+                    <span class="viewing-mode-title"><b >{{ viewingMode }}</b></span>
+                  </template>
+                  <template v-else>
+                    <span class="viewing-mode-unselected" @click="changeViewingMode(i)">{{ item.name }}</span>
+                  </template>
+              </template>
+            </div>
+
+            <!-- Selected Viewing mode is always on key 0 -->
+            <el-row class="viewing-mode-description">
+              {{viewingModes[0].description}}
+            </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
             <el-row class="backgroundText">Drawn By*</el-row>
@@ -1694,9 +1677,19 @@ export default {
      * Function triggered by viewing mode change.
      * (e.g., from 'Exploration' to 'Annotation')
      * All tooltips and popups currently showing on map will be closed
-     * when this function is triggered.
+     * when this function is triggered. Optional index can be provided, this will
+     * switch the provided view mode to the first index. This is done so that the
+     * active mode is always first displayed.
      */
-     changeViewingMode: function () {
+     changeViewingMode: function (newModeIndex=null) {
+      if (newModeIndex !== null) {
+        this.viewingMode = this.viewingModes[newModeIndex].name
+
+        // Swap the active mode to the first index
+        let temp = this.viewingModes[0];
+        this.viewingModes[0] = this.viewingModes[newModeIndex];
+        this.viewingModes[newModeIndex] = temp;
+      }
       this.closeTooltip()
     },
     /**
@@ -2585,7 +2578,20 @@ export default {
       selectedDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
       viewingMode: 'Exploration',
-      viewingModes: ['Annotation', 'Exploration', 'Neuron Connection'],
+      viewingModes: {
+        0: {
+          name: 'Exploration', 
+          description:'View detail of neural pathways by selecting a pathway to view its connections and data sources.'
+        },
+        1: {
+          name: 'Neuron Curation',
+          description: 'Discover Neuron connections by selecting a neuron and viewing its associated network connections'
+        },
+        2: {
+          name: 'Annotation',
+          description: 'Log in to annotate the map by adding new features or editing existing features. You can also view approved annotations from other users.'
+        }
+      },
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       annotatedType: 'Anyone',
@@ -3143,6 +3149,30 @@ export default {
   &:hover {
     cursor: pointer;
   }
+}
+
+.viewing-mode-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: $app-primary-color;
+  margin: 8px;
+  text-decoration: underline;
+}
+
+.viewing-mode-unselected {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(48, 49, 51);
+  margin: 8px;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.viewing-mode-description {
+  font-size: 12px;
+  color: rgb(48, 49, 51);
+  text-align: left;
+  margin: 0 8px 8px 8px;
 }
 
 :deep(.maplibregl-ctrl-minimap) {
