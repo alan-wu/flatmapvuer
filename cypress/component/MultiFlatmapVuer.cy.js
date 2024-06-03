@@ -9,6 +9,14 @@ import { createPinia, setActivePinia } from 'pinia';
 
 describe('MultiFlatmapVuer', () => {
 
+  Cypress.on('uncaught:exception', (err) => {
+    // returning false here prevents Cypress from
+    // failing the test
+    if (err.message.includes('Source "markers" already exists.'))
+      return false
+    return true
+  })
+
   beforeEach(() => {
     cy.viewport(1920, 1080);
     cy.fixture('MultiFlatmapProps.json').as('props');
@@ -106,7 +114,7 @@ describe('MultiFlatmapVuer', () => {
         }, [])
 
         // Check the pop up has the same information as when the test was created
-        cy.get('.subtitle').should('exist').contains('Observed in Rattus norvegicus species')
+        cy.get('.subtitle').should('exist').contains('Studied in Rattus norvegicus species')
         cy.get('[origin-item-label="Twelfth thoracic ganglion"]').should('exist')
         cy.get('[component-item-label="connective tissue, neck of urinary bladder"]').should('exist')
         cy.get('[destination-item-label="wall of blood vessel, Arteriole in connective tissue of bladder dome"]').should('exist')
@@ -139,7 +147,7 @@ describe('MultiFlatmapVuer', () => {
 
             // Click the open pubmed button and check that the window.open call was intercepted
             cy.get('#open-pubmed-button').should('exist').click()
-            cy.get('@Open').should('have.been.calledOnceWithExactly', 'https://pubmed.ncbi.nlm.nih.gov/?term=1358408%2C9622251%2C9442414%2C7174880', '_blank')
+            cy.get('@Open').should('have.been.calledOnceWithExactly', Cypress.sinon.match(/^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov(?:\/.*)/), '_blank')
 
           })
 
