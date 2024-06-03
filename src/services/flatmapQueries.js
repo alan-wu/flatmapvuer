@@ -275,11 +275,32 @@ let FlatmapQueries = function () {
     }
   }
 
-  this.createLabelFromNeuralNode = function (node, lookUp, isSingle=true) {
-    if (isSingle) {
-      return lookUp[node]
+  // This function is used to determine if a node is a single node or a node with multiple children
+  //  Returns the id of the node if it is a single node, otherwise returns false
+  this.findIfNodeIsSingle = function (node) {
+    if (node.length === 1) { // If the node is in the form [id]
+      console.error("Server returns a single node", node)
+      return node[0]
+    } else {  
+      if (node.length === 2 && node[1].length === 0) { // If the node is in the form [id, []]
+        return node[0]
+      } else {  
+        return false // If the node is in the form [id, [id1, id2]]
+      }
+    }
+  }
+
+  this.createLabelFromNeuralNode = function (node, lookUp) {
+
+    // Check if the node is a single node or a node with multiple children
+    let nodeIsSingle = this.findIfNodeIsSingle(node)
+   
+    // Case where node is in the form [id]
+    if (nodeIsSingle) {
+      return lookUp[nodeIsSingle]
     }
 
+    // Case where node is in the form [id, [id1 (,id2)]]
     let label = lookUp[node[0]]
     if (node.length === 2 && node[1].length > 0) {
       node[1].forEach((n) => {
@@ -328,12 +349,11 @@ let FlatmapQueries = function () {
         this.destinations = axons.map((a) =>
           this.createLabelFromNeuralNode(a, lookUp)
         )
-
         this.origins = dendrites.map((d) =>
-          this.createLabelFromNeuralNode(d, lookUp, true)
+          this.createLabelFromNeuralNode(d, lookUp)
         )
         this.components = components.map((c) =>
-          this.createLabelFromNeuralNode(c, lookUp, false)
+          this.createLabelFromNeuralNode(c, lookUp)
         )
         this.flattenAndFindDatasets(components, axons, dendrites)
         resolve({
