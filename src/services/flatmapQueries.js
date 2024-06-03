@@ -279,6 +279,7 @@ let FlatmapQueries = function () {
   //  Returns the id of the node if it is a single node, otherwise returns false
   this.findIfNodeIsSingle = function (node) {
     if (node.length === 1) { // If the node is in the form [id]
+      console.error("Server returns a single node", node)
       return node[0]
     } else {  
       if (node.length === 2 && node[1].length === 0) { // If the node is in the form [id, []]
