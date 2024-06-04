@@ -2581,7 +2581,7 @@ export default {
       viewingModes: {
         0: {
           name: 'Exploration', 
-          description:'View detail of neural pathways by selecting a pathway to view its connections and data sources.'
+          description:'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources'
         },
         1: {
           name: 'Neuron Connection',
@@ -2589,7 +2589,7 @@ export default {
         },
         2: {
           name: 'Annotation',
-          description: 'Log in to annotate the map by adding new features or editing existing features. You can also view approved annotations from other users.'
+          description: 'In development, feature coming soon'
         }
       },
       drawnType: 'All tools',
