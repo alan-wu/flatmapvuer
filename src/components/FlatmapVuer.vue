@@ -2589,7 +2589,7 @@ export default {
         },
         2: {
           name: 'Annotation',
-          description: 'In development, feature coming soon'
+          description: 'View internal identifiers of features'
         }
       },
       drawnType: 'All tools',
