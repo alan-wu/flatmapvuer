@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="selections-container">
     <el-row>
       <el-col :span="12">
         <div class="title-text">Systems</div>
@@ -119,6 +119,10 @@ export default {
 
 <style lang="scss" scoped>
 
+.selections-container {
+  padding-top: 5px;
+}
+
 .checkbox-container {
   display: flex;
   cursor: pointer;
@@ -163,6 +167,7 @@ export default {
   background: #ffffff;
   margin-top: 6px;
   scrollbar-width: thin;
+  overflow: hidden;
 
   :deep(.el-tree) {
     max-height: 240px;
