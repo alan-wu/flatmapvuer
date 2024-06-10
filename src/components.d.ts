@@ -9,7 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     ConnectionDialog: typeof import('./components/ConnectionDialog.vue')['default']
-    DrawTool: typeof import('./components/DrawTool.vue')['default']
+    DrawToolbar: typeof import('./components/DrawToolbar.vue')['default']
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -22,7 +22,6 @@ declare module 'vue' {
     ElIconArrowDown: typeof import('@element-plus/icons-vue')['ArrowDown']
     ElIconArrowLeft: typeof import('@element-plus/icons-vue')['ArrowLeft']
     ElIconArrowUp: typeof import('@element-plus/icons-vue')['ArrowUp']
-    ElIconCircleClose: typeof import('@element-plus/icons-vue')['CircleClose']
     ElIconClose: typeof import('@element-plus/icons-vue')['Close']
     ElIconDelete: typeof import('@element-plus/icons-vue')['Delete']
     ElIconEdit: typeof import('@element-plus/icons-vue')['Edit']
