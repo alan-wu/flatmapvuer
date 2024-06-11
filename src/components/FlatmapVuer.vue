@@ -622,9 +622,7 @@ import {
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
-import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
-import TreeControls from './TreeControls.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import '@abi-software/svg-sprite/dist/style.css'
 import SvgLegends from './legends/SvgLegends.vue'
@@ -649,7 +647,8 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import DrawToolbar from './DrawToolbar.vue'
+import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
+import '@abi-software/map-utilities/dist/style.css'
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
