@@ -299,13 +299,16 @@ Please use `const` to assign meaningful names to them...
               </el-popover>
               <tree-controls
                 v-if="isFC && systems && systems.length > 0"
+                class="treeControls"
+                mapType="flatmap"
+                title="Systems"
+                :treeData="systems"
                 :active="currentActive"
                 :hover="currentHover"
-                :tree-data="systems"
-                ref="treeControls"
-                @changed="systemSelected"
+                @checkChanged="systemSelected"
                 @checkAll="checkAllSystems"
-                @change-active="ftuSelected"
+                @changeActive="ftuSelected"
+                ref="treeControls"
               />
               <selections-group
                 v-if="containsAlert && alertOptions"
@@ -3439,6 +3442,13 @@ export default {
       font-weight: normal;
     }
   }
+}
+.treeControls {
+  text-align: left;
+  overflow: none;
+  padding-top: 7px;
+  padding-bottom: 16px;
+  background: #ffffff;
 }
 </style>
 

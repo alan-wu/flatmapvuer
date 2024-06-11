@@ -1,23 +1,29 @@
 <template>
-  <div class="container">
-    <el-row>
+  <div>
+    <el-row v-if="title">
       <el-col :span="12">
-        <div class="title-text">Systems</div>
+        <div class="title-text">
+          {{ title }}
+        </div>
       </el-col>
     </el-row>
     <div class="tree-container">
       <el-tree
-        ref="tree"
-        node-key="key"
+        ref="regionTree"
+        v-loading="!isReady"
+        element-loading-background="rgba(0, 0, 0, 0.3)"
         show-checkbox
-        :check-strictly="false"
+        :node-key="nodeKey"
         :data="treeData"
+        :check-strictly="false"
+        :expand-on-click-node="false"
         :render-after-expand="false"
-        :default-expanded-keys="defaultExpandedKeys"
+        :default-expanded-keys="expandedKeys"
         @check="checkChanged"
       >
         <template #default="{ node, data }">
           <span
+            v-if="mapType === 'flatmap'"
             class="region-tree-node"
             :class="{
               activeItem: nodeIsActive(data),
@@ -30,6 +36,29 @@
               {{ node.label }}
             </div>
           </span>
+          <span
+            v-else-if="mapType === 'scaffold'"
+            class="region-tree-node"
+            :class="{
+              activeItem: active.includes(data.id),
+              hoverItem: hover.includes(data.id),
+            }"
+            @click="changeActiveByNode(data, true)"
+            @mouseover="changeHoverByNode(data, true)"
+          >
+            <el-color-picker
+              v-if="data.isPrimitives"
+              :class="{ 'show-picker': showColourPicker }"
+              v-model="data.activeColour"
+              size="small"
+              :popper-class="myPopperClass"
+              @change="setColour(data, $event)"
+            />
+            <span>{{ node.label }}</span>
+            <span v-if="data.isTextureSlides" class="node-options">
+              (Texture)
+            </span>
+          </span>
         </template>
       </el-tree>
     </div>
@@ -39,107 +68,157 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import {
-  ElCheckbox as Checkbox,
-  ElCheckboxGroup as CheckboxGroup,
+  ElTree as Tree,
   ElColorPicker as ColorPicker,
   ElRow as Row,
-  ElTree as Tree,
-} from 'element-plus'
+  ElCol as Col,
+} from "element-plus";
 
 /**
  * A vue component for toggling visibility of various regions.
  */
 export default {
-  name: 'TreeControls',
+  name: "TreeControls",
   components: {
-    Checkbox,
-    CheckboxGroup,
+    Tree,
     ColorPicker,
     Row,
-    Tree,
+    Col,
   },
   props: {
+    mapType: {
+      type: String,
+      required: true,
+    },
+    isReady: {
+      type: Boolean,
+      default: true,
+    },
+    title: {
+      type: String,
+    },
     treeData: {
       type: Array,
       default: function () {
-        return []
+        return [];
       },
     },
+    showColourPicker: {
+      type: Boolean,
+      default: false,
+    },
     active: {
-      type: String,
-      default: '',
+      type: [String, Array],
+      required: true,
     },
     hover: {
-      type: String,
-      default: '',
+      type: [String, Array],
+      required: true,
     },
   },
   data: function () {
     return {
-      defaultExpandedKeys: ['All'],
-    }
+      defaultExpandedKeys: ["All"],
+      myPopperClass: "hide-scaffold-colour-popup",
+    };
   },
-  unmounted: function () {
-    this.sortedPrimitiveGroups = undefined
+  computed: {
+    isFlatmap: function () {
+      return this.mapType === "flatmap";
+    },
+    isScaffold: function () {
+      return this.mapType === "scaffold";
+    },
+    nodeKey: function () {
+      if (this.isFlatmap) {
+        return "key";
+      } else if (this.isScaffold) {
+        return "id";
+      }
+    },
+    expandedKeys: function () {
+      if (this.isFlatmap) {
+        return this.defaultExpandedKeys;
+      } else if (this.isScaffold) {
+        return [];
+      }
+    },
+  },
+  watch: {
+    showColourPicker: {
+      immediate: true,
+      handler: function () {
+        if (this.showColourPicker) this.myPopperClass = "showPicker";
+        else this.myPopperClass = "hide-scaffold-colour-popup";
+      },
+    },
   },
   methods: {
-    nodeIsActive: function (data) {
-      return this.active === data.models
-    },
-    nodeIsHover: function (data) {
-      return this.hover === data.models
-    },
-    changeActiveByNode: function (data) {
-      if (data.models) {
-        this.$emit('change-active', data.models)
-      }
-    },
-    changeHoverByNode: function () {
-      //if (data.models) {
-      //  this.$emit("change-active", data.models);
-      //}
-    },
-    checkChanged: function (node, data) {
-      const isChecked = data.checkedKeys.includes(node.key)
-      if (node.key === 'All') {
-        this.$emit('checkAll', isChecked)
-      } else {
-        this.$emit('changed', { key: node.key, value: isChecked })
-      }
+    setColour: function (nodeData, value) {
+      this.$emit("setColour", nodeData, value);
     },
     getBackgroundStyles: function (node) {
-      if ('colour' in node) {
-        return { background: node.colour }
+      if ("colour" in node) {
+        return { background: node.colour };
       }
-      return {}
+      return {};
+    },
+    nodeIsActive: function (data) {
+      return this.active === data.models;
+    },
+    nodeIsHover: function (data) {
+      return this.hover === data.models;
+    },
+    changeActiveByNode: function (data, propagate = false) {
+      if (this.isFlatmap) {
+        if (data.models) {
+          this.$emit("changeActive", data.models);
+        }
+      } else if (this.isScaffold) {
+        if (data.isPrimitives || data.isRegion) {
+          this.$emit("changeActive", data, propagate);
+        }
+      }
+    },
+    changeHoverByNode: function (data, propagate = false) {
+      if (this.isFlatmap) {
+        if (data.models) {
+          this.$emit("changeHover", data.models);
+        }
+      } else if (this.isScaffold) {
+        if (data.isPrimitives) {
+          this.$emit("changeHover", data, propagate);
+        }
+      }
+    },
+    checkChanged: function (node, data) {
+      if (this.isFlatmap) {
+        const isChecked = data.checkedKeys.includes(node.key);
+        if (node.key === "All") {
+          this.$emit("checkAll", isChecked);
+        } else {
+          this.$emit("checkChanged", { key: node.key, value: isChecked });
+        }
+      } else if (this.isScaffold) {
+        this.$emit("checkChanged", node, data);
+      }
     },
   },
-}
+  unmounted: function () {
+    this.sortedPrimitiveGroups = undefined;
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-
-.checkbox-container {
-  display: flex;
-  cursor: pointer;
-}
-
-.tree-controls {
-  position: absolute;
-  bottom: 0px;
-  transition: all 1s ease;
-
-  &:focus {
-    outline: none;
+:deep(.el-loading-spinner) {
+  .path {
+    stroke: $app-primary-color;
   }
-}
 
-.container {
-  text-align: left;
-  overflow: none;
-  padding-top: 7px;
-  padding-bottom: 16px;
-  background: #ffffff;
+  .el-loading-text {
+    color: $app-primary-color;
+  }
 }
 
 .title-text {
@@ -150,10 +229,6 @@ export default {
   font-weight: normal;
   line-height: 20px;
   margin-left: 8px;
-}
-
-.all-checkbox {
-  float: right;
 }
 
 .tree-container {
@@ -168,6 +243,7 @@ export default {
     max-height: 240px;
     min-height: 130px;
     overflow: auto;
+
     &::-webkit-scrollbar {
       width: 4px;
     }
@@ -194,10 +270,11 @@ export default {
 }
 
 :deep(
-  .el-tree-node__children
-  .el-tree-node__children
-  .el-tree-node__content
-  > label.el-checkbox) {
+    .el-tree-node__children
+      .el-tree-node__children
+      .el-tree-node__content
+      > label.el-checkbox
+  ) {
   display: none;
 }
 
@@ -214,6 +291,10 @@ export default {
   background-color: #bbb !important;
 }
 
+.hoverItem {
+  background-color: #eee !important;
+}
+
 .region-tree-node {
   flex: 1;
   color: $app-primary-color !important;
@@ -223,9 +304,44 @@ export default {
   padding-left: 0px;
   background-color: #fff;
   width: 100%;
+
+  :deep(.el-color-picker) {
+    height: 14px !important;
+  }
+
+  :deep(.el-color-picker__trigger) {
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 0px;
+    height: 14px;
+    width: 14px;
+    border: 0px;
+  }
 }
 
-.hoverItem {
-  background-color: #eee !important;
+:deep(.el-color-picker__color) {
+  border: 1px solid $app-primary-color;
+}
+
+:deep(.el-color-picker__icon) {
+  &.el-icon-arrow-down {
+    display: none;
+  }
+}
+
+:deep(.show-picker) {
+  .el-color-picker__icon {
+    &.el-icon-arrow-down {
+      display: block;
+    }
+  }
+}
+
+.hide-scaffold-colour-popup {
+  display: none;
+}
+
+.node-options {
+  text-align: right;
 }
 </style>
