@@ -95,10 +95,9 @@
 </template>
 
 <script>
+/* eslint-disable no-alert, no-console */
 import { shallowRef } from 'vue';
 import { Setting as ElIconSetting } from '@element-plus/icons-vue'
-/* eslint-disable no-alert, no-console */
-import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import {
   ElAutocomplete as Autocomplete,
   ElButton as Button,
@@ -107,6 +106,7 @@ import {
   ElRow as Row,
 } from 'element-plus'
 import './icons/mapicon-species-style.css'
+import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
@@ -119,6 +119,7 @@ export default {
     ElIconSetting,
     Popover,
     Row,
+    MultiFlatmapVuer,
     HelpModeDialog,
   },
   methods: {
@@ -298,9 +299,6 @@ export default {
         this.helpModeActiveItem = 0;
       }
     }
-  },
-  components: {
-    MultiFlatmapVuer,
   },
 }
 </script>
