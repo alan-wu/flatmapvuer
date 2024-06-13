@@ -1745,6 +1745,7 @@ export default {
       popupCloseButton.style.display = 'block'
       this.$refs.tooltip.$el.style.display = 'flex'
       popupCloseButton.onclick = () => {
+        this.$emit('provenance-popup-close');
         if (ftooltip) ftooltip.style.display = 'block'
       }
     },
