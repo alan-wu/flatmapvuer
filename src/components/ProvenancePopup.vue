@@ -321,7 +321,7 @@ export default {
   margin-bottom: 0.5em;
 
   .main > &:first-of-type {
-    margin-right: 0.5em;
+    margin-right: 1em;
   }
 }
 
