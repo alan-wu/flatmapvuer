@@ -17,7 +17,7 @@
             placement="right"
             popper-class="warning-popper flatmap-popper"
             :teleported="false"
-            :visible="hoverVisibilities[6].value"
+            :visible="hoverVisibilities[7].value"
             ref="warningPopover"
           >
 <!--
@@ -27,15 +27,15 @@ Please use `const` to assign meaningful names to them...
  -->
             <p
               v-if="isLegacy"
-              @mouseover="showTooltip(6)"
-              @mouseout="hideTooltip(6)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               This is a legacy map, you may view the latest map instead.
             </p>
             <p
               v-else-if="isFC"
-              @mouseover="showTooltip(6)"
-              @mouseout="hideTooltip(6)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               This map displays the connectivity of individual neurons.
               Specifically, those which align with (parts of) the neuron
@@ -99,15 +99,15 @@ Please use `const` to assign meaningful names to them...
           :teleported="false"
           trigger="manual"
           popper-class="warning-popper flatmap-popper"
-          :visible="hoverVisibilities[7].value"
+          :visible="hoverVisibilities[8].value"
           ref="whatsNewPopover"
         >
           <template #reference>
             <div
               class="latest-changesicon"
               v-if="displayLatestChanges"
-              @mouseover="showTooltip(7)"
-              @mouseout="hideTooltip(7)"
+              @mouseover="showTooltip(8)"
+              @mouseout="hideTooltip(8)"
             >
               <el-icon><el-icon-warning-filled /></el-icon>
               <span class="warning-text">What's new?</span>
@@ -172,7 +172,7 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           width="70"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[0].value"
+          :visible="hoverVisibilities[1].value"
           ref="zoomInPopover"
         >
           <template #reference>
@@ -180,8 +180,8 @@ Please use `const` to assign meaningful names to them...
               icon="zoomIn"
               class="icon-button zoomIn"
               @click="zoomIn()"
-              @mouseover="showTooltip(0)"
-              @mouseout="hideTooltip(0)"
+              @mouseover="showTooltip(1)"
+              @mouseout="hideTooltip(1)"
             />
           </template>
         </el-popover>
@@ -192,7 +192,7 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           width="70"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[1].value"
+          :visible="hoverVisibilities[2].value"
           ref="zoomOutPopover"
         >
           <template #reference>
@@ -200,8 +200,8 @@ Please use `const` to assign meaningful names to them...
               icon="zoomOut"
               class="icon-button zoomOut"
               @click="zoomOut()"
-              @mouseover="showTooltip(1)"
-              @mouseout="hideTooltip(1)"
+              @mouseover="showTooltip(2)"
+              @mouseout="hideTooltip(2)"
             />
           </template>
         </el-popover>
@@ -212,7 +212,7 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           width="70"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[2].value"
+          :visible="hoverVisibilities[3].value"
           ref="zoomFitPopover"
         >
           <div>
@@ -225,8 +225,8 @@ Please use `const` to assign meaningful names to them...
               icon="fitWindow"
               class="icon-button fitWindow"
               @click="resetView()"
-              @mouseover="showTooltip(2)"
-              @mouseout="hideTooltip(2)"
+              @mouseover="showTooltip(3)"
+              @mouseout="hideTooltip(3)"
             />
           </template>
         </el-popover>
@@ -238,7 +238,7 @@ Please use `const` to assign meaningful names to them...
         trigger="manual"
         :offset="-18"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[6].value"
         ref="checkBoxPopover"
       >
         <template #reference>
@@ -285,12 +285,12 @@ Please use `const` to assign meaningful names to them...
                 width="max-content"
                 trigger="manual"
                 popper-class="flatmap-popper"
-                :visible="hoverVisibilities[5].value"
+                :visible="hoverVisibilities[0].value"
                 ref="markerPopover"
               >
                 <template #reference>
                   <div
-                    v-show="hoverVisibilities[5].value"
+                    v-show="hoverVisibilities[0].value"
                     class="flatmap-marker-help"
                     v-html="flatmapMarker"
                     v-popover:markerPopover
@@ -560,7 +560,7 @@ Please use `const` to assign meaningful names to them...
       >
         <el-row>
           <el-popover
-            :visible="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[4].value"
             content="Open new map"
             placement="right"
             :teleported="false"
@@ -573,8 +573,8 @@ Please use `const` to assign meaningful names to them...
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showTooltip(8)"
-                @mouseout="hideTooltip(8)"
+                @mouseover="showTooltip(4)"
+                @mouseout="hideTooltip(4)"
               />
             </template>
           </el-popover>
@@ -583,7 +583,7 @@ Please use `const` to assign meaningful names to them...
           <el-popover
             content="Change settings"
             placement="right"
-            :visible="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[5].value"
             :teleported="false"
             trigger="manual"
             popper-class="flatmap-popper"
@@ -594,8 +594,8 @@ Please use `const` to assign meaningful names to them...
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showTooltip(3)"
-                @mouseout="hideTooltip(3)"
+                @mouseover="showTooltip(5)"
+                @mouseout="hideTooltip(5)"
               />
             </template>
           </el-popover>
@@ -2543,15 +2543,15 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
-        { value: false, ref: 'zoomInPopover' }, // 0
-        { value: false, ref: 'zoomOutPopover' }, // 1
-        { value: false, ref: 'zoomFitPopover' }, // 2
-        { value: false, ref: 'settingsPopover' }, // 3
-        { value: false, ref: 'checkBoxPopover' }, // 4
-        { value: false, ref: 'markerPopover' }, // 5
-        { value: false, ref: 'warningPopover' }, // 6
-        { value: false, ref: 'whatsNewPopover' }, // 7
-        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'markerPopover' }, // 0
+        { value: false, ref: 'zoomInPopover' }, // 1
+        { value: false, ref: 'zoomOutPopover' }, // 2
+        { value: false, ref: 'zoomFitPopover' }, // 3
+        { value: false, ref: 'openMapPopover' }, // 4
+        { value: false, ref: 'settingsPopover' }, // 5
+        { value: false, ref: 'checkBoxPopover' }, // 6
+        { value: false, ref: 'warningPopover' }, // 7
+        { value: false, ref: 'whatsNewPopover' }, // 8
         { value: false, ref: 'featuredMarkerPopover' }, // 9
         { value: false, refs: "toolbarPopover", ref: "editPopover" }, // 10
         { value: false, refs: "toolbarPopover", ref: "deletePopover" }, // 11
