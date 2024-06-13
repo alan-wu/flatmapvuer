@@ -1285,8 +1285,8 @@ export default {
 
         // Loop through the path features and check if we have origin nodes
         pathFeatures.forEach((p) => {
-        
-          // Get the nodes from each path feature 
+
+          // Get the nodes from each path feature
           this.mapImp.nodePathModels(p.featureId).forEach((f) => {
             highlight = true
             // s2 here is the second level paths
@@ -1298,7 +1298,7 @@ export default {
                 return
               }
             })
-            
+
             if (highlight) {
               toHighlight.push(f)
             }
@@ -1472,11 +1472,11 @@ export default {
     taxonMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
-          let gid = this.mapImp.taxonFeatureIds(payload.key)  
+          let gid = this.mapImp.taxonFeatureIds(payload.key)
           this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
           this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
-          // reset visibility of paths 
+          // reset visibility of paths
           this.mapImp.selectGeoJSONFeatures("-1")
           payload.selections.forEach((item) => {
             let show = payload.checked.includes(item.taxon)
@@ -2655,7 +2655,7 @@ export default {
       } else this.showAnnotator(false)
     },
     activeDrawMode: function () {
-      // Deselect any feature when draw mode is changed 
+      // Deselect any feature when draw mode is changed
       this.changeAnnotationDrawMode({ mode: 'simple_select' })
       this.connectionEntry = {}
     },
@@ -2982,6 +2982,36 @@ export default {
 }
 
 :deep(.flatmapvuer-popover) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  transform: none !important;
+  height: 100%;
+  z-index: 100;
+
+  .maplibregl-popup-tip {
+    display: none;
+  }
+
+  .maplibregl-popup-content {
+    height: 100%;
+  }
+
+  .tooltip-container {
+    align-items: flex-start;
+    height: 100%;
+    box-sizing: border-box;
+
+    > .main {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
   .maplibregl-popup-close-button {
     position: absolute;
     right: 0;

@@ -31,6 +31,7 @@
         </span>
       </el-popover>
     </div>
+    <!--
     <div v-show="showDetails" class="hide" id="hide-path-info" @click="showDetails = false">
       Hide path information
       <el-icon><el-icon-arrow-up /></el-icon>
@@ -39,8 +40,9 @@
       Show path information
       <el-icon><el-icon-arrow-down /></el-icon>
     </div>
-    <transition name="slide-fade">
-      <div v-show="showDetails" class="content-container scrollbar">
+    -->
+    <!-- <transition name="slide-fade"> -->
+      <div class="content-container scrollbar">
         {{ entry.paths }}
         <div v-if="entry.origins && entry.origins.length > 0" class="block">
           <div>
@@ -155,7 +157,7 @@
 
         <external-resource-card :resources="resources"></external-resource-card>
       </div>
-    </transition>
+    <!-- </transition> -->
   </div>
 </template>
 
@@ -496,9 +498,11 @@ export default {
 }
 
 .content-container {
-  overflow-y: scroll;
+  overflow-y: auto;
   scrollbar-width: thin !important;
-  max-height: 240px;
+  max-height: 100%;
+  flex: 1 1 100%;
+  padding-bottom: 1rem;
 
   .block {
     padding-top: 0.5em;
