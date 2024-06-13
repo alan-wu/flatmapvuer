@@ -1745,6 +1745,10 @@ export default {
       popupCloseButton.style.display = 'block'
       this.$refs.tooltip.$el.style.display = 'flex'
       popupCloseButton.onclick = () => {
+        /**
+         * This event is emitted
+         * when a provenance popup is closed.
+         */
         this.$emit('provenance-popup-close');
         if (ftooltip) ftooltip.style.display = 'block'
       }
@@ -2235,11 +2239,36 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
+      this.handleMapClick();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
        */
       this.$emit('ready', this)
+    },
+    /**
+     * @vuese
+     * Function to handle mouse click on map area
+     * after the map is loaded.
+     */
+    handleMapClick: function () {
+      const containerEl = this.$el;
+      const _map = this.mapImp._map;
+
+      if (_map) {
+        _map.on('click', (e) => {
+          const flatmapPopoverEls = containerEl.querySelectorAll('.flatmapvuer-popover');
+          flatmapPopoverEls.forEach((flatmapPopoverEl) => {
+            if (flatmapPopoverEl) {
+              /**
+               * This event is emitted
+               * when a provenance popup is closed.
+               */
+              this.$emit('provenance-popup-close');
+            }
+          });
+        });
+      }
     },
     /**
      * @vuese
