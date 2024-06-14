@@ -606,7 +606,7 @@ Please use `const` to assign meaningful names to them...
         class="tooltip"
         v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
-        :entry="tooltipEntry"
+        :tooltipEntry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
