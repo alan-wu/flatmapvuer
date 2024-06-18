@@ -276,12 +276,12 @@ Please use `const` to assign meaningful names to them...
               </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
-                content="Find these markers for data"
+                content="Find these markers for data. The numbers represent the number of markers in the area."
                 placement="right"
                 :teleported="false"
-                width="max-content"
+                width="200"
                 trigger="manual"
-                popper-class="flatmap-popper"
+                popper-class="flatmap-popper flatmap-marker-popper"
                 :visible="hoverVisibilities[5].value"
                 ref="markerPopover"
               >
@@ -3185,6 +3185,12 @@ export default {
       background-color: #f3ecf6;
     }
   }
+}
+
+:deep(.flatmap-popper.flatmap-marker-popper) {
+  white-space: break-spaces;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 :deep(.el-loading-spinner) {
