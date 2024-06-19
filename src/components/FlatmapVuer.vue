@@ -435,17 +435,15 @@ Please use `const` to assign meaningful names to them...
                   :key="item + i"
                 >
                   <template v-if="item.name === viewingMode">
-                    <span class="viewing-mode-title"><b >{{ viewingMode }}</b></span>
+                    <span class="viewing-mode-title"><b >{{ item.name }}</b></span>
                   </template>
                   <template v-else>
                     <span class="viewing-mode-unselected" @click="changeViewingMode(i)">{{ item.name }}</span>
                   </template>
               </template>
             </div>
-
-            <!-- Selected Viewing mode is always on key 0 -->
             <el-row class="viewing-mode-description">
-              {{viewingModes[0].description}}
+              {{ viewingModes[viewingModeIndex].description}}
             </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
@@ -1678,17 +1676,12 @@ export default {
      * (e.g., from 'Exploration' to 'Annotation')
      * All tooltips and popups currently showing on map will be closed
      * when this function is triggered. Optional index can be provided, this will
-     * switch the provided view mode to the first index. This is done so that the
-     * active mode is always first displayed.
+     * switch the provided view mode to the first index.
      */
      changeViewingMode: function (newModeIndex=null) {
       if (newModeIndex !== null) {
-        this.viewingMode = this.viewingModes[newModeIndex].name
-
-        // Swap the active mode to the first index
-        let temp = this.viewingModes[0];
-        this.viewingModes[0] = this.viewingModes[newModeIndex];
-        this.viewingModes[newModeIndex] = temp;
+        //this.viewingMode = this.viewingModes[newModeIndex].name
+        this.viewingModeIndex = newModeIndex
       }
       this.closeTooltip()
     },
@@ -2577,7 +2570,7 @@ export default {
       currentActive: '',
       selectedDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
-      viewingMode: 'Exploration',
+      viewingModeIndex: 0,
       viewingModes: {
         0: {
           name: 'Exploration', 
@@ -2630,7 +2623,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(useMainStore, ['userToken'])
+    ...mapState(useMainStore, ['userToken']),
+    viewingMode: function() {
+      return this.viewingModes[this.viewingModeIndex].name
+    }
   },
   watch: {
     entry: function () {
