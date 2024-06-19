@@ -598,7 +598,7 @@ Please use `const` to assign meaningful names to them...
       <Tooltip
         ref="tooltip"
         class="tooltip"
-        v-show="tooltipDisplay"
+        v-show="tooltipDisplay && !provenanceSidebar"
         :annotationEntry="annotationEntry"
         :entry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
@@ -1974,7 +1974,18 @@ export default {
           options.positionAtLastClick = true
         }
       }
-      if (!this.disableUI) {
+      // If provenanceSidebar is set to `true`
+      // Provenance info will show in sidebar
+      if (this.provenanceSidebar) {
+        if (this.mapImp && this.mapImp.map) {
+          // TODO: to move the map center to highlighted area
+          // this.mapImp.map.setCenter(this.centerCoords);
+        }
+        this.$emit('provenance-popup-open', this.tooltipEntry);
+      }
+      // If provenanceSidebar is not set (default) or set to `false`
+      // Provenance info tooltip will show on map
+      if (!this.disableUI && !this.provenanceSidebar) {
         this.$nextTick(() => {
           this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
           this.popUpCssHacks()
@@ -2161,6 +2172,7 @@ export default {
             minZoom: this.minZoom,
             tooltips: this.tooltips,
             minimap: minimap,
+            // tooltipDelay: 15, // new feature to delay tooltips showing
           }
         )
         promise1.then((returnedObject) => {
@@ -2257,6 +2269,9 @@ export default {
 
       if (_map) {
         _map.on('click', (e) => {
+          // TODO: to move the map to highlighted area
+          // const { lat, lng } = e.lngLat;
+          // this.centerCoords = [lat, lng];
           const flatmapPopoverEls = containerEl.querySelectorAll('.flatmapvuer-popover');
           flatmapPopoverEls.forEach((flatmapPopoverEl) => {
             if (flatmapPopoverEl) {
@@ -2519,7 +2534,14 @@ export default {
      disableUI: {
       type: Boolean,
       default: false,
-    }
+    },
+    /**
+     * The option to show provenance information in sidebar
+     */
+    provenanceSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   provide() {
     return {
@@ -2540,6 +2562,7 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
+      // centerCoords: [], // TODO: to move the map to center of the highlighted area
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
