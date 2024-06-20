@@ -1977,10 +1977,9 @@ export default {
       // If provenanceSidebar is set to `true`
       // Provenance info will show in sidebar
       if (this.provenanceSidebar) {
-        if (this.mapImp && this.mapImp.map) {
-          // TODO: to move the map center to highlighted area
-          // this.mapImp.map.setCenter(this.centerCoords);
-        }
+        // move the map center to highlighted area
+        const currentDataResources = [feature];
+        this.highlightConnectedPaths(currentDataResources);
         this.$emit('provenance-popup-open', this.tooltipEntry);
       }
       // If provenanceSidebar is not set (default) or set to `false`
@@ -2269,9 +2268,6 @@ export default {
 
       if (_map) {
         _map.on('click', (e) => {
-          // TODO: to move the map to highlighted area
-          // const { lat, lng } = e.lngLat;
-          // this.centerCoords = [lat, lng];
           const flatmapPopoverEls = containerEl.querySelectorAll('.flatmapvuer-popover');
           flatmapPopoverEls.forEach((flatmapPopoverEl) => {
             if (flatmapPopoverEl) {
@@ -2562,7 +2558,6 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
-      // centerCoords: [], // TODO: to move the map to center of the highlighted area
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
