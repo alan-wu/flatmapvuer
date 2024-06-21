@@ -276,7 +276,7 @@ Please use `const` to assign meaningful names to them...
               </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
-                content="Find these markers for data. The numbers represent the number of markers in the area."
+                content="Find these markers for data. The number inside the markers is the number of datasets available for each marker."
                 placement="right"
                 :teleported="false"
                 width="200"
