@@ -2015,7 +2015,9 @@ export default {
         if (bbox?.length) {
           setTimeout(() => {
             Map.fitBounds(bbox, {
-              padding: {right: sidebarWidth},
+              padding: {
+                right: sidebarWidth
+              },
               animate: true
             });
           });
@@ -2299,16 +2301,9 @@ export default {
 
       if (_map) {
         _map.on('click', (e) => {
-          const flatmapPopoverEls = containerEl.querySelectorAll('.flatmapvuer-popover');
-          flatmapPopoverEls.forEach((flatmapPopoverEl) => {
-            if (flatmapPopoverEl) {
-              /**
-               * This event is emitted
-               * when a provenance popup is closed.
-               */
-              this.$emit('provenance-popup-close');
-            }
-          });
+          if (this.tooltipEntry.featureId) {
+            this.$emit('provenance-popup-close');
+          }
         });
       }
     },
