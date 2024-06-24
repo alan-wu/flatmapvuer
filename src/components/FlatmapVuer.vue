@@ -1978,8 +1978,8 @@ export default {
       // Provenance info will show in sidebar
       if (this.provenanceSidebar) {
         // move the map center to highlighted area
-        const currentDataResources = [feature];
-        this.highlightConnectedPaths(currentDataResources);
+        const featureIds = [feature];
+        this.moveMap(featureIds);
         this.$emit('provenance-popup-open', this.tooltipEntry);
       }
       // If provenanceSidebar is not set (default) or set to `false`
@@ -1989,6 +1989,37 @@ export default {
           this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
           this.popUpCssHacks()
         })
+      }
+    },
+    /**
+     * Move the map to the left side
+     * to the visible area of the feature IDs
+     * because the sidebar is opened
+     * @arg featureIds
+     */
+     moveMap: function (featureIds) {
+      if (this.mapImp) {
+        const Map = this.mapImp._map;
+        const bbox = this.mapImp._bounds.toArray();
+        const sidebarWidth = 500; // actual width is 600
+
+        // Zoom the map to features first
+        this.mapImp.zoomToFeatures(featureIds, { noZoomIn: true });
+
+        // Hide the left pathway drawer
+        // to get more space for the map
+        this.showPathwaysDrawer(false);
+
+        // Move the map to left side
+        // since the sidebar is taking space on the right
+        if (bbox?.length) {
+          setTimeout(() => {
+            Map.fitBounds(bbox, {
+              padding: {right: sidebarWidth},
+              animate: true
+            });
+          });
+        }
       }
     },
     /**
