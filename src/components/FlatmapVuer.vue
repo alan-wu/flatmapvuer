@@ -3056,36 +3056,6 @@ export default {
 }
 
 :deep(.flatmapvuer-popover) {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: auto;
-  transform: none !important;
-  height: 100%;
-  z-index: 100;
-
-  .maplibregl-popup-tip {
-    display: none;
-  }
-
-  .maplibregl-popup-content {
-    height: 100%;
-  }
-
-  .tooltip-container {
-    align-items: flex-start;
-    height: 100%;
-    box-sizing: border-box;
-
-    > .main {
-      height: 100%;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-    }
-  }
-
   .maplibregl-popup-close-button {
     position: absolute;
     right: 0;
