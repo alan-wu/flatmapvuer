@@ -114,7 +114,7 @@ Please use `const` to assign meaningful names to them...
             </div>
           </template>
           <template #default>
-            <b>Network discovery mode</b>
+            <b>Neuron Connection mode</b>
             <p>
               You can now view the network of neurons connected to a selected
               neuron. This mode is located in the settings at the bottom right.
@@ -279,13 +279,13 @@ Please use `const` to assign meaningful names to them...
               </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
-                content="Find these markers for data"
+                content="Find these markers for data. The number inside the markers is the number of datasets available for each marker."
                 placement="right"
                 :teleported="false"
-                width="max-content"
+                width="200"
                 trigger="manual"
-                popper-class="flatmap-popper"
-                :visible="hoverVisibilities[0].value"
+                popper-class="flatmap-popper flatmap-marker-popper"
+                :visible="hoverVisibilities[5].value"
                 ref="markerPopover"
               >
                 <template #reference>
@@ -426,7 +426,7 @@ Please use `const` to assign meaningful names to them...
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="200"
+        width="320"
         :teleported="false"
         trigger="click"
         popper-class="background-popper h-auto"
@@ -435,25 +435,22 @@ Please use `const` to assign meaningful names to them...
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
-            <el-select
-              :teleported="false"
-              v-model="viewingMode"
-              @change="changeViewingMode"
-              placeholder="Select"
-              class="select-box"
-              popper-class="flatmap_dropdown"
-            >
-              <el-option
-                v-for="(item, i) in viewingModes"
-                :key="item + i"
-                :label="item"
-                :value="item"
-              >
-                <el-row>
-                  <el-col :span="12">{{ item }}</el-col>
-                </el-row>
-              </el-option>
-            </el-select>
+            <div style="margin-bottom: 2px;">
+              <template
+                  v-for="(item, i) in viewingModes"
+                  :key="item + i"
+                >
+                  <template v-if="item.name === viewingMode">
+                    <span class="viewing-mode-title"><b >{{ item.name }}</b></span>
+                  </template>
+                  <template v-else>
+                    <span class="viewing-mode-unselected" @click="changeViewingMode(i)">{{ item.name }}</span>
+                  </template>
+              </template>
+            </div>
+            <el-row class="viewing-mode-description">
+              {{ viewingModes[viewingModeIndex].description}}
+            </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
             <el-row class="backgroundText">Drawn By*</el-row>
@@ -635,6 +632,7 @@ import {
   ElRow as Row,
   ElSelect as Select,
   ElDialog as Dialog,
+  ElIcon as Icon,
 } from 'element-plus'
 import flatmapMarker from '../icons/flatmap-marker'
 import {
@@ -742,6 +740,7 @@ export default {
     Col,
     Loading,
     Radio,
+    Icon,
     RadioGroup,
     Row,
     Select,
@@ -1641,7 +1640,7 @@ export default {
             }
             if (eventType === 'click') {
               this.featuresAlert = data.alert
-              if (this.viewingMode === 'Network Discovery') {
+              if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
                 this.currentActive = data.models ? data.models : ''
@@ -1666,7 +1665,7 @@ export default {
               }
             } else if (
               eventType === 'mouseenter' &&
-              !(this.viewingMode === 'Network Discovery')
+              !(this.viewingMode === 'Neuron Connection')
             ) {
               this.currentHover = data.models ? data.models : ''
             }
@@ -1674,7 +1673,7 @@ export default {
               data &&
               data.type !== 'marker' &&
               eventType === 'click' &&
-              !(this.viewingMode === 'Network Discovery') &&
+              !(this.viewingMode === 'Neuron Connection') &&
               // Disable popup when drawing
               !this.activeDrawTool
             ) {
@@ -1692,9 +1691,14 @@ export default {
      * Function triggered by viewing mode change.
      * (e.g., from 'Exploration' to 'Annotation')
      * All tooltips and popups currently showing on map will be closed
-     * when this function is triggered.
+     * when this function is triggered. Optional index can be provided, this will
+     * switch the provided view mode to the first index.
      */
-     changeViewingMode: function () {
+     changeViewingMode: function (newModeIndex=null) {
+      if (newModeIndex !== null) {
+        //this.viewingMode = this.viewingModes[newModeIndex].name
+        this.viewingModeIndex = newModeIndex
+      }
       this.closeTooltip()
     },
     /**
@@ -1952,6 +1956,7 @@ export default {
         }, timeout)
       }
     },
+
     /**
      * @vuese
      * Function to hide tooltip
@@ -2581,8 +2586,21 @@ export default {
       currentActive: '',
       selectedDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
-      viewingMode: 'Exploration',
-      viewingModes: ['Annotation', 'Exploration', 'Network Discovery'],
+      viewingModeIndex: 0,
+      viewingModes: {
+        0: {
+          name: 'Exploration', 
+          description:'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources'
+        },
+        1: {
+          name: 'Neuron Connection',
+          description: 'Discover Neuron connections by selecting a neuron and viewing its associated network connections'
+        },
+        2: {
+          name: 'Annotation',
+          description: 'View internal identifiers of features'
+        }
+      },
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       annotatedType: 'Anyone',
@@ -2631,7 +2649,10 @@ export default {
     ...mapState(useMainStore, ['userToken']),
     isValidDrawnCreated: function () {
       return Object.keys(this.drawnCreatedEvent).length > 0
-    }
+    },
+    viewingMode: function() {
+      return this.viewingModes[this.viewingModeIndex].name
+    },
   },
   watch: {
     entry: function () {
@@ -2815,6 +2836,13 @@ export default {
     border-radius: 10px;
     box-shadow: inset 0 0 6px #c0c4cc;
   }
+}
+
+.convert-warning-icon-to-info {
+  transform: rotate(180deg);
+  color: #8300bf;
+  height: 10px;
+  width: auto;
 }
 
 .flatmap-marker-help {
@@ -3140,6 +3168,32 @@ export default {
   }
 }
 
+.viewing-mode-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: $app-primary-color;
+  margin: 8px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.viewing-mode-unselected {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(48, 49, 51);
+  margin: 8px;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.viewing-mode-description {
+  font-size: 12px;
+  color: rgb(48, 49, 51);
+  text-align: left;
+  padding-bottom: 4px;
+  margin-left: 8px;
+}
+
 :deep(.maplibregl-ctrl-minimap) {
   transform-origin: top right;
   @media (max-width: 1250px) {
@@ -3206,6 +3260,12 @@ export default {
       background-color: #f3ecf6;
     }
   }
+}
+
+:deep(.flatmap-popper.flatmap-marker-popper) {
+  white-space: break-spaces;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 :deep(.el-loading-spinner) {

@@ -8,7 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
-    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
@@ -29,7 +28,6 @@ declare module 'vue' {
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
-    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTree: typeof import('element-plus/es')['ElTree']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
     MultiFlatmapVuer: typeof import('./components/MultiFlatmapVuer.vue')['default']
