@@ -2301,7 +2301,6 @@ export default {
      * after the map is loaded.
      */
     handleMapClick: function () {
-      const containerEl = this.$el;
       const _map = this.mapImp._map;
 
       if (_map) {
@@ -2647,7 +2646,7 @@ export default {
       viewingModeIndex: 0,
       viewingModes: {
         0: {
-          name: 'Exploration', 
+          name: 'Exploration',
           description:'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources'
         },
         1: {
