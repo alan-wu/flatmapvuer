@@ -17,7 +17,7 @@
             placement="right"
             popper-class="warning-popper flatmap-popper"
             :teleported="false"
-            :visible="hoverVisibilities[6].value"
+            :visible="hoverVisibilities[7].value"
             ref="warningPopover"
           >
 <!--
@@ -27,15 +27,15 @@ Please use `const` to assign meaningful names to them...
  -->
             <p
               v-if="isLegacy"
-              @mouseover="showTooltip(6)"
-              @mouseout="hideTooltip(6)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               This is a legacy map, you may view the latest map instead.
             </p>
             <p
               v-else-if="isFC"
-              @mouseover="showTooltip(6)"
-              @mouseout="hideTooltip(6)"
+              @mouseover="showTooltip(7)"
+              @mouseout="hideTooltip(7)"
             >
               This map displays the connectivity of individual neurons.
               Specifically, those which align with (parts of) the neuron
@@ -99,15 +99,15 @@ Please use `const` to assign meaningful names to them...
           :teleported="false"
           trigger="manual"
           popper-class="warning-popper flatmap-popper"
-          :visible="hoverVisibilities[7].value"
+          :visible="hoverVisibilities[8].value"
           ref="whatsNewPopover"
         >
           <template #reference>
             <div
               class="latest-changesicon"
               v-if="displayLatestChanges"
-              @mouseover="showTooltip(7)"
-              @mouseout="hideTooltip(7)"
+              @mouseover="showTooltip(8)"
+              @mouseout="hideTooltip(8)"
             >
               <el-icon><el-icon-warning-filled /></el-icon>
               <span class="warning-text">What's new?</span>
@@ -142,23 +142,26 @@ Please use `const` to assign meaningful names to them...
         <el-icon-arrow-down />
       </el-icon>
 
-      <DrawTool
+      <DrawToolbar
         v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
-        :helpMode="helpMode"
-        :hoverVisibilities=hoverVisibilities
-        :flatmapCanvas="this.$el"
+        :mapCanvas="{
+          containerHTML: this.$el,
+          class: '.maplibregl-canvas',
+        }"
+        :toolbarOptions="toolbarOptions"
         :drawnType="drawnType"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
-        :drawnCreatedEvent="drawnCreatedEvent"
+        :newlyDrawnEntry="drawnCreatedEvent"
         :connectionEntry="connectionEntry"
-        @drawToolbarEvent="drawToolbarEvent"
+        :hoverVisibilities="hoverVisibilities"
+        @clickToolbar="toolbarEvent"
+        @featureTooltip="connectedFeatureTooltip"
         @confirmDrawn="confirmDrawnFeature"
         @cancelDrawn="cancelDrawnFeature"
-        @featureTooltip="connectedFeatureTooltip"
         @showTooltip="showTooltip"
         @hideTooltip="hideTooltip"
-        ref="drawToolPopover"
+        ref="toolbarPopover"
       />
 
       <div class="bottom-right-control" v-show="!disableUI">
@@ -169,7 +172,7 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           width="70"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[0].value"
+          :visible="hoverVisibilities[1].value"
           ref="zoomInPopover"
         >
           <template #reference>
@@ -177,8 +180,8 @@ Please use `const` to assign meaningful names to them...
               icon="zoomIn"
               class="icon-button zoomIn"
               @click="zoomIn()"
-              @mouseover="showTooltip(0)"
-              @mouseout="hideTooltip(0)"
+              @mouseover="showTooltip(1)"
+              @mouseout="hideTooltip(1)"
             />
           </template>
         </el-popover>
@@ -189,7 +192,7 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           width="70"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[1].value"
+          :visible="hoverVisibilities[2].value"
           ref="zoomOutPopover"
         >
           <template #reference>
@@ -197,8 +200,8 @@ Please use `const` to assign meaningful names to them...
               icon="zoomOut"
               class="icon-button zoomOut"
               @click="zoomOut()"
-              @mouseover="showTooltip(1)"
-              @mouseout="hideTooltip(1)"
+              @mouseover="showTooltip(2)"
+              @mouseout="hideTooltip(2)"
             />
           </template>
         </el-popover>
@@ -209,7 +212,7 @@ Please use `const` to assign meaningful names to them...
           trigger="manual"
           width="70"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[2].value"
+          :visible="hoverVisibilities[3].value"
           ref="zoomFitPopover"
         >
           <div>
@@ -222,8 +225,8 @@ Please use `const` to assign meaningful names to them...
               icon="fitWindow"
               class="icon-button fitWindow"
               @click="resetView()"
-              @mouseover="showTooltip(2)"
-              @mouseout="hideTooltip(2)"
+              @mouseover="showTooltip(3)"
+              @mouseout="hideTooltip(3)"
             />
           </template>
         </el-popover>
@@ -235,7 +238,7 @@ Please use `const` to assign meaningful names to them...
         trigger="manual"
         :offset="-18"
         popper-class="flatmap-popper"
-        :visible="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[6].value"
         ref="checkBoxPopover"
       >
         <template #reference>
@@ -287,7 +290,7 @@ Please use `const` to assign meaningful names to them...
               >
                 <template #reference>
                   <div
-                    v-show="hoverVisibilities[5].value"
+                    v-show="hoverVisibilities[0].value"
                     class="flatmap-marker-help"
                     v-html="flatmapMarker"
                     v-popover:markerPopover
@@ -296,13 +299,16 @@ Please use `const` to assign meaningful names to them...
               </el-popover>
               <tree-controls
                 v-if="isFC && systems && systems.length > 0"
+                class="treeControls"
+                mapType="flatmap"
+                title="Systems"
+                :treeData="systems"
                 :active="currentActive"
                 :hover="currentHover"
-                :tree-data="systems"
-                ref="treeControls"
-                @changed="systemSelected"
+                @checkChanged="systemSelected"
                 @checkAll="checkAllSystems"
-                @change-active="ftuSelected"
+                @changeActive="ftuSelected"
+                ref="treeControls"
               />
               <selections-group
                 v-if="containsAlert && alertOptions"
@@ -551,7 +557,7 @@ Please use `const` to assign meaningful names to them...
       >
         <el-row>
           <el-popover
-            :visible="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[4].value"
             content="Open new map"
             placement="right"
             :teleported="false"
@@ -564,8 +570,8 @@ Please use `const` to assign meaningful names to them...
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showTooltip(8)"
-                @mouseout="hideTooltip(8)"
+                @mouseover="showTooltip(4)"
+                @mouseout="hideTooltip(4)"
               />
             </template>
           </el-popover>
@@ -574,7 +580,7 @@ Please use `const` to assign meaningful names to them...
           <el-popover
             content="Change settings"
             placement="right"
-            :visible="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[5].value"
             :teleported="false"
             trigger="manual"
             popper-class="flatmap-popper"
@@ -585,8 +591,8 @@ Please use `const` to assign meaningful names to them...
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showTooltip(3)"
-                @mouseout="hideTooltip(3)"
+                @mouseover="showTooltip(5)"
+                @mouseout="hideTooltip(5)"
               />
             </template>
           </el-popover>
@@ -597,7 +603,7 @@ Please use `const` to assign meaningful names to them...
         class="tooltip"
         v-show="tooltipDisplay && !connectivityInfoSidebar"
         :annotationEntry="annotationEntry"
-        :entry="tooltipEntry"
+        :tooltipEntry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
       />
@@ -613,9 +619,7 @@ import {
   ArrowDown as ElIconArrowDown,
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
-import Tooltip from './Tooltip.vue'
 import SelectionsGroup from './SelectionsGroup.vue'
-import TreeControls from './TreeControls.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import '@abi-software/svg-sprite/dist/style.css'
 import SvgLegends from './legends/SvgLegends.vue'
@@ -641,7 +645,8 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import DrawTool from './DrawTool.vue'
+import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
+import '@abi-software/map-utilities/dist/style.css'
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -749,7 +754,7 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawTool
+    DrawToolbar
   },
   beforeCreate: function () {
     this.mapManager = undefined
@@ -772,14 +777,14 @@ export default {
       this.connectionEntry = {}
       this.activeDrawTool = undefined
       this.activeDrawMode = undefined
-      this.drawnCreatedEvent = undefined
+      this.drawnCreatedEvent = {}
     },
     /**
      * @vuese
      * Function to cancel a newly drawn feature.
      */
     cancelDrawnFeature: function () {
-      if (this.drawnCreatedEvent) {
+      if (this.isValidDrawnCreated) {
         this.closeTooltip()
         this.annotationEntry = {
           ...this.drawnCreatedEvent.feature,
@@ -819,7 +824,7 @@ export default {
      * Function to confirm a newly drawn feature.
      */
     confirmDrawnFeature: function () {
-      if (this.drawnCreatedEvent) {
+      if (this.isValidDrawnCreated) {
         this.checkAndCreatePopups(this.drawnCreatedEvent)
         // Add connection if exist to annotationEntry
         // Connection will only be added in creating new drawn feature annotation
@@ -835,27 +840,37 @@ export default {
      * Function to process the annotation toolbar click events.
      * @arg type
      */
-    drawToolbarEvent: function (type) {
+    toolbarEvent: function (type, name) {
       this.closeTooltip()
       this.doubleClickedFeature = false
-      if (type === 'Delete') {
-        this.activeDrawMode = this.activeDrawMode === 'Delete' ? undefined : 'Delete'
-      } else if (type === 'Edit') {
-        this.activeDrawMode = this.activeDrawMode === 'Edit' ? undefined : 'Edit'
-      } else {
-        this.activeDrawTool = type
-      }
-      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-        this.rollbackAnnotationEvent()
+      this.connectionEntry = {}
+      if (type === 'mode') {
+        // Deselect any feature when draw mode is changed
+        this.changeAnnotationDrawMode({ mode: 'simple_select' })
+        this.activeDrawMode = name
+        // rollback modified feature when exit edit/delete mode
+        if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+          this.rollbackAnnotationEvent()
+        }
+      } else if (type === 'tool') {
+        if (name) {
+          const tool = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+          this.changeAnnotationDrawMode({ mode: `draw${tool}` })
+          this.initialiseDrawing()
+        } else {
+          this.changeAnnotationDrawMode({ mode: 'simple_select' })
+          this.cancelDrawnFeature()
+        }
+        this.activeDrawTool = name
       }
     },
-        /**
+    /**
      * @vuese
      * Function to fire annotation event based on the provided ``data``.
-     * Either edit or delete event.
+     * Either edit or delete action.
      * @arg data
      */
-    drawModeEvent: function (data) {
+    annotationDrawModeEvent: function (data) {
       if (this.activeDrawMode === 'Edit') {
         if (this.doubleClickedFeature) {
           if (data.feature.feature.geometry.type !== 'Point') {
@@ -954,8 +969,13 @@ export default {
       ) {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
-        if (this.annotationEntry.type === 'deleted') this.closeTooltip()
-        else this.addAnnotationFeature() // Update 'existDrawnFeatures' when created or updated event
+        if (this.annotationEntry.type === 'deleted') {
+          this.closeTooltip()
+          this.annotationEntry = {}
+        } else {
+          // Update 'existDrawnFeatures' when created or updated event
+          this.addAnnotationFeature()
+        }
       }
     },
     /**
@@ -1543,11 +1563,7 @@ export default {
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
       } else if (data.type === 'modeChanged') {
-        if (data.feature.mode === 'simple_select' && this.activeDrawTool) {
-          if (!this.drawnCreatedEvent) this.initialiseDrawing() // Reset if invalid linestring or polygon
-        } else if (data.feature.mode === 'direct_select') {
-          this.doubleClickedFeature = true
-        }
+        if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
       } else if (data.type === 'selectionChanged') {
         this.selectedDrawnFeature = data.feature.features.length === 0 ?
           undefined : data.feature.features[0]
@@ -1562,7 +1578,7 @@ export default {
             if (drawnFeature && drawnFeature.connection) {
               this.connectionEntry = drawnFeature.connection
             }
-            this.drawModeEvent(payload)
+            this.annotationDrawModeEvent(payload)
           }
         }
       } else {
@@ -1629,7 +1645,7 @@ export default {
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Drawing connectivity between features
-                if (this.activeDrawTool && !this.drawnCreatedEvent) {
+                if (this.activeDrawTool && !this.isValidDrawnCreated) {
                   // Check if flatmap features or existing drawn features
                   const validDrawnFeature = data.featureId || this.existDrawnFeatures.find(
                     (feature) => feature.id === data.id
@@ -2605,22 +2621,22 @@ export default {
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
       hoverVisibilities: [
-        { value: false, ref: 'zoomInPopover' }, // 0
-        { value: false, ref: 'zoomOutPopover' }, // 1
-        { value: false, ref: 'zoomFitPopover' }, // 2
-        { value: false, ref: 'settingsPopover' }, // 3
-        { value: false, ref: 'checkBoxPopover' }, // 4
-        { value: false, ref: 'markerPopover' }, // 5
-        { value: false, ref: 'warningPopover' }, // 6
-        { value: false, ref: 'whatsNewPopover' }, // 7
-        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'markerPopover' }, // 0
+        { value: false, ref: 'zoomInPopover' }, // 1
+        { value: false, ref: 'zoomOutPopover' }, // 2
+        { value: false, ref: 'zoomFitPopover' }, // 3
+        { value: false, ref: 'openMapPopover' }, // 4
+        { value: false, ref: 'settingsPopover' }, // 5
+        { value: false, ref: 'checkBoxPopover' }, // 6
+        { value: false, ref: 'warningPopover' }, // 7
+        { value: false, ref: 'whatsNewPopover' }, // 8
         { value: false, ref: 'featuredMarkerPopover' }, // 9
-        { value: false, refs: 'drawToolPopover', ref: 'connectionPopover' }, // 10
-        { value: false, refs: 'drawToolPopover', ref: 'drawPointPopover' }, // 11
-        { value: false, refs: 'drawToolPopover', ref: 'drawLinePopover' }, // 12
-        { value: false, refs: 'drawToolPopover', ref: 'drawPolygonPopover' }, // 13
-        { value: false, refs: 'drawToolPopover', ref: 'deletePopover' }, // 14
-        { value: false, refs: 'drawToolPopover', ref: 'editPopover' }, // 15
+        { value: false, refs: "toolbarPopover", ref: "editPopover" }, // 10
+        { value: false, refs: "toolbarPopover", ref: "deletePopover" }, // 11
+        { value: false, refs: "toolbarPopover", ref: "pointPopover" }, // 12
+        { value: false, refs: "toolbarPopover", ref: "lineStringPopover" }, // 13
+        { value: false, refs: "toolbarPopover", ref: "polygonPopover" }, // 14
+        { value: false, refs: "toolbarPopover", ref: "connectionPopover" }, // 15
       ],
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
@@ -2664,16 +2680,23 @@ export default {
       annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      toolbarOptions: [
+        "Edit",
+        "Delete",
+        "Point",
+        "LineString",
+        "Polygon",
+        "Connection",
+      ],
       annotator: undefined,
       userInformation: undefined,
+      activeDrawMode: undefined,
       activeDrawTool: undefined,
-      drawnCreatedEvent: undefined,
       featureAnnotationSubmitted: false,
+      drawnCreatedEvent: {},
       connectionEntry: {},
       existDrawnFeatures: [], // Store all exist drawn features
       doubleClickedFeature: false,
-      activeDrawMode: undefined,
-      drawModes: ['Delete', 'Edit'],
       containsAlert: false,
       alertOptions: [
         {
@@ -2697,9 +2720,12 @@ export default {
   },
   computed: {
     ...mapState(useMainStore, ['userToken']),
+    isValidDrawnCreated: function () {
+      return Object.keys(this.drawnCreatedEvent).length > 0
+    },
     viewingMode: function() {
       return this.viewingModes[this.viewingModeIndex].name
-    }
+    },
   },
   watch: {
     entry: function () {
@@ -2747,11 +2773,6 @@ export default {
           this.loading = false
         })
       } else this.showAnnotator(false)
-    },
-    activeDrawMode: function () {
-      // Deselect any feature when draw mode is changed
-      this.changeAnnotationDrawMode({ mode: 'simple_select' })
-      this.connectionEntry = {}
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
@@ -3553,6 +3574,13 @@ export default {
       font-weight: normal;
     }
   }
+}
+.treeControls {
+  text-align: left;
+  overflow: none;
+  padding-top: 7px;
+  padding-bottom: 16px;
+  background: #ffffff;
 }
 </style>
 
