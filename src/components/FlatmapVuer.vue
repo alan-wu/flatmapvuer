@@ -601,7 +601,7 @@ Please use `const` to assign meaningful names to them...
       <Tooltip
         ref="tooltip"
         class="tooltip"
-        v-show="tooltipDisplay && !connectivityInfoSidebar"
+        v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
         :tooltipEntry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
@@ -1997,15 +1997,17 @@ export default {
       }
       // If connectivityInfoSidebar is set to `true`
       // Connectivity info will show in sidebar
-      if (this.connectivityInfoSidebar) {
+      if (this.connectivityInfoSidebar && this.viewingMode !== 'Annotation') {
         // move the map center to highlighted area
         const featureIds = [feature];
         this.moveMap(featureIds);
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
-      // If connectivityInfoSidebar is not set (default) or set to `false`
-      // Connectivity info (Provenance info) tooltip will show on map
-      if (!this.disableUI && !this.connectivityInfoSidebar) {
+      // If UI is not disabled,
+      // And connectivityInfoSidebar is not set (default) or set to `false`
+      // Provenance popup will be shown on map
+      // Tooltip will be shown for Annotation view
+      if (!this.disableUI && (!this.connectivityInfoSidebar || this.viewingMode === 'Annotation')) {
         this.$nextTick(() => {
           this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
           this.popUpCssHacks()
