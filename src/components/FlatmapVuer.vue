@@ -2021,11 +2021,11 @@ export default {
      * because the sidebar is opened
      * @arg featureIds
      */
-     moveMap: function (featureIds) {
+     moveMap: function (featureIds, options = {}) {
       if (this.mapImp) {
+        const { offsetX = 0, offsetY = 0, zoom = 4 } = options;
         const Map = this.mapImp._map;
         const bbox = this.mapImp._bounds.toArray();
-        const sidebarWidth = 500; // actual width is 600
 
         // Zoom the map to features first
         this.mapImp.zoomToFeatures(featureIds, { noZoomIn: true });
@@ -2039,9 +2039,8 @@ export default {
         if (bbox?.length) {
           setTimeout(() => {
             Map.fitBounds(bbox, {
-              padding: {
-                right: sidebarWidth
-              },
+              offset: [offsetX, offsetY],
+              zoom: zoom,
               animate: true
             });
           });
