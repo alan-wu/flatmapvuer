@@ -1983,7 +1983,6 @@ export default {
      * @arg feature
      */
     displayTooltip: function (feature, geometry = undefined) {
-      this.tooltipDisplay = true
       let featureId = undefined
       let options = { className: 'flatmapvuer-popover' }
       if (geometry) {
@@ -1999,8 +1998,9 @@ export default {
       // Connectivity info will show in sidebar
       if (this.connectivityInfoSidebar && this.viewingMode !== 'Annotation') {
         // move the map center to highlighted area
-        const featureIds = [feature];
-        this.moveMap(featureIds);
+        // this method is moved to sidebar connectivity info
+        // const featureIds = [feature];
+        // this.moveMap(featureIds);
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       // If UI is not disabled,
@@ -2008,6 +2008,7 @@ export default {
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
       if (!this.disableUI && (!this.connectivityInfoSidebar || this.viewingMode === 'Annotation')) {
+        this.tooltipDisplay = true;
         this.$nextTick(() => {
           this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
           this.popUpCssHacks()
