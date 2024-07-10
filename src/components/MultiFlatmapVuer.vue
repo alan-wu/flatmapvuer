@@ -56,6 +56,9 @@
       @resource-selected="resourceSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
+      :connectivityInfoSidebar="connectivityInfoSidebar"
+      @connectivity-info-open="onConnectivityInfoOpen"
+      @connectivity-info-close="onConnectivityInfoClose"
       @open-map="
         /**
          * This event is emitted when the user chooses a different map option
@@ -260,6 +263,12 @@ export default {
        * @arg payload
        */
       this.$emit('pan-zoom-callback', payload)
+    },
+    onConnectivityInfoClose: function () {
+      this.$emit('connectivity-info-close');
+    },
+    onConnectivityInfoOpen: function (entryData) {
+      this.$emit('connectivity-info-open', entryData);
     },
     onSelectionsDataChanged: function (data) {
       this.$emit('pathway-selection-changed', data);
@@ -697,7 +706,14 @@ export default {
     disableUI: {
       type: Boolean,
       default: false,
-    }
+    },
+    /**
+     * The option to show connectivity information in sidebar
+     */
+    connectivityInfoSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {

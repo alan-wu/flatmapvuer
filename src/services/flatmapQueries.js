@@ -222,7 +222,7 @@ let FlatmapQueries = function () {
     this.origins = []
     this.components = []
     if (!keastIds || keastIds.length == 0) return
-    
+
     let prom1 = this.queryForConnectivity(keastIds, signal) // This on returns a promise so dont need 'await'
     let prom2 = await this.pubmedQueryOnIds(eventData)
     let results = await Promise.all([prom1, prom2])
@@ -281,10 +281,10 @@ let FlatmapQueries = function () {
     if (node.length === 1) { // If the node is in the form [id]
       console.error("Server returns a single node", node)
       return node[0]
-    } else {  
+    } else {
       if (node.length === 2 && node[1].length === 0) { // If the node is in the form [id, []]
         return node[0]
-      } else {  
+      } else {
         return false // If the node is in the form [id, [id1, id2]]
       }
     }
@@ -294,7 +294,7 @@ let FlatmapQueries = function () {
 
     // Check if the node is a single node or a node with multiple children
     let nodeIsSingle = this.findIfNodeIsSingle(node)
-   
+
     // Case where node is in the form [id]
     if (nodeIsSingle) {
       return lookUp[nodeIsSingle]
@@ -467,7 +467,8 @@ let FlatmapQueries = function () {
   this.pubmedSearchUrl = function (ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
-    params.append('term', ids)
+    const decodedIDs = ids.map((id) => decodeURIComponent(id));
+    params.append('term', decodedIDs);
     return url + params.toString()
   }
 }

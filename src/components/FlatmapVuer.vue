@@ -845,7 +845,7 @@ export default {
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
-        // Deselect any feature when draw mode is changed 
+        // Deselect any feature when draw mode is changed
         this.changeAnnotationDrawMode({ mode: 'simple_select' })
         this.activeDrawMode = name
         // rollback modified feature when exit edit/delete mode
@@ -1304,8 +1304,8 @@ export default {
 
         // Loop through the path features and check if we have origin nodes
         pathFeatures.forEach((p) => {
-        
-          // Get the nodes from each path feature 
+
+          // Get the nodes from each path feature
           this.mapImp.nodePathModels(p.featureId).forEach((f) => {
             highlight = true
             // s2 here is the second level paths
@@ -1317,7 +1317,7 @@ export default {
                 return
               }
             })
-            
+
             if (highlight) {
               toHighlight.push(f)
             }
@@ -1491,11 +1491,11 @@ export default {
     taxonMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
-          let gid = this.mapImp.taxonFeatureIds(payload.key)  
+          let gid = this.mapImp.taxonFeatureIds(payload.key)
           this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
           this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
-          // reset visibility of paths 
+          // reset visibility of paths
           this.mapImp.selectGeoJSONFeatures("-1")
           payload.selections.forEach((item) => {
             let show = payload.checked.includes(item.taxon)
@@ -1765,6 +1765,11 @@ export default {
       popupCloseButton.style.display = 'block'
       this.$refs.tooltip.$el.style.display = 'flex'
       popupCloseButton.onclick = () => {
+        /**
+         * This event is emitted
+         * when a connectivity info (provenance popup) is closed.
+         */
+        this.$emit('connectivity-info-close');
         if (ftooltip) ftooltip.style.display = 'block'
       }
     },
@@ -1978,7 +1983,6 @@ export default {
      * @arg feature
      */
     displayTooltip: function (feature, geometry = undefined) {
-      this.tooltipDisplay = true
       let featureId = undefined
       let options = { className: 'flatmapvuer-popover' }
       if (geometry) {
@@ -1990,11 +1994,57 @@ export default {
           options.positionAtLastClick = true
         }
       }
-      if (!this.disableUI) {
+      // If connectivityInfoSidebar is set to `true`
+      // Connectivity info will show in sidebar
+      if (this.connectivityInfoSidebar && this.viewingMode !== 'Annotation') {
+        // move the map center to highlighted area
+        // this method is moved to sidebar connectivity info
+        // const featureIds = [feature];
+        // this.moveMap(featureIds);
+        this.$emit('connectivity-info-open', this.tooltipEntry);
+      }
+      // If UI is not disabled,
+      // And connectivityInfoSidebar is not set (default) or set to `false`
+      // Provenance popup will be shown on map
+      // Tooltip will be shown for Annotation view
+      if (!this.disableUI && (!this.connectivityInfoSidebar || this.viewingMode === 'Annotation')) {
+        this.tooltipDisplay = true;
         this.$nextTick(() => {
           this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
           this.popUpCssHacks()
         })
+      }
+    },
+    /**
+     * Move the map to the left side
+     * to the visible area of the feature IDs
+     * because the sidebar is opened
+     * @arg featureIds
+     */
+     moveMap: function (featureIds, options = {}) {
+      if (this.mapImp) {
+        const { offsetX = 0, offsetY = 0, zoom = 4 } = options;
+        const Map = this.mapImp._map;
+        const bbox = this.mapImp._bounds.toArray();
+
+        // Zoom the map to features first
+        this.mapImp.zoomToFeatures(featureIds, { noZoomIn: true });
+
+        // Hide the left pathway drawer
+        // to get more space for the map
+        this.showPathwaysDrawer(false);
+
+        // Move the map to left side
+        // since the sidebar is taking space on the right
+        if (bbox?.length) {
+          setTimeout(() => {
+            Map.fitBounds(bbox, {
+              offset: [offsetX, offsetY],
+              zoom: zoom,
+              animate: true
+            });
+          });
+        }
       }
     },
     /**
@@ -2177,6 +2227,7 @@ export default {
             minZoom: this.minZoom,
             tooltips: this.tooltips,
             minimap: minimap,
+            // tooltipDelay: 15, // new feature to delay tooltips showing
           }
         )
         promise1.then((returnedObject) => {
@@ -2255,11 +2306,28 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
+      this.handleMapClick();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
        */
       this.$emit('ready', this)
+    },
+    /**
+     * @vuese
+     * Function to handle mouse click on map area
+     * after the map is loaded.
+     */
+    handleMapClick: function () {
+      const _map = this.mapImp._map;
+
+      if (_map) {
+        _map.on('click', (e) => {
+          if (this.tooltipEntry.featureId) {
+            this.$emit('connectivity-info-close');
+          }
+        });
+      }
     },
     /**
      * @vuese
@@ -2510,7 +2578,14 @@ export default {
      disableUI: {
       type: Boolean,
       default: false,
-    }
+    },
+    /**
+     * The option to show connectivity information in sidebar
+     */
+    connectivityInfoSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   provide() {
     return {
@@ -2589,7 +2664,7 @@ export default {
       viewingModeIndex: 0,
       viewingModes: {
         0: {
-          name: 'Exploration', 
+          name: 'Exploration',
           description:'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources'
         },
         1: {
