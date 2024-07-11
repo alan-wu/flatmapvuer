@@ -631,7 +631,6 @@ import SelectionsGroup from './SelectionsGroup.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import '@abi-software/svg-sprite/dist/style.css'
 import SvgLegends from './legends/SvgLegends.vue'
-import IframeImageDialog from './IframeImageDialog.vue'
 import {
   ElButton as Button,
   ElCol as Col,
@@ -656,8 +655,7 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import ImageGalleryPopup from './ImageGalleryPopup.vue'
-import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
+import { DrawToolbar, Tooltip, TreeControls, IframeImageDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
 const centroid = (geometry) => {
@@ -767,7 +765,6 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    ImageGalleryPopup,
     DrawToolbar
   },
   beforeCreate: function () {
