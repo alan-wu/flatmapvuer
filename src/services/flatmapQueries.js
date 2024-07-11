@@ -222,23 +222,35 @@ let FlatmapQueries = function () {
     this.origins = []
     this.components = []
     if (!keastIds || keastIds.length == 0) return
+
+    let prom1 = this.queryForConnectivity(keastIds, signal) // This on returns a promise so dont need 'await'
+    let prom2 = await this.pubmedQueryOnIds(eventData)
+    let results = await Promise.all([prom1, prom2])
+    return results
+  }
+
+  this.queryForConnectivity = function (keastIds, signal, processConnectivity=true) {
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
-    let prom1 = new Promise((resolve) => {
-      fetch(`${this.flatmapApi}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        signal: signal,
-      })
+    const headers = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+      ...(signal ? { signal: signal } : {}), // add signal to header if it exists
+    }
+    return new Promise((resolve) => {
+      fetch(`${this.flatmapApi}knowledge/query/`, headers)
         .then((response) => response.json())
         .then((data) => {
           if (this.connectivityExists(data)) {
             let connectivity = JSON.parse(data.values[0][0])
-            this.processConnectivity(connectivity).then(() => {
-              resolve(true)
-            })
+            if (processConnectivity) {
+              this.processConnectivity(connectivity).then((processedConnectivity) => {
+                resolve(processedConnectivity)
+              })
+            }
+            else resolve(connectivity)
           } else {
             resolve(false)
           }
@@ -248,9 +260,6 @@ let FlatmapQueries = function () {
           resolve(false)
         })
     })
-    let prom2 = await this.pubmedQueryOnIds(eventData)
-    let results = await Promise.all([prom1, prom2])
-    return results
   }
 
   this.connectivityExists = function (data) {
@@ -266,7 +275,32 @@ let FlatmapQueries = function () {
     }
   }
 
+  // This function is used to determine if a node is a single node or a node with multiple children
+  //  Returns the id of the node if it is a single node, otherwise returns false
+  this.findIfNodeIsSingle = function (node) {
+    if (node.length === 1) { // If the node is in the form [id]
+      console.error("Server returns a single node", node)
+      return node[0]
+    } else {
+      if (node.length === 2 && node[1].length === 0) { // If the node is in the form [id, []]
+        return node[0]
+      } else {
+        return false // If the node is in the form [id, [id1, id2]]
+      }
+    }
+  }
+
   this.createLabelFromNeuralNode = function (node, lookUp) {
+
+    // Check if the node is a single node or a node with multiple children
+    let nodeIsSingle = this.findIfNodeIsSingle(node)
+
+    // Case where node is in the form [id]
+    if (nodeIsSingle) {
+      return lookUp[nodeIsSingle]
+    }
+
+    // Case where node is in the form [id, [id1 (,id2)]]
     let label = lookUp[node[0]]
     if (node.length === 2 && node[1].length > 0) {
       node[1].forEach((n) => {
@@ -322,7 +356,18 @@ let FlatmapQueries = function () {
           this.createLabelFromNeuralNode(c, lookUp)
         )
         this.flattenAndFindDatasets(components, axons, dendrites)
-        resolve(true)
+        resolve({
+          ids: {
+            axons: axons,
+            dendrites: dendrites,
+            components: components,
+          },
+          labels: {
+            destinations: this.destinations,
+            origins: this.origins,
+            components: this.components,
+          }
+        })
       })
     })
   }
@@ -339,29 +384,6 @@ let FlatmapQueries = function () {
       }
     })
     return found.flat()
-  }
-
-  this.findComponents = function (connectivity) {
-    let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
-    let nodes = removeDuplicates(dnodes)
-
-    let found = []
-    let terminal = false
-    nodes.forEach((node) => {
-      terminal = false
-      // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-      if (inArray(connectivity.axons, node)) {
-        terminal = true
-      }
-      if (inArray(connectivity.dendrites, node)) {
-        terminal = true
-      }
-      if (!terminal) {
-        found.push(node)
-      }
-    })
-
-    return found
   }
 
   this.stripPMIDPrefix = function (pubmedId) {
@@ -445,7 +467,8 @@ let FlatmapQueries = function () {
   this.pubmedSearchUrl = function (ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
-    params.append('term', ids)
+    const decodedIDs = ids.map((id) => decodeURIComponent(id));
+    params.append('term', decodedIDs);
     return url + params.toString()
   }
 }
