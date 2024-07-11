@@ -1740,6 +1740,7 @@ export default {
             ...data.feature,
             resourceId: this.serverURL,
           }
+          this.tooltipType = 'annotation'
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
@@ -1773,6 +1774,7 @@ export default {
           results[1] ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
+          this.tooltipType = 'provenance'
           this.resourceForTooltip = data.resource[0]
           data.resourceForTooltip = this.resourceForTooltip
           this.createTooltipFromNeuronCuration(data)
