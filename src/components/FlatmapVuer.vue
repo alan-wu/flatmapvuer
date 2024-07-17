@@ -1617,6 +1617,7 @@ export default {
             const label = data.label
             const resource = [data.models]
             const taxonomy = this.entry
+            const flatmapId = this.flatmapId
             const biologicalSex = this.biologicalSex
             let taxons = undefined
             if (data.taxons) {
@@ -1630,6 +1631,7 @@ export default {
             const payload = {
               dataset: data.dataset,
               biologicalSex: biologicalSex,
+              flatmapId: flatmapId,
               taxonomy: taxonomy,
               resource: resource,
               label: label,
@@ -2100,6 +2102,7 @@ export default {
       if (this.mapImp) {
         let state = {
           entry: this.entry,
+          flatmapId: this.flatmapId,
           viewport: this.mapImp.getState(),
         }
         const identifier = this.mapImp.getIdentifier()
@@ -2120,8 +2123,8 @@ export default {
       if (state) {
         if (
           this.mapImp &&
-          state.entry &&
-          this.entry == state.entry &&
+          ((state.entry && this.entry == state.entry) ||
+          (state.flatmapId && this.flatmapId == state.flatmapId)) &&
           (!state.biologicalSex || state.biologicalSex === this.biologicalSex)
         ) {
           if (state.viewport) {
@@ -2191,16 +2194,26 @@ export default {
         // @arg identifier.uuid {string} The unique uuid the flatmap. If given then this exact map will
         //  be loaded, overriding ``taxon`` and ``biologicalSex``.
 
-        let identifier = { taxon: this.entry }
+        let identifier = {}
+        if (this.entry) {
+          identifier.taxon = this.entry
+        } else if (this.flatmapId) {
+          identifier.id = this.flatmapId
+        }
         if (this.uuid) {
           identifier.uuid = this.uuid
         }
-        //This now handle the uses of uuid when resuming states
+        //This now handles the uses of uuid when resuming states
         if (state) {
           if (state.uuid) {
             identifier = { uuid: state.uuid }
-          } else if (state.entry) {
-            identifier.taxon = state.entry
+          } else if (state.entry || state.flatmapId) {
+            if (state.entry) {
+              identifier.taxon = state.entry
+            } else if (state.flatmapId) {
+              identifier.id = state.flatmapId
+            }
+            
             if (state.biologicalSex) {
               identifier['biologicalSex'] = state.biologicalSex
             } else if (identifier.taxon === 'NCBITaxon:9606') {
@@ -2214,6 +2227,9 @@ export default {
           if (this.biologicalSex) {
             identifier['biologicalSex'] = this.biologicalSex
           }
+        }
+        if (!identifier.taxon && !identifier.uuid) {
+          identifier = identifier.id;
         }
 
         let promise1 = this.mapManager.loadMap(
@@ -2299,7 +2315,9 @@ export default {
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
-      this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      if (this.mapImp.taxonIdentifiers) {
+        this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      }
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
@@ -2406,10 +2424,13 @@ export default {
     /**
      * The taxon identifier of the species represented by the map.
      */
-    entry: {
-      type: String,
-      required: true,
-    },
+    entry: String,
+    /**
+     * The ``id`` of the flatmap.
+     * If given then this exact map will be loaded,
+     * overriding ``taxon`` and ``biologicalSex``.
+     */
+    flatmapId: String,
     /**
      * The unique ``uuid`` of the flatmap.
      * If given then this exact map will be loaded,

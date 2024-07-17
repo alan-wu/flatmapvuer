@@ -43,6 +43,7 @@
       :key="key"
       v-show="activeSpecies == key"
       :entry="item.taxo"
+      :flatmapId="item.flatmapId"
       :uuid="item.uuid"
       :biologicalSex="item.biologicalSex"
       :displayWarning="item.displayWarning"
@@ -157,13 +158,15 @@ export default {
             .then((data) => {
               //Check each key in the provided availableSpecies against the one
               Object.keys(this.availableSpecies).forEach((key) => {
-                // FIrst look through the uuid
+                // First look through the uuid
                 const uuid = this.availableSpecies[key].uuid
                 if (uuid && data.map((e) => e.uuid).indexOf(uuid) > 0) {
                   this.speciesList[key] = reactive(this.availableSpecies[key])
                 } else {
                   for (let i = 0; i < data.length; i++) {
-                    if (this.availableSpecies[key].taxo === data[i].taxon) {
+                    if ((this.availableSpecies[key].taxo && this.availableSpecies[key].taxo === data[i].taxon) ||
+                    (this.availableSpecies[key].flatmapId && this.availableSpecies[key].flatmapId === data[i].id))
+                    {
                       if (this.availableSpecies[key].biologicalSex) {
                         if (
                           data[i].biologicalSex &&
