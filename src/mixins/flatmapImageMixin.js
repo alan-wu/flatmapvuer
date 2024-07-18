@@ -1,10 +1,10 @@
 export default {
   // Note that the setting store is included in MapContent.vue
   methods: {
-    populateFlatmapWithImages: function (mapImp, images) {
+    populateFlatmapWithImages: function (mapImp, images = []) {
       let anatomyList = []
       console.log('images in populateflatmap', images)
-      images.images.forEach((image) => {
+      images.forEach((image) => {
         if (image.value && image.value.length > 0)
         image.value.forEach((image) => {
           if (image.anatomy && image.anatomy.length > 0) {
@@ -18,9 +18,9 @@ export default {
         })
       })
     },
-    findImagesForAnatomy: function (images, anatomyToFind) {
+    findImagesForAnatomy: function (images = [], anatomyToFind) {
       let imageList = []
-      images.images.forEach((image) => {
+      images.forEach((image) => {
         if (image.value && image.value.length > 0)
         image.value.forEach((image) => {
           if (image.anatomy && image.anatomy.length > 0) {

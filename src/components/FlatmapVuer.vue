@@ -2437,10 +2437,10 @@ export default {
     },
     addImagesToMap: async function () {
       if (this.mapImp) {
-        let images = await this.getImagesFromScicrunch()
-        if (images) {
-          this.images = images
-          this.populateFlatmapWithImages(this.mapImp, images)
+        let response = await this.getImagesFromScicrunch()
+        if (response && response.success) {
+          this.images = response.images
+          this.populateFlatmapWithImages(this.mapImp, response.images)
         }
       }
     },
