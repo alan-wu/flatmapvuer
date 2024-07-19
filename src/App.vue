@@ -287,7 +287,7 @@ export default {
       useHelpModeDialog: true,
       multiflatmapRef: null,
       mapSettings: [],
-      sparcApi: "http://localhost:5000",
+      sparcApi: import.meta.env.SPARC_API,
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcoe-demo.org/current/flatmap/v3/",
