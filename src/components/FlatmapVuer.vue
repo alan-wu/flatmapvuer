@@ -1996,7 +1996,7 @@ export default {
       }
       // If connectivityInfoSidebar is set to `true`
       // Connectivity info will show in sidebar
-      if ((this.connectivityInfoSidebar && this.isTooltipEntry()) && this.viewingMode !== 'Annotation') {
+      if ((this.connectivityInfoSidebar && this.hasTooltipEntry()) && this.viewingMode !== 'Annotation') {
         // move the map center to highlighted area
         // this method is moved to sidebar connectivity info
         // const featureIds = [feature];
@@ -2013,7 +2013,7 @@ export default {
           (
             this.viewingMode === 'Exploration' &&
             !this.connectivityInfoSidebar &&
-            this.isTooltipEntry()
+            this.hasTooltipEntry()
           )
         )
       ) {
@@ -2025,7 +2025,7 @@ export default {
 
       }
     },
-    isTooltipEntry: function () {
+    hasTooltipEntry: function () {
       const {
         components,
         destinations,
