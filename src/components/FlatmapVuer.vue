@@ -2035,10 +2035,10 @@ export default {
       } = this.tooltipEntry;
 
       return Boolean(
-        components?.length &&
-        destinations?.length &&
-        origins?.length &&
-        provenanceTaxonomy?.length &&
+        components?.length ||
+        destinations?.length ||
+        origins?.length ||
+        provenanceTaxonomy?.length ||
         provenanceTaxonomyLabel?.length
       );
     },
