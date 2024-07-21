@@ -1998,7 +1998,7 @@ export default {
       }
       // If connectivityInfoSidebar is set to `true`
       // Connectivity info will show in sidebar
-      if (this.connectivityInfoSidebar && this.viewingMode !== 'Annotation') {
+      if ((this.connectivityInfoSidebar && this.hasTooltipEntry()) && this.viewingMode !== 'Annotation') {
         // move the map center to highlighted area
         // this method is moved to sidebar connectivity info
         // const featureIds = [feature];
@@ -2009,13 +2009,40 @@ export default {
       // And connectivityInfoSidebar is not set (default) or set to `false`
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
-      if (!this.disableUI && (!this.connectivityInfoSidebar || this.viewingMode === 'Annotation')) {
+      if (
+        !this.disableUI && (
+          this.viewingMode === 'Annotation' ||
+          (
+            this.viewingMode === 'Exploration' &&
+            !this.connectivityInfoSidebar &&
+            this.hasTooltipEntry()
+          )
+        )
+      ) {
         this.tooltipDisplay = true;
         this.$nextTick(() => {
-          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
-          this.popUpCssHacks()
-        })
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
+          this.popUpCssHacks();
+        });
+
       }
+    },
+    hasTooltipEntry: function () {
+      const {
+        components,
+        destinations,
+        origins,
+        provenanceTaxonomy,
+        provenanceTaxonomyLabel
+      } = this.tooltipEntry;
+
+      return Boolean(
+        components?.length ||
+        destinations?.length ||
+        origins?.length ||
+        provenanceTaxonomy?.length ||
+        provenanceTaxonomyLabel?.length
+      );
     },
     /**
      * Move the map to the left side
