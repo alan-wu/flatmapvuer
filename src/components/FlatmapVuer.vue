@@ -757,8 +757,6 @@ export default {
     DrawToolbar
   },
   beforeCreate: function () {
-    this.mapManager = undefined
-    this.mapImp = undefined
     //The state watcher may triggered before
     //created causing issue, This flag will
     //resolve this issue.
@@ -2625,6 +2623,9 @@ export default {
   },
   data: function () {
     return {
+      sensor: null,
+      mapManager: undefined,
+      flatmapQueries: undefined,
       annotationEntry: {},
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
@@ -2649,6 +2650,7 @@ export default {
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
+      tooltipWait: [],
       hoverVisibilities: [
         { value: false, ref: 'markerPopover' }, // 0
         { value: false, ref: 'zoomInPopover' }, // 1
@@ -2812,10 +2814,9 @@ export default {
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
-    this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
-    this.mapManager = new flatmap.MapManager(this.flatmapAPI)
-    this.flatmapQueries = new FlatmapQueries()
+    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI))
+    this.flatmapQueries = markRaw(new FlatmapQueries())
     this.flatmapQueries.initialise(this.flatmapAPI)
     if (this.state) {
       //State is set and require to set the state
