@@ -2650,7 +2650,7 @@ export default {
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
-      tooltipWait: [],
+      tooltipWait: markRaw([]),
       hoverVisibilities: [
         { value: false, ref: 'markerPopover' }, // 0
         { value: false, ref: 'zoomInPopover' }, // 1
