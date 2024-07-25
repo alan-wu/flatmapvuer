@@ -87,6 +87,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import { markRaw } from 'vue'
 import EventBus from './EventBus'
 import FlatmapVuer from './FlatmapVuer.vue'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -713,7 +714,7 @@ export default {
       activeSpecies: undefined,
       speciesList: {},
       requireInitialisation: true,
-      resolveList: [],
+      resolveList: markRaw([]),
       initialised: false,
     }
   },

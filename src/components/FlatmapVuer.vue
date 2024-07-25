@@ -2313,7 +2313,7 @@ export default {
      */
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-      this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
+      this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
