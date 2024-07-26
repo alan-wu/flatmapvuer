@@ -1999,6 +1999,9 @@ export default {
         // this method is moved to sidebar connectivity info
         // const featureIds = [feature];
         // this.moveMap(featureIds);
+        if (this.featuresAlert) {
+          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
+        }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       // If UI is not disabled,
