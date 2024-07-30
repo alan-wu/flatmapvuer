@@ -768,8 +768,6 @@ export default {
     DrawToolbar
   },
   beforeCreate: function () {
-    this.mapManager = undefined
-    this.mapImp = undefined
     //The state watcher may triggered before
     //created causing issue, This flag will
     //resolve this issue.
@@ -2021,24 +2019,54 @@ export default {
       }
       // If connectivityInfoSidebar is set to `true`
       // Connectivity info will show in sidebar
-      if (this.connectivityInfoSidebar && this.viewingMode !== 'Annotation') {
+      if ((this.connectivityInfoSidebar && this.hasTooltipEntry()) && this.viewingMode !== 'Annotation') {
         // move the map center to highlighted area
         // this method is moved to sidebar connectivity info
         // const featureIds = [feature];
         // this.moveMap(featureIds);
+        if (this.featuresAlert) {
+          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
+        }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       // If UI is not disabled,
       // And connectivityInfoSidebar is not set (default) or set to `false`
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
-      if (!this.disableUI && (!this.connectivityInfoSidebar || this.viewingMode === 'Annotation')) {
+      if (
+        !this.disableUI && (
+          this.viewingMode === 'Annotation' ||
+          (
+            this.viewingMode === 'Exploration' &&
+            !this.connectivityInfoSidebar &&
+            this.hasTooltipEntry()
+          )
+        )
+      ) {
         this.tooltipDisplay = true;
         this.$nextTick(() => {
-          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options)
-          this.popUpCssHacks()
-        })
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
+          this.popUpCssHacks();
+        });
+
       }
+    },
+    hasTooltipEntry: function () {
+      const {
+        components,
+        destinations,
+        origins,
+        provenanceTaxonomy,
+        provenanceTaxonomyLabel
+      } = this.tooltipEntry;
+
+      return Boolean(
+        components?.length ||
+        destinations?.length ||
+        origins?.length ||
+        provenanceTaxonomy?.length ||
+        provenanceTaxonomyLabel?.length
+      );
     },
     /**
      * Move the map to the left side
@@ -2313,7 +2341,7 @@ export default {
      */
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-      this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
+      this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
@@ -2641,6 +2669,9 @@ export default {
   },
   data: function () {
     return {
+      sensor: null,
+      mapManager: undefined,
+      flatmapQueries: undefined,
       annotationEntry: {},
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
@@ -2669,6 +2700,7 @@ export default {
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
+      tooltipWait: markRaw([]),
       hoverVisibilities: [
         { value: false, ref: 'markerPopover' }, // 0
         { value: false, ref: 'zoomInPopover' }, // 1
@@ -2832,10 +2864,9 @@ export default {
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
-    this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
-    this.mapManager = new flatmap.MapManager(this.flatmapAPI)
-    this.flatmapQueries = new FlatmapQueries()
+    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI))
+    this.flatmapQueries = markRaw(new FlatmapQueries())
     this.flatmapQueries.initialise(this.flatmapAPI)
     if (this.state) {
       //State is set and require to set the state
