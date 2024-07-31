@@ -77,7 +77,8 @@
       :displayMinimap="true"
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
-      :sparcAPI="sparcApi"
+      :rootURL="rootURL"
+      :sparcAPI="sparcAPI"
       :disableUI="disableUI"
       @open-pubmed-url="onOpenPubmedUrl"
       @pathway-selection-changed="onPathwaySelectionChanged"
@@ -287,7 +288,8 @@ export default {
       useHelpModeDialog: true,
       multiflatmapRef: null,
       mapSettings: [],
-      sparcApi: "http://localhost:5000",
+      rootURL: "http://localhost:3000",
+      sparcAPI: "http://localhost:8000",
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcoe-demo.org/current/flatmap/v3/",

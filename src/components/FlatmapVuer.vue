@@ -602,18 +602,11 @@ Please use `const` to assign meaningful names to them...
         ref="tooltip"
         class="tooltip"
         v-show="tooltipDisplay"
-        :annotationEntry="annotationEntry"
-        :tooltipEntry="tooltipEntry"
         :tooltipType="tooltipType"
-        :galleryItems="galleryItems"
-        :annotationDisplay="viewingMode === 'Annotation'"
-        @viewImage="viewIframeImage"
+        :provenanceEntry="provenanceEntry"
+        :annotationEntry="annotationEntry"
+        :imageEntry="imageEntry"
         @annotation="commitAnnotationEvent"
-      />
-      <IframeImageDialog
-        :imageIframeURL="imageIframeURL"
-        :imageIframeOpen="imageIframeOpen"
-        @closeImageIframe="closeImageIframe"
       />
     </div>
   </div>
@@ -655,7 +648,7 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import { DrawToolbar, Tooltip, TreeControls, IframeImageDialog } from '@abi-software/map-utilities'
+import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
 const centroid = (geometry) => {
@@ -1680,7 +1673,6 @@ export default {
             }
             if (
               data &&
-              data.type !== 'marker' &&
               eventType === 'click' &&
               !(this.viewingMode === 'Neuron Connection') &&
               // Disable popup when drawing
@@ -1719,15 +1711,27 @@ export default {
     checkAndCreatePopups: async function (data) {
 
       if (data.feature.type === 'marker') {
-        this.tooltipType = 'image-gallery'
+        this.tooltipType = 'image'
         console.log('marker data', data)
         console.log('saved images', this.images)
         let filteredImages = this.findImagesForAnatomy(this.images, data.resource[0])
         console.log('filtered images:',filteredImages)
-        this.galleryItems = filteredImages
-        this.displayTooltip(data.feature.models)
-      } else {
+        this.imageEntry = filteredImages
+        console.log(data.feature.models);
+        // this.displayTooltip(data.feature.models)
 
+        let options = { className: 'flatmapvuer-popover' }
+        let featureId = this.mapImp.modelFeatureIds(data.feature.models)[0]
+        if (!this.activeDrawTool) {
+          options.positionAtLastClick = true
+        }
+        this.tooltipDisplay = true;
+        this.$nextTick(() => {
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
+          this.popUpCssHacks();
+        });
+        
+      } else {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         if (data.feature) {
@@ -1812,7 +1816,7 @@ export default {
      * @arg data
      */
     createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
+      this.provenanceEntry = await this.flatmapQueries.createTooltipData(data)
       this.displayTooltip(data.resource[0])
     },
     /**
@@ -2025,9 +2029,9 @@ export default {
         // const featureIds = [feature];
         // this.moveMap(featureIds);
         if (this.featuresAlert) {
-          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
+          this.provenanceEntry['featuresAlert'] = this.featuresAlert;
         }
-        this.$emit('connectivity-info-open', this.tooltipEntry);
+        this.$emit('connectivity-info-open', this.provenanceEntry);
       }
       // If UI is not disabled,
       // And connectivityInfoSidebar is not set (default) or set to `false`
@@ -2058,7 +2062,7 @@ export default {
         origins,
         provenanceTaxonomy,
         provenanceTaxonomyLabel
-      } = this.tooltipEntry;
+      } = this.provenanceEntry;
 
       return Boolean(
         components?.length ||
@@ -2377,7 +2381,7 @@ export default {
 
       if (_map) {
         _map.on('click', (e) => {
-          if (this.tooltipEntry.featureId) {
+          if (this.provenanceEntry.featureId) {
             this.$emit('connectivity-info-close');
           }
         });
@@ -2637,6 +2641,13 @@ export default {
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     /**
+     * Specify the root url of the SPARC portal.
+     */
+    rootURL: {
+      type: String,
+      default: 'https://sparc.science/',
+    },
+    /**
      * Specify the endpoint of the SPARC API.
      */
     sparcAPI: {
@@ -2646,7 +2657,7 @@ export default {
     /**
      * Flag to disable UIs on Map
      */
-     disableUI: {
+    disableUI: {
       type: Boolean,
       default: false,
     },
@@ -2680,9 +2691,7 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
-      imageIframeOpen: false,
-      imageIframeURL: '',
-      galleryItems: [],
+      imageEntry: [],
       tooltipType: 'provenance',
       sckanDisplay: [
         {
@@ -2727,7 +2736,7 @@ export default {
       availableBackground: ['white', 'lightskyblue', 'black'],
       loading: false,
       flatmapMarker: flatmapMarker,
-      tooltipEntry: createUnfilledTooltipData(),
+      provenanceEntry: createUnfilledTooltipData(),
       connectivityTooltipVisible: false,
       drawerOpen: false,
       featuresAlert: undefined,
