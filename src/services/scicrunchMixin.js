@@ -7,7 +7,7 @@ const generateShareLink = (datasetId, datasetVersion, filePath) => {
 };
 
 const getView2DImageLink = (rootURL, datasetId, datasetVersion, filePath) => {
-  return `${rootURL}/datasets/file/${datasetId}/${datasetVersion}?path=files/${filePath}`;
+  return `${rootURL}datasets/file/${datasetId}/${datasetVersion}?path=files/${filePath}`;
 };
 
 const getView3DImageLink = (
@@ -37,7 +37,7 @@ const getView3DImageLink = (
 
 const getBiolucidaInfo = async function (sparcAPI, datasetId) {
   return new Promise((resolve, reject) => {
-    const endpoint = `${sparcAPI}/image_search/${datasetId}`;
+    const endpoint = `${sparcAPI}image_search/${datasetId}`;
     fetch(endpoint)
       .then((response) => response.json())
       .then((data) => {
@@ -78,7 +78,7 @@ export default {
   // Note that the setting store is included in MapContent.vue
   methods: {
     getThumbnailURL: function (thumbnailId) {
-      return `${this.sparcAPI}/thumbnail/${thumbnailId}`;
+      return `${this.sparcAPI}thumbnail/${thumbnailId}`;
     },
 
     getSegmentationThumbnailURL: function (
@@ -87,7 +87,7 @@ export default {
       filePath,
       s3uri
     ) {
-      return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}&s3uri=${s3uri}`;
+      return `${this.sparcAPI}thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}&s3uri=${s3uri}`;
     },
 
     getImagesFromScicrunch: async function () {
@@ -95,7 +95,7 @@ export default {
         const response = await fetch(
           `${
             this.sparcAPI
-          }/multiple_dataset_info/using_multiple_mimetype/?${new URLSearchParams(
+          }multiple_dataset_info/using_multiple_mimetype/?${new URLSearchParams(
             { q: imageQuery }
           )}`
         );

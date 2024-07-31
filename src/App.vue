@@ -288,8 +288,8 @@ export default {
       useHelpModeDialog: true,
       multiflatmapRef: null,
       mapSettings: [],
-      rootURL: "http://localhost:3000",
-      sparcAPI: "http://localhost:8000",
+      rootURL: "http://localhost:3000/",
+      sparcAPI: "http://localhost:8000/",
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcoe-demo.org/current/flatmap/v3/",
