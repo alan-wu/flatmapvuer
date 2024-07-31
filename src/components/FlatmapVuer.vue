@@ -1718,18 +1718,18 @@ export default {
         console.log('filtered images:',filteredImages)
         this.imageEntry = filteredImages
         console.log(data.feature.models);
-        // this.displayTooltip(data.feature.models)
+        this.displayTooltip(data.feature.models)
 
-        let options = { className: 'flatmapvuer-popover' }
-        let featureId = this.mapImp.modelFeatureIds(data.feature.models)[0]
-        if (!this.activeDrawTool) {
-          options.positionAtLastClick = true
-        }
-        this.tooltipDisplay = true;
-        this.$nextTick(() => {
-          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
-          this.popUpCssHacks();
-        });
+        // let options = { className: 'flatmapvuer-popover' }
+        // let featureId = this.mapImp.modelFeatureIds(data.feature.models)[0]
+        // if (!this.activeDrawTool) {
+        //   options.positionAtLastClick = true
+        // }
+        // this.tooltipDisplay = true;
+        // this.$nextTick(() => {
+        //   this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
+        //   this.popUpCssHacks();
+        // });
         
       } else {
       // Call flatmap database to get the connection data
@@ -2458,14 +2458,6 @@ export default {
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
       return []
-    },
-    viewIframeImage: function (url) {
-      this.imageIframeURL = url
-      this.imageIframeOpen = true
-    },
-    closeImageIframe: function () {
-      this.imageIframeURL = ''
-      this.imageIframeOpen = false
     },
     addImagesToMap: async function () {
       if (this.mapImp) {
