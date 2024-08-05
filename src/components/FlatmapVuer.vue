@@ -640,8 +640,7 @@ import {
   FlatmapQueries,
   findTaxonomyLabel,
 } from '../services/flatmapQueries.js'
-import scicrunchMixin from '../services/scicrunchMixin.js'
-import flatmapImageMixin from '../mixins/flatmapImageMixin.js'
+import imageMixin from '../mixins/imageMixin.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -738,7 +737,7 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
-  mixins: [scicrunchMixin, flatmapImageMixin],
+  mixins: [imageMixin],
   components: {
     Button,
     Col,
@@ -1712,24 +1711,21 @@ export default {
 
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image'
-        console.log('marker data', data)
-        console.log('saved images', this.images)
-        let filteredImages = this.findImagesForAnatomy(this.images, data.resource[0])
-        console.log('filtered images:',filteredImages)
-        this.imageEntry = filteredImages
-        console.log(data.feature.models);
-        this.displayTooltip(data.feature.models)
+        if (data.resource[0] in this.anatomyImages) {
+          this.imageEntry = this.anatomyImages[data.resource[0]]
+        }
+        // this.displayTooltip(data.feature.models)
 
-        // let options = { className: 'flatmapvuer-popover' }
-        // let featureId = this.mapImp.modelFeatureIds(data.feature.models)[0]
-        // if (!this.activeDrawTool) {
-        //   options.positionAtLastClick = true
-        // }
-        // this.tooltipDisplay = true;
-        // this.$nextTick(() => {
-        //   this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
-        //   this.popUpCssHacks();
-        // });
+        let options = { className: 'flatmapvuer-popover' }
+        let featureId = this.mapImp.modelFeatureIds(data.feature.models)[0]
+        if (!this.activeDrawTool) {
+          options.positionAtLastClick = true
+        }
+        this.tooltipDisplay = true;
+        this.$nextTick(() => {
+          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
+          this.popUpCssHacks();
+        });
         
       } else {
       // Call flatmap database to get the connection data
@@ -2461,10 +2457,9 @@ export default {
     },
     addImagesToMap: async function () {
       if (this.mapImp) {
-        let response = await this.getImagesFromScicrunch()
+        let response = await this.getImageDatasetFromScicrunch()
         if (response && response.success) {
-          this.images = response.images
-          this.populateFlatmapWithImages(this.mapImp, response.images)
+          this.anatomyImages = this.populateViewerWithImages(response.datasets, this.mapImp)
         }
       }
     },
@@ -2797,7 +2792,8 @@ export default {
           with: true,
           without: true,
         }
-      })
+      }),
+      anatomyImages: {}
     }
   },
   computed: {
