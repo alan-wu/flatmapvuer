@@ -77,7 +77,7 @@
       :displayMinimap="true"
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
-      :sparcAPI="sparcApi"
+      :sparcAPI="sparcAPI"
       :disableUI="disableUI"
       @open-pubmed-url="onOpenPubmedUrl"
       @pathway-selection-changed="onPathwaySelectionChanged"
@@ -287,7 +287,7 @@ export default {
       useHelpModeDialog: true,
       multiflatmapRef: null,
       mapSettings: [],
-      sparcApi: import.meta.env.SPARC_API,
+      sparcAPI: import.meta.env.SPARC_API,
       flatmapAPI: import.meta.env.FLATMAP_API,
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
