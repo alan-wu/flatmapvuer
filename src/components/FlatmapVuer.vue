@@ -765,7 +765,8 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar
+    DrawToolbar,
+    IframeImageDialog
   },
   beforeCreate: function () {
     //The state watcher may triggered before
@@ -1717,7 +1718,7 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
-
+      console.log("checkandcreate")
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image-gallery'
         console.log('marker data', data)
@@ -2467,6 +2468,7 @@ export default {
       if (this.mapImp) {
         let response = await this.getImagesFromScicrunch()
         if (response && response.success) {
+          console.log("addImagesToMap")
           this.images = response.images
           this.populateFlatmapWithImages(this.mapImp, response.images)
         }

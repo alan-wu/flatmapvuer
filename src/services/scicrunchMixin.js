@@ -10,9 +10,19 @@ const getBiolucidaInfo = async function (sparcAPI, datasetId) {
   return new Promise((resolve, reject) => {
     const endpoint = `${sparcAPI}/image_search/${datasetId}`
     fetch(endpoint)
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status >= 200 && response.status < 300) {
+          return response.json();
+        } else {
+          reject();
+        }      
+      })
       .then((data) => {
-        if (data.status == 'success') resolve(data);
+        if (data.status == 'success') {
+          resolve(data);
+        } else {
+          reject();
+        }
       })
   })
 }
@@ -51,7 +61,6 @@ export default {
         const dataType = 'segmentation';
         console.log('starting promise list')
         let promiseList = results.map(async (result, i) => {
-          if (i !== 8){
           const datasetId = result.dataset_identifier;
           const datasetVersion = result.dataset_version;
           const s3uri = result.s3uri;
@@ -71,7 +80,7 @@ export default {
               type: dataType,
               thumbnail: bioImage.thumbnail_url,
             };
-          });}
+          });
         });
         console.log('promiseList:', promiseList);
         let biolucidaInfos = await Promise.allSettled(promiseList);
