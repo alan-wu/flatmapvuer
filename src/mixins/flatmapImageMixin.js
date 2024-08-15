@@ -2,6 +2,8 @@ export default {
   // Note that the setting store is included in MapContent.vue
   methods: {
     populateFlatmapWithImages: function (mapImp, images = []) {
+      const ids = mapImp.anatomicalIdentifiers;
+      console.log(ids)
       let anatomyList = []
       console.log('images in populateflatmap', images)
       images.forEach((image) => {
@@ -9,7 +11,8 @@ export default {
         image.value.forEach((image) => {
           if (image.anatomy && image.anatomy.length > 0) {
             image.anatomy.forEach((anatomy) => {
-              if (!anatomyList.includes(anatomy.curie)) {
+              if (!anatomyList.includes(anatomy.curie) && ids.includes(anatomy.curie)) {
+                console.log(anatomy.curie)
                 anatomyList.push(anatomy.curie)
                 this.createImageThumbnailMarkerUrl(mapImp, anatomy.curie, image.thumbnail)
               }
