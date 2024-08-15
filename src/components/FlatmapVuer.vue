@@ -54,7 +54,7 @@ Please use `const` to assign meaningful names to them...
                 SCKAN </a
               >.
             </p>
-            <p v-else @mouseover="showTooltip(6)" @mouseout="hideTooltip(6)">
+            <p v-else @mouseover="showTooltip(7)" @mouseout="hideTooltip(7)">
               This map displays the connectivity of neuron populations.
               Specifically, those from the primarily rat-based
               <a
@@ -76,8 +76,8 @@ Please use `const` to assign meaningful names to them...
               <div
                 class="warning-icon"
                 v-if="displayWarning"
-                @mouseover="showTooltip(6)"
-                @mouseout="hideTooltip(6)"
+                @mouseover="showTooltip(7)"
+                @mouseout="hideTooltip(7)"
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
