@@ -363,7 +363,7 @@ Please use `const` to assign meaningful names to them...
                 key="pathwaysSelection"
               />
               <selections-group
-                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+                v-if="taxonConnectivity && taxonConnectivity.length > 0"
                 title="Studied in"
                 labelKey="label"
                 identifierKey="taxon"
