@@ -82,6 +82,7 @@
       :flatmapAPI="flatmapAPI"
       :rootURL="rootURL"
       :sparcAPI="sparcAPI"
+      :anatomyImages="anatomyImages"
     />
   </div>
 </template>
@@ -723,6 +724,13 @@ export default {
     connectivityInfoSidebar: {
       type: Boolean,
       default: false,
+    },
+    /**
+     * The option to show connectivity information in sidebar
+     */
+    anatomyImages: {
+      type: Object,
+      default: {},
     },
   },
   data: function () {

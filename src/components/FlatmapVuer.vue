@@ -433,6 +433,7 @@ Please use `const` to assign meaningful names to them...
         virtual-triggering
       >
         <div>
+          <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
             <div style="margin-bottom: 2px;">
@@ -453,6 +454,7 @@ Please use `const` to assign meaningful names to them...
             </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
+            <el-row class="backgroundSpacer"></el-row>
             <el-row class="backgroundText">Drawn By*</el-row>
             <el-row class="backgroundControl">
               <el-select
@@ -475,6 +477,7 @@ Please use `const` to assign meaningful names to them...
                 </el-option>
               </el-select>
             </el-row>
+            <el-row class="backgroundSpacer"></el-row>
             <el-row class="backgroundText">Annotated By*</el-row>
             <el-row class="backgroundControl">
               <el-select
@@ -498,6 +501,18 @@ Please use `const` to assign meaningful names to them...
               </el-select>
             </el-row>
           </template>
+          <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">View Image</el-row>
+          <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
+            <el-radio-group
+              v-model="imageRadio"
+              class="flatmap-radio"
+              @change="setImage"
+            >
+            <el-radio :label="false">Hide</el-radio>
+            <el-radio :label="true">Show</el-radio>
+            </el-radio-group>
+          </el-row>
           <el-row class="backgroundSpacer" v-if="displayFlightPathOption"></el-row>
           <el-row class="backgroundText" v-if="displayFlightPathOption">Flight path display</el-row>
           <el-row class="backgroundControl" v-if="displayFlightPathOption">
@@ -640,7 +655,6 @@ import {
   FlatmapQueries,
   findTaxonomyLabel,
 } from '../services/flatmapQueries.js'
-import imageMixin from '../mixins/imageMixin.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -737,7 +751,6 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
-  mixins: [imageMixin],
   components: {
     Button,
     Col,
@@ -1082,6 +1095,26 @@ export default {
       this.annotatedType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
+      }
+    },
+    /**
+     * @vuese
+     * Function to switch the type of person who annotated.
+     * @arg flag
+     */
+    setImage: function (flag) {
+      this.imageRadio = flag
+      if (this.mapImp) {
+        if (flag) {
+          for (const [key, value] of Object.entries(this.anatomyImages)) {
+            this.mapImp.addMarker(key, { className: "slandered-marker", cluster: false })
+            const id = this.mapImp.addImage(key, value[0].thumbnail)
+            if (id) this.imageIds.push(id)
+          }
+        } else {
+          this.mapImp.clearMarkers();
+          this.imageIds.forEach((id) => this.mapImp.removeImage(id))
+        }
       }
     },
     /**
@@ -2356,7 +2389,6 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
-      this.addImagesToMap()
       this.handleMapClick();
       /**
        * This is ``onFlatmapReady`` event.
@@ -2451,14 +2483,6 @@ export default {
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
       return []
-    },
-    addImagesToMap: async function () {
-      if (this.mapImp) {
-        let response = await this.getImageDatasetFromScicrunch()
-        if (response && response.success) {
-          this.anatomyImages = this.populateViewerWithImages(response.datasets, this.mapImp)
-        }
-      }
     },
   },
   props: {
@@ -2652,6 +2676,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    anatomyImages: {
+      type: Object,
+      default: {},
+    },
   },
   provide() {
     return {
@@ -2781,7 +2809,8 @@ export default {
           without: true,
         }
       }),
-      anatomyImages: {}
+      imageRadio: false,
+      imageIds: [],
     }
   },
   computed: {

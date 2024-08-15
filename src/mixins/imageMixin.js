@@ -78,30 +78,9 @@ const getAnnotatedBiolucida = function (data) {
 export default {
   // Note that the setting store is included in MapContent.vue
   methods: {
-    createThumbnailMarkers: function (mapImp, id, image) {
-      return new Promise((resolve, reject) => {
-        let wrapperElement = document.createElement("div");
-        let img = new Image();
-        img.src = image;
-        img.style = "height: auto;width: 50px;margin-right: 80px;";
-        img.onload = function () {
-          wrapperElement.appendChild(img);
-          const markerIdentifier = mapImp.addMarker(id, {
-            element: wrapperElement,
-            className: "highlight-marker",
-            cluster: false,
-            type: "image",
-          });
-          resolve(markerIdentifier);
-        };
-        img.onerror = function () {
-          reject(new Error("Failed to load image at " + image));
-        };
-      });
-    },
-
-    populateViewerWithImages: function (datasets, mapImp = undefined) {
-      let anatomyImageObjects = {};
+    populateAnatomyImageObjects: function (datasets) {
+      let anatomyCurieImageObjects = {};
+      let anatomyNameImageObjects = {};
       const datasetsLength = datasets.length;
       for (let i = 0; i < datasetsLength; i++) {
         const dataset = datasets[i];
@@ -113,26 +92,23 @@ export default {
               const anatomyLength = image.anatomy.length;
               for (let k = 0; k < anatomyLength; k++) {
                 const anatomy = image.anatomy[k];
-                const locationIdentifier = mapImp
-                  ? anatomy.curie
-                  : anatomy.name;
-                if (!(locationIdentifier in anatomyImageObjects)) {
-                  anatomyImageObjects[locationIdentifier] = [];
-                  if (mapImp) {
-                    this.createThumbnailMarkers(
-                      mapImp,
-                      locationIdentifier,
-                      image.thumbnail
-                    );
-                  }
+                if (!(anatomy.curie in anatomyCurieImageObjects)) {
+                  anatomyCurieImageObjects[anatomy.curie] = [];
                 }
-                anatomyImageObjects[locationIdentifier].push(image);
+                anatomyCurieImageObjects[anatomy.curie].push(image);
+                if (!(anatomy.name in anatomyNameImageObjects)) {
+                  anatomyNameImageObjects[anatomy.name] = [];
+                }
+                anatomyNameImageObjects[anatomy.name].push(image);
               }
             }
           }
         }
       }
-      return anatomyImageObjects;
+      return {
+        "anatomyCurie": anatomyCurieImageObjects,
+        "anatomyName": anatomyNameImageObjects
+      };
     },
 
     processResults: async function (results) {
@@ -159,17 +135,17 @@ export default {
               const datasetImage = biolucidaInfo[bioImage.biolucida.identifier];
               const link = bio2DIds.includes(bioImage.biolucida.identifier)
                 ? getView2DImageLink(
-                    this.rootURL,
-                    datasetId,
-                    datasetVersion,
-                    bioImage.dataset.path
-                  )
+                  this.rootURL,
+                  datasetId,
+                  datasetVersion,
+                  bioImage.dataset.path
+                )
                 : getView3DImageLink(
-                    this.rootURL,
-                    datasetId,
-                    datasetVersion,
-                    datasetImage
-                  );
+                  this.rootURL,
+                  datasetId,
+                  datasetVersion,
+                  datasetImage
+                );
               return {
                 title: bioImage.name,
                 anatomy: result.organs,

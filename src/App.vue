@@ -83,6 +83,7 @@
       @open-pubmed-url="onOpenPubmedUrl"
       @pathway-selection-changed="onPathwaySelectionChanged"
       @flatmapChanged="onFlatmapChanged"
+      :anatomyImages="anatomyImages"
     />
 
     <HelpModeDialog
@@ -111,9 +112,11 @@ import './icons/mapicon-species-style.css'
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import imageMixin from './mixins/imageMixin.js'
 
 export default {
   name: 'app',
+  mixins: [imageMixin],
   components: {
     Autocomplete,
     Button,
@@ -216,6 +219,12 @@ export default {
         this.$refs.multiflatmapHelp.toggleTooltipPinHighlight();
       }
     },
+    processAnatomyImages: async function () {
+      let response = await this.getImageDatasetFromScicrunch()
+      if (response && response.success) {
+        this.anatomyImages = this.populateAnatomyImageObjects(response.datasets).anatomyCurie
+      }
+    },
   },
   data: function () {
     return {
@@ -293,11 +302,13 @@ export default {
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
-      ElIconSetting: shallowRef(ElIconSetting)
+      ElIconSetting: shallowRef(ElIconSetting),
+      anatomyImages: {}
     }
   },
   mounted: function () {
     this.multiflatmapRef = this.$refs.multi;
+    this.processAnatomyImages()
   },
   watch: {
     helpMode: function (newVal) {
