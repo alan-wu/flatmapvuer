@@ -433,7 +433,6 @@ Please use `const` to assign meaningful names to them...
         virtual-triggering
       >
         <div>
-          <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
             <div style="margin-bottom: 2px;">
@@ -1107,13 +1106,14 @@ export default {
       if (this.mapImp) {
         if (flag) {
           for (const [key, value] of Object.entries(this.anatomyImages)) {
-            this.mapImp.addMarker(key, { className: "slandered-marker", cluster: false })
+            this.mapImp.addMarker(key, { className: "standard-marker", cluster: false })
             const id = this.mapImp.addImage(key, value[0].thumbnail)
             if (id) this.imageIds.push(id)
           }
         } else {
           this.mapImp.clearMarkers();
           this.imageIds.forEach((id) => this.mapImp.removeImage(id))
+          this.imageIds = []
         }
       }
     },
