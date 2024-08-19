@@ -2491,12 +2491,9 @@ export default {
       if (this.mapImp) {
         const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
         if (type === "Segmentations") {
-          let response = await this.getSegmentationsThumbnails("id", anatomicalIdentifiers)
-          /*
-          if (response && response.success) {
-            this.images = response.images
-            this.populateFlatmapWithImages(this.mapImp, response.images)
-          }*/
+          let images = await this.getSegmentationsThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+          this.populateFlatmapWithImages(this.mapImp, images, type)
         }
       }
     },

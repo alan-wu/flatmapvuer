@@ -29,9 +29,8 @@ export default {
       console.log('thumbnail url', `${this.sparcAPI}/thumbnail/${thumbnailId}`)
       return `${this.sparcAPI}/thumbnail/${thumbnailId}`
     },
-    getSegmentationThumbnailURL: function(datasetId, datasetVersion, filePath, s3uri) {
-      console.log('thumbnail url', `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}&s3uri=${s3uri}`)
-      return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}&s3uri=${s3uri}`;
+    getSegmentationThumbnailURL: function(datasetId, datasetVersion, filePath) {
+      return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}`;
     },
     //Get representative segmentations thumbnails
     //  key - can either be
@@ -54,7 +53,7 @@ export default {
           }
         });
         const keys = identifiers.map((item) => item[key]);
-        response = await fetch(`${this.sparcAPI}/get-datasetids-for-curies`, {
+        response = await fetch(`${this.sparcAPI}/get-files-info-for-curies`, {
           method: "POST",
           body: JSON.stringify(
             {
@@ -63,20 +62,32 @@ export default {
             }
           ),
           headers: {
-  
             "Content-Type": "application/json",
           },
         });
         data = await response.json();
-        console.log(data)
-       // if (identifier.length > 0) {
-       //   await fetch(`${this.sparcAPI}/get-organ-curies/?${new URLSearchParams({filetypes: "mbf_segmentation"})}`);
-       // }
-        return {success: true};
+        if (data['files_info']) {
+          const images = {};
+          for (const [key, value] of Object.entries(data['files_info'])) {
+            if (value.length > 0) {
+              const list = [];
+              value.forEach((entry) => {
+                let image = {
+                  thumbnail: this.getSegmentationThumbnailURL(entry.id,
+                    entry.version, entry.file_path),
+                  datasetId: entry.id,
+                }
+                list.push(image);
+              });
+              images[key] = list;
+            }
+          }
+          return images;
+        }
       } catch (error) {
         console.error('Error:', error);
-        return {success: false};
       }
+      return {};
     },
     getImagesFromScicrunch: async function () {
       try {
