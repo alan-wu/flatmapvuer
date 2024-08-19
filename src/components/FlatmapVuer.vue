@@ -503,14 +503,37 @@ Please use `const` to assign meaningful names to them...
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
           <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">View Image</el-row>
           <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
-            <el-radio-group
-              v-model="imageRadio"
-              class="flatmap-radio"
-              @change="setImage"
-            >
-            <el-radio :label="false">Hide</el-radio>
-            <el-radio :label="true">Show</el-radio>
-            </el-radio-group>
+            <el-col :span="12">
+              <el-radio-group
+                v-model="imageRadio"
+                class="flatmap-radio"
+                @change="setImage"
+              >
+                <el-radio :label="false">Hide</el-radio>
+                <el-radio :label="true">Show</el-radio>
+              </el-radio-group>
+            </el-col>
+            <el-col :span="12" v-if="imageRadio">
+              <el-select
+                :teleported="false"
+                v-model="imageType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setImageType"
+              >
+                <el-option
+                  v-for="item in imageTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-col>
           </el-row>
           <el-row class="backgroundSpacer" v-if="displayFlightPathOption"></el-row>
           <el-row class="backgroundText" v-if="displayFlightPathOption">Flight path display</el-row>
@@ -1096,24 +1119,50 @@ export default {
         this.addAnnotationFeature()
       }
     },
+    removeImageFromMap: function () {
+      if (this.mapImp) {
+        this.mapImp.clearMarkers();
+        this.imageIds.forEach((id) => this.mapImp.removeImage(id))
+        this.imageIds = []
+      }
+    },
+    populateImageToMap: function () {
+      if (this.mapImp) {
+        for (const [key, value] of Object.entries(this.anatomyImages)) {
+          this.mapImp.addMarker(key, { className: "standard-marker", cluster: false })
+          const id = this.mapImp.addImage(key, value[0].thumbnail)
+          if (id) this.imageIds.push(id)
+        }
+      }
+    },
     /**
      * @vuese
-     * Function to switch the type of person who annotated.
+     * Function to switch the type of displayed image.
+     * @arg flag
+     */
+    setImageType: function (flag) {
+      this.imageType = flag
+      if (this.mapImp) {
+        if (flag === 'Biolucida') {
+          this.populateImageToMap()
+        } else {
+          console.log('switch to', flag);
+          this.removeImageFromMap()
+        }
+      }
+    },
+    /**
+     * @vuese
+     * Function to switch show or hide images.
      * @arg flag
      */
     setImage: function (flag) {
       this.imageRadio = flag
       if (this.mapImp) {
         if (flag) {
-          for (const [key, value] of Object.entries(this.anatomyImages)) {
-            this.mapImp.addMarker(key, { className: "standard-marker", cluster: false })
-            const id = this.mapImp.addImage(key, value[0].thumbnail)
-            if (id) this.imageIds.push(id)
-          }
+          this.setImageType(this.imageType)
         } else {
-          this.mapImp.clearMarkers();
-          this.imageIds.forEach((id) => this.mapImp.removeImage(id))
-          this.imageIds = []
+          this.removeImageFromMap()
         }
       }
     },
@@ -2811,6 +2860,8 @@ export default {
       }),
       imageRadio: false,
       imageIds: [],
+      imageType: 'Biolucida',
+      imageTypes: ['Biolucida', 'Plot', 'Scaffold', 'Segmentation'],
     }
   },
   computed: {
