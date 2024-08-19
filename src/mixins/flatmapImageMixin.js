@@ -4,6 +4,7 @@ export default {
     downloadAndCreateImageThumbnailMarkerUrl: function(mapImp, key, list, type) {
       const count = list.length
       if (count > 0) {
+        //Pick a random image
         const index = Math.floor(Math.random() * count)
         const thumbnail = list[index].thumbnail
         this.getThumbnail(thumbnail, type)
@@ -11,6 +12,7 @@ export default {
             this.createImageThumbnailMarkerUrl(mapImp, key, wrappedElement)
           })
           .catch(() => {
+            //Failed to download, pick another one
             list.splice(index)
             this.downloadAndCreateImageThumbnailMarkerUrl(mapImp, key, list, type)
           })
@@ -18,10 +20,7 @@ export default {
     },
     populateFlatmapWithImages: function (mapImp, images = [], type) {
       for (const [key, list] of Object.entries(images)) {
-        //Pick a random image
-        const count = list.length
-        const index = Math.floor(Math.random() * count)
-        const thumbnail = list[index].thumbnail
+        
         this.downloadAndCreateImageThumbnailMarkerUrl(mapImp, key, list, type)     
       }
       /*
