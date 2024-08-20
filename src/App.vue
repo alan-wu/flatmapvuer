@@ -83,7 +83,6 @@
       @open-pubmed-url="onOpenPubmedUrl"
       @pathway-selection-changed="onPathwaySelectionChanged"
       @flatmapChanged="onFlatmapChanged"
-      :anatomyImages="anatomyImages"
     />
 
     <HelpModeDialog
@@ -219,12 +218,6 @@ export default {
         this.$refs.multiflatmapHelp.toggleTooltipPinHighlight();
       }
     },
-    processAnatomyImages: async function () {
-      let response = await this.getImageDatasetFromScicrunch()
-      if (response && response.success) {
-        this.anatomyImages = this.populateAnatomyImageObjects(response.datasets).anatomyCurie
-      }
-    },
   },
   data: function () {
     return {
@@ -294,21 +287,20 @@ export default {
       multiflatmapRef: null,
       mapSettings: [],
       rootURL: "http://localhost:3000/",
-      sparcAPI: "http://localhost:8000/",
+      sparcAPI: import.meta.env.VITE_SPARC_API,
+      flatmapAPI: import.meta.env.FLATMAP_API,
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
       //flatmapAPI: "https://mapcoe-demo.org/current/flatmap/v3/",
-      flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
+      // flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
       ElIconSetting: shallowRef(ElIconSetting),
-      anatomyImages: {}
     }
   },
   mounted: function () {
     this.multiflatmapRef = this.$refs.multi;
-    this.processAnatomyImages()
   },
   watch: {
     helpMode: function (newVal) {

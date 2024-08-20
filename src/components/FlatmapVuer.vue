@@ -685,6 +685,7 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import imageMixin from '../mixins/imageMixin'
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -773,6 +774,7 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
+  mixins:[imageMixin],
   components: {
     Button,
     Col,
@@ -1128,27 +1130,38 @@ export default {
     },
     populateImageToMap: function () {
       if (this.mapImp) {
-        for (const [key, value] of Object.entries(this.anatomyImages)) {
-          this.mapImp.addMarker(key, { className: "standard-marker", cluster: false })
-          const id = this.mapImp.addImage(key, value[0].thumbnail)
-          if (id) this.imageIds.push(id)
+        for (const [key, value] of Object.entries(this.anatomyImages[this.imageType])) {
+          if (value.length) {
+            const id = this.mapImp.addImage(key, value[0].thumbnail)
+            if (id) {
+              this.imageIds.push(id)
+              this.mapImp.addMarker(key, { className: "standard-marker", cluster: false })
+            }
+          }
         }
       }
     },
     /**
      * @vuese
      * Function to switch the type of displayed image.
-     * @arg flag
+     * @arg type
      */
-    setImageType: function (flag) {
-      this.imageType = flag
+    setImageType: async function (type) {
+      this.imageType = type
       if (this.mapImp) {
-        if (flag === 'Biolucida') {
-          this.populateImageToMap()
+        this.loading = true
+        const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
+        this.removeImageFromMap()
+        if (type === 'Image' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await this.getBiolucidaThumbnails("id", anatomicalIdentifiers)
+        } else if (type === 'Segmentation' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await this.getSegmentationThumbnails("id", anatomicalIdentifiers)
         } else {
-          console.log('switch to', flag);
-          this.removeImageFromMap()
+          console.log('switch to', type);
         }
+        this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
+        // this.populateImageToMap()
+        this.loading = false
       }
     },
     /**
@@ -1790,8 +1803,8 @@ export default {
 
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image'
-        if (data.resource[0] in this.anatomyImages) {
-          this.imageEntry = this.anatomyImages[data.resource[0]]
+        if (data.resource[0] in this.anatomyImages[this.imageType]) {
+          this.imageEntry = this.anatomyImages[this.imageType][data.resource[0]]
         }
         // this.displayTooltip(data.feature.models)
 
@@ -2725,10 +2738,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    anatomyImages: {
-      type: Object,
-      default: {},
-    },
   },
   provide() {
     return {
@@ -2858,10 +2867,11 @@ export default {
           without: true,
         }
       }),
+      anatomyImages: {},
       imageRadio: false,
       imageIds: [],
-      imageType: 'Biolucida',
-      imageTypes: ['Biolucida', 'Plot', 'Scaffold', 'Segmentation'],
+      imageType: 'Image',
+      imageTypes: ['Image', 'Plot', 'Scaffold', 'Segmentation'],
     }
   },
   computed: {
