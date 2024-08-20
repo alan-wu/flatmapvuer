@@ -2489,9 +2489,14 @@ export default {
     },
     setImageType: async function (type) {
       if (this.mapImp) {
+        this.mapImp.clearMarkers()
         const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
         if (type === "Segmentations") {
           let images = await this.getSegmentationsThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+          this.populateFlatmapWithImages(this.mapImp, images, type)
+        } else if (type === "Images") {
+          let images = await this.getBiolucidaThumbnails("id", anatomicalIdentifiers)
           this.images = images
           this.populateFlatmapWithImages(this.mapImp, images, type)
         }
@@ -2783,7 +2788,7 @@ export default {
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       imageType: 'None',
-      imageTypes: ['Segmentations', 'None'],
+      imageTypes: ['Segmentations', 'Images', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,

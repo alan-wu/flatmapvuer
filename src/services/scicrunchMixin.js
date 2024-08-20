@@ -1,7 +1,7 @@
 /* eslint-disable no-alert, no-console */
 const imageQuery = '"*jp2* OR *vnd.ome.xml* OR *jpx*"';
 
-const getBiolucidaInfo = async function (sparcAPI, datasetId) {
+const getBiolucidaInfo = async (sparcAPI, datasetId) => {
   return new Promise((resolve, reject) => {
     const endpoint = `${sparcAPI}/image_search/${datasetId}`
     fetch(endpoint)
@@ -22,15 +22,76 @@ const getBiolucidaInfo = async function (sparcAPI, datasetId) {
   })
 }
 
+const getFilesInfo = async (api, key, idsList, types) => {
+  let params = new URLSearchParams();
+  types.forEach((type) => {
+    params.append('arrayparams', type);
+    params.append('arrayparams', type);
+  });
+  let response = await fetch(`${api}/get-organ-curies/?${params}`);
+  let data = await response.json();
+  const identifiers = [];
+  data.uberon.array.forEach(pair => {
+    const identifier = {
+      id: pair.id.toUpperCase(),
+      name: pair.name
+    };
+    if (idsList.includes(identifier[key])) {
+      identifiers.push(identifier);
+    }
+  });
+  const keys = identifiers.map((item) => item[key]);
+  response = await fetch(`${api}/get-files-info-for-curies`, {
+    method: "POST",
+    body: JSON.stringify(
+      {
+        filetypes: types,
+        curies: keys,
+      }
+    ),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  data = await response.json();
+  return data;
+}
+
 export default {
   // Note that the setting store is included in MapContent.vue
   methods: {
     getThumbnailURL: function(thumbnailId) {
-      console.log('thumbnail url', `${this.sparcAPI}/thumbnail/${thumbnailId}`)
       return `${this.sparcAPI}/thumbnail/${thumbnailId}`
     },
     getSegmentationThumbnailURL: function(datasetId, datasetVersion, filePath) {
       return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}`;
+    },
+    getBiolucidaThumbnails: async function (key, idsList) {
+      try {
+        const data = await getFilesInfo(this.sparcAPI, key, idsList, ["biolucida-2d", "biolucida-3d"]);
+        if (data['files_info']) {
+          const images = {};
+          for (const [key, value] of Object.entries(data['files_info'])) {
+            if (value.length > 0) {
+              const list = [];
+              value.forEach((entry) => {
+                if (entry.biolucida_id) {
+                  let image = {
+                    thumbnail: this.getThumbnailURL(entry.biolucida_id),
+                    datasetId: entry.id,
+                  }
+                  list.push(image);
+                }
+              });
+              images[key] = list;
+            }
+          }
+          return images;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      return {};
     },
     //Get representative segmentations thumbnails
     //  key - can either be
@@ -40,32 +101,7 @@ export default {
     // will be used
     getSegmentationsThumbnails: async function (key, idsList) {
       try {
-        let response = await fetch(`${this.sparcAPI}/get-organ-curies/?${new URLSearchParams({filetypes: "mbf-segmentation"})}`);
-        let data = await response.json();
-        const identifiers = [];
-        data.uberon.array.forEach(pair => {
-          const identifier = {
-            id: pair.id.toUpperCase(),
-            name: pair.name
-          };
-          if (idsList.includes(identifier[key])) {
-            identifiers.push(identifier);
-          }
-        });
-        const keys = identifiers.map((item) => item[key]);
-        response = await fetch(`${this.sparcAPI}/get-files-info-for-curies`, {
-          method: "POST",
-          body: JSON.stringify(
-            {
-              filetypes: ["mbf-segmentation"],
-              curies: keys,
-            }
-          ),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        data = await response.json();
+        const data = await getFilesInfo(this.sparcAPI, key, idsList, ["mbf-segmentation"]);
         if (data['files_info']) {
           const images = {};
           for (const [key, value] of Object.entries(data['files_info'])) {

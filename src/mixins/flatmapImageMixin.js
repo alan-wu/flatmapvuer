@@ -20,7 +20,6 @@ export default {
     },
     populateFlatmapWithImages: function (mapImp, images = [], type) {
       for (const [key, list] of Object.entries(images)) {
-        
         this.downloadAndCreateImageThumbnailMarkerUrl(mapImp, key, list, type)     
       }
       /*
@@ -63,8 +62,9 @@ export default {
     },
     getThumbnail: async function(url, type) {
       return new Promise((resolve, reject) => {
-        if (type === "Segmentations") {
-          this.getSegmentationThumbnail(url)
+        if (type === "Segmentations" ||
+            type === "Images") {
+          this.getBinaryThumbnail(url)
             .then((response) => resolve(response))
             .catch((response) => reject(response))
         } else {
@@ -74,7 +74,7 @@ export default {
         }
       })
     },
-    getSegmentationThumbnail: async function(url) {
+    getBinaryThumbnail: async function(url) {
       return new Promise((resolve, reject) => {
         fetch(url)
           .then((response) => {
