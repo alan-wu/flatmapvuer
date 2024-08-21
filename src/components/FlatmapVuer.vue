@@ -2491,19 +2491,20 @@ export default {
       if (this.mapImp) {
         this.mapImp.clearMarkers()
         const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
-        if (type === "Scaffolds") {
-          let images = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
-          this.images = images
-          this.populateFlatmapWithImages(this.mapImp, images, type)
-        } else if (type === "Segmentations") {
-          let images = await this.getSegmentationsThumbnails("id", anatomicalIdentifiers)
-          this.images = images
-          this.populateFlatmapWithImages(this.mapImp, images, type)
-        } else if (type === "Images") {
+        if (type === "Images") {
           let images = await this.getBiolucidaThumbnails("id", anatomicalIdentifiers)
           this.images = images
-          this.populateFlatmapWithImages(this.mapImp, images, type)
+        } else if (type === "Scaffolds") {
+          let images = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+        } else if (type === "Segmentations") {
+          let images = await this.getSegmentationThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+        } else if (type === "Plots") {
+          let images = await this.getPlotThumbnails("id", anatomicalIdentifiers)
+          this.images = images
         }
+        this.populateFlatmapWithImages(this.mapImp, this.images, type)
       }
     },
   },
@@ -2792,7 +2793,7 @@ export default {
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       imageType: 'None',
-      imageTypes: ['Images', 'Scaffolds', 'Segmentations', 'None'],
+      imageTypes: ['Images', 'Scaffolds', 'Segmentations', 'Plots', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,

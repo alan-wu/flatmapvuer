@@ -110,7 +110,7 @@ export default {
       const thumbnailEntry = this.findEntryWithPathInArray(
         viewEntry, list, "abi-thumbnail");
       if (thumbnailEntry) {
-        return `${this.sparcAPI}/s3-resource/${thumbnailEntry.id}/files/${thumbnailEntry.file_path}?${new URLSearchParams({encodeBase64: true})}`;
+        return `${this.sparcAPI}/s3-resource/${thumbnailEntry.id}/files/${thumbnailEntry.file_path}`;
       }
       return undefined;
     },
@@ -146,14 +146,13 @@ export default {
       }
       return {};
     },
-    
     //Get representative segmentations thumbnails
     //  key - can either be
     //    id - use the uberon id as key or
     //    name - anatomical name as key
     //  idsList - Only id / name from the server matching the one in this list
     // will be used
-    getSegmentationsThumbnails: async function (key, idsList) {
+    getSegmentationThumbnails: async function (key, idsList) {
       try {
         const data = await getFilesInfo(this.sparcAPI, key, idsList, ["mbf-segmentation"]);
         if (data['files_info']) {
@@ -182,6 +181,47 @@ export default {
     },
     getSegmentationThumbnailURL: function(datasetId, datasetVersion, filePath) {
       return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}`;
+    },
+    getPlotThumbnailURL: function(entry) {
+      //None of the thumbnail for plot is properly annotated.
+      //We will use the first in is source of for testing.
+      if (entry.isSourceOf.length > 0) {
+        return `${this.sparcAPI}/s3-resource/${entry.id}/files/${entry.isSourceOf[0]}`;
+      }
+      return undefined;
+    },
+    getPlotThumbnails: async function (key, idsList) {
+      try {
+        const data = await getFilesInfo(this.sparcAPI, key, idsList,
+          ["abi-plot", "abi-thumbnail"]);
+        if (data['files_info']) {
+          const images = {};
+          for (const [key, value] of Object.entries(data['files_info'])) {
+            if (value.length > 0) {
+              const list = [];
+              value.forEach((entry) => {
+                if (entry.type === "abi-plot") {
+                  console.log(entry);
+                  const thumbnailURL = this.getPlotThumbnailURL(entry);
+                  if (thumbnailURL) {
+                    let image = {
+                      thumbnail: thumbnailURL,
+                      resource: entry.file_path,
+                      datasetId: entry.id,
+                    }
+                    list.push(image);
+                  }
+                }
+              });
+              images[key] = list;
+            }
+          }
+          return images;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      return {};
     },
     getImagesFromScicrunch: async function () {
       try {
