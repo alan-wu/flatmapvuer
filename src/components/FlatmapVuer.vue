@@ -500,9 +500,9 @@ Please use `const` to assign meaningful names to them...
               </el-select>
             </el-row>
           </template>
-          <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Images Display</el-row>
-          <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
+          <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration' && !isFC"></el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration' && !isFC">Images Display</el-row>
+          <el-row class="backgroundControl" v-if="viewingMode === 'Exploration' && !isFC">
             <el-col :span="12">
               <el-radio-group
                 v-model="imageRadio"
@@ -795,7 +795,8 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar
+    DrawToolbar,
+    IframeImageDialog
   },
   beforeCreate: function () {
     //The state watcher may triggered before
@@ -1139,13 +1140,12 @@ export default {
           this.anatomyImages[type] = await this.getSegmentationThumbnails("id", anatomicalIdentifiers)
         } else if (type === 'Scaffold' && !(type in this.anatomyImages)) {
           this.anatomyImages[type] = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
-        } else {
-          console.log('switch to', type);
+        } else if (type === 'Plot' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await this.getPlotThumbnails("id", anatomicalIdentifiers)
         }
         if (this.anatomyImages[type]) {
           this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
         }
-        // this.populateImageToMap()
         this.loading = false
       }
     },
@@ -1785,7 +1785,7 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
-
+      console.log("checkandcreate")
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image'
         if (data.resource[0] in this.anatomyImages[this.imageType]) {
@@ -2436,7 +2436,7 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
-      this.handleMapClick();
+      this.handleMapClick()
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -2804,6 +2804,8 @@ export default {
       },
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
+      imageType: 'None',
+      imageTypes: ['Images', 'Scaffolds', 'Segmentations', 'Plots', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
