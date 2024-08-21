@@ -54,6 +54,7 @@ export default {
                     thumbnail: this.getBiolucidaThumbnailURL(
                       entry.biolucida_id
                     ),
+                    resource: entry.file_path,
                     id: entry.id,
                     title: getFileName(entry.file_path),
                     type: "Image",
@@ -96,6 +97,7 @@ export default {
                     entry.version,
                     entry.file_path
                   ),
+                  resource: entry.file_path,
                   id: entry.id,
                   title: getFileName(entry.file_path),
                   type: "Segmentation",
@@ -186,9 +188,7 @@ export default {
         "abi-thumbnail"
       );
       if (thumbnailEntry) {
-        return `${this.sparcAPI}/s3-resource/${thumbnailEntry.id}/files/${
-          thumbnailEntry.file_path
-        }?${new URLSearchParams({ encodeBase64: true })}`;
+        return `${this.sparcAPI}/s3-resource/${thumbnailEntry.id}/files/${thumbnailEntry.file_path}`;
       }
       return undefined;
     },
@@ -206,6 +206,52 @@ export default {
             }
           }
         }
+      }
+      return undefined;
+    },
+    getPlotThumbnails: async function (key, idsList) {
+      try {
+        const data = await getFilesInfo(this.sparcAPI, key, idsList, [
+          "abi-plot",
+          "abi-thumbnail",
+        ]);
+        if (data["files_info"]) {
+          const images = {};
+          for (const [key, value] of Object.entries(data["files_info"])) {
+            if (value.length > 0) {
+              const list = [];
+              value.forEach((entry) => {
+                if (entry.type === "abi-plot") {
+                  const thumbnailURL = this.getPlotThumbnailURL(entry);
+                  if (thumbnailURL) {
+                    let image = {
+                      thumbnail: thumbnailURL,
+                      resource: entry.file_path,
+                      datasetId: entry.id,
+                      title: getFileName(entry.file_path),
+                      type: "Plot",
+                      link: thumbnailURL,
+                      mimetype: entry.mimetype,
+                    };
+                    list.push(image);
+                  }
+                }
+              });
+              images[key] = list;
+            }
+          }
+          return images;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+      return {};
+    },
+    getPlotThumbnailURL: function (entry) {
+      //None of the thumbnail for plot is properly annotated.
+      //We will use the first in is source of for testing.
+      if (entry.isSourceOf.length > 0) {
+        return `${this.sparcAPI}/s3-resource/${entry.id}/files/${entry.isSourceOf[0]}`;
       }
       return undefined;
     },

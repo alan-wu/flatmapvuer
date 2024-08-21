@@ -34,7 +34,7 @@ export default {
     },
     getThumbnail: async function (url, type) {
       return new Promise((resolve, reject) => {
-        if (type === "Image" || type === "Segmentation" || type === "Scaffold") {
+        if (type === "Image" || type === "Segmentation") {
           this.getBinaryThumbnail(url)
             .then((response) => resolve(response))
             .catch((response) => reject(response));

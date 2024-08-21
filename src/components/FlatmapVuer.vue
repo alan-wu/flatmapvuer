@@ -795,8 +795,7 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar,
-    IframeImageDialog
+    DrawToolbar
   },
   beforeCreate: function () {
     //The state watcher may triggered before
@@ -2804,10 +2803,12 @@ export default {
       },
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
-      imageType: 'None',
-      imageTypes: ['Images', 'Scaffolds', 'Segmentations', 'Plots', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
+      anatomyImages: markRaw({}),
+      imageRadio: false,
+      imageType: 'Image',
+      imageTypes: ['Image', 'Plot', 'Scaffold', 'Segmentation'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       toolbarOptions: [
@@ -2846,11 +2847,6 @@ export default {
           without: true,
         }
       }),
-      anatomyImages: markRaw({}),
-      imageRadio: false,
-      imageIds: [],
-      imageType: 'Image',
-      imageTypes: ['Image', 'Plot', 'Scaffold', 'Segmentation'],
     }
   },
   computed: {
