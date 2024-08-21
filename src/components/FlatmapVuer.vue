@@ -2491,7 +2491,11 @@ export default {
       if (this.mapImp) {
         this.mapImp.clearMarkers()
         const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
-        if (type === "Segmentations") {
+        if (type === "Scaffolds") {
+          let images = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+          this.populateFlatmapWithImages(this.mapImp, images, type)
+        } else if (type === "Segmentations") {
           let images = await this.getSegmentationsThumbnails("id", anatomicalIdentifiers)
           this.images = images
           this.populateFlatmapWithImages(this.mapImp, images, type)
@@ -2788,7 +2792,7 @@ export default {
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       imageType: 'None',
-      imageTypes: ['Segmentations', 'Images', 'None'],
+      imageTypes: ['Images', 'Scaffolds', 'Segmentations', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,

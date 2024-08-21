@@ -25,8 +25,7 @@ const getBiolucidaInfo = async (sparcAPI, datasetId) => {
 const getFilesInfo = async (api, key, idsList, types) => {
   let params = new URLSearchParams();
   types.forEach((type) => {
-    params.append('arrayparams', type);
-    params.append('arrayparams', type);
+    params.append('filetypes', type);
   });
   let response = await fetch(`${api}/get-organ-curies/?${params}`);
   let data = await response.json();
@@ -60,11 +59,8 @@ const getFilesInfo = async (api, key, idsList, types) => {
 export default {
   // Note that the setting store is included in MapContent.vue
   methods: {
-    getThumbnailURL: function(thumbnailId) {
+    getBiolucidaThumbnailURL: function(thumbnailId) {
       return `${this.sparcAPI}/thumbnail/${thumbnailId}`
-    },
-    getSegmentationThumbnailURL: function(datasetId, datasetVersion, filePath) {
-      return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}`;
     },
     getBiolucidaThumbnails: async function (key, idsList) {
       try {
@@ -77,7 +73,8 @@ export default {
               value.forEach((entry) => {
                 if (entry.biolucida_id) {
                   let image = {
-                    thumbnail: this.getThumbnailURL(entry.biolucida_id),
+                    thumbnail: this.getBiolucidaThumbnailURL(entry.biolucida_id),
+                    resource: entry.file_path,
                     datasetId: entry.id,
                   }
                   list.push(image);
@@ -93,6 +90,63 @@ export default {
       }
       return {};
     },
+    findEntryWithPathInArray(entry, list, type) {
+      if (entry && list) {
+        for (let i = 0; i < entry.isSourceOf.length; i++) {
+          for (let l = 0; l < list.length; l++) {
+            const item = list[l];
+            if (entry.id === item.id && (!type || item.type === type) && 
+              entry.isSourceOf[i] === item.file_path) {
+              return item;
+            }
+          }
+        }
+      }
+      return undefined
+    },
+    getScaffoldThumbnailURL: function(entry, list) {
+      const viewEntry = this.findEntryWithPathInArray(
+        entry, list, "abi-scaffold-view-file");
+      const thumbnailEntry = this.findEntryWithPathInArray(
+        viewEntry, list, "abi-thumbnail");
+      if (thumbnailEntry) {
+        return `${this.sparcAPI}/s3-resource/${thumbnailEntry.id}/files/${thumbnailEntry.file_path}?${new URLSearchParams({encodeBase64: true})}`;
+      }
+      return undefined;
+    },
+    getScaffoldThumbnails: async function (key, idsList) {
+      try {
+        const data = await getFilesInfo(this.sparcAPI, key, idsList,
+          ["abi-thumbnail", "abi-scaffold-metadata-file", 'abi-scaffold-view-file']);
+        if (data['files_info']) {
+          const images = {};
+          for (const [key, value] of Object.entries(data['files_info'])) {
+            if (value.length > 0) {
+              const list = [];
+              value.forEach((entry) => {
+                if (entry.type === "abi-scaffold-metadata-file") {
+                  const thumbnailURL = this.getScaffoldThumbnailURL(entry, value);
+                  if (thumbnailURL) {
+                    let image = {
+                      thumbnail: thumbnailURL,
+                      resource: entry.file_path,
+                      datasetId: entry.id,
+                    }
+                    list.push(image);
+                  }
+                }
+              });
+              images[key] = list;
+            }
+          }
+          return images;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      return {};
+    },
+    
     //Get representative segmentations thumbnails
     //  key - can either be
     //    id - use the uberon id as key or
@@ -111,6 +165,7 @@ export default {
                 let image = {
                   thumbnail: this.getSegmentationThumbnailURL(entry.id,
                     entry.version, entry.file_path),
+                  resource: entry.file_path,
                   datasetId: entry.id,
                 }
                 list.push(image);
@@ -124,6 +179,9 @@ export default {
         console.error('Error:', error);
       }
       return {};
+    },
+    getSegmentationThumbnailURL: function(datasetId, datasetVersion, filePath) {
+      return `${this.sparcAPI}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}`;
     },
     getImagesFromScicrunch: async function () {
       try {
