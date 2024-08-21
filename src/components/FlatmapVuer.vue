@@ -501,7 +501,7 @@ Please use `const` to assign meaningful names to them...
             </el-row>
           </template>
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">View Image</el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Images Display</el-row>
           <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
             <el-col :span="12">
               <el-radio-group
@@ -685,6 +685,7 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import scicrunchMixin from '../mixins/scicrunchMixin'
 import imageMixin from '../mixins/imageMixin'
 
 const centroid = (geometry) => {
@@ -774,7 +775,7 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
-  mixins:[imageMixin],
+  mixins:[scicrunchMixin,imageMixin],
   components: {
     Button,
     Col,
@@ -1121,26 +1122,6 @@ export default {
         this.addAnnotationFeature()
       }
     },
-    removeImageFromMap: function () {
-      if (this.mapImp) {
-        this.mapImp.clearMarkers();
-        this.imageIds.forEach((id) => this.mapImp.removeImage(id))
-        this.imageIds = []
-      }
-    },
-    populateImageToMap: function () {
-      if (this.mapImp) {
-        for (const [key, value] of Object.entries(this.anatomyImages[this.imageType])) {
-          if (value.length) {
-            const id = this.mapImp.addImage(key, value[0].thumbnail)
-            if (id) {
-              this.imageIds.push(id)
-              this.mapImp.addMarker(key, { className: "standard-marker", cluster: false })
-            }
-          }
-        }
-      }
-    },
     /**
      * @vuese
      * Function to switch the type of displayed image.
@@ -1151,15 +1132,19 @@ export default {
       if (this.mapImp) {
         this.loading = true
         const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
-        this.removeImageFromMap()
+        this.mapImp.clearMarkers();
         if (type === 'Image' && !(type in this.anatomyImages)) {
           this.anatomyImages[type] = await this.getBiolucidaThumbnails("id", anatomicalIdentifiers)
         } else if (type === 'Segmentation' && !(type in this.anatomyImages)) {
           this.anatomyImages[type] = await this.getSegmentationThumbnails("id", anatomicalIdentifiers)
+        } else if (type === 'Scaffold' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
         } else {
           console.log('switch to', type);
         }
-        this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
+        if (this.anatomyImages[type]) {
+          this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
+        }
         // this.populateImageToMap()
         this.loading = false
       }
@@ -1175,7 +1160,7 @@ export default {
         if (flag) {
           this.setImageType(this.imageType)
         } else {
-          this.removeImageFromMap()
+          this.mapImp.clearMarkers();
         }
       }
     },
@@ -2711,18 +2696,11 @@ export default {
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     /**
-     * Specify the root url of the SPARC portal.
-     */
-    rootURL: {
-      type: String,
-      default: 'https://sparc.science/',
-    },
-    /**
      * Specify the endpoint of the SPARC API.
      */
     sparcAPI: {
       type: String,
-      default: 'https://api.sparc.science/',
+      default: 'https://api.sparc.science',
     },
     /**
      * Flag to disable UIs on Map
@@ -2742,7 +2720,6 @@ export default {
   provide() {
     return {
       flatmapAPI: this.flatmapAPI,
-      sparcAPI: this.sparcAPI,
       $annotator: this.annotator,
       getFeaturesAlert: () => this.featuresAlert,
       userApiKey: this.userToken,
@@ -2867,7 +2844,7 @@ export default {
           without: true,
         }
       }),
-      anatomyImages: {},
+      anatomyImages: markRaw({}),
       imageRadio: false,
       imageIds: [],
       imageType: 'Image',

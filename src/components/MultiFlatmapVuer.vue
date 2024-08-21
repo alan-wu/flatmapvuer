@@ -80,7 +80,6 @@
       :showStarInLegend="showStarInLegend"
       style="height: 100%"
       :flatmapAPI="flatmapAPI"
-      :rootURL="rootURL"
       :sparcAPI="sparcAPI"
     />
   </div>
@@ -697,18 +696,11 @@ export default {
       default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     /**
-     * Specify the root url of the SPARC portal.
-     */
-    rootURL: {
-      type: String,
-      default: 'https://sparc.science/',
-    },
-    /**
      * Specify the endpoint of the SPARC API.
      */
     sparcAPI: {
       type: String,
-      default: 'https://api.sparc.science/',
+      default: 'https://api.sparc.science',
     },
     /**
      * Flag to disable UIs on Map
