@@ -685,7 +685,12 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
-import scicrunchMixin from '../mixins/scicrunchMixin'
+import {
+  getBiolucidaThumbnails,
+  getSegmentationThumbnails,
+  getScaffoldThumbnails,
+  getPlotThumbnails
+} from '../services/scicrunchQueries'
 import imageMixin from '../mixins/imageMixin'
 
 const centroid = (geometry) => {
@@ -775,7 +780,7 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
-  mixins:[scicrunchMixin,imageMixin],
+  mixins:[imageMixin],
   components: {
     Button,
     Col,
@@ -808,6 +813,57 @@ export default {
     return { annotator }
   },
   methods: {
+    /**
+     * @vuese
+     * Function to add image thumbnails to the map.
+     */
+    populateImageThumbnails: async function (type) {
+      if (this.mapImp) {
+        this.loading = true
+        const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
+        this.closeTooltip()
+        this.mapImp.clearMarkers();
+        if (type === 'Image' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await getBiolucidaThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
+        } else if (type === 'Segmentation' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await getSegmentationThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
+        } else if (type === 'Scaffold' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await getScaffoldThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
+        } else if (type === 'Plot' && !(type in this.anatomyImages)) {
+          this.anatomyImages[type] = await getPlotThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
+        }
+        if (this.anatomyImages[type]) {
+          this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
+        }
+        this.loading = false
+      }
+    },
+    /**
+     * @vuese
+     * Function to switch the type of displayed image.
+     * @arg type
+     */
+    setImageType: function (type) {
+      this.imageType = type
+      if (this.mapImp) {
+        this.populateImageThumbnails(type)
+      }
+    },
+    /**
+     * @vuese
+     * Function to switch show or hide images.
+     * @arg flag
+     */
+    setImage: function (flag) {
+      this.imageRadio = flag
+      if (this.mapImp) {
+        if (flag) {
+          this.setImageType(this.imageType)
+        } else {
+          this.mapImp.clearMarkers();
+        }
+      }
+    },
     /**
      * @vuese
      * Function to initialise drawing.
@@ -1120,47 +1176,6 @@ export default {
       this.annotatedType = flag
       if (this.mapImp) {
         this.addAnnotationFeature()
-      }
-    },
-    /**
-     * @vuese
-     * Function to switch the type of displayed image.
-     * @arg type
-     */
-    setImageType: async function (type) {
-      this.imageType = type
-      if (this.mapImp) {
-        this.loading = true
-        const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
-        this.mapImp.clearMarkers();
-        if (type === 'Image' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await this.getBiolucidaThumbnails("id", anatomicalIdentifiers)
-        } else if (type === 'Segmentation' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await this.getSegmentationThumbnails("id", anatomicalIdentifiers)
-        } else if (type === 'Scaffold' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
-        } else if (type === 'Plot' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await this.getPlotThumbnails("id", anatomicalIdentifiers)
-        }
-        if (this.anatomyImages[type]) {
-          this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
-        }
-        this.loading = false
-      }
-    },
-    /**
-     * @vuese
-     * Function to switch show or hide images.
-     * @arg flag
-     */
-    setImage: function (flag) {
-      this.imageRadio = flag
-      if (this.mapImp) {
-        if (flag) {
-          this.setImageType(this.imageType)
-        } else {
-          this.mapImp.clearMarkers();
-        }
       }
     },
     /**
@@ -2808,7 +2823,7 @@ export default {
       anatomyImages: markRaw({}),
       imageRadio: false,
       imageType: 'Image',
-      imageTypes: ['Image', 'Plot', 'Scaffold', 'Segmentation'],
+      imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       toolbarOptions: [
