@@ -2,33 +2,23 @@ export default {
   methods: {
     populateMapWithImages: function (mapImp, images, type) {
       for (const [key, list] of Object.entries(images)) {
-        this.downloadAndCreateImageThumbnailMarkerUrl(mapImp, key, list, type);
+        this.downloadImageThumbnail(mapImp, key, list, type);
       }
     },
-    downloadAndCreateImageThumbnailMarkerUrl: function (
-      mapImp,
-      key,
-      list,
-      type
-    ) {
+    downloadImageThumbnail: function (mapImp, key, list, type) {
       const count = list.length;
       if (count > 0) {
         //Pick a random image
         const index = Math.floor(Math.random() * count);
         const thumbnail = list[index].thumbnail;
         this.getThumbnail(thumbnail, type)
-          .then((wrappedElement) => {
-            this.createImageThumbnailMarkerUrl(mapImp, key, wrappedElement);
+          .then((wrapperElement) => {
+            this.addImageThumbnailMarker(mapImp, key, wrapperElement);
           })
           .catch(() => {
             //Failed to download, pick another one
             list.splice(index);
-            this.downloadAndCreateImageThumbnailMarkerUrl(
-              mapImp,
-              key,
-              list,
-              type
-            );
+            this.downloadImageThumbnail(mapImp, key, list, type);
           });
       }
     },
@@ -89,17 +79,13 @@ export default {
         img.src = url;
       });
     },
-    createImageThumbnailMarkerUrl: function (mapImp, id, wrapperElement) {
-      // add it to the flatmap
+    addImageThumbnailMarker: function (mapImp, id, wrapperElement) {
       const markerIdentifier = mapImp.addMarker(id, {
         element: wrapperElement,
         className: "highlight-marker",
         cluster: false,
         type: "image",
       });
-
-      const marker = mapImp.addMarker(id);
-      return marker;
     },
   },
 };
