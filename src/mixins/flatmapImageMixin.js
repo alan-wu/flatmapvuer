@@ -22,43 +22,12 @@ export default {
       for (const [key, list] of Object.entries(images)) {
         this.downloadAndCreateImageThumbnailMarkerUrl(mapImp, key, list, type)     
       }
-      /*
-      images.forEach((image) => {
-        if (image.value && image.value.length > 0)
-        image.value.forEach((image) => {
-          if (image.anatomy && image.anatomy.length > 0) {
-            image.anatomy.forEach((anatomy) => {
-              if (!anatomyList.includes(anatomy.curie) && ids.includes(anatomy.curie)) {
-                console.log(anatomy.curie)
-                anatomyList.push(anatomy.curie)
-                this.createImageThumbnailMarkerUrl(mapImp, anatomy.curie, image.thumbnail)
-              }
-            })
-          }
-        })
-      })
-      */
     },
     findImagesForAnatomy: function (images = [], anatomyToFind) {
       if (anatomyToFind in images) {
         return images[anatomyToFind]
       }
       return []
-      /*
-      images.forEach((image) => {
-        if (image.value && image.value.length > 0)
-        image.value.forEach((image) => {
-          if (image.anatomy && image.anatomy.length > 0) {
-            image.anatomy.forEach((anatomy) => {
-              if (anatomy.curie === anatomyToFind) {
-                imageList.push(image)
-              }
-            })
-          }
-        })
-      })
-      return imageList
-      */
     },
     getThumbnail: async function(url, type) {
       return new Promise((resolve, reject) => {
