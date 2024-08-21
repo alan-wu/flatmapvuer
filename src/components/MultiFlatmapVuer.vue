@@ -87,7 +87,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { reactive } from 'vue'
+import { markRaw } from 'vue'
 import EventBus from './EventBus'
 import FlatmapVuer from './FlatmapVuer.vue'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -119,12 +119,6 @@ export default {
     Select,
     Popover,
     FlatmapVuer,
-  },
-  beforeMount() {
-    //List for resolving the promise in initialise
-    //if initialise is called multiple times
-    this._resolveList = []
-    this._initialised = false
   },
   mounted: function () {
     this.initialise()
@@ -160,7 +154,7 @@ export default {
                 // FIrst look through the uuid
                 const uuid = this.availableSpecies[key].uuid
                 if (uuid && data.map((e) => e.uuid).indexOf(uuid) > 0) {
-                  this.speciesList[key] = reactive(this.availableSpecies[key])
+                  this.speciesList[key] = this.availableSpecies[key]
                 } else {
                   for (let i = 0; i < data.length; i++) {
                     if (this.availableSpecies[key].taxo === data[i].taxon) {
@@ -170,11 +164,11 @@ export default {
                           data[i].biologicalSex ===
                             this.availableSpecies[key].biologicalSex
                         ) {
-                          this.speciesList[key] = reactive(this.availableSpecies[key])
+                          this.speciesList[key] = this.availableSpecies[key]
                           break
                         }
                       } else {
-                        this.speciesList[key] = reactive(this.availableSpecies[key])
+                        this.speciesList[key] = this.availableSpecies[key]
                         break
                       }
                     }
@@ -205,19 +199,19 @@ export default {
                   5
                 )
               }
-              this._initialised = true
+              this.initialised = true
               resolve()
               //Resolve all other promises resolve in the list
-              this._resolveList.forEach((other) => {
+              this.resolveList.forEach((other) => {
                 other()
               })
             })
-        } else if (this._initialised) {
+        } else if (this.initialised) {
           //resolve as it has been initialised
           resolve()
         } else {
           //resolve when the async initialisation is finished
-          this._resolveList.push(resolve)
+          this.resolveList.push(resolve)
         }
       })
     },
@@ -361,11 +355,11 @@ export default {
           if (state.species.slice(0, 6) === 'Legacy') name = state.species
           else name = name + ` ${state.species}`
         }
-        this.speciesList[name] = reactive({
+        this.speciesList[name] = {
           taxo: taxo,
           isLegacy: true,
           displayWarning: true,
-        })
+        }
         return {
           species: name,
           state: {
@@ -720,6 +714,8 @@ export default {
       activeSpecies: undefined,
       speciesList: {},
       requireInitialisation: true,
+      resolveList: markRaw([]),
+      initialised: false,
     }
   },
   watch: {

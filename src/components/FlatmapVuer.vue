@@ -54,7 +54,7 @@ Please use `const` to assign meaningful names to them...
                 SCKAN </a
               >.
             </p>
-            <p v-else @mouseover="showTooltip(6)" @mouseout="hideTooltip(6)">
+            <p v-else @mouseover="showTooltip(7)" @mouseout="hideTooltip(7)">
               This map displays the connectivity of neuron populations.
               Specifically, those from the primarily rat-based
               <a
@@ -76,8 +76,8 @@ Please use `const` to assign meaningful names to them...
               <div
                 class="warning-icon"
                 v-if="displayWarning"
-                @mouseover="showTooltip(6)"
-                @mouseout="hideTooltip(6)"
+                @mouseover="showTooltip(7)"
+                @mouseout="hideTooltip(7)"
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
@@ -452,6 +452,30 @@ Please use `const` to assign meaningful names to them...
               {{ viewingModes[viewingModeIndex].description}}
             </el-row>
           </el-row>
+          <template v-if="viewingMode === 'Exploration' && !isFC">
+            <el-row class="backgroundText">Images Display</el-row>
+            <el-row class="backgroundControl">
+              <el-select
+                :teleported="false"
+                v-model="imageType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="flatmap_dropdown"
+                @change="setImageType"
+              >
+                <el-option
+                  v-for="item in imageTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-row>
+          </template>
           <template v-if="viewingMode === 'Annotation' && userInformation">
             <el-row class="backgroundText">Drawn By*</el-row>
             <el-row class="backgroundControl">
@@ -604,8 +628,16 @@ Please use `const` to assign meaningful names to them...
         v-show="tooltipDisplay"
         :annotationEntry="annotationEntry"
         :tooltipEntry="tooltipEntry"
+        :tooltipType="tooltipType"
+        :galleryItems="galleryItems"
         :annotationDisplay="viewingMode === 'Annotation'"
+        @viewImage="viewIframeImage"
         @annotation="commitAnnotationEvent"
+      />
+      <IframeImageDialog
+        :imageIframeURL="imageIframeURL"
+        :imageIframeOpen="imageIframeOpen"
+        @closeImageIframe="closeImageIframe"
       />
     </div>
   </div>
@@ -639,13 +671,15 @@ import {
   FlatmapQueries,
   findTaxonomyLabel,
 } from '../services/flatmapQueries.js'
+import scicrunchMixin from '../services/scicrunchMixin.js'
+import flatmapImageMixin from '../mixins/flatmapImageMixin.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
+import { DrawToolbar, Tooltip, TreeControls, IframeImageDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
 const centroid = (geometry) => {
@@ -735,6 +769,7 @@ const createUnfilledTooltipData = function () {
  */
 export default {
   name: 'FlatmapVuer',
+  mixins: [scicrunchMixin, flatmapImageMixin],
   components: {
     Button,
     Col,
@@ -754,11 +789,10 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar
+    DrawToolbar,
+    IframeImageDialog
   },
   beforeCreate: function () {
-    this.mapManager = undefined
-    this.mapImp = undefined
     //The state watcher may triggered before
     //created causing issue, This flag will
     //resolve this issue.
@@ -1708,6 +1742,17 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
+      console.log("checkandcreate")
+      if (data.feature.type === 'marker') {
+        this.tooltipType = 'image-gallery'
+        console.log('marker data', data)
+        console.log('saved images', this.images)
+        let filteredImages = this.findImagesForAnatomy(this.images, data.resource[0])
+        console.log('filtered images:',filteredImages)
+        this.galleryItems = filteredImages
+        this.displayTooltip(data.feature.models)
+      } else {
+
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         if (data.feature) {
@@ -1715,6 +1760,7 @@ export default {
             ...data.feature,
             resourceId: this.serverURL,
           }
+          this.tooltipType = 'annotation'
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
@@ -1748,9 +1794,11 @@ export default {
           results[1] ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
+          this.tooltipType = 'provenance'
           this.resourceForTooltip = data.resource[0]
           data.resourceForTooltip = this.resourceForTooltip
           this.createTooltipFromNeuronCuration(data)
+          }
         }
       }
     },
@@ -2001,6 +2049,9 @@ export default {
         // this method is moved to sidebar connectivity info
         // const featureIds = [feature];
         // this.moveMap(featureIds);
+        if (this.featuresAlert) {
+          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
+        }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       // If UI is not disabled,
@@ -2315,7 +2366,7 @@ export default {
      */
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-      this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
+      this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
       if (this.mapImp.options && this.mapImp.options.style === 'functional') {
         this.isFC = true
       }
@@ -2333,7 +2384,7 @@ export default {
       this.computePathControlsMaximumHeight()
       this.drawerOpen = true
       this.mapResize()
-      this.handleMapClick();
+      this.handleMapClick()
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -2427,6 +2478,34 @@ export default {
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
       return []
+    },
+    viewIframeImage: function (url) {
+      this.imageIframeURL = url
+      this.imageIframeOpen = true
+    },
+    closeImageIframe: function () {
+      this.imageIframeURL = ''
+      this.imageIframeOpen = false
+    },
+    setImageType: async function (type) {
+      if (this.mapImp) {
+        this.mapImp.clearMarkers()
+        const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
+        if (type === "Images") {
+          let images = await this.getBiolucidaThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+        } else if (type === "Scaffolds") {
+          let images = await this.getScaffoldThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+        } else if (type === "Segmentations") {
+          let images = await this.getSegmentationThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+        } else if (type === "Plots") {
+          let images = await this.getPlotThumbnails("id", anatomicalIdentifiers)
+          this.images = images
+        }
+        this.populateFlatmapWithImages(this.mapImp, this.images, type)
+      }
     },
   },
   props: {
@@ -2625,6 +2704,9 @@ export default {
   },
   data: function () {
     return {
+      sensor: null,
+      mapManager: undefined,
+      flatmapQueries: undefined,
       annotationEntry: {},
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
@@ -2633,6 +2715,10 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
+      imageIframeOpen: false,
+      imageIframeURL: '',
+      galleryItems: [],
+      tooltipType: 'provenance',
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
@@ -2649,6 +2735,7 @@ export default {
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
+      tooltipWait: markRaw([]),
       hoverVisibilities: [
         { value: false, ref: 'markerPopover' }, // 0
         { value: false, ref: 'zoomInPopover' }, // 1
@@ -2705,6 +2792,8 @@ export default {
       },
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
+      imageType: 'None',
+      imageTypes: ['Images', 'Scaffolds', 'Segmentations', 'Plots', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
@@ -2812,10 +2901,9 @@ export default {
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
-    this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
-    this.mapManager = new flatmap.MapManager(this.flatmapAPI)
-    this.flatmapQueries = new FlatmapQueries()
+    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI))
+    this.flatmapQueries = markRaw(new FlatmapQueries())
     this.flatmapQueries.initialise(this.flatmapAPI)
     if (this.state) {
       //State is set and require to set the state
