@@ -1799,7 +1799,6 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
-      console.log("checkandcreate")
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image'
         if (data.resource[0] in this.anatomyImages[this.imageType]) {
