@@ -377,13 +377,14 @@ Please use `const` to assign meaningful names to them...
                 key="taxonSelection"
               />
               <selections-group
-                v-if="!(isCentreLine || isFC)  && centreLines && centreLines.length > 0"
+                v-if="!(isCentreLine || isFC) && (centreLines && centreLines.length > 0 || nerves && nerves.length > 0)"
                 title="Nerves"
                 labelKey="label"
                 identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
+                :selections="nerves && nerves.length > 0 ? nerves : centreLines"
+                @changed="nervesSelected"
                 @selections-data-changed="onSelectionsDataChanged"
+                @checkAll="checkAllNerves"
                 ref="centrelinesSelection"
                 key="centrelinesSelection"
               />
@@ -1164,6 +1165,15 @@ export default {
         })
       })
     },
+    processNerves: function (nerves) {
+      this.nerves.length = 0
+      if (nerves && nerves.length > 0) {
+        nerves.forEach((nerve) => {
+          const item = { key: nerve.id, label: nerve.label ? nerve.label : nerve.id, enabled: false }
+          this.nerves.push(item)
+        })
+      }
+    },
     /**
      * @vuese
      * Function to show or hide the display of the bottom-left drawer container.
@@ -1247,7 +1257,16 @@ export default {
      * ``payload.value = true/false``.
      * @arg payload
      */
-    centreLinesSelected: function (payload) {
+    nervesSelected: function (payload) {
+      if (this.mapImp) {
+        if (payload.key === 'centrelines') {
+          this.checkAllNerves(payload)
+        } else {
+          this.mapImp.enableNeuronPathsByNerve(payload.key, payload.value)
+        }
+      }
+    },
+    checkAllNerves: function (payload) {
       if (this.mapImp) {
         this.mapImp.enableCentrelines(payload.value)
       }
@@ -2330,6 +2349,7 @@ export default {
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
       this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      this.processNerves(this.mapImp.getNerveDetails())
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
@@ -2654,6 +2674,7 @@ export default {
       ],
       systems: [],
       taxonConnectivity: [],
+      nerves: [],
       pathwaysMaxHeight: 1000,
       tooltipWait: markRaw([]),
       hoverVisibilities: [
