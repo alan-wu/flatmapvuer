@@ -110,11 +110,12 @@ import './icons/mapicon-species-style.css'
 import MultiFlatmapVuer from './components/MultiFlatmapVuer.vue'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
-import imageMixin from './mixins/imageMixin.js'
+import { mapStores } from 'pinia';
+import { useSettingsStore } from './stores/settings';
+import { getOrganCuries } from './services/scicrunchQueries'
 
 export default {
   name: 'app',
-  mixins: [imageMixin],
   components: {
     Autocomplete,
     Button,
@@ -298,6 +299,10 @@ export default {
   },
   mounted: function () {
     this.multiflatmapRef = this.$refs.multi;
+    getOrganCuries(this.sparcAPI).then((organCuries) => this.settingsStore.updateOrganCuries(organCuries))
+  },
+  computed: {
+    ...mapStores(useSettingsStore),
   },
   watch: {
     helpMode: function (newVal) {

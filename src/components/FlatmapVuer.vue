@@ -426,7 +426,7 @@ Please use `const` to assign meaningful names to them...
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="320"
+        width="330"
         :teleported="false"
         trigger="click"
         popper-class="background-popper h-auto"
@@ -501,7 +501,7 @@ Please use `const` to assign meaningful names to them...
             </el-row>
           </template>
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration' && !isFC"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration' && !isFC">Images Display</el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration' && !isFC">Types display</el-row>
           <el-row class="backgroundControl" v-if="viewingMode === 'Exploration' && !isFC">
             <el-col :span="12">
               <el-radio-group
@@ -509,8 +509,8 @@ Please use `const` to assign meaningful names to them...
                 class="flatmap-radio"
                 @change="setImage"
               >
-                <el-radio :label="false">Hide</el-radio>
-                <el-radio :label="true">Show</el-radio>
+                <el-radio :label="false">Marker</el-radio>
+                <el-radio :label="true">Image</el-radio>
               </el-radio-group>
             </el-col>
             <el-col :span="12" v-if="imageRadio">
@@ -681,8 +681,9 @@ import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
-import { mapState } from 'pinia'
-import { useMainStore } from '@/store/index'
+import { mapState, mapStores } from 'pinia'
+import { useMainStore } from '@/stores/index'
+import { useSettingsStore } from '@/stores/settings'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import {
@@ -820,19 +821,22 @@ export default {
     populateImageThumbnails: async function (type) {
       if (this.mapImp) {
         this.loading = true
-        const anatomicalIdentifiers = this.mapImp.anatomicalIdentifiers
+        const identifiers = this.mapImp.anatomicalIdentifiers
+        const organCuries = this.settingsStore.organCuries
         this.closeTooltip()
         this.mapImp.clearMarkers();
-        if (type === 'Image' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await getBiolucidaThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
-        } else if (type === 'Segmentation' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await getSegmentationThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
-        } else if (type === 'Scaffold' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await getScaffoldThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
-        } else if (type === 'Plot' && !(type in this.anatomyImages)) {
-          this.anatomyImages[type] = await getPlotThumbnails(this.sparcAPI, "id", anatomicalIdentifiers)
+        if (!(type in this.anatomyImages)) {
+          if (type === 'Image') {
+            this.anatomyImages[type] = await getBiolucidaThumbnails(this.sparcAPI, "id", identifiers, organCuries)
+          } else if (type === 'Segmentation') {
+            this.anatomyImages[type] = await getSegmentationThumbnails(this.sparcAPI, "id", identifiers, organCuries)
+          } else if (type === 'Scaffold') {
+            this.anatomyImages[type] = await getScaffoldThumbnails(this.sparcAPI, "id", identifiers, organCuries)
+          } else if (type === 'Plot') {
+            this.anatomyImages[type] = await getPlotThumbnails(this.sparcAPI, "id", identifiers, organCuries)
+          }
         }
-        if (this.anatomyImages[type]) {
+        if (type in this.anatomyImages) {
           this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
         }
         this.loading = false
@@ -2865,6 +2869,7 @@ export default {
   },
   computed: {
     ...mapState(useMainStore, ['userToken']),
+    ...mapStores(useSettingsStore),
     isValidDrawnCreated: function () {
       return Object.keys(this.drawnCreatedEvent).length > 0
     },
