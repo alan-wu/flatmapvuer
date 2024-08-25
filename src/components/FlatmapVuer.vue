@@ -1808,19 +1808,7 @@ export default {
         if (data.resource[0] in this.anatomyImages[this.imageType]) {
           this.imageEntry = this.anatomyImages[this.imageType][data.resource[0]]
         }
-        // this.displayTooltip(data.feature.models)
-
-        let options = { className: 'flatmapvuer-popover' }
-        let featureId = this.mapImp.modelFeatureIds(data.feature.models)[0]
-        if (!this.activeDrawTool) {
-          options.positionAtLastClick = true
-        }
-        this.tooltipDisplay = true;
-        this.$nextTick(() => {
-          this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
-          this.popUpCssHacks();
-        });
-        
+        this.displayTooltip(data.feature.models)
       } else {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
@@ -2123,6 +2111,9 @@ export default {
         }
         this.$emit('connectivity-info-open', this.provenanceEntry);
       }
+      if (this.imageThumbnailSidebar && this.imageEntry.length && this.viewingMode === 'Exploration') {
+        this.$emit('image-thumbnail-open', this.imageEntry)
+      }
       // If UI is not disabled,
       // And connectivityInfoSidebar is not set (default) or set to `false`
       // Provenance popup will be shown on map
@@ -2132,8 +2123,10 @@ export default {
           this.viewingMode === 'Annotation' ||
           (
             this.viewingMode === 'Exploration' &&
-            !this.connectivityInfoSidebar &&
-            this.hasTooltipEntry()
+            (
+              (!this.connectivityInfoSidebar && this.hasTooltipEntry()) ||
+              (!this.imageThumbnailSidebar && this.imageEntry.length)
+            )
           )
         )
       ) {
@@ -2730,6 +2723,13 @@ export default {
      * The option to show connectivity information in sidebar
      */
     connectivityInfoSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The option to show image thumbnail in sidebar
+     */
+    imageThumbnailSidebar: {
       type: Boolean,
       default: false,
     },

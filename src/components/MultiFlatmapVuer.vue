@@ -81,6 +81,8 @@
       style="height: 100%"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
+      :imageThumbnailSidebar="imageThumbnailSidebar"
+      @image-thumbnail-open="onImageThumbnailOpen"
     />
   </div>
 </template>
@@ -263,6 +265,9 @@ export default {
     },
     onConnectivityInfoOpen: function (entryData) {
       this.$emit('connectivity-info-open', entryData);
+    },
+    onImageThumbnailOpen: function (payload) {
+      this.$emit('image-thumbnail-open', payload);
     },
     onSelectionsDataChanged: function (data) {
       this.$emit('pathway-selection-changed', data);
@@ -713,6 +718,13 @@ export default {
      * The option to show connectivity information in sidebar
      */
     connectivityInfoSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The option to show image thumbnail in sidebar
+     */
+    imageThumbnailSidebar: {
       type: Boolean,
       default: false,
     },
