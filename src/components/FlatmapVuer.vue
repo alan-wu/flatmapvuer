@@ -1169,8 +1169,10 @@ export default {
       this.nerves.length = 0
       if (nerves && nerves.length > 0) {
         nerves.forEach((nerve) => {
-          const item = { key: nerve.id, label: nerve.label ? nerve.label : nerve.id, enabled: false }
-          this.nerves.push(item)
+          if (nerve.label) {
+            const item = { key: nerve.id, label: nerve.label ? nerve.label : nerve.id, enabled: false }
+            this.nerves.push(item)
+          }
         })
       }
     },
