@@ -1814,7 +1814,7 @@ export default {
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image'
         const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, [data.resource[0]])
-        this.imageEntry = imageThumbnails[data.resource[0]]
+        this.imageEntry = markRaw(imageThumbnails[data.resource[0]])
         this.displayTooltip(data.feature.models)
       } else {
       // Call flatmap database to get the connection data
@@ -2767,7 +2767,7 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
-      imageEntry: [],
+      imageEntry: markRaw([]),
       tooltipType: 'provenance',
       sckanDisplay: [
         {
