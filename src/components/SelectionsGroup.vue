@@ -37,6 +37,23 @@
       @change="handleCheckedItemsChange"
     >
       <div class="checkbox-group-inner">
+        <div class="checkbox-tooltip" :style="{'top': tooltipPosition + 'px'}">
+          <el-popover
+            ref="tooltip"
+            :visible="tooltipVisible"
+            placement="top"
+            :show-arrow="false"
+            :teleported="false"
+            trigger="manual"
+            popper-class="checkbox-tooltip-popper"
+            virtual-triggering
+            :width="260"
+          >
+            <template #default>
+              <div class="checkbox-text">{{ tooltipLabel }}</div>
+            </template>
+          </el-popover>
+        </div>
         <el-row
           v-for="item in selections"
           :key="item[identifierKey]"
@@ -45,12 +62,15 @@
           <div class="checkbox-container" 
             @mouseenter="checkboxMouseEnterEmit(item[identifierKey], true)"
             @mouseleave="checkboxMouseEnterEmit(item[identifierKey], false)"
+            ref="checkboxContainer"
             >
             <el-checkbox
               class="my-checkbox"
               :label="item[identifierKey]"
               @change="visibilityToggle(item[identifierKey], $event)"
               @click="onCheckboxNativeChange"
+              @mouseenter="displayTooltip(item[labelKey], true, $event)"
+              @mouseleave="displayTooltip('', false, $event)"
               :checked="!('enabled' in item) || item.enabled === true"
             >
               <el-row class="checkbox-row">
@@ -58,7 +78,7 @@
                   <div class="path-visual" :style="getLineStyles(item)"></div>
                 </el-col>
                 <el-col :span="20">
-                  <div :style="getBackgroundStyles(item)">
+                  <div class="selection-checkbox-label" :style="getBackgroundStyles(item)">
                     {{ item[labelKey] }}
                   </div>
                 </el-col>
@@ -201,6 +221,26 @@ export default {
       }
       return { display: 'None' }
     },
+    displayTooltip: function (tooltipLabel, visible, e) {
+      const hoverItem = e.target;
+      const containerItem = hoverItem.querySelector('.checkbox-row');
+      const containerItemWidth = containerItem.clientWidth;
+      let lastElement = containerItem.querySelector('.path-visual');
+      let childrenWidth = 0;
+      if (lastElement) {
+        const rect = lastElement.getBoundingClientRect();
+        childrenWidth = rect.width;
+      }
+      lastElement = containerItem.querySelector('.selection-checkbox-label');
+      if (lastElement) {
+        const rect = lastElement.getBoundingClientRect();
+        childrenWidth += rect.width;
+      }
+      const longLabel = Math.floor(childrenWidth) > containerItemWidth;
+      this.tooltipVisible = longLabel && visible;
+      this.tooltipLabel = tooltipLabel;
+      this.tooltipPosition = e.pageY - 50;
+    }
   },
   props: {
     colourStyle: {
@@ -249,6 +289,9 @@ export default {
         label: '',
         checked: '',
       },
+      tooltipVisible: false,
+      tooltipLabel: "",
+      tooltipPosition: 0,
     }
   },
   mounted: function () {
@@ -307,6 +350,11 @@ export default {
 
 .checkbox-group-inner {
   padding: 18px;
+  overflow: hidden;
+}
+
+.selection-checkbox-label {
+  width: fit-content;
 }
 
 :deep(.el-checkbox__label) {
@@ -360,4 +408,23 @@ export default {
     }
   }
 }
+
+.checkbox-tooltip {
+  position:fixed;
+  z-index: 2;
+}
+
+:deep(.checkbox-tooltip-popper.el-popover) {
+  text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  padding: 4px;
+  font-size: 12px;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #ffffff;
+    }
+  }
+}
+
 </style>

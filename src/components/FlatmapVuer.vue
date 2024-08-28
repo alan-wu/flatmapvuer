@@ -245,7 +245,7 @@ Please use `const` to assign meaningful names to them...
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
-            v-show="!disableUI"
+            v-show="!(disableUI || isCentreLine)"
           >
             <div
               class="pathway-container"
@@ -377,11 +377,11 @@ Please use `const` to assign meaningful names to them...
                 key="taxonSelection"
               />
               <selections-group
-                v-if="!isFC && (centreLines && centreLines.length > 0 || nerves && nerves.length > 0)"
+                v-if="!(isCentreLine || isFC) && (centreLines && centreLines.length > 0 || nerves && nerves.length > 0)"
                 title="Nerves"
                 labelKey="label"
-                identifierKey="key"
-                :selections="nerves && nerves.length > 0 ? nerves : centreLines"
+                :identifierKey="nerves.length > 0 ? 'label' : 'key'"
+                :selections="nerves.length > 0 ? nerves : centreLines"
                 @changed="nervesSelected"
                 @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllNerves"
@@ -1165,13 +1165,30 @@ export default {
         })
       })
     },
+    /**
+     * @vuese
+     * Function to process nerves information and turn store it in the
+     * nerves array.
+     */
     processNerves: function (nerves) {
       this.nerves.length = 0
       if (nerves && nerves.length > 0) {
+        const uniques = {};
         nerves.forEach((nerve) => {
-          const item = { key: nerve.id, label: nerve.label ? nerve.label : nerve.id, enabled: false }
-          this.nerves.push(item)
+          if (nerve.label) {
+            if (!(nerve.label in uniques)) {
+              uniques[nerve.label] = []
+            }
+            uniques[nerve.label].push(nerve.id)
+          }
         })
+        for (const [key, value] of Object.entries(uniques)) {
+          this.nerves.push({
+            key: value,
+            label:  key,
+            enabled: false,
+          })
+        }
       }
     },
     /**
@@ -1262,13 +1279,25 @@ export default {
         if (payload.key === 'centrelines') {
           this.checkAllNerves(payload)
         } else {
-          this.mapImp.enableNeuronPathsByNerve(payload.key, payload.value)
+          const data = this.nerves.find((item) => item.label === payload.key)
+          data.key.forEach((key) => {
+            this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+          });
         }
       }
     },
     checkAllNerves: function (payload) {
       if (this.mapImp) {
-        this.mapImp.enableCentrelines(payload.value)
+        if (this.nerves.length > 0) {
+          console.log(this.nerves)
+          this.nerves.forEach((item) => {
+            item.key.forEach((key) => {
+              this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+            });
+          });
+        } else {
+          this.mapImp.enableCentrelines(payload.value)
+        }
       }
     },
     onSelectionsDataChanged: function (data) {
@@ -2333,13 +2362,17 @@ export default {
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
       this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
-      if (this.mapImp.options && this.mapImp.options.style === 'functional') {
+      if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
+      } else if (this.mapImp.options?.style === 'centreline') {
+        this.isCentreLine = true
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      this.mapImp.enableCentrelines(false)
+      if (!this.isCentreLine) {
+        this.mapImp.enableCentrelines(false)
+      }
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
@@ -2349,7 +2382,7 @@ export default {
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = true
+      this.drawerOpen = !this.isCentreLine
       this.mapResize()
       this.handleMapClick();
       /**
@@ -2693,6 +2726,7 @@ export default {
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
       isFC: false,
+      isCentreLine: false,
       inHelp: false,
       currentBackground: 'white',
       availableBackground: ['white', 'lightskyblue', 'black'],
