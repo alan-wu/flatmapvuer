@@ -2382,7 +2382,7 @@ export default {
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = !this.isCentreLine      
+      this.drawerOpen = !this.isCentreLine
       this.mapResize()
       this.handleMapClick();
       /**
