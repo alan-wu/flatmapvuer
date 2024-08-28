@@ -22,21 +22,11 @@ const getOrganCuries = async (sparcApi, filetypes = [], species = []) => {
   return organCuries;
 };
 
-const getFilesInfoForCuries = async (
-  sparcApi,
-  key,
-  identifiers,
-  organCuries,
-  filetypes
-) => {
-  const curies = organCuries
-    .filter((item) => identifiers.includes(item[key]))
-    .map((item) => item.id);
-
+const getFilesInfoForCuries = async (sparcApi, organCuries, filetypes) => {
   const response = await fetch(`${sparcApi}/get-files-info-for-curies`, {
     method: "POST",
     body: JSON.stringify({
-      curies: curies,
+      curies: organCuries.map((item) => item.id),
       filetypes: filetypes,
     }),
     headers: {
@@ -56,25 +46,18 @@ const getBiolucidaThumbnailURL = (sparcApi, biolucidaId) => {
   return `${sparcApi}/thumbnail/${biolucidaId}`;
 };
 
-const getBiolucidaThumbnails = async (
-  sparcApi,
-  key,
-  identifiers,
-  organCuries
-) => {
+const getBiolucidaThumbnails = async (sparcApi, organCuries, type) => {
   try {
-    const data = await getFilesInfoForCuries(
-      sparcApi,
-      key,
-      identifiers,
-      organCuries,
-      ["biolucida-2d", "biolucida-3d"]
-    );
+    const data = await getFilesInfoForCuries(sparcApi, organCuries, [
+      "biolucida-2d",
+      "biolucida-3d",
+    ]);
+
     if (data["files_info"]) {
-      const images = {};
+      let images = {};
       for (const [key, value] of Object.entries(data["files_info"])) {
         if (value.length > 0) {
-          const list = [];
+          let list = [];
           value.forEach((entry) => {
             const thumbnailURL = getBiolucidaThumbnailURL(
               sparcApi,
@@ -86,10 +69,11 @@ const getBiolucidaThumbnails = async (
                 resource: entry.file_path,
                 id: entry.id,
                 title: getFileNameFromPath(entry.file_path),
-                type: "Image",
+                type: type,
                 link: thumbnailURL,
                 mimetype: entry.mimetype,
                 species: entry.species,
+                version: entry.version,
               };
               list.push(image);
             }
@@ -114,25 +98,17 @@ const getSegmentationThumbnailURL = (
   return `${sparcApi}/thumbnail/neurolucida?datasetId=${datasetId}&version=${datasetVersion}&path=files/${filePath}`;
 };
 
-const getSegmentationThumbnails = async (
-  sparcApi,
-  key,
-  identifiers,
-  organCuries
-) => {
+const getSegmentationThumbnails = async (sparcApi, organCuries, type) => {
   try {
-    const data = await getFilesInfoForCuries(
-      sparcApi,
-      key,
-      identifiers,
-      organCuries,
-      ["mbf-segmentation"]
-    );
+    const data = await getFilesInfoForCuries(sparcApi, organCuries, [
+      "mbf-segmentation",
+    ]);
+
     if (data["files_info"]) {
-      const images = {};
+      let images = {};
       for (const [key, value] of Object.entries(data["files_info"])) {
         if (value.length > 0) {
-          const list = [];
+          let list = [];
           value.forEach((entry) => {
             const thumbnailURL = getSegmentationThumbnailURL(
               sparcApi,
@@ -145,10 +121,11 @@ const getSegmentationThumbnails = async (
               resource: entry.file_path,
               id: entry.id,
               title: getFileNameFromPath(entry.file_path),
-              type: "Segmentation",
+              type: type,
               link: thumbnailURL,
               mimetype: entry.mimetype,
               species: entry.species,
+              version: entry.version,
             };
             list.push(image);
           });
@@ -198,25 +175,19 @@ const getScaffoldThumbnailURL = (sparcApi, entry, list) => {
   return undefined;
 };
 
-const getScaffoldThumbnails = async (
-  sparcApi,
-  key,
-  identifiers,
-  organCuries
-) => {
+const getScaffoldThumbnails = async (sparcApi, organCuries, type) => {
   try {
-    const data = await getFilesInfoForCuries(
-      sparcApi,
-      key,
-      identifiers,
-      organCuries,
-      ["abi-thumbnail", "abi-scaffold-metadata-file", "abi-scaffold-view-file"]
-    );
+    const data = await getFilesInfoForCuries(sparcApi, organCuries, [
+      "abi-thumbnail",
+      "abi-scaffold-metadata-file",
+      "abi-scaffold-view-file",
+    ]);
+
     if (data["files_info"]) {
-      const images = {};
+      let images = {};
       for (const [key, value] of Object.entries(data["files_info"])) {
         if (value.length > 0) {
-          const list = [];
+          let list = [];
           value.forEach((entry) => {
             if (entry.type === "abi-scaffold-metadata-file") {
               const thumbnailURL = getScaffoldThumbnailURL(
@@ -230,9 +201,10 @@ const getScaffoldThumbnails = async (
                   resource: entry.file_path,
                   id: entry.id,
                   title: getFileNameFromPath(entry.file_path),
-                  type: "Scaffold",
+                  type: type,
                   link: thumbnailURL,
                   species: entry.species,
+                  version: entry.version,
                 };
                 list.push(image);
               }
@@ -258,20 +230,18 @@ const getPlotThumbnailURL = (sparcApi, entry) => {
   return undefined;
 };
 
-const getPlotThumbnails = async (sparcApi, key, identifiers, organCuries) => {
+const getPlotThumbnails = async (sparcApi, organCuries, type) => {
   try {
-    const data = await getFilesInfoForCuries(
-      sparcApi,
-      key,
-      identifiers,
-      organCuries,
-      ["abi-plot", "abi-thumbnail"]
-    );
+    const data = await getFilesInfoForCuries(sparcApi, organCuries, [
+      "abi-plot",
+      "abi-thumbnail",
+    ]);
+
     if (data["files_info"]) {
-      const images = {};
+      let images = {};
       for (const [key, value] of Object.entries(data["files_info"])) {
         if (value.length > 0) {
-          const list = [];
+          let list = [];
           value.forEach((entry) => {
             if (entry.type === "abi-plot") {
               const thumbnailURL = getPlotThumbnailURL(sparcApi, entry);
@@ -279,11 +249,12 @@ const getPlotThumbnails = async (sparcApi, key, identifiers, organCuries) => {
                 let image = {
                   thumbnail: thumbnailURL,
                   resource: entry.file_path,
-                  datasetId: entry.id,
+                  id: entry.id,
                   title: getFileNameFromPath(entry.file_path),
-                  type: "Plot",
+                  type: type,
                   link: thumbnailURL,
                   species: entry.species,
+                  version: entry.version,
                 };
                 list.push(image);
               }

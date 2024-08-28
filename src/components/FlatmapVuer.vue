@@ -820,36 +820,44 @@ export default {
      */
     populateImageThumbnails: async function (type) {
       if (this.mapImp) {
-        this.loading = true
-        const identifiers = this.mapImp.anatomicalIdentifiers
-        const organCuries = this.settingsStore.organCuries
         this.closeTooltip()
         this.mapImp.clearMarkers();
-        if (!(type in this.anatomyImages)) {
-          if (type === 'Image') {
-            this.anatomyImages[type] = await getBiolucidaThumbnails(this.sparcAPI, "id", identifiers, organCuries)
-          } else if (type === 'Segmentation') {
-            this.anatomyImages[type] = await getSegmentationThumbnails(this.sparcAPI, "id", identifiers, organCuries)
-          } else if (type === 'Scaffold') {
-            this.anatomyImages[type] = await getScaffoldThumbnails(this.sparcAPI, "id", identifiers, organCuries)
-          } else if (type === 'Plot') {
-            this.anatomyImages[type] = await getPlotThumbnails(this.sparcAPI, "id", identifiers, organCuries)
-          }
-        }
-        if (type in this.anatomyImages) {
-          this.populateMapWithImages(this.mapImp, this.anatomyImages[type], type)
-        }
-        this.loading = false
+        const identifiers = this.mapImp.anatomicalIdentifiers
+        const imageThumbnails = this.settingsStore.getImageThumbnails(type, identifiers)
+        this.populateMapWithImages(this.mapImp, imageThumbnails, type)
       }
+    },
+    /**
+     * @vuese
+     * Function to fetching image thumbnails.
+     */
+    fetchImageThumbnails: async function (type) {
+      let thumbnails = {}
+      const organCuries = this.settingsStore.organCuries
+      if (type === 'Image') {
+        thumbnails = await getBiolucidaThumbnails(this.sparcAPI, organCuries, type)
+      } else if (type === 'Segmentation') {
+        thumbnails = await getSegmentationThumbnails(this.sparcAPI, organCuries, type)
+      } else if (type === 'Scaffold') {
+        thumbnails = await getScaffoldThumbnails(this.sparcAPI, organCuries, type)
+      } else if (type === 'Plot') {
+        thumbnails = await getPlotThumbnails(this.sparcAPI, organCuries, type)
+      }
+      this.settingsStore.updateImageThumbnails(type, thumbnails)
     },
     /**
      * @vuese
      * Function to switch the type of displayed image.
      * @arg type
      */
-    setImageType: function (type) {
+    setImageType: async function (type) {
       this.imageType = type
       if (this.mapImp) {
+        if (!this.settingsStore.imageTypeCached(type)) {
+          this.loading = true
+          await this.fetchImageThumbnails(type)
+          this.loading = false
+        }
         this.populateImageThumbnails(type)
       }
     },
@@ -1805,9 +1813,8 @@ export default {
     checkAndCreatePopups: async function (data) {
       if (data.feature.type === 'marker') {
         this.tooltipType = 'image'
-        if (data.resource[0] in this.anatomyImages[this.imageType]) {
-          this.imageEntry = this.anatomyImages[this.imageType][data.resource[0]]
-        }
+        const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, [data.resource[0]])
+        this.imageEntry = imageThumbnails[data.resource[0]]
         this.displayTooltip(data.feature.models)
       } else {
       // Call flatmap database to get the connection data
@@ -2829,7 +2836,6 @@ export default {
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
       annotatedType: 'Anyone',
       annotatedTypes: ['Anyone', 'Me', 'Others'],
-      anatomyImages: markRaw({}),
       imageRadio: false,
       imageType: 'Image',
       imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
