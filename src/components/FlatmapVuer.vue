@@ -1279,9 +1279,13 @@ export default {
         if (payload.key === 'centrelines') {
           this.checkAllNerves(payload)
         } else {
-          const data = this.nerves.find((item) => item.label === payload.key)
-          data.key.forEach((key) => {
-            this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+          this.nerves.forEach((item) => {
+            if (item.label === payload.key) {
+              item.key.forEach((key) => {
+                this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+              });
+              item.enabled = payload.value
+            }
           });
         }
       }
@@ -1289,10 +1293,15 @@ export default {
     checkAllNerves: function (payload) {
       if (this.mapImp) {
         if (this.nerves.length > 0) {
-          console.log(this.nerves)
           this.nerves.forEach((item) => {
             item.key.forEach((key) => {
+              // Need to make sure nerves are disabled before displaying all
+              if (payload.value && item.enabled) {
+                this.mapImp.enableNeuronPathsByNerve(key, false)
+                item.enabled = false
+              }
               this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+              item.enabled = payload.value
             });
           });
         } else {
