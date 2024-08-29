@@ -460,7 +460,7 @@ Please use `const` to assign meaningful names to them...
                 :teleported="false"
                 v-model="drawnType"
                 placeholder="Select"
-                class="select-box"
+                class="select-box annotationSelector"
                 popper-class="flatmap_dropdown"
                 @change="setDrawnType"
               >
@@ -483,7 +483,7 @@ Please use `const` to assign meaningful names to them...
                 :teleported="false"
                 v-model="annotatedType"
                 placeholder="Select"
-                class="select-box"
+                class="select-box annotationSelector"
                 popper-class="flatmap_dropdown"
                 @change="setAnnotatedType"
               >
@@ -501,24 +501,24 @@ Please use `const` to assign meaningful names to them...
             </el-row>
           </template>
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration' && !isFC"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration' && !isFC">Types display</el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration' && !isFC">Markers display</el-row>
           <el-row class="backgroundControl" v-if="viewingMode === 'Exploration' && !isFC">
-            <el-col :span="12">
+            <el-col :span="14">
               <el-radio-group
                 v-model="imageRadio"
                 class="flatmap-radio"
                 @change="setImage"
               >
-                <el-radio :label="false">Marker</el-radio>
+                <el-radio :label="false">Standard</el-radio>
                 <el-radio :label="true">Image</el-radio>
               </el-radio-group>
             </el-col>
-            <el-col :span="12" v-if="imageRadio">
+            <el-col :span="10" v-if="imageRadio">
               <el-select
                 :teleported="false"
                 v-model="imageType"
                 placeholder="Select"
-                class="select-box"
+                class="select-box imageSelector"
                 popper-class="flatmap_dropdown"
                 @change="setImageType"
               >
@@ -3719,7 +3719,12 @@ export default {
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  width: 150px!important;
+  &.annotationSelector {
+    width: 150px!important;
+  }
+  &.imageSelector {
+    width: 120px!important;
+  }
 }
 
 :deep(.flatmap_dropdown) {
