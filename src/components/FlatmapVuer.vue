@@ -3723,7 +3723,7 @@ export default {
     width: 150px!important;
   }
   &.imageSelector {
-    width: 120px!important;
+    width: 125px!important;
   }
 }
 
