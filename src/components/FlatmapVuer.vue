@@ -1811,7 +1811,7 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
-      if (data.feature.type === 'marker') {
+      if (data.feature.type === 'marker' && this.imageRadio) {
         this.tooltipType = 'image'
         const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, [data.resource[0]])
         this.imageEntry = markRaw(imageThumbnails[data.resource[0]])
