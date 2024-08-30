@@ -1811,10 +1811,11 @@ export default {
      * @arg data
      */
     checkAndCreatePopups: async function (data) {
+      this.imageEntry = []
+      this.provenanceEntry = {}
       if (data.feature.type === 'marker' && this.imageRadio) {
         this.tooltipType = 'image'
         const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, [data.resource[0]])
-        this.imageEntry = markRaw([])
         if (data.resource[0] in imageThumbnails) {
           this.imageEntry = markRaw(imageThumbnails[data.resource[0]])
         }
@@ -2105,7 +2106,7 @@ export default {
         options.annotationFeatureGeometry = geometry
       } else {
         featureId = this.mapImp.modelFeatureIds(feature)[0]
-        if (!this.activeDrawTool) {
+        if (!this.activeDrawTool && !this.imageEntry.length) {
           options.positionAtLastClick = true
         }
       }
