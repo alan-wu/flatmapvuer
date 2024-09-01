@@ -285,7 +285,7 @@ Please use `const` to assign meaningful names to them...
                 width="200"
                 trigger="manual"
                 popper-class="flatmap-popper flatmap-marker-popper"
-                :visible="hoverVisibilities[5].value"
+                :visible="hoverVisibilities[0].value"
                 ref="markerPopover"
               >
                 <template #reference>
@@ -2334,7 +2334,7 @@ export default {
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = !this.isCentreLine      
+      this.drawerOpen = !this.isCentreLine
       this.mapResize()
       this.handleMapClick();
       /**
