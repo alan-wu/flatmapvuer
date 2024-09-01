@@ -2479,7 +2479,8 @@ export default {
 
       if (_map) {
         _map.on('click', (e) => {
-          if (this.provenanceEntry.featureId) {
+          // Tmeporary add imageEntry length
+          if (this.provenanceEntry.featureId || this.imageEntry.length) {
             this.$emit('connectivity-info-close');
           }
         });
