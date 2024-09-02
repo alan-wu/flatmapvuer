@@ -1514,7 +1514,7 @@ export default {
           this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
           // reset visibility of paths
-          this.mapImp.selectGeoJSONFeatures("-1")
+          this.mapImp.unselectGeoJSONFeatures()
           payload.selections.forEach((item) => {
             let show = payload.checked.includes(item.taxon)
             this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
