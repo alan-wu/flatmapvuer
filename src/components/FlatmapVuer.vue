@@ -874,6 +874,7 @@ export default {
         } else {
           this.mapImp.clearMarkers();
         }
+        this.$emit('imageThumbnailDisplay', flag)
       }
     },
     /**

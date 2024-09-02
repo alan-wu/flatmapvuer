@@ -81,6 +81,7 @@
       style="height: 100%"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
+      @imageThumbnailDisplay="onImageThumbnailDisplay"
       :imageThumbnailSidebar="imageThumbnailSidebar"
       @image-thumbnail-open="onImageThumbnailOpen"
     />
@@ -265,6 +266,9 @@ export default {
     },
     onConnectivityInfoOpen: function (entryData) {
       this.$emit('connectivity-info-open', entryData);
+    },
+    onImageThumbnailDisplay: function (payload) {
+      this.$emit('imageThumbnailDisplay', payload);
     },
     onImageThumbnailOpen: function (payload) {
       this.$emit('image-thumbnail-open', payload);
