@@ -789,9 +789,6 @@ export default {
     return { annotator }
   },
   methods: {
-    mouseEnterEmitted: function (payload) {
-      console.log('mouseEnterEmitted', payload);
-    },
     /**
      * @vuese
      * Function to initialise drawing.
