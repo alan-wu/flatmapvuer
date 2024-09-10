@@ -395,6 +395,7 @@ Please use `const` to assign meaningful names to them...
                 :identifierKey="nerves.length > 0 ? 'label' : 'key'"
                 :selections="nerves.length > 0 ? nerves : centreLines"
                 @changed="nervesSelected"
+                @checkboxMouseEnter="nerveMouseEnterEmitted"
                 @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllNerves"
                 ref="centrelinesSelection"
@@ -788,6 +789,9 @@ export default {
     return { annotator }
   },
   methods: {
+    mouseEnterEmitted: function (payload) {
+      console.log('mouseEnterEmitted', payload);
+    },
     /**
      * @vuese
      * Function to initialise drawing.
@@ -1199,14 +1203,18 @@ export default {
             if (!(nerve.label in uniques)) {
               uniques[nerve.label] = []
             }
-            uniques[nerve.label].push(nerve.id)
+            uniques[nerve.label].push({
+              id: nerve.id,
+              models: nerve.models,
+            })
           }
         })
         for (const [key, value] of Object.entries(uniques)) {
           this.nerves.push({
-            key: value,
-            label:  key,
+            key: value.map(v => v.id),
+            label: key,
             enabled: false,
+            model: [...new Set(value.map(v => v.models))],
           })
         }
       }
@@ -1285,6 +1293,27 @@ export default {
     zoomOut: function () {
       if (this.mapImp) {
         this.mapImp.zoomOut()
+      }
+    },
+    nerveMouseEnterEmitted: function (payload) {
+      if (this.mapImp) {
+        if (this.nerves.length > 0) {
+          this.nerves.forEach((nerve) => {
+            if (nerve.label === payload.key) {
+              nerve.key.forEach((key) => {
+                this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+              })
+              if (payload.value) {
+                nerve.model.forEach((model) => {
+                  const gid = this.mapImp.modelFeatureIds(model)
+                  this.mapImp.zoomToGeoJSONFeatures(gid, { noZoomIn: true })
+                })
+              } else {
+                this.mapImp.unselectGeoJSONFeatures()
+              }
+            }
+          })
+        }
       }
     },
     /**
