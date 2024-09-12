@@ -392,12 +392,12 @@ Please use `const` to assign meaningful names to them...
                 v-if="!(isCentreLine || isFC) && (centreLines && centreLines.length > 0 || nerves && nerves.length > 0)"
                 title="Nerves"
                 labelKey="label"
-                :identifierKey="nerves.length > 0 ? 'label' : 'key'"
-                :selections="nerves.length > 0 ? nerves : centreLines"
+                identifierKey="key"
+                :selections="centreLines"
+                :options="nerves"
                 @changed="nervesSelected"
                 @checkboxMouseEnter="nerveMouseEnterEmitted"
                 @selections-data-changed="onSelectionsDataChanged"
-                @checkAll="checkAllNerves"
                 ref="centrelinesSelection"
                 key="centrelinesSelection"
               />
@@ -1208,8 +1208,9 @@ export default {
         })
         for (const [key, value] of Object.entries(uniques)) {
           this.nerves.push({
+            value: key,
             key: value.map(v => v.id),
-            label: key,
+            label: key.charAt(0).toUpperCase() + key.slice(1),
             enabled: false,
             model: [...new Set(value.map(v => v.models))],
           })
@@ -1294,64 +1295,43 @@ export default {
     },
     nerveMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
-        if (this.nerves.length > 0) {
-          this.nerves.forEach((nerve) => {
-            if (nerve.label === payload.key) {
-              nerve.key.forEach((key) => {
-                this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+        this.nerves.forEach((nerve) => {
+          if (nerve.value === payload.key) {
+            nerve.key.forEach((key) => {
+              this.mapImp.enableNeuronPathsByNerve(key, payload.value)
+            })
+            if (payload.value) {
+              nerve.model.forEach((model) => {
+                const gid = this.mapImp.modelFeatureIds(model)
+                this.mapImp.zoomToGeoJSONFeatures(gid, { noZoomIn: true })
               })
-              if (payload.value) {
-                nerve.model.forEach((model) => {
-                  const gid = this.mapImp.modelFeatureIds(model)
-                  this.mapImp.zoomToGeoJSONFeatures(gid, { noZoomIn: true })
-                })
-              } else {
-                this.mapImp.unselectGeoJSONFeatures()
-              }
+            } else {
+              this.mapImp.unselectGeoJSONFeatures()
             }
-          })
-        }
+          }
+        })
       }
     },
     /**
      * @vuese
      * Function to show or hide centrelines and nodes.
-     * The parameter ``payload`` is an object with a boolean property, ``value``,
-     * ``payload.value = true/false``.
+     * The parameter ``payload`` is an object/a list of objects with properties, ``key``, ``value``,
      * @arg payload
      */
     nervesSelected: function (payload) {
       if (this.mapImp) {
         if (payload.key === 'centrelines') {
-          this.checkAllNerves(payload)
-        } else {
-          this.nerves.forEach((item) => {
-            if (item.label === payload.key) {
-              item.key.forEach((key) => {
-                this.mapImp.enableNeuronPathsByNerve(key, payload.value)
-              });
-              item.enabled = payload.value
-            }
-          });
-        }
-      }
-    },
-    checkAllNerves: function (payload) {
-      if (this.mapImp) {
-        if (this.nerves.length > 0) {
-          this.nerves.forEach((item) => {
-            item.key.forEach((key) => {
-              // Need to make sure nerves are disabled before displaying all
-              if (payload.value && item.enabled) {
-                this.mapImp.enableNeuronPathsByNerve(key, false)
-                item.enabled = false
-              }
-              this.mapImp.enableNeuronPathsByNerve(key, payload.value)
-              item.enabled = payload.value
-            });
-          });
-        } else {
           this.mapImp.enableCentrelines(payload.value)
+        } else {
+          this.nerves.forEach((nerve) => {
+            payload.forEach((item) => {
+              if (nerve.value === item.key) {
+                nerve.key.forEach((key) => {
+                  this.mapImp.enableNeuronPathsByNerve(key, item.value)
+                })
+              }
+            })
+          })
         }
       }
     },
