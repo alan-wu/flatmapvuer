@@ -106,6 +106,7 @@
           <span
             @mouseenter="checkboxMouseEnterEmit(data.value, true)"
             @mouseleave="checkboxMouseEnterEmit(data.value, false)"
+            @click="handleCascaderItemsChange($event, true)"
           >
             {{ data[labelKey] }}
           </span>
@@ -144,23 +145,28 @@ export default {
     cascaderFilterMethod: function (node, keyword) {
       return node.label.toLowerCase().indexOf(keyword.toLowerCase()) !== -1
     },
-    processCascaderItems: function (currentCascader) {
-      let changed = []
-      const removed = this.previousCascader.filter((pItem) => !currentCascader.includes(pItem))
-      const added = currentCascader.filter((cItem) => !this.previousCascader.includes(cItem))
-      removed.forEach((item) => {
-        changed.push({ key: item, value: false })
-      })
-      added.forEach((item) => {
-        changed.push({ key: item, value: true })
-      })
-      return changed
-    },
-    handleCascaderItemsChange: function (value) {
-      const items = value.flat(2)
-      const changedCascader = this.processCascaderItems(items)
-      this.$emit('changed', changedCascader)
-      this.previousCascader = items
+    handleCascaderItemsChange: function (value, clickOnLabel = false) {
+      if (clickOnLabel) {
+        // Update cascaderItems through v-model will have a display issue
+        // Click the associated checkbox programmatically
+        const cascaderNodeLabel = value.srcElement.parentElement
+        const cascaderNode = cascaderNodeLabel.parentElement
+        const cascaderCheckbox = cascaderNode.querySelector('.el-checkbox')
+        cascaderCheckbox.click()
+      } else {
+        const currentCascader = value.flat(2)
+        let changedCascader = []
+        const removed = this.previousCascader.filter((pItem) => !currentCascader.includes(pItem))
+        const added = currentCascader.filter((cItem) => !this.previousCascader.includes(cItem))
+        removed.forEach((item) => {
+          changedCascader.push({ key: item, value: false })
+        })
+        added.forEach((item) => {
+          changedCascader.push({ key: item, value: true })
+        })
+        this.$emit('changed', changedCascader)
+        this.previousCascader = currentCascader
+      }
     },
     /**
      * Function to toggle paths to default.
@@ -491,7 +497,8 @@ export default {
   padding: 0 0 18px 18px;
 }
 
-.cascader-popper {
+
+.cascader-popper, .el-cascader__collapse-tag {
   font-family: $font-family;
   width: 300px;
 
