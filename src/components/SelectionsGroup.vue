@@ -519,7 +519,6 @@ export default {
 <style lang="scss">
 .el-cascader,
 .el-cascader__tags {
-  font-family: $font-family;
   padding: 0 0 18px 18px;
 }
 
