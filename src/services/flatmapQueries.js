@@ -393,6 +393,122 @@ let FlatmapQueries = function () {
   this.stripPMIDPrefix = function (pubmedId) {
     return pubmedId.split(':')[1]
   }
+  
+  this.getPMID = function(idsList) {
+    return new Promise((resolve) => {
+      if (idsList.length > 0) {
+        //Muliple term search does not work well,
+        //DOIs term get splitted unexpectedly
+        //
+        const promises = []
+        const results = []
+        idsList.forEach((id) => {
+          const wrapped = '"' + id + '"'
+          const params = new URLSearchParams({
+            db: 'pubmed',
+            term: wrapped,
+            format: 'json'
+          })
+          const promise = fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?${params}`, {
+            method: 'GET',
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            const newIds = data.esearchresult ? data.esearchresult.idlist : []
+            results.push(...newIds)
+          })
+          promises.push(promise)
+        })
+        
+        Promise.all(promises).then(() => {
+          resolve(results)
+        }).catch(() => {
+          resolve(results)
+        })
+      } else {
+        resolve([])
+      }
+    })
+  }
+
+  this.convertPublicationIds = function (ids) {
+    return new Promise((resolve) => {
+      const pmids = []
+      const toBeConverted = []
+      ids.forEach((id) => {
+        if (id.type === "pmid") {
+          pmids.push(id.id)
+        } else if (id.type === "doi" || id.type === "pmc") {
+          toBeConverted.push(id.id)
+        }
+      })
+      this.getPMID(toBeConverted).then((idList) => {
+        pmids.push(...idList)
+        resolve(pmids)
+      })
+      .catch(() => {
+        resolve(pmids)
+      })
+    })
+  } 
+
+  this.extractPublicationIdFromURLString = function (urlStr) {
+    if (!urlStr) return
+
+    const str = decodeURIComponent(urlStr)
+
+    let term = {id: '', type: ''}
+
+    const names = [
+      'doi.org/',
+      'nih.gov/pubmed/',
+      'pmc/articles/',
+      'pubmed.ncbi.nlm.nih.gov/',
+    ]
+
+    names.forEach((name) => {
+      const lastIndex = str.lastIndexOf(name)
+      if (lastIndex !== -1) {
+        term.id = str.slice(lastIndex + name.length)
+        if (name === 'doi.org/') {
+          term.type = "doi"
+        } else if (name === 'pmc/articles/') {
+          term.type = "pmc"
+        } else {
+          term.type = "pmid"
+        }
+      }
+    })
+
+    //Backward compatability with doi: and PMID:
+    if (term.id === '') {
+      if (urlStr.includes("doi:")) {
+        term.id = this.stripPMIDPrefix(urlStr)
+        term.type = "doi"
+      } else if (urlStr.includes("PMID:")) {
+        term.id = this.stripPMIDPrefix(urlStr)
+        term.type = "pmid"
+      }
+    }
+
+    if (term.id.endsWith('/')) {
+      term.id = term.id.slice(0, -1)
+    }
+
+    return term
+  }
+
+  this.getURLsForPubMed = function (data) {
+    return new Promise((resolve) => {
+      const ids = data.values.map((id) => this.extractPublicationIdFromURLString(id[0]))
+      this.convertPublicationIds(ids).then((pmids) => {
+        if (pmids.length > 0) {
+          const transformedIDs = pmids.join()
+          resolve([this.pubmedSearchUrl(transformedIDs)])
+        }
+      })
+    })
+  }
 
   this.buildPubmedSqlStatement = function (keastIds) {
     let sql = 'select distinct publication from publications where entity in ('
@@ -434,12 +550,14 @@ let FlatmapQueries = function () {
       this.flatmapQuery(sql).then((data) => {
         // Create pubmed url on paths if we have them
         if (data.values.length > 0) {
-          this.urls = [
-            this.pubmedSearchUrl(
-              data.values.map((id) => this.stripPMIDPrefix(id[0]))
-            ),
-          ]
-          resolve(true)
+           this.getURLsForPubMed(data).then((urls) => {
+            this.urls = urls
+            resolve(true)
+          })
+          .catch(() => {
+            this.urls = []
+            resolve(false)
+          })
         } else {
           // Create pubmed url on models
           this.pubmedQueryOnModels(source).then((result) => {
@@ -455,12 +573,14 @@ let FlatmapQueries = function () {
       this.buildPubmedSqlStatementForModels(source)
     ).then((data) => {
       if (Array.isArray(data.values) && data.values.length > 0) {
-        this.urls = [
-          this.pubmedSearchUrl(
-            data.values.map((id) => this.stripPMIDPrefix(id[0]))
-          ),
-        ]
-        return true
+        this.getURLsForPubMed(data).then((urls) => {
+          this.urls = urls
+          return true
+        })
+        .catch(() => {
+          this.urls = []
+          return false
+        })
       } else {
         this.urls = [] // Clears the pubmed search button
       }
@@ -471,8 +591,7 @@ let FlatmapQueries = function () {
   this.pubmedSearchUrl = function (ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
-    const decodedIDs = ids.map((id) => decodeURIComponent(id));
-    params.append('term', decodedIDs);
+    params.append('term', ids)
     return url + params.toString()
   }
 }
