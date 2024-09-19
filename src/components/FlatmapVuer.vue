@@ -2246,12 +2246,12 @@ export default {
             identifier = { uuid: state.uuid }
           } else if (state.entry) {
             identifier.taxon = state.entry
-            if (state.biologicalSex) {
-              identifier['biologicalSex'] = state.biologicalSex
-            } else if (identifier.taxon === 'NCBITaxon:9606') {
-              //For backward compatibility
-              identifier['biologicalSex'] = 'PATO:0000384'
-            }
+          }
+          if (state.biologicalSex) {
+              identifier['biologicalSex'] = state.biologicalSex;
+          } else if (identifier.taxon === 'NCBITaxon:9606') {
+            //For backward compatibility
+            identifier['biologicalSex'] = 'PATO:0000384';
           }
         } else {
           // Set the bioloicalSex now if map is not resumed from
