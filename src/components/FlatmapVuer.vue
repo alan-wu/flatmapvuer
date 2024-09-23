@@ -2027,7 +2027,10 @@ export default {
       // Tooltip will be shown for Annotation view
       if (
         !this.disableUI && (
-          this.viewingMode === 'Annotation' ||
+          (
+            this.viewingMode === 'Annotation' &&
+            this.userInformation
+          ) ||
           (
             this.viewingMode === 'Exploration' &&
             !this.connectivityInfoSidebar &&
@@ -2807,7 +2810,7 @@ export default {
       if (mode === 'Annotation') {
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
-          if (userData.name && userData.email) {
+          if (userData.name && userData.email && userData.canUpdate) {
             this.showAnnotator(true)
             this.userInformation = userData
             this.setFeatureAnnotated()
