@@ -102,13 +102,34 @@
         clearable
         @change="handleCascaderItemsChange"
       >
-        <template #default="{ node, data }">
-          <span
-            @mouseenter="checkboxMouseEnterEmit(data.value, true)"
-            @mouseleave="checkboxMouseEnterEmit(data.value, false)"
+        <template #default="{ node, data }" >
+          <el-popover
+            :visible="tooltipVisible && data.label === tooltipLabel"
+            placement="top"
+            :show-arrow="false"
+            trigger="hover"
+            popper-class="cascader-tooltip-popper"
+            :content="tooltipLabel"
+            :width="260"
           >
-            {{ data[labelKey] }}
-          </span>
+            <template #reference>
+              <div
+                @mouseenter="displayTooltip(data[labelKey], true, $event)"
+                @mouseleave="displayTooltip('', false, $event)"
+                @click="handleCascaderItemsChange($event, true)"
+              >
+                <div class="checkbox-row">
+                  <div
+                    class="selection-checkbox-label"
+                    @mouseenter="checkboxMouseEnterEmit(data.value, true)"
+                    @mouseleave="checkboxMouseEnterEmit(data.value, false)"
+                  >
+                    {{ data[labelKey] }}
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-popover>
         </template>
       </el-cascader>
     </div>
@@ -116,6 +137,13 @@
 </template>
 
 <script>
+const getParentElement = (element, className) => {
+  if (element.classList.contains(className)) {
+    return element
+  }
+  return getParentElement(element.parentElement, className)
+}
+
 /* eslint-disable no-alert, no-console */
 import {
   Warning as ElIconWarning,
@@ -144,23 +172,27 @@ export default {
     cascaderFilterMethod: function (node, keyword) {
       return node.label.toLowerCase().indexOf(keyword.toLowerCase()) !== -1
     },
-    processCascaderItems: function (currentCascader) {
-      let changed = []
-      const removed = this.previousCascader.filter((pItem) => !currentCascader.includes(pItem))
-      const added = currentCascader.filter((cItem) => !this.previousCascader.includes(cItem))
-      removed.forEach((item) => {
-        changed.push({ key: item, value: false })
-      })
-      added.forEach((item) => {
-        changed.push({ key: item, value: true })
-      })
-      return changed
-    },
-    handleCascaderItemsChange: function (value) {
-      const items = value.flat(2)
-      const changedCascader = this.processCascaderItems(items)
-      this.$emit('changed', changedCascader)
-      this.previousCascader = items
+    handleCascaderItemsChange: function (value, clickOnLabel = false) {
+      if (clickOnLabel) {
+        // Update cascaderItems through v-model will have a display issue
+        // Click the associated checkbox programmatically
+        const cascaderNode = getParentElement(value.srcElement, 'el-cascader-node')
+        const cascaderCheckbox = cascaderNode.querySelector('.el-checkbox')
+        cascaderCheckbox.click()
+      } else {
+        const currentCascader = value.flat(2)
+        let changedCascader = []
+        const removed = this.previousCascader.filter((pItem) => !currentCascader.includes(pItem))
+        const added = currentCascader.filter((cItem) => !this.previousCascader.includes(cItem))
+        removed.forEach((item) => {
+          changedCascader.push({ key: item, value: false })
+        })
+        added.forEach((item) => {
+          changedCascader.push({ key: item, value: true })
+        })
+        this.$emit('changed', changedCascader)
+        this.previousCascader = currentCascader
+      }
     },
     /**
      * Function to toggle paths to default.
@@ -228,7 +260,6 @@ export default {
       // Update the stated to send to the emit
       this.$emit('checkboxMouseEnter', { key: key, value: value, selections: this.selections, checked: this.checkedItems})
     },
-
     handleCheckedItemsChange: function (value) {
       let checkedCount = value.length
       this.checkAll = checkedCount === this.selections.length
@@ -491,17 +522,25 @@ export default {
   padding: 0 0 18px 18px;
 }
 
+.el-cascader__collapse-tag {
+  font-family: $font-family;
+}
+
 .cascader-popper {
   font-family: $font-family;
   width: 300px;
 
-  .el-cascader__suggestion-item.is-checked {
+  .el-cascader__suggestion-item {
     color: $app-primary-color;
+
+    &.is-checked {
+      min-height: 34px;
+      height: fit-content;
+    }
   }
 
   .el-cascader-menu__wrap.el-scrollbar__wrap {
-    max-width: fit-content;
-    height: 500px;
+    height: 450px;
   }
 
   .el-cascader-node {
@@ -522,5 +561,12 @@ export default {
       border-color: $app-primary-color;
     }
   }
+}
+
+.el-popper.el-popover.cascader-tooltip-popper {
+  text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  padding: 4px;
+  font-size: 12px;
 }
 </style>
