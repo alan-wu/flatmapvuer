@@ -54,7 +54,7 @@ let FlatmapQueries = function () {
     this.lookUp = []
   }
 
-  this.createTooltipData = async function (eventData) {
+  this.createTooltipData = async function (mapImp, eventData) {
     let hyperlinks = []
     if (
       eventData.feature.hyperlinks &&
@@ -68,12 +68,14 @@ let FlatmapQueries = function () {
     if (eventData.provenanceTaxonomy) {
       taxonomyLabel = []
       for (let i = 0; eventData.provenanceTaxonomy.length > i; i++) {
-        taxonomyLabel.push(
-          await findTaxonomyLabel(
-            this.flatmapAPI,
-            eventData.provenanceTaxonomy[i]
-          )
-        )
+        const taxon = eventData.provenanceTaxonomy[i];
+        mapImp.queryLabels(taxon).then((entityLabels) => {
+          const entityLabel = entityLabels[0];
+          if (entityLabel) {
+            const value = entityLabel.label;
+            taxonomyLabel.push(value);
+          }
+        });
       }
     }
 
@@ -393,7 +395,7 @@ let FlatmapQueries = function () {
   this.stripPMIDPrefix = function (pubmedId) {
     return pubmedId.split(':')[1]
   }
-  
+
   this.getPMID = function(idsList) {
     return new Promise((resolve) => {
       if (idsList.length > 0) {
@@ -419,7 +421,7 @@ let FlatmapQueries = function () {
           })
           promises.push(promise)
         })
-        
+
         Promise.all(promises).then(() => {
           resolve(results)
         }).catch(() => {
@@ -450,7 +452,7 @@ let FlatmapQueries = function () {
         resolve(pmids)
       })
     })
-  } 
+  }
 
   this.extractPublicationIdFromURLString = function (urlStr) {
     if (!urlStr) return

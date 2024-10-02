@@ -1178,10 +1178,14 @@ export default {
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
       taxonIdentifiers.forEach((taxon) => {
-        findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-          const item = { taxon, label: value }
-          this.taxonConnectivity.push(item)
-        })
+        this.mapImp.queryLabels(taxon).then((entityLabels) => {
+          const entityLabel = entityLabels[0];
+          if (entityLabel) {
+            const value = entityLabel.label;
+            const item = { taxon, label: value };
+            this.taxonConnectivity.push(item);
+          }
+        });
       })
     },
     /**
@@ -1804,7 +1808,7 @@ export default {
      * @arg data
      */
     createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
       this.displayTooltip(data.resource[0])
     },
     /**
