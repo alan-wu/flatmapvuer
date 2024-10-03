@@ -67,14 +67,13 @@ let FlatmapQueries = function () {
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
       taxonomyLabel = []
-      mapImp.queryLabels(eventData.provenanceTaxonomy).then((entityLabels) => {
-        if (entityLabels.length) {
-          entityLabels.forEach((entityLabel) => {
-            const { label } = entityLabel;
-            taxonomyLabel.push(label);
-          });
-        }
-      });
+      const entityLabels = await mapImp.queryLabels(eventData.provenanceTaxonomy);
+      if (entityLabels.length) {
+        entityLabels.forEach((entityLabel) => {
+          const { label } = entityLabel;
+          taxonomyLabel.push(label);
+        });
+      }
     }
 
     let tooltipData = {
