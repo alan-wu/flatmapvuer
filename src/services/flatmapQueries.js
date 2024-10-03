@@ -136,33 +136,22 @@ let FlatmapQueries = function () {
     return labelList
   }
 
-  this.createLabelLookup = function (uberons) {
-    return new Promise((resolve) => {
+  this.createLabelLookup = function (mapImp, uberons) {
+    return new Promise(async (resolve) => {
       let uberonMap = {}
       this.uberons = []
-      const data = { sql: this.buildLabelSqlStatement(uberons) }
-      fetch(`${this.flatmapApi}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((payload) => {
-          const entity = payload.keys.indexOf('entity')
-          const label = payload.keys.indexOf('label')
-          if (entity > -1 && label > -1) {
-            payload.values.forEach((pair) => {
-              uberonMap[pair[entity]] = pair[label]
-              this.uberons.push({
-                id: pair[entity],
-                name: pair[label],
-              })
-            })
-          }
-          resolve(uberonMap)
-        })
+      const entityLabels = await findTaxonomyLabels(mapImp, uberons);
+      if (entityLabels.length) {
+        entityLabels.forEach((entityLabel) => {
+          const { taxon: entity, label } = entityLabel;
+          uberonMap[entity] = label;
+          this.uberons.push({
+            id: entity,
+            name: label,
+          })
+        });
+        resolve(uberonMap)
+      }
     })
   }
 
@@ -241,7 +230,7 @@ let FlatmapQueries = function () {
     return found
   }
 
-  this.retrieveFlatmapKnowledgeForEvent = async function (eventData) {
+  this.retrieveFlatmapKnowledgeForEvent = async function (mapImp, eventData) {
     // check if there is an existing query
     if (this.controller) this.controller.abort()
 
@@ -255,13 +244,13 @@ let FlatmapQueries = function () {
     this.components = []
     if (!keastIds || keastIds.length == 0) return
 
-    let prom1 = this.queryForConnectivity(keastIds, signal) // This on returns a promise so dont need 'await'
+    let prom1 = this.queryForConnectivity(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
     let prom2 = await this.pubmedQueryOnIds(eventData)
     let results = await Promise.all([prom1, prom2])
     return results
   }
 
-  this.queryForConnectivity = function (keastIds, signal, processConnectivity=true) {
+  this.queryForConnectivity = function (mapImp, keastIds, signal, processConnectivity=true) {
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
     const headers = {
       method: 'POST',
@@ -278,7 +267,7 @@ let FlatmapQueries = function () {
           if (this.connectivityExists(data)) {
             let connectivity = JSON.parse(data.values[0][0])
             if (processConnectivity) {
-              this.processConnectivity(connectivity).then((processedConnectivity) => {
+              this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
                 resolve(processedConnectivity)
               })
             }
@@ -368,7 +357,7 @@ let FlatmapQueries = function () {
     )
   }
 
-  this.processConnectivity = function (connectivity) {
+  this.processConnectivity = function (mapImp, connectivity) {
     return new Promise((resolve) => {
       // Filter the origin and destinations from components
       let components = this.findComponents(connectivity)
@@ -381,7 +370,7 @@ let FlatmapQueries = function () {
       let conIds = this.findAllIdsFromConnectivity(connectivity)
 
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
-      this.createLabelLookup(conIds).then((lookUp) => {
+      this.createLabelLookup(mapImp, conIds).then((lookUp) => {
         this.destinations = axons.map((a) =>
           this.createLabelFromNeuralNode(a, lookUp)
         )

@@ -1313,7 +1313,7 @@ export default {
         let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
 
         // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivity(payload)
+        let connectivity = await this.flatmapQueries.queryForConnectivity(this.mapImp, payload)
 
         // Check and flatten the origins node graph
         let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
@@ -1756,7 +1756,7 @@ export default {
         }
       } else {
         let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // The line below only creates the tooltip if some data was found on the path
         // result 0 is the connection, result 1 is the pubmed results from flatmap
         if (
