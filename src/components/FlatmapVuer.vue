@@ -378,7 +378,7 @@ Please use `const` to assign meaningful names to them...
                 v-if="taxonConnectivity && taxonConnectivity.length > 0"
                 title="Studied in"
                 labelKey="label"
-                identifierKey="taxon"
+                identifierKey="entity"
                 helpMessage="Evidence exists that this set of neuron populations have been studied in the given species."
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
@@ -389,11 +389,10 @@ Please use `const` to assign meaningful names to them...
                 key="taxonSelection"
               />
               <selections-group
-                v-if="!(isCentreLine || isFC) && (centreLines && centreLines.length > 0 || nerves && nerves.length > 0)"
+                v-if="!isFC && (nerves && nerves.length > 0)"
                 title="Nerves"
                 labelKey="label"
                 identifierKey="key"
-                :selections="centreLines"
                 :options="nerves"
                 @changed="nervesSelected"
                 @checkboxMouseEnter="nerveMouseEnterEmitted"
@@ -659,7 +658,6 @@ import {
 import flatmapMarker from '../icons/flatmap-marker'
 import {
   FlatmapQueries,
-  findTaxonomyLabel,
 } from '../services/flatmapQueries.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -1177,11 +1175,10 @@ export default {
      * @arg flatmapAPI,
      * @arg taxonIdentifiers
      */
-    processTaxon: function (flatmapAPI, taxonIdentifiers) {
+    processTaxon: function (mapImp, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
-      taxonIdentifiers.forEach((taxon) => {
-        findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-          const item = { taxon, label: value }
+      mapImp.queryLabels(taxonIdentifiers).then((data) => {
+        data.forEach((item) => {
           this.taxonConnectivity.push(item)
         })
       })
@@ -1201,7 +1198,6 @@ export default {
               uniques[nerve.label] = []
             }
             uniques[nerve.label].push({
-              id: nerve.id,
               models: nerve.models,
             })
           }
@@ -1209,9 +1205,9 @@ export default {
         for (const [key, value] of Object.entries(uniques)) {
           this.nerves.push({
             value: key,
-            key: value.map(v => v.id),
+            key: value.map(v => v.models),
             label: key.charAt(0).toUpperCase() + key.slice(1),
-            enabled: false,
+            enabled: true,
             model: [...new Set(value.map(v => v.models))],
           })
         }
@@ -1294,22 +1290,35 @@ export default {
       }
     },
     nerveMouseEnterEmitted: function (payload) {
+      console.log(payload)
       if (this.mapImp) {
+        const keys = []
         this.nerves.forEach((nerve) => {
           if (nerve.value === payload.key) {
-            nerve.key.forEach((key) => {
-              this.mapImp.enableNeuronPathsByNerve(key, payload.value)
-            })
-            if (payload.value) {
-              nerve.model.forEach((model) => {
-                const gid = this.mapImp.modelFeatureIds(model)
-                this.mapImp.zoomToGeoJSONFeatures(gid, { noZoomIn: true })
-              })
-            } else {
-              this.mapImp.unselectGeoJSONFeatures()
-            }
+            keys.push(...nerve.key)
           }
         })
+        this.mapImp.enableNeuronPathsByNerve(keys, payload.value)
+        if (payload.value) {
+          keys.forEach((key) => {
+            const gid = this.mapImp.modelFeatureIds(key)
+            console.log(gid)
+            this.mapImp.zoomToGeoJSONFeatures(gid, { noZoomIn: true })
+          })
+        } else {
+          if (payload.cascaderItems.length > 0) {
+            const on = []
+            this.nerves.forEach((nerve) => {
+              payload.cascaderItems.forEach((item) => {
+                if (nerve.value === item[0]) {
+                  on.push(...nerve.key)
+                }
+              })
+            })
+            this.mapImp.enableNeuronPathsByNerve(on, true)
+          }
+          this.mapImp.unselectGeoJSONFeatures()
+        }
       }
     },
     /**
@@ -1320,19 +1329,21 @@ export default {
      */
     nervesSelected: function (payload) {
       if (this.mapImp) {
-        if (payload.key === 'centrelines') {
-          this.mapImp.enableCentrelines(payload.value)
-        } else {
-          this.nerves.forEach((nerve) => {
-            payload.forEach((item) => {
-              if (nerve.value === item.key) {
-                nerve.key.forEach((key) => {
-                  this.mapImp.enableNeuronPathsByNerve(key, item.value)
-                })
+        const on = []
+        const off = []
+        this.nerves.forEach((nerve) => {
+          payload.forEach((item) => {
+            if (nerve.value === item.key) {
+              if (item.value) {
+                on.push(...nerve.key)
+              } else {
+                off.push(...nerve.key)
               }
-            })
+            }
           })
-        }
+        })
+        if (on.length > 0) this.mapImp.enableNeuronPathsByNerve(on, true)
+        if (off.length > 0) this.mapImp.enableNeuronPathsByNerve(off, false)
       }
     },
     onSelectionsDataChanged: function (data) {
@@ -2405,13 +2416,10 @@ export default {
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      if (!this.isCentreLine) {
-        this.mapImp.enableCentrelines(false)
-      }
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
-      this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      this.processTaxon(this.mapImp, this.mapImp.taxonIdentifiers)
       this.processNerves(this.mapImp.getNerveDetails())
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
@@ -2726,13 +2734,6 @@ export default {
         {
           label: 'Display Path with SCKAN',
           key: 'VALID',
-        },
-      ],
-      centreLines: [
-        {
-          label: 'Display Nerves',
-          key: 'centrelines',
-          enabled: false,
         },
       ],
       systems: [],

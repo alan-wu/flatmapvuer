@@ -201,11 +201,18 @@ export default {
     reset: function () {
       this.checkAll = true
       this.checkedItems = []
+      this.cascaderItems = []
       this.selections.forEach((item) => {
         if (!('enabled' in item) || item.enabled === true) {
           this.checkedItems.push(item[this.identifierKey])
         } else {
           this.checkAll = false
+        }
+      })
+      this.options.forEach((item) => {
+        if (!('enabled' in item) || item.enabled === true) {
+          this.cascaderItems.push(item[this.labelKey])
+          this.previousCascader.push(item[this.labelKey])
         }
       })
     },
@@ -258,7 +265,8 @@ export default {
     },
     checkboxMouseEnterEmit: function (key, value) {
       // Update the stated to send to the emit
-      this.$emit('checkboxMouseEnter', { key: key, value: value, selections: this.selections, checked: this.checkedItems})
+      this.$emit('checkboxMouseEnter', { key: key, value: value, selections: this.selections,
+        checked: this.checkedItems, cascaderItems: this.cascaderItems})
     },
     handleCheckedItemsChange: function (value) {
       let checkedCount = value.length
