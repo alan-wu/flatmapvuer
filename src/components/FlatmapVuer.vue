@@ -657,7 +657,7 @@ import {
 import flatmapMarker from '../icons/flatmap-marker'
 import {
   FlatmapQueries,
-  findTaxonomyLabel,
+  findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -1177,12 +1177,10 @@ export default {
      */
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
-      this.mapImp.queryLabels(taxonIdentifiers).then((entityLabels) => {
+      findTaxonomyLabels(this.mapImp, taxonIdentifiers).then((entityLabels) => {
         if (entityLabels.length) {
           entityLabels.forEach((entityLabel) => {
-            const { entity: taxon, label } = entityLabel;
-            const item = { taxon, label };
-            this.taxonConnectivity.push(item);
+            this.taxonConnectivity.push(entityLabel);
           });
         }
       });

@@ -8,6 +8,7 @@ const removeDuplicates = function (arrayOfAnything) {
 }
 
 const cachedLabels = {}
+const cachedTaxonLabels = [];
 
 const findTaxonomyLabel = async function (flatmapAPI, taxonomy) {
   if (cachedLabels && cachedLabels.hasOwnProperty(taxonomy)) {
@@ -33,6 +34,38 @@ const findTaxonomyLabel = async function (flatmapAPI, taxonomy) {
         resolve(taxonomy)
       })
   })
+}
+
+const findTaxonomyLabels = async function (mapImp, taxonomies) {
+  const intersectionTaxonomies = taxonomies.filter((taxonomy) =>
+    cachedTaxonLabels.some((obj) => obj.taxon === taxonomy)
+  );
+
+  const foundCachedTaxonLabels = cachedTaxonLabels.filter((obj) =>
+    intersectionTaxonomies.includes(obj.taxon)
+  );
+
+  const leftoverTaxonomies = taxonomies.filter((taxonomy) =>
+    !intersectionTaxonomies.includes(taxonomy)
+  );
+
+  if (!leftoverTaxonomies.length) {
+    return foundCachedTaxonLabels;
+  } else {
+    const entityLabels = await mapImp.queryLabels(leftoverTaxonomies);
+    if (entityLabels.length) {
+      entityLabels.forEach((entityLabel) => {
+        let { entity: taxon, label } = entityLabel;
+        if (label === 'Mammalia') {
+          label = 'Mammalia not otherwise specified'
+        }
+        const item = { taxon, label };
+        foundCachedTaxonLabels.push(item);
+        cachedTaxonLabels.push(item);
+      });
+      return foundCachedTaxonLabels;
+    }
+  }
 }
 
 const inArray = function (ar1, ar2) {
@@ -67,7 +100,7 @@ let FlatmapQueries = function () {
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
       taxonomyLabel = []
-      const entityLabels = await mapImp.queryLabels(eventData.provenanceTaxonomy);
+      const entityLabels = await findTaxonomyLabels(mapImp, eventData.provenanceTaxonomy);
       if (entityLabels.length) {
         entityLabels.forEach((entityLabel) => {
           const { label } = entityLabel;
@@ -595,4 +628,4 @@ let FlatmapQueries = function () {
   }
 }
 
-export { FlatmapQueries, findTaxonomyLabel }
+export { FlatmapQueries, findTaxonomyLabel, findTaxonomyLabels }
