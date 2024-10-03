@@ -1177,16 +1177,15 @@ export default {
      */
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
-      taxonIdentifiers.forEach((taxon) => {
-        this.mapImp.queryLabels(taxon).then((entityLabels) => {
-          const entityLabel = entityLabels[0];
-          if (entityLabel) {
-            const value = entityLabel.label;
-            const item = { taxon, label: value };
+      this.mapImp.queryLabels(taxonIdentifiers).then((entityLabels) => {
+        if (entityLabels.length) {
+          entityLabels.forEach((entityLabel) => {
+            const { entity: taxon, label } = entityLabel;
+            const item = { taxon, label };
             this.taxonConnectivity.push(item);
-          }
-        });
-      })
+          });
+        }
+      });
     },
     /**
      * @vuese

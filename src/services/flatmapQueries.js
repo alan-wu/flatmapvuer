@@ -67,16 +67,14 @@ let FlatmapQueries = function () {
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
       taxonomyLabel = []
-      for (let i = 0; eventData.provenanceTaxonomy.length > i; i++) {
-        const taxon = eventData.provenanceTaxonomy[i];
-        mapImp.queryLabels(taxon).then((entityLabels) => {
-          const entityLabel = entityLabels[0];
-          if (entityLabel) {
-            const value = entityLabel.label;
-            taxonomyLabel.push(value);
-          }
-        });
-      }
+      mapImp.queryLabels(eventData.provenanceTaxonomy).then((entityLabels) => {
+        if (entityLabels.length) {
+          entityLabels.forEach((entityLabel) => {
+            const { label } = entityLabel;
+            taxonomyLabel.push(label);
+          });
+        }
+      });
     }
 
     let tooltipData = {
