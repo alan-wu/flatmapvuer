@@ -211,7 +211,7 @@ export default {
       })
       this.options.forEach((item) => {
         if (!('enabled' in item) || item.enabled === true) {
-          this.cascaderItems.push(item[this.labelKey])
+          this.cascaderItems.push([item[this.labelKey]])
           this.previousCascader.push(item[this.labelKey])
         }
       })
