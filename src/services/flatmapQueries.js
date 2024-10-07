@@ -244,10 +244,43 @@ let FlatmapQueries = function () {
     this.components = []
     if (!keastIds || keastIds.length == 0) return
 
-    let prom1 = this.queryForConnectivity(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
-    let prom2 = await this.pubmedQueryOnIds(eventData)
-    let results = await Promise.all([prom1, prom2])
+    let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
+    // let prom2 = await this.pubmedQueryOnIds(eventData)
+    let results = await Promise.all([prom1])
     return results
+  }
+
+  this.queryForConnectivityNew = function (mapImp, keastIds, signal, processConnectivity=true) {
+    return new Promise((resolve) => {
+      mapImp.queryKnowledge(keastIds[0])
+        .then((response) => {
+          if (this.checkConnectivityExists(response)) {
+            let connectivity = response;
+            if (processConnectivity) {
+              this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
+                // publications
+                if (response.references) {
+                  this.getURLsForPubMed(response.references).then((urls) => {
+                    this.urls = urls;
+                  });
+                }
+                resolve(processedConnectivity)
+              })
+            }
+            else resolve(connectivity)
+          } else {
+            resolve(false)
+          }
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') {
+            // This error is from AbortController's abort method.
+          } else {
+            console.error('Error:', error)
+          }
+          resolve(false)
+        })
+    })
   }
 
   this.queryForConnectivity = function (mapImp, keastIds, signal, processConnectivity=true) {
@@ -286,6 +319,10 @@ let FlatmapQueries = function () {
         })
     })
   }
+
+  this.checkConnectivityExists = function (data) {
+    return data && data.connectivity?.length;
+  };
 
   this.connectivityExists = function (data) {
     if (
@@ -521,7 +558,11 @@ let FlatmapQueries = function () {
 
   this.getURLsForPubMed = function (data) {
     return new Promise((resolve) => {
-      const ids = data.values.map((id) => this.extractPublicationIdFromURLString(id[0]))
+      const ids = data.map((id) =>
+        (typeof id === 'object') ?
+        this.extractPublicationIdFromURLString(id[0]) :
+        this.extractPublicationIdFromURLString(id)
+      )
       this.convertPublicationIds(ids).then((pmids) => {
         if (pmids.length > 0) {
           const transformedIDs = pmids.join()
@@ -571,7 +612,7 @@ let FlatmapQueries = function () {
       this.flatmapQuery(sql).then((data) => {
         // Create pubmed url on paths if we have them
         if (data.values.length > 0) {
-           this.getURLsForPubMed(data).then((urls) => {
+           this.getURLsForPubMed(data.values).then((urls) => {
             this.urls = urls
             resolve(true)
           })
@@ -594,7 +635,7 @@ let FlatmapQueries = function () {
       this.buildPubmedSqlStatementForModels(source)
     ).then((data) => {
       if (Array.isArray(data.values) && data.values.length > 0) {
-        this.getURLsForPubMed(data).then((urls) => {
+        this.getURLsForPubMed(data.values).then((urls) => {
           this.urls = urls
           return true
         })
