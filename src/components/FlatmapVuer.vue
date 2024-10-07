@@ -1313,7 +1313,7 @@ export default {
         let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
 
         // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivity(this.mapImp, payload)
+        let connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
 
         // Check and flatten the origins node graph
         let originsFlat = connectivity?.ids?.dendrites?.flat().flat()

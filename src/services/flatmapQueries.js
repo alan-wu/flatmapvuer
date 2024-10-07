@@ -242,6 +242,7 @@ let FlatmapQueries = function () {
     this.destinations = []
     this.origins = []
     this.components = []
+    this.urls = []
     if (!keastIds || keastIds.length == 0) return
 
     let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
@@ -258,13 +259,19 @@ let FlatmapQueries = function () {
             let connectivity = response;
             if (processConnectivity) {
               this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
-                // publications
                 if (response.references) {
+                  // with publications
                   this.getURLsForPubMed(response.references).then((urls) => {
+                    // TODO: if empty urls array is returned,
+                    // the urls are not on PubMed.
+                    // Those urls, response.references, will be shown in another way.
                     this.urls = urls;
-                  });
+                    resolve(processedConnectivity)
+                  })
+                } else {
+                  // without publications
+                  resolve(processedConnectivity)
                 }
-                resolve(processedConnectivity)
               })
             }
             else resolve(connectivity)
@@ -567,6 +574,9 @@ let FlatmapQueries = function () {
         if (pmids.length > 0) {
           const transformedIDs = pmids.join()
           resolve([this.pubmedSearchUrl(transformedIDs)])
+        } else {
+          // return empty array for non-pubmed urls
+          resolve(pmids)
         }
       })
     })
