@@ -1269,7 +1269,7 @@ export default {
      * @arg payload
      */
     centreLinesSelected: function (payload) {
-      if (this.mapImp) {
+      if (this.mapImp && this.mapImp.enableCentrelines) {
         this.mapImp.enableCentrelines(payload.value)
       }
     },
@@ -2347,7 +2347,7 @@ export default {
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      if (!this.isCentreLine) {
+      if (!this.isCentreLine && this.mapImp.enableCentrelines) {
         this.mapImp.enableCentrelines(false)
       }
       //Disable layers for now
