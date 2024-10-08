@@ -195,8 +195,12 @@ export default {
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
     },
-    onFlatmapChanged: function () {
+    onFlatmapChanged: function (activeSpecies) {
       this.helpMode = false;
+      // Update current flatmapImp after changing species
+      if (this.$refs.multi.$refs[activeSpecies][0].mapImp) {
+        window.flatmapImp = this.$refs.multi.$refs[activeSpecies][0].mapImp;
+      }
     },
     onHelpModeShowNext: function () {
       this.helpModeActiveItem += 1;
