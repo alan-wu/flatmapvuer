@@ -56,7 +56,6 @@
     "vue": "^3.4.15"
   },
   "devDependencies": {
-    "@cypress/webpack-dev-server": "^3.6.1",
     "@vitejs/plugin-vue": "^4.6.2",
     "@vuese/markdown-render": "^2.11.3",
     "auto-changelog": "^2.4.0",
