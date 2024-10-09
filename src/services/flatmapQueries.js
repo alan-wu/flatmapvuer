@@ -285,7 +285,9 @@ let FlatmapQueries = function () {
           if (error.name === 'AbortError') {
             // This error is from AbortController's abort method.
           } else {
-            console.error('Error:', error)
+            // console.error('Error:', error)
+            // TODO: to update after queryKnowledge method update
+            console.warn(`Unable to get the knowledge for the entity ${keastIds[0]}.`)
           }
           resolve(false)
         })
