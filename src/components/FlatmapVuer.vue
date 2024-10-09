@@ -422,13 +422,14 @@ Please use `const` to assign meaningful names to them...
         virtual-triggering
       >
         <el-row v-for="item in openMapOptions" :key="item.key">
+          <!--
+            This event is emitted when the user chooses a different map option
+            from ``openMapOptions`` props.
+            @event open-map
+            @arg {String} `mapOption.key`
+          -->
           <el-button type="primary" plain
-            @click="/**
-             * This event is emitted when the user chooses a different map option
-             * from ``openMapOptions`` props.
-             * @arg mapOption.key
-            * */
-            $emit('open-map', item.key)"
+            @click="$emit('open-map', item.key)"
           >
             {{ item.display }}
           </el-button>
@@ -788,7 +789,7 @@ export default {
   },
   methods: {
     /**
-     * @vuese
+     * @public
      * Function to initialise drawing.
      */
     initialiseDrawing: function () {
@@ -798,7 +799,7 @@ export default {
       this.drawnCreatedEvent = {}
     },
     /**
-     * @vuese
+     * @public
      * Function to cancel a newly drawn feature.
      */
     cancelDrawnFeature: function () {
@@ -813,9 +814,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display connected features' tooltip for drawn connectivity.
-     * @arg id
+     * @param {String} `id`
      */
     connectedFeatureTooltip: function (value) {
       if (this.mapImp) {
@@ -838,7 +839,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to confirm a newly drawn feature.
      */
     confirmDrawnFeature: function () {
@@ -854,9 +855,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to process the annotation toolbar click events.
-     * @arg type
+     * @arg {String} `type`
+     * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
       this.closeTooltip()
@@ -883,10 +885,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fire annotation event based on the provided ``data``.
      * Either edit or delete action.
-     * @arg data
+     * @arg {Object} `data`
      */
     annotationDrawModeEvent: function (data) {
       if (this.activeDrawMode === 'Edit') {
@@ -925,9 +927,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to update the annotation draw mode.
-     * @arg mode
+     * @arg {Object} `mode`
      */
     changeAnnotationDrawMode: function (mode) {
       if (this.mapImp) {
@@ -935,7 +937,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to remove all drawn annotations from flatmap annotation layer.
      */
     clearAnnotationFeature: function () {
@@ -947,7 +949,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fire the ``trash`` action.
      * See https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#trash-draw for more details.
      */
@@ -960,7 +962,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to rollback the failure drawn from flatmap annotation layer.
      */
     rollbackAnnotationEvent: function () {
@@ -974,9 +976,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to commit the emitted ``annotation`` data from successful new drawn to flatmap annotation layer.
-     * @arg annotation
+     * @arg {Object} `annotation`
      */
     commitAnnotationEvent: function (annotation) {
       if (
@@ -997,10 +999,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fetch annotated item id.
-     * @arg userId,
-     * @arg participated
+     * @arg {String} `userId`,
+     * @arg {String} `participated`
      */
     fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
       let annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
@@ -1009,7 +1011,7 @@ export default {
       return annotatedItemIds
     },
     /**
-     * @vuese
+     * @public
      * Function to add existing drawn annotations to flatmap.
      */
     setFeatureAnnotated: async function () {
@@ -1021,10 +1023,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fetch drawn features.
-     * @arg userId,
-     * @arg participated
+     * @arg {String} `userId`,
+     * @arg {String} `participated`
      */
     fetchDrawnFeatures: async function (userId, participated) {
       const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
@@ -1040,7 +1042,7 @@ export default {
       return drawnFeatures
     },
     /**
-     * @vuese
+     * @public
      * Function to draw existing drawn annotations based on selector.
      */
     addAnnotationFeature: async function () {
@@ -1066,9 +1068,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display annotator toolbar.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     showAnnotator: function (flag) {
       if (this.mapImp) {
@@ -1079,9 +1081,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to switch the type of annotation.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setDrawnType: function (flag) {
       this.drawnType = flag
@@ -1091,9 +1093,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to switch the type of person who annotated.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setAnnotatedType: function (flag) {
       this.annotatedType = flag
@@ -1102,9 +1104,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to switch from 2D to 3D
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setFlightPath3D: function (flag) {
       this.flightPath3DRadio = flag
@@ -1113,7 +1115,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to view the latest map (example when you are on legacy map).
      */
     viewLatestMap: function () {
@@ -1133,10 +1135,10 @@ export default {
       this.$emit('view-latest-map', state)
     },
     /**
-     * @vuese
+     * @public
      * Function to change the background colour of the map
      * by providing the ``colour``.
-     * @arg colour
+     * @arg {String} `colour`
      */
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour
@@ -1145,9 +1147,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to process a list of a FC flatmap's systems.
-     * @arg systems
+     * @arg {Array} `systems`
      */
     processSystems: function (systems) {
       this.systems.length = 0
@@ -1169,11 +1171,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to add taxon identifiers into the taxon connectivity array,
      * by retrieving their corresponding labels using the flatmap API.
-     * @arg flatmapAPI,
-     * @arg taxonIdentifiers
+     * @arg {String} `flatmapAPI`,
+     * @arg {Array} `taxonIdentifiers`
      */
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
@@ -1186,17 +1188,17 @@ export default {
       });
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the display of the bottom-left drawer container.
      */
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle colour/greyscale of organs.
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setColour: function (flag) {
       this.colourRadio = flag
@@ -1205,10 +1207,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle outlines f organs.
      * The parameter ``flag`` is a boolean, ``true`` to show outlines, ``false`` to hide outlines.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setOutlines: function (flag) {
       this.outlineRadio = flag
@@ -1217,7 +1219,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle paths to default.
      * Also called when the associated button is pressed.
      */
@@ -1242,7 +1244,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to zoom in.
      * Also called when the associated button is pressed.
      */
@@ -1252,7 +1254,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to zoom out.
      * Also called when the associated button is pressed.
      */
@@ -1262,11 +1264,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide centrelines and nodes.
      * The parameter ``payload`` is an object with a boolean property, ``value``,
      * ``payload.value = true/false``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     centreLinesSelected: function (payload) {
       if (this.mapImp && this.mapImp.enableCentrelines) {
@@ -1300,10 +1302,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to highlight the connected paths
      * by providing path model identifier, ``pathId``.
-     * @arg pathId
+     * @arg {String} `pathId`
      */
     highlightConnectedPaths: async function (payload) {
       if (this.mapImp) {
@@ -1374,10 +1376,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable mouse enter and leave event for
      * alert checkbox
-     * @arg payload
+     * @arg {Object} `payload`
      */
     alertMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
@@ -1399,10 +1401,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) pathways with/without alert
      * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
      alertSelected: function (payload) {
       if (this.mapImp) {
@@ -1423,10 +1425,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) all alerts
      * option by providing ``flag`` (true/false).
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
      checkAllAlerts: function (payload) {
       if (this.mapImp) {
@@ -1441,10 +1443,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) the system
      * by providing ``kay, value`` ``payload`` object ``{systemId, true/false}``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     systemSelected: function (payload) {
       if (this.mapImp) {
@@ -1452,10 +1454,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) all systems
      * by providing ``flag`` (true/false).
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     checkAllSystems: function (flag) {
       if (this.mapImp) {
@@ -1465,18 +1467,18 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display features with annotation matching the provided term.
-     * @arg models
+     * @arg {String} `models`
      */
     ftuSelected: function (models) {
       this.searchAndShowResult(models, true)
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the layer
      * by providing ``{layerId, true/false}`` in ``payload``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     layersSelected: function (payload) {
       if (this.mapImp) {
@@ -1484,10 +1486,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide all layers
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     checkAllLayers: function (payload) {
       if (this.mapImp) {
@@ -1497,10 +1499,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide connectivity features studied in particular species
      * by providing ``{taxonId, true/false}`` in ``payload.key, payload.value``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     taxonsSelected: function (payload) {
       if (this.mapImp) {
@@ -1524,10 +1526,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide connectivity features studied in particular species
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     checkAllTaxons: function (payload) {
       if (this.mapImp) {
@@ -1537,10 +1539,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to hide or show paths of a given type
      * by providing ``{pathType, true/false}`` in ``payload.key, payload.value``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     pathwaysSelected: function (payload) {
       if (this.mapImp) {
@@ -1548,10 +1550,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to hide or show paths of a given type
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     checkAllPathways: function (payload) {
       if (this.mapImp) {
@@ -1561,19 +1563,19 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to generate callbacks as a result of panning/zooming the map.
      * ``flag`` (boolean) - generate callbacks when ``true``, otherwise disable them.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
     /**
-     * @vuese
+     * @public
      * Function to process annotation callbacks, invoked when events occur with the map.
-     * @arg payload,
-     * @arg data
+     * @arg {Object} `payload`,
+     * @arg {Object} `data`
      */
     annotationEventCallback: function (payload, data) {
       // Popup closed will trigger aborted event this is used to control the tooltip
@@ -1617,7 +1619,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * A callback function, invoked when events occur with the map.
      * The first parameter gives the type of event, the second provides details about the event.
      * _(This is the ``callback`` function from ``MapManager.loadMap()``)_.
@@ -1706,10 +1708,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function triggered by viewing mode change.
      * (e.g., from 'Exploration' to 'Annotation')
      * All tooltips and popups currently showing on map will be closed
+     * @arg {String} `modeName`
      */
     changeViewingMode: function (modeName) {
       if (modeName) {
@@ -1718,10 +1721,10 @@ export default {
       this.closeTooltip()
     },
     /**
-     * @vuese
+     * @public
      * Function to create/display tooltips from the provided ``data``.
      * _checkNeuronClicked shows a neuron path pop up if a path was recently clicked._
-     * @arg data
+     * @arg {Object} `data`
      */
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
@@ -1790,7 +1793,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to close tooltip.
      */
     closeTooltip: function () {
@@ -1800,20 +1803,20 @@ export default {
       })
     },
     /**
-     * @vuese
+     * @public
      * Function to create tooltip from Neuron Curation ``data``.
-     * @arg data
+     * @arg {Object} `data`
      */
     createTooltipFromNeuronCuration: async function (data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
       this.displayTooltip(data.resource[0])
     },
     /**
-     * @vuese
+     * @public
      * Function to show popup on map.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showPopup: function (featureId, node, options) {
       // Keeping this as an API
@@ -1828,11 +1831,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show marker popup.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showMarkerPopup: function (featureId, node, options) {
       if (this.mapImp) {
@@ -1840,7 +1843,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to close minimap.
      */
     closeMinimap: function () {
@@ -1875,10 +1878,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to set help mode
      * by providing flag ``helpMode`` (true/false).
-     * @arg helpMode
+     * @arg {Boolean} `helpMode`
      */
     setHelpMode: function (helpMode) {
       const toolTipsLength = this.hoverVisibilities.length;
@@ -1960,10 +1963,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show tooltip
      * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
+     * @arg {Number} `tooltipNumber`
+     * @arg {Number} `timeout` _(default: `500`)_
      */
     showTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
@@ -1979,10 +1983,11 @@ export default {
     },
 
     /**
-     * @vuese
+     * @public
      * Function to hide tooltip
      * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
+     * @arg {Number} `tooltipNumber`
+     * @arg {Number} `timeout` _(default: `500`)_
      */
     hideTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
@@ -1993,10 +1998,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display tooltip
      * by providing featureId (``feature``).
-     * @arg feature
+     * @arg {String} `feature`
+     * @arg {String} `geometry` _(default: `undefined`)_
      */
     displayTooltip: function (feature, geometry = undefined) {
       let featureId = undefined
@@ -2097,7 +2103,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to open Flatmap Help Popup.
      */
     openFlatmapHelpPopup: function () {
@@ -2117,7 +2123,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to close Flatmap Help Popup.
      */
     closeFlatmapHelpPopup: function () {
@@ -2128,7 +2134,7 @@ export default {
         })
     },
     /**
-     * @vuese
+     * @public
      * Function to get annotation labels.
      */
     getLabels: function () {
@@ -2142,7 +2148,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to get the state (object) of the map.
      */
     getState: function () {
@@ -2161,9 +2167,9 @@ export default {
       return undefined
     },
     /**
-     * @vuese
+     * @public
      * Function to set state (object) for the map.
-     * @arg state
+     * @arg {Object} `state`
      */
     setState: function (state) {
       if (state) {
@@ -2183,10 +2189,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to restore map's state
      * from the ``state`` provided.
-     * @arg state
+     * @arg {Object} `state`
      */
     restoreMapState: function (state) {
       if (state) {
@@ -2195,11 +2201,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show flight path option
      * (3D option)
      * based on the map version (currently 1.6 and above).
-     * @arg mapVersion
+     * @arg {String} `mapVersion`
      */
     setFlightPathInfo: function (mapVersion) {
       const mapVersionForFlightPath = 1.6
@@ -2211,10 +2217,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to create Flatmap
      * by providing the ``state``.
-     * @arg state
+     * @arg {Object} `state`
      */
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
@@ -2300,7 +2306,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to compute path controls maximum height.
      */
     computePathControlsMaximumHeight() {
@@ -2314,7 +2320,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to resize the map.
      */
     mapResize: function () {
@@ -2332,7 +2338,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
      */
     onFlatmapReady: function () {
@@ -2368,7 +2374,7 @@ export default {
       this.$emit('ready', this)
     },
     /**
-     * @vuese
+     * @public
      * Function to handle mouse click on map area
      * after the map is loaded.
      */
@@ -2384,29 +2390,29 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the minimap
      * by providing ``flag`` (boolean) value.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     showMinimap: function (flag) {
       if (this.mapImp) this.mapImp.showMinimap(flag)
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the pathways drawer
      * by providing ``flag`` (boolean) value.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     showPathwaysDrawer: function (flag) {
       this.drawerOpen = flag
     },
     /**
-     * @vuese
+     * @public
      * Function to display features with annotation matching the provided term,
      * with the option to display the label using displayLabel flag.
-     * @arg term,
-     * @arg displayLabel
+     * @arg {String} `term`,
+     * @arg {String} `displayLabel`
      */
     searchAndShowResult: function (term, displayLabel) {
       if (this.mapImp) {
@@ -2446,10 +2452,10 @@ export default {
       return false
     },
     /**
-     * @vuese
+     * @public
      * Function to show search suggestions
      * from the ``term`` provided.
-     * @arg term
+     * @arg {String} `term`
      */
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)

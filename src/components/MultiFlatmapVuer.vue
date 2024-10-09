@@ -38,6 +38,12 @@
 
       </el-popover>
     </div>
+    <!--
+      This event is emitted when the user chooses a different map option
+      from ``openMapOptions`` props.
+      @event open-map
+      @arg {Object} `$event`
+    -->
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
@@ -59,13 +65,7 @@
       :connectivityInfoSidebar="connectivityInfoSidebar"
       @connectivity-info-open="onConnectivityInfoOpen"
       @connectivity-info-close="onConnectivityInfoClose"
-      @open-map="
-        /**
-         * This event is emitted when the user chooses a different map option
-         * from ``openMapOptions`` props.
-         * @arg $event
-         */
-        $emit('open-map', $event)"
+      @open-map="$emit('open-map', $event)"
       @pathway-selection-changed="onSelectionsDataChanged"
       :minZoom="minZoom"
       :helpMode="activeSpecies == key && helpMode"
@@ -137,7 +137,7 @@ export default {
   },
   methods: {
     /**
-     * @vuese
+     * @public
      * Function to initialise the component when mounted.
      * It returns a promise.
      */
@@ -216,9 +216,9 @@ export default {
       })
     },
     /**
-     * @vuese
+     * @public
      * Function to emit ``resource-selected`` event with provided ``resource``.
-     * @arg action
+     * @arg {Object} `action`
      */
      resourceSelected: function (action) {
       /**
@@ -227,9 +227,9 @@ export default {
       this.$emit('resource-selected', action)
     },
     /**
-     * @vuese
+     * @public
      * Function to emit ``ready`` event after the flatmap is loaded.
-     * @arg component
+     * @arg {Object} `component`
      */
     FlatmapReady: function (component) {
       /**
@@ -239,17 +239,17 @@ export default {
       this.$emit('ready', component)
     },
     /**
-     * @vuese
+     * @public
      * Function to get the current active map.
      */
     getCurrentFlatmap: function () {
       return this.$refs[this.activeSpecies][0]
     },
     /**
-     * @vuese
+     * @public
      * Function to emit ``pan-zoom-callback`` event
      * from the event emitted in ``callback`` function from ``MapManager.loadMap()``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     panZoomCallback: function (payload) {
       /**
@@ -268,35 +268,35 @@ export default {
       this.$emit('pathway-selection-changed', data);
     },
     /**
-     * @vuese
+     * @public
      * Function to show popup on map.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showPopup(featureId, node, options)
     },
     /**
-     * @vuese
+     * @public
      * Function to show marker popup.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showMarkerPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showMarkerPopup(featureId, node, options)
     },
     /**
-     * @vuese
+     * @public
      * Function to set species.
      * This function is called on the first load and
      * when user changes the species.
-     * @arg species,
-     * @arg state,
-     * @arg numberOfRetry
+     * @arg {Array} `species`,
+     * @arg {Object} `state`,
+     * @arg {Number} `numberOfRetry`
      */
     setSpecies: function (species, state, numberOfRetry) {
       if (this.$refs && species in this.$refs) {
@@ -318,7 +318,6 @@ export default {
       }
     },
     /**
-     * @vuese
      * Function to switch to the latest existing map from
      * a legacy map of the same species.
      * @arg state
@@ -340,11 +339,9 @@ export default {
       }
     },
     /**
-     * @vuese
      * Create a legacy entry with the provided information
      * @arg state,
      * @arg taxo,
-     * @arg uuid
      *
      * @private
      */
@@ -372,7 +369,6 @@ export default {
       }
     },
     /**
-     * @vuese
      * Function used to translate the legacy map state to one that can be used in current
      * flatmap if required. If it is a legacy, an Select entry will be added
      * @arg state
@@ -431,11 +427,9 @@ export default {
       })
     },
     /**
-     * @vuese
+     * @public
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
-     *
-     * @public
      */
     getState: function () {
       let state = {
@@ -447,12 +441,10 @@ export default {
       return state
     },
     /**
-     * @vuese
+     * @public
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
-     * @arg state
-     *
-     * @public
+     * @arg {Object} state
      */
     setState: function (state) {
       if (state) {
@@ -473,8 +465,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to activate help mode tooltip by item index number
+     * @arg {Number} `index`
      */
     activateTooltipByIndex: function (index) {
       return (
@@ -483,8 +476,9 @@ export default {
       );
     },
     /**
-     * @vuese
+     * @public
      * Function to check the last item of help mode
+     * @arg {Boolean} `isLastItem`
      */
     onHelpModeLastItem: function (isLastItem) {
       if (isLastItem) {
@@ -492,7 +486,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to emit event after a tooltip is shown.
      */
     onTooltipShown: function () {
@@ -502,7 +496,7 @@ export default {
       this.$emit('shown-tooltip');
     },
     /**
-     * @vuese
+     * @public
      * Function to emit event after a tooltip on the map is shown.
      */
     onMapTooltipShown: function () {
@@ -512,8 +506,9 @@ export default {
       this.$emit('shown-map-tooltip');
     },
     /**
-     * @vuese
+     * @public
      * Function to change the view mode of the map.
+     * @arg {String} `modeName`
      */
     changeViewingMode: function (modeName) {
       let map = this.getCurrentFlatmap()
