@@ -2917,12 +2917,14 @@ export default {
 .pathway-location {
   position: absolute;
   bottom: 0px;
+  left: 0px;
+  transform: translateX(0);
   transition: all var(--el-transition-duration);
   &.open {
-    left: 0px;
+    transform: translateX(0);
   }
   &.close {
-    left: -309px;
+    transform: translateX(-100%);
   }
 }
 
@@ -3498,6 +3500,7 @@ export default {
     }
   }
   &.close {
+    transform: translateX(22px); // button + border width
     i {
       transform: rotate(180deg) scaleY(2);
     }
