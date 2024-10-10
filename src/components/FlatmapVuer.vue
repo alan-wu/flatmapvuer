@@ -2922,7 +2922,7 @@ export default {
     left: 0px;
   }
   &.close {
-    left: -298px;
+    left: -309px;
   }
 }
 
@@ -2940,6 +2940,8 @@ export default {
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
+  border-left: 0;
+  border-bottom: 0;
   padding-bottom: 16px;
   background: #ffffff;
   overflow-x: hidden;
