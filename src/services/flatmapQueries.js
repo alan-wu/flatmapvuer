@@ -393,7 +393,7 @@ let FlatmapQueries = function () {
   this.stripPMIDPrefix = function (pubmedId) {
     return pubmedId.split(':')[1]
   }
-  
+
   this.getPMID = function(idsList) {
     return new Promise((resolve) => {
       if (idsList.length > 0) {
@@ -419,7 +419,7 @@ let FlatmapQueries = function () {
           })
           promises.push(promise)
         })
-        
+
         Promise.all(promises).then(() => {
           resolve(results)
         }).catch(() => {
@@ -450,7 +450,7 @@ let FlatmapQueries = function () {
         resolve(pmids)
       })
     })
-  } 
+  }
 
   this.extractPublicationIdFromURLString = function (urlStr) {
     if (!urlStr) return
@@ -505,6 +505,8 @@ let FlatmapQueries = function () {
         if (pmids.length > 0) {
           const transformedIDs = pmids.join()
           resolve([this.pubmedSearchUrl(transformedIDs)])
+        } else {
+          resolve([])
         }
       })
     })
@@ -552,7 +554,11 @@ let FlatmapQueries = function () {
         if (data.values.length > 0) {
            this.getURLsForPubMed(data).then((urls) => {
             this.urls = urls
-            resolve(true)
+            if (urls.length) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
           })
           .catch(() => {
             this.urls = []
