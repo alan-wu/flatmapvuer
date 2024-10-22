@@ -378,7 +378,7 @@ Please use `const` to assign meaningful names to them...
                 v-if="taxonConnectivity && taxonConnectivity.length > 0"
                 title="Studied in"
                 labelKey="label"
-                identifierKey="entity"
+                identifierKey="taxon"
                 helpMessage="Evidence exists that this set of neuron populations have been studied in the given species."
                 :selections="taxonConnectivity"
                 @changed="taxonsSelected"
