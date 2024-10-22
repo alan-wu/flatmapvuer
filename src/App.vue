@@ -133,6 +133,15 @@ export default {
     FlatmapSelected: function (resource) {
       if (resource.eventType === 'click') {
         if (this.consoleOn) console.log('resource', resource)
+
+        // Show marker on centreline of right vagus X nerve trunk
+        const { kind, models, location } = resource.feature;
+        if (window.flatmapImp && models && location && kind === 'centreline') {
+          window.flatmapImp.clearMarkers();
+          window.flatmapImp.addMarker(models, {
+            location: location
+          });
+        }
       }
     },
     onOpenPubmedUrl: function (url) {
@@ -186,8 +195,12 @@ export default {
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
     },
-    onFlatmapChanged: function () {
+    onFlatmapChanged: function (activeSpecies) {
       this.helpMode = false;
+      // Update current flatmapImp after changing species
+      if (this.$refs.multi.$refs[activeSpecies][0].mapImp) {
+        window.flatmapImp = this.$refs.multi.$refs[activeSpecies][0].mapImp;
+      }
     },
     onHelpModeShowNext: function () {
       this.helpModeActiveItem += 1;
@@ -262,7 +275,7 @@ export default {
           displayWarning: true,
         },
         Vagus: {
-          taxo: 'UBERON:1759',
+          taxo: 'UBERON:0001759',
           displayWarning: true,
         },
         Sample: { taxo: 'NCBITaxon:1', displayWarning: true },
