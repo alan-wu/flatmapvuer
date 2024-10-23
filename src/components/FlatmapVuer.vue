@@ -634,7 +634,7 @@ Please use `const` to assign meaningful names to them...
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef, markRaw } from 'vue'
+import { inject, provide, shallowRef, markRaw } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -784,7 +784,15 @@ export default {
     this.setStateRequired = false
   },
   setup(props) {
-    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+    let annotator = inject('$annotator')
+    if (!annotator) {
+      console.log("Not defined")
+      annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+      provide('$annotator', annotator)
+    } else {
+      console.log("defined")
+    }
+    console.log(annotator)
     return { annotator }
   },
   methods: {
@@ -2650,7 +2658,6 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      $annotator: this.annotator,
       getFeaturesAlert: () => this.featuresAlert,
       userApiKey: this.userToken,
     }
