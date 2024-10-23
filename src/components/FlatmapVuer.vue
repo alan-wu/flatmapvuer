@@ -2921,6 +2921,8 @@ export default {
   left: 0px;
   transform: translateX(0);
   transition: all var(--el-transition-duration);
+  z-index: 99;
+
   &.open {
     transform: translateX(0);
   }
