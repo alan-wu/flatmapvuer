@@ -519,8 +519,8 @@ Please use `const` to assign meaningful names to them...
               class="flatmap-radio"
               @change="setFlightPath3D"
             >
-            <el-radio :label="false">2D</el-radio>
-            <el-radio :label="true">3D</el-radio>
+            <el-radio :value="false">2D</el-radio>
+            <el-radio :value="true">3D</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -531,8 +531,8 @@ Please use `const` to assign meaningful names to them...
               class="flatmap-radio"
               @change="setColour"
             >
-              <el-radio :label="true">Colour</el-radio>
-              <el-radio :label="false">Greyscale</el-radio>
+              <el-radio :value="true">Colour</el-radio>
+              <el-radio :value="false">Greyscale</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -543,8 +543,8 @@ Please use `const` to assign meaningful names to them...
               class="flatmap-radio"
               @change="setOutlines"
             >
-              <el-radio :label="true">Show</el-radio>
-              <el-radio :label="false">Hide</el-radio>
+              <el-radio :value="true">Show</el-radio>
+              <el-radio :value="false">Hide</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -1202,7 +1202,7 @@ export default {
     setColour: function (flag) {
       this.colourRadio = flag
       if (this.mapImp) {
-        this.mapImp.setColour({ colour: flag, outline: this.outlinesRadio })
+        this.mapImp.setPaint({ colour: flag, outline: this.outlinesRadio })
       }
     },
     /**
@@ -1214,7 +1214,7 @@ export default {
     setOutlines: function (flag) {
       this.outlineRadio = flag
       if (this.mapImp) {
-        this.mapImp.setColour({ colour: this.colourRadio, outline: flag })
+        this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
       }
     },
     /**
