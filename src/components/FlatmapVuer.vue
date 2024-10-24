@@ -812,6 +812,7 @@ export default {
      */
     cancelDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
+        this.$emit("annotation-close")
         this.closeTooltip()
         this.annotationEntry = {
           ...this.drawnCreatedEvent.feature,
@@ -998,6 +999,7 @@ export default {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
         if (this.annotationEntry.type === 'deleted') {
+          this.$emit("annotation-close")
           this.closeTooltip()
           this.annotationEntry = {}
         } else {
@@ -1725,6 +1727,7 @@ export default {
       if (modeName) {
         this.viewingMode = modeName
       }
+      this.$emit("annotation-close")
       this.closeTooltip()
     },
     /**
@@ -1752,7 +1755,9 @@ export default {
             ) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
-              if (this.activeDrawTool) this.createConnectivityBody()
+              if (this.activeDrawTool) {
+                this.createConnectivityBody()
+              }
               this.displayTooltip(
                 data.feature.feature.id,
                 centroid(data.feature.feature.geometry)
@@ -2035,6 +2040,9 @@ export default {
         }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
+      if (this.annotationSidebar && this.viewingMode === 'Annotation') {
+        this.$emit('annotation-open', {annotationEntry: this.annotationEntry, commitCallback: this.commitAnnotationEvent});
+      }
       // If UI is not disabled,
       // And connectivityInfoSidebar is not set (default) or set to `false`
       // Provenance popup will be shown on map
@@ -2043,6 +2051,7 @@ export default {
         !this.disableUI && (
           (
             this.viewingMode === 'Annotation' &&
+            !this.annotationSidebar &&
             this.userInformation
           ) ||
           (
@@ -2650,6 +2659,13 @@ export default {
      * The option to show connectivity information in sidebar
      */
     connectivityInfoSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The option to show annotation in sidebar
+     */
+    annotationSidebar: {
       type: Boolean,
       default: false,
     },

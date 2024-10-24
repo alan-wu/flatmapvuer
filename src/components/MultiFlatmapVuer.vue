@@ -62,6 +62,9 @@
       @resource-selected="resourceSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
+      :annotationSidebar="annotationSidebar"
+      @annotation-open="onAnnotationOpen"
+      @annotation-close="onAnnotationClose"
       :connectivityInfoSidebar="connectivityInfoSidebar"
       @connectivity-info-open="onConnectivityInfoOpen"
       @connectivity-info-close="onConnectivityInfoClose"
@@ -257,6 +260,12 @@ export default {
        * @arg payload
        */
       this.$emit('pan-zoom-callback', payload)
+    },
+    onAnnotationClose: function () {
+      this.$emit('annotation-close');
+    },
+    onAnnotationOpen: function (payload) {
+      this.$emit('annotation-open', payload);
     },
     onConnectivityInfoClose: function () {
       this.$emit('connectivity-info-close');
@@ -708,6 +717,13 @@ export default {
      * The option to show connectivity information in sidebar
      */
     connectivityInfoSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The option to show connectivity information in sidebar
+     */
+     annotationSidebar: {
       type: Boolean,
       default: false,
     },
