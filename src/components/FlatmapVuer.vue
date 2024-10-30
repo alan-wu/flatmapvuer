@@ -806,13 +806,13 @@ export default {
       this.activeDrawMode = undefined
       this.drawnCreatedEvent = {}
     },
-    /**
+    /** 
      * @public
      * Function to cancel a newly drawn feature.
      */
     cancelDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
-        this.$emit("annotation-close")
+        if (this.annotationSidebar) this.$emit("annotation-close")
         this.closeTooltip()
         this.annotationEntry = {
           ...this.drawnCreatedEvent.feature,
@@ -871,6 +871,7 @@ export default {
      */
     toolbarEvent: function (type, name) {
       this.closeTooltip()
+      if (this.annotationSidebar) this.$emit("annotation-close")
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
@@ -999,7 +1000,7 @@ export default {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
         if (this.annotationEntry.type === 'deleted') {
-          this.$emit("annotation-close")
+          if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           this.annotationEntry = {}
         } else {
@@ -1727,7 +1728,7 @@ export default {
       if (modeName) {
         this.viewingMode = modeName
       }
-      this.$emit("annotation-close")
+      if (this.annotationSidebar) this.$emit("annotation-close")
       this.closeTooltip()
     },
     /**
