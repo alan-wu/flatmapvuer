@@ -786,13 +786,9 @@ export default {
   setup(props) {
     let annotator = inject('$annotator')
     if (!annotator) {
-      console.log("Not defined")
       annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
       provide('$annotator', annotator)
-    } else {
-      console.log("defined")
     }
-    console.log(annotator)
     return { annotator }
   },
   methods: {
@@ -2361,7 +2357,6 @@ export default {
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
       this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
-      console.log(this.mapImp.options)
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       } else if (this.mapImp.options?.style === 'centreline') {
