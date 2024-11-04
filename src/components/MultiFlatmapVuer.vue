@@ -1,6 +1,6 @@
 <template>
   <div class="multi-container" ref="multiContainer">
-    <div style="position: absolute; z-index: 10" v-if="!disableUI">
+    <div style="position: absolute; z-index: 100" v-if="!disableUI">
       <div class="species-display-text">Species</div>
       <el-popover
         content="Select a species"
