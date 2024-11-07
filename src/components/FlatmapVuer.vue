@@ -1212,7 +1212,7 @@ export default {
      * @arg {Boolean} `flag`
      */
     setOutlines: function (flag) {
-      this.outlineRadio = flag
+      this.outlinesRadio = flag
       if (this.mapImp) {
         this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
       }
@@ -1660,6 +1660,9 @@ export default {
             }
             if (eventType === 'click') {
               this.featuresAlert = data.alert
+              //The following will be used to track either a feature is selected
+              this.statesTracking.activeClick = true
+              this.statesTracking.activeTerm = data?.models
               if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
@@ -1757,6 +1760,7 @@ export default {
           this.annotation = {}
         }
       } else {
+        //require data.resource && data.feature.source
         let results =
           await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
         // The line below only creates the tooltip if some data was found on the path
@@ -2161,6 +2165,12 @@ export default {
         else if (identifier && identifier.biologicalSex)
           state['biologicalSex'] = identifier.biologicalSex
         if (identifier && identifier.uuid) state['uuid'] = identifier.uuid
+        state['viewingMode'] = this.viewingMode
+        state['searchTerm'] = this.statesTracking.activeTerm
+        state['flightPath3D'] = this.flightPath3DRadio
+        state['colour'] = this.colourRadio
+        state['outlinesRadio'] = this.outlinesRadio
+        state['background'] = this.currentBackground
         return state
       }
       return undefined
@@ -2178,9 +2188,7 @@ export default {
           this.entry == state.entry &&
           (!state.biologicalSex || state.biologicalSex === this.biologicalSex)
         ) {
-          if (state.viewport) {
-            this.mapImp.setState(state.viewport)
-          }
+          this.restoreMapState(state)
         } else {
           this.createFlatmap(state)
         }
@@ -2196,7 +2204,32 @@ export default {
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
-        if (state.searchTerm) this.searchAndShowResult(state.searchTerm, true)
+        if (state.viewingMode) this.changeViewingMode(state.viewingMode)
+        //The following three are boolean
+        if ('flightPath3D' in state) this.setFlightPath3D(state.flightPath3D)
+        if ('colour' in state) this.setColour(state.colour)
+        if ('outlines' in state) this.setOutlines(state.outlines)
+        if (state.background) this.backgroundChangeCallback(state.background)
+        if (state.searchTerm) {
+          const searchTerm = state.searchTerm
+          this.searchAndShowResult(searchTerm, true)
+          if (state.viewingMode === "Neuron Connection") {
+            this.highlightConnectedPaths([searchTerm])
+          } else {
+            const geoID = this.mapImp.modelFeatureIds(searchTerm)
+            if (geoID.length > 0) {
+              const feature = this.mapImp.featureProperties(geoID[0])
+              this.searchAndShowResult(searchTerm, true)
+              const data = {
+                resource: [feature.source],
+                feature,
+                label: feature.label,
+                provenanceTaxonomy: feature.taxons
+              }
+              this.checkAndCreatePopups(data)
+            }
+          }
+        }
       }
     },
     /**
@@ -2343,7 +2376,6 @@ export default {
     onFlatmapReady: function () {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
       this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
-      console.log(this.mapImp.options)
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       } else if (this.mapImp.options?.style === 'centreline') {
@@ -2382,6 +2414,13 @@ export default {
 
       if (_map) {
         _map.on('click', (e) => {
+          //A little logic to make sure we are keeping track
+          //of selected term
+          if (this.statesTracking.activeClick) {
+            this.statesTracking.activeClick = false
+          } else {
+            this.statesTracking.activeTerm = ""
+          }
           if (this.tooltipEntry.featureId) {
             this.$emit('connectivity-info-close');
           }
@@ -2772,7 +2811,11 @@ export default {
           with: true,
           without: true,
         }
-      })
+      }),
+      statesTracking: markRaw({
+        activeClick: false,
+        activeTerm: "",
+      }),
     }
   },
   computed: {
