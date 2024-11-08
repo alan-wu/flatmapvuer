@@ -1217,6 +1217,15 @@ export default {
         this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
       }
     },
+    setInitMapState: function () {
+      if (this.mapImp) {
+        const map = this.mapImp._map;
+        const initBounds = map.getBounds();
+        this.initMapState = {
+          initBounds,
+        };
+      }
+    },
     /**
      * @public
      * Function to toggle paths to default.
@@ -1225,6 +1234,12 @@ export default {
     resetView: function () {
       if (this.mapImp) {
         this.mapImp.resetMap()
+        // fit to window
+        const map = this.mapImp._map;
+        const { initBounds } = this.initMapState;
+        if (initBounds) {
+          map.fitBounds(initBounds);
+        }
         if (this.$refs.centrelinesSelection) {
           this.$refs.centrelinesSelection.reset()
         }
@@ -2366,6 +2381,7 @@ export default {
       this.drawerOpen = !this.isCentreLine
       this.mapResize()
       this.handleMapClick();
+      this.setInitMapState();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -2668,6 +2684,7 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
+      initMapState: {},
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
