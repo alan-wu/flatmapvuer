@@ -1233,11 +1233,15 @@ export default {
      */
     resetView: function () {
       if (this.mapImp) {
-        this.mapImp.resetMap()
         // fit to window
         const map = this.mapImp._map;
         const { initBounds } = this.initMapState;
+        // reset rotation
+        map.resetNorthPitch({
+          animate: false,
+        });
         if (initBounds) {
+          // reset zoom and position
           map.fitBounds(initBounds);
         }
         if (this.$refs.centrelinesSelection) {
