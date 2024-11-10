@@ -2152,6 +2152,20 @@ export default {
     },
     /**
      * @public
+     * Function to get and store the state (object) of the map in
+     * the provided argument
+     */
+    getVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        let comp = this.$refs[ref]
+        if (comp) {
+          state[ref] = comp.getState()
+        }
+      })
+    },
+    /**
+     * @public
      * Function to get the state (object) of the map.
      */
     getState: function () {
@@ -2171,9 +2185,22 @@ export default {
         state['colour'] = this.colourRadio
         state['outlinesRadio'] = this.outlinesRadio
         state['background'] = this.currentBackground
+        this.getVisibilityState(state)
         return state
       }
       return undefined
+    },
+    setVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        const settings = state[ref]
+        if (settings) {
+          const comp = this.$refs[ref]
+          if (comp) {
+            comp.setState(settings)
+          }
+        }
+      })
     },
     /**
      * @public
@@ -2230,6 +2257,7 @@ export default {
             }
           }
         }
+        this.setVisibilityState(state)
       }
     },
     /**
