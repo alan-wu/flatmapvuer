@@ -1166,7 +1166,6 @@ export default {
           if (children.length > 0) child.children = children
           data.children.push(child)
         })
-
         this.systems.push(data)
       }
     },
@@ -2163,6 +2162,30 @@ export default {
           state[ref] = comp.getState()
         }
       })
+      if (this.$refs.treeControls) {
+        const checkedKeys = this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+        state['systemsSelection'] = checkedKeys.filter(term => !term.includes('.'))
+      }
+    },
+    setVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        const settings = state[ref]
+        if (settings) {
+          const comp = this.$refs[ref]
+          if (comp) {
+            comp.setState(settings)
+          }
+        }
+      })
+      if ('systemsSelection' in state) {
+        if (this.$refs.treeControls) {
+          this.$refs.treeControls.$refs.regionTree.setCheckedKeys(state['systemsSelection']);
+          this.systems[0].children.forEach((item) => {
+            this.mapImp.enableSystem(item.key, state['systemsSelection'].includes(item.key))
+          })
+        }
+      }
     },
     /**
      * @public
@@ -2189,18 +2212,6 @@ export default {
         return state
       }
       return undefined
-    },
-    setVisibilityState: function (state) {
-      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
-      refs.forEach(ref => {
-        const settings = state[ref]
-        if (settings) {
-          const comp = this.$refs[ref]
-          if (comp) {
-            comp.setState(settings)
-          }
-        }
-      })
     },
     /**
      * @public
