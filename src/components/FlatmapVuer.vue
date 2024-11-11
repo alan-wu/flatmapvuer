@@ -2150,7 +2150,6 @@ export default {
       }
     },
     /**
-     * @public
      * Function to get and store the state (object) of the map in
      * the provided argument
      */
@@ -2167,6 +2166,10 @@ export default {
         state['systemsSelection'] = checkedKeys.filter(term => !term.includes('.'))
       }
     },
+    /**
+     * Function to set and restore the visibility state (object) of 
+     * the map with the provided argument
+     */
     setVisibilityState: function (state) {
       const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
       refs.forEach(ref => {
