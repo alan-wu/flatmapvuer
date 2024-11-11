@@ -1176,12 +1176,19 @@ export default {
      * @arg {String} `flatmapAPI`,
      * @arg {Array} `taxonIdentifiers`
      */
-    processTaxon: function (flatmapAPI, taxonIdentifiers) {
+    processTaxon: function (flatmapAPI, taxonIdentifiers, state) {
       this.taxonConnectivity.length = 0
       taxonIdentifiers.forEach((taxon) => {
         findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-          const item = { taxon, label: value }
+          let enabled = true
+          if (state) {
+            enabled = state.checkAll ? true : state.checked.includes(taxon)
+          }
+          const item = { taxon, label: value, enabled}
           this.taxonConnectivity.push(item)
+          if (this.mapImp) {
+            this.mapImp.enableConnectivityByTaxonIds(taxon, enabled)
+          }
         })
       })
     },
@@ -2365,16 +2372,13 @@ export default {
           this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
-          this.onFlatmapReady()
-          if (this._stateToBeSet) this.restoreMapState(this._stateToBeSet)
-          else {
-            this.restoreMapState(state)
-          }
+          const stateToSet = this._stateToBeSet ? this._stateToBeSet : state
+          this.onFlatmapReady(stateToSet)
+          this.$nextTick(() => this.restoreMapState(stateToSet))
         })
       } else if (state) {
         this._stateToBeSet = {
-          viewport: state.viewport,
-          searchTerm: state.searchTerm,
+          ...state
         }
         if (this.mapImp && !this.loading)
           this.restoreMapState(this._stateToBeSet)
@@ -2416,7 +2420,7 @@ export default {
      * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
      */
-    onFlatmapReady: function () {
+    onFlatmapReady: function (state) {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
       this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
       if (this.mapImp.options?.style === 'functional') {
@@ -2433,7 +2437,9 @@ export default {
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
-      this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      //Async, pass the state for checking
+      this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers,
+        state ? state['taxonSelection'] : undefined)
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
