@@ -2508,7 +2508,7 @@ export default {
      */
     minZoom: {
       type: Number,
-      default: 4,
+      default: 1,
     },
     /**
      * The option to add another feature label _(`FeatureSmallSymbolLayer`)_
