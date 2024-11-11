@@ -717,28 +717,6 @@ const processFTUs = (parent, key) => {
   return ftus
 }
 
-const processSystems = (systems) => {
-  const allSystems = []
-  if (systems && systems.length > 0) {
-    const data = { label: 'All', key: 'All', children: [] }
-    systems.forEach((system) => {
-      const child = {
-        colour: system.colour,
-        enabled: system.enabled,
-        label: system.id,
-        key: system.id,
-      }
-      const children = processFTUs(system, child.key)
-      if (children.length > 0) child.children = children
-      data.children.push(child)
-    })
-
-    allSystems.push(data)
-  }
-
-  return allSystems
-}
-
 const createUnfilledTooltipData = function () {
   return {
     destinations: [],
