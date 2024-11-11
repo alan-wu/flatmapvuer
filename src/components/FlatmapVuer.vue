@@ -2883,6 +2883,9 @@ export default {
   transform: translateX(0);
   transition: all var(--el-transition-duration);
   z-index: 99;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 
   &.open {
     transform: translateX(0);
@@ -3438,11 +3441,6 @@ export default {
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
-}
-
-.drawer-button {
-  float: left;
-  margin-top: calc(50% - 36px);
   background-color: #f9f2fc;
 
   i {
