@@ -3429,7 +3429,6 @@ export default {
   }
 }
 
-.open-drawer,
 .drawer-button {
   z-index: 8;
   width: 20px;
@@ -3439,13 +3438,6 @@ export default {
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
-}
-
-.open-drawer {
-  position: absolute;
-  left: 0px;
-  background-color: #f7faff;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
 }
 
 .drawer-button {
