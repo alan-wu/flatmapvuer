@@ -2163,6 +2163,7 @@ export default {
       })
       if (this.$refs.treeControls) {
         const checkedKeys = this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+        //Only store first level systems (terms without .)
         state['systemsSelection'] = checkedKeys.filter(term => !term.includes('.'))
       }
     },
