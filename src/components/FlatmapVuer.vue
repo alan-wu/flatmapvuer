@@ -2438,7 +2438,6 @@ export default {
      */
     handleMapClick: function () {
       const _map = this.mapImp._map;
-
       if (_map) {
         _map.on('click', (e) => {
           //A little logic to make sure we are keeping track
@@ -2483,6 +2482,7 @@ export default {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
+          this.statesTracking.activeTerm = ""
           return true
         } else {
           const searchResults = this.mapImp.search(term)
@@ -2491,6 +2491,7 @@ export default {
             searchResults.results &&
             searchResults.results.length > 0
           ) {
+            this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
             if (
               displayLabel &&
