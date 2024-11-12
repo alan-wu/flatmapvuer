@@ -257,7 +257,7 @@ Please use `const` to assign meaningful names to them...
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
-            v-show="!(disableUI || isCentreLine)"
+            v-show="!disableUI"
           >
             <div
               class="pathway-container"
@@ -387,17 +387,6 @@ Please use `const` to assign meaningful names to them...
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
-              />
-              <selections-group
-                v-if="!(isCentreLine || isFC)  && centreLines && centreLines.length > 0"
-                title="Nerves"
-                labelKey="label"
-                identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
-                @selections-data-changed="onSelectionsDataChanged"
-                ref="centrelinesSelection"
-                key="centrelinesSelection"
               />
             </div>
             <div
@@ -658,7 +647,7 @@ import {
 import flatmapMarker from '../icons/flatmap-marker'
 import {
   FlatmapQueries,
-  findTaxonomyLabel,
+  findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -1179,12 +1168,13 @@ export default {
      */
     processTaxon: function (flatmapAPI, taxonIdentifiers) {
       this.taxonConnectivity.length = 0
-      taxonIdentifiers.forEach((taxon) => {
-        findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-          const item = { taxon, label: value }
-          this.taxonConnectivity.push(item)
-        })
-      })
+      findTaxonomyLabels(this.mapImp, taxonIdentifiers).then((entityLabels) => {
+        if (entityLabels.length) {
+          entityLabels.forEach((entityLabel) => {
+            this.taxonConnectivity.push(entityLabel);
+          });
+        }
+      });
     },
     /**
      * @public
@@ -1284,18 +1274,6 @@ export default {
         this.mapImp.zoomOut()
       }
     },
-    /**
-     * @public
-     * Function to show or hide centrelines and nodes.
-     * The parameter ``payload`` is an object with a boolean property, ``value``,
-     * ``payload.value = true/false``.
-     * @arg {Object} `payload`
-     */
-    centreLinesSelected: function (payload) {
-      if (this.mapImp) {
-        this.mapImp.enableCentrelines(payload.value)
-      }
-    },
     onSelectionsDataChanged: function (data) {
       this.$emit('pathway-selection-changed', data);
     },
@@ -1336,7 +1314,7 @@ export default {
         let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
 
         // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivity(payload)
+        let connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
 
         // Check and flatten the origins node graph
         let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
@@ -1780,12 +1758,11 @@ export default {
         }
       } else {
         let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // The line below only creates the tooltip if some data was found on the path
-        // result 0 is the connection, result 1 is the pubmed results from flatmap
+        // the pubmed URLs are in knowledge response.references
         if (
-          results[0] ||
-          results[1] ||
+          (results && results[0]) ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
           this.resourceForTooltip = data.resource[0]
@@ -1829,7 +1806,7 @@ export default {
      * @arg {Object} `data`
      */
     createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
       this.displayTooltip(data.resource[0])
     },
     /**
@@ -2368,15 +2345,10 @@ export default {
       console.log(this.mapImp.options)
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
-      } else if (this.mapImp.options?.style === 'centreline') {
-        this.isCentreLine = true
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      if (!this.isCentreLine) {
-        this.mapImp.enableCentrelines(false)
-      }
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
@@ -2385,7 +2357,7 @@ export default {
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = !this.isCentreLine
+      this.drawerOpen = true;
       this.mapResize()
       this.handleMapClick();
       this.setInitMapState();
@@ -2698,13 +2670,6 @@ export default {
           key: 'VALID',
         },
       ],
-      centreLines: [
-        {
-          label: 'Display Nerves',
-          key: 'centrelines',
-          enabled: false,
-        },
-      ],
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
@@ -2730,7 +2695,6 @@ export default {
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
       isFC: false,
-      isCentreLine: false,
       inHelp: false,
       currentBackground: 'white',
       availableBackground: ['white', 'lightskyblue', 'black'],
@@ -2945,6 +2909,9 @@ export default {
   transform: translateX(0);
   transition: all var(--el-transition-duration);
   z-index: 99;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 
   &.open {
     transform: translateX(0);
@@ -3491,7 +3458,6 @@ export default {
   }
 }
 
-.open-drawer,
 .drawer-button {
   z-index: 8;
   width: 20px;
@@ -3501,18 +3467,6 @@ export default {
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
-}
-
-.open-drawer {
-  position: absolute;
-  left: 0px;
-  background-color: #f7faff;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-}
-
-.drawer-button {
-  float: left;
-  margin-top: calc(50% - 36px);
   background-color: #f9f2fc;
 
   i {

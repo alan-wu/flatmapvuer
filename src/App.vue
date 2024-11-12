@@ -175,7 +175,8 @@ export default {
         const results = this.$refs.multi
           .getCurrentFlatmap()
           .searchSuggestions(term)
-        results.__featureIds.forEach((id) => {
+        const featureIds = results.__featureIds || results.featureIds;
+        featureIds.forEach((id) => {
           const annotation = this.$refs.multi
             .getCurrentFlatmap()
             .mapImp.annotation(id)
@@ -195,8 +196,12 @@ export default {
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
     },
-    onFlatmapChanged: function () {
+    onFlatmapChanged: function (activeSpecies) {
       this.helpMode = false;
+      // Update current flatmapImp after changing species
+      if (this.$refs.multi.$refs[activeSpecies][0].mapImp) {
+        window.flatmapImp = this.$refs.multi.$refs[activeSpecies][0].mapImp;
+      }
     },
     onHelpModeShowNext: function () {
       this.helpModeActiveItem += 1;
