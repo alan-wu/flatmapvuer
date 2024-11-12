@@ -1221,6 +1221,9 @@ export default {
       if (this.mapImp) {
         const map = this.mapImp._map;
         const initBounds = map.getBounds();
+
+        map.setMaxBounds(null); // override default
+
         this.initMapState = {
           initBounds,
         };
