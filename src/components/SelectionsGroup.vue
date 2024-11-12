@@ -42,7 +42,7 @@
           :key="item[identifierKey]"
           :label="item[identifierKey]"
         >
-          <div class="checkbox-container" 
+          <div class="checkbox-container"
             @mouseenter="checkboxMouseEnterEmit(item[identifierKey], true)"
             @mouseleave="checkboxMouseEnterEmit(item[identifierKey], false)"
             >
@@ -170,7 +170,7 @@ export default {
       this.checkedItems = val
         ? this.selections.map((a) => a[this.identifierKey])
         : []
-      
+
       this.$emit('checkAll', {
         keys: this.selections.map((a) => a[this.identifierKey]),
         value: val,
@@ -338,7 +338,7 @@ export default {
 
 :deep(.el-checkbox__label) {
   padding-left: 5px;
-  color: $app-primary-color;
+  color: inherit !important;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0px;
@@ -359,10 +359,6 @@ export default {
 :deep(.el-row) {
   height:20px;
   margin-bottom: 0;
-}
-
-:deep(.el-checkbox__label) {
-  color: $app-primary-color !important;
 }
 
 .checkbox-row {
