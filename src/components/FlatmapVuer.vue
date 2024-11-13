@@ -833,7 +833,12 @@ export default {
      * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
-      if (this.annotationSidebar) this.$emit("annotation-close")
+      if (this.annotationSidebar) {
+        this.$emit("annotation-close")
+        if (!this.featureAnnotationSubmitted) {
+          this.rollbackAnnotationEvent()
+        }
+      }
       this.closeTooltip()
       // rollback feature if not submitted
       if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
