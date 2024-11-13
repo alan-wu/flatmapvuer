@@ -1227,9 +1227,6 @@ export default {
             animate: false
           });
         }
-        if (this.$refs.centrelinesSelection) {
-          this.$refs.centrelinesSelection.reset()
-        }
         if (this.$refs.skcanSelection) {
           this.$refs.skcanSelection.reset()
         }
@@ -2158,7 +2155,7 @@ export default {
       }
     },
     /**
-     * Function to set and restore the visibility state (object) of 
+     * Function to set and restore the visibility state (object) of
      * the map with the provided argument
      */
     setVisibilityState: function (state) {
