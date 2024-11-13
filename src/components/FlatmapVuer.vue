@@ -1210,7 +1210,11 @@ export default {
     setInitMapState: function () {
       if (this.mapImp) {
         const map = this.mapImp._map;
-        const initBounds = map.getBounds();
+        const bounds = this.mapImp.options.bounds;
+        const initBounds = [
+          [bounds[0], bounds[1]],
+          [bounds[2], bounds[3]]
+        ];
 
         map.setMaxBounds(null); // override default
 
@@ -1235,7 +1239,9 @@ export default {
         });
         if (initBounds) {
           // reset zoom and position
-          map.fitBounds(initBounds);
+          map.fitBounds(initBounds, {
+            animate: false
+          });
         }
         if (this.$refs.centrelinesSelection) {
           this.$refs.centrelinesSelection.reset()
