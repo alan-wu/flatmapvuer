@@ -833,18 +833,18 @@ export default {
      * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
-      this.closeTooltip()
       if (this.annotationSidebar) this.$emit("annotation-close")
+      this.closeTooltip()
+      // rollback feature if not submitted
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
+      }
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
         // Deselect any feature when draw mode is changed
         this.changeAnnotationDrawMode({ mode: 'simple_select' })
         this.activeDrawMode = name
-        // rollback modified feature when exit edit/delete mode
-        if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-          this.rollbackAnnotationEvent()
-        }
       } else if (type === 'tool') {
         if (name) {
           const tool = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
@@ -1688,6 +1688,10 @@ export default {
       }
       if (this.annotationSidebar) this.$emit("annotation-close")
       this.closeTooltip()
+      // rollback feature if not submitted
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
+      }
     },
     /**
      * @public
