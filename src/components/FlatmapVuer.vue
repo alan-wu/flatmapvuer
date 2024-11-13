@@ -257,7 +257,7 @@ Please use `const` to assign meaningful names to them...
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
-            v-show="!(disableUI || isCentreLine)"
+            v-show="!disableUI"
           >
             <div
               class="pathway-container"
@@ -387,17 +387,6 @@ Please use `const` to assign meaningful names to them...
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
-              />
-              <selections-group
-                v-if="!(isCentreLine || isFC)  && centreLines && centreLines.length > 0"
-                title="Nerves"
-                labelKey="label"
-                identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
-                @selections-data-changed="onSelectionsDataChanged"
-                ref="centrelinesSelection"
-                key="centrelinesSelection"
               />
             </div>
             <div
@@ -658,7 +647,7 @@ import {
 import flatmapMarker from '../icons/flatmap-marker'
 import {
   FlatmapQueries,
-  findTaxonomyLabel,
+  findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -715,28 +704,6 @@ const processFTUs = (parent, key) => {
     })
   }
   return ftus
-}
-
-const processSystems = (systems) => {
-  const allSystems = []
-  if (systems && systems.length > 0) {
-    const data = { label: 'All', key: 'All', children: [] }
-    systems.forEach((system) => {
-      const child = {
-        colour: system.colour,
-        enabled: system.enabled,
-        label: system.id,
-        key: system.id,
-      }
-      const children = processFTUs(system, child.key)
-      if (children.length > 0) child.children = children
-      data.children.push(child)
-    })
-
-    allSystems.push(data)
-  }
-
-  return allSystems
 }
 
 const createUnfilledTooltipData = function () {
@@ -1173,7 +1140,6 @@ export default {
           if (children.length > 0) child.children = children
           data.children.push(child)
         })
-
         this.systems.push(data)
       }
     },
@@ -1184,14 +1150,22 @@ export default {
      * @arg {String} `flatmapAPI`,
      * @arg {Array} `taxonIdentifiers`
      */
-    processTaxon: function (flatmapAPI, taxonIdentifiers) {
+    processTaxon: function (taxonIdentifiers, state) {
       this.taxonConnectivity.length = 0
-      taxonIdentifiers.forEach((taxon) => {
-        findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-          const item = { taxon, label: value }
-          this.taxonConnectivity.push(item)
-        })
-      })
+      findTaxonomyLabels(this.mapImp, taxonIdentifiers).then((entityLabels) => {
+        if (entityLabels.length) {
+          entityLabels.forEach((entityLabel) => {
+            let enabled = true
+            if (state) {
+              enabled = state.checkAll ? true : state.checked.includes(entityLabel.taxon)
+            }
+            this.taxonConnectivity.push({...entityLabel, enabled});
+            if (this.mapImp) {
+              this.mapImp.enableConnectivityByTaxonIds(entityLabel.taxon, enabled)
+            }
+          });
+        }
+      });
     },
     /**
      * @public
@@ -1219,7 +1193,7 @@ export default {
      * @arg {Boolean} `flag`
      */
     setOutlines: function (flag) {
-      this.outlineRadio = flag
+      this.outlinesRadio = flag
       if (this.mapImp) {
         this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
       }
@@ -1232,9 +1206,6 @@ export default {
     resetView: function () {
       if (this.mapImp) {
         this.mapImp.resetMap()
-        if (this.$refs.centrelinesSelection) {
-          this.$refs.centrelinesSelection.reset()
-        }
         if (this.$refs.skcanSelection) {
           this.$refs.skcanSelection.reset()
         }
@@ -1267,18 +1238,6 @@ export default {
     zoomOut: function () {
       if (this.mapImp) {
         this.mapImp.zoomOut()
-      }
-    },
-    /**
-     * @public
-     * Function to show or hide centrelines and nodes.
-     * The parameter ``payload`` is an object with a boolean property, ``value``,
-     * ``payload.value = true/false``.
-     * @arg {Object} `payload`
-     */
-    centreLinesSelected: function (payload) {
-      if (this.mapImp) {
-        this.mapImp.enableCentrelines(payload.value)
       }
     },
     onSelectionsDataChanged: function (data) {
@@ -1321,7 +1280,7 @@ export default {
         let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
 
         // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivity(payload)
+        let connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
 
         // Check and flatten the origins node graph
         let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
@@ -1667,6 +1626,9 @@ export default {
             }
             if (eventType === 'click') {
               this.featuresAlert = data.alert
+              //The following will be used to track either a feature is selected
+              this.statesTracking.activeClick = true
+              this.statesTracking.activeTerm = data?.models
               if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
@@ -1767,13 +1729,13 @@ export default {
           this.annotation = {}
         }
       } else {
+        //require data.resource && data.feature.source
         let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // The line below only creates the tooltip if some data was found on the path
-        // result 0 is the connection, result 1 is the pubmed results from flatmap
+        // the pubmed URLs are in knowledge response.references
         if (
-          results[0] ||
-          results[1] ||
+          (results && results[0]) ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
           this.resourceForTooltip = data.resource[0]
@@ -1817,7 +1779,7 @@ export default {
      * @arg {Object} `data`
      */
     createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
       this.displayTooltip(data.resource[0])
     },
     /**
@@ -2161,6 +2123,48 @@ export default {
       }
     },
     /**
+     * Function to get and store the state (object) of the map in
+     * the provided argument
+     */
+    getVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        let comp = this.$refs[ref]
+        if (comp) {
+          state[ref] = comp.getState()
+        }
+      })
+      if (this.$refs.treeControls) {
+        const checkedKeys = this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+        //Only store first level systems (terms without .)
+        state['systemsSelection'] = checkedKeys.filter(term => !term.includes('.'))
+      }
+    },
+    /**
+     * Function to set and restore the visibility state (object) of 
+     * the map with the provided argument
+     */
+    setVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        const settings = state[ref]
+        if (settings) {
+          const comp = this.$refs[ref]
+          if (comp) {
+            comp.setState(settings)
+          }
+        }
+      })
+      if ('systemsSelection' in state) {
+        if (this.$refs.treeControls) {
+          this.$refs.treeControls.$refs.regionTree.setCheckedKeys(state['systemsSelection']);
+          this.systems[0].children.forEach((item) => {
+            this.mapImp.enableSystem(item.key, state['systemsSelection'].includes(item.key))
+          })
+        }
+      }
+    },
+    /**
      * @public
      * Function to get the state (object) of the map.
      */
@@ -2175,6 +2179,13 @@ export default {
         else if (identifier && identifier.biologicalSex)
           state['biologicalSex'] = identifier.biologicalSex
         if (identifier && identifier.uuid) state['uuid'] = identifier.uuid
+        state['viewingMode'] = this.viewingMode
+        state['searchTerm'] = this.statesTracking.activeTerm
+        state['flightPath3D'] = this.flightPath3DRadio
+        state['colour'] = this.colourRadio
+        state['outlinesRadio'] = this.outlinesRadio
+        state['background'] = this.currentBackground
+        this.getVisibilityState(state)
         return state
       }
       return undefined
@@ -2192,9 +2203,7 @@ export default {
           this.entry == state.entry &&
           (!state.biologicalSex || state.biologicalSex === this.biologicalSex)
         ) {
-          if (state.viewport) {
-            this.mapImp.setState(state.viewport)
-          }
+          this.restoreMapState(state)
         } else {
           this.createFlatmap(state)
         }
@@ -2210,7 +2219,33 @@ export default {
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
-        if (state.searchTerm) this.searchAndShowResult(state.searchTerm, true)
+        if (state.viewingMode) this.changeViewingMode(state.viewingMode)
+        //The following three are boolean
+        if ('flightPath3D' in state) this.setFlightPath3D(state.flightPath3D)
+        if ('colour' in state) this.setColour(state.colour)
+        if ('outlines' in state) this.setOutlines(state.outlines)
+        if (state.background) this.backgroundChangeCallback(state.background)
+        if (state.searchTerm) {
+          const searchTerm = state.searchTerm
+          this.searchAndShowResult(searchTerm, true)
+          if (state.viewingMode === "Neuron Connection") {
+            this.highlightConnectedPaths([searchTerm])
+          } else {
+            const geoID = this.mapImp.modelFeatureIds(searchTerm)
+            if (geoID.length > 0) {
+              const feature = this.mapImp.featureProperties(geoID[0])
+              this.searchAndShowResult(searchTerm, true)
+              const data = {
+                resource: [feature.source],
+                feature,
+                label: feature.label,
+                provenanceTaxonomy: feature.taxons
+              }
+              this.checkAndCreatePopups(data)
+            }
+          }
+        }
+        this.setVisibilityState(state)
       }
     },
     /**
@@ -2303,16 +2338,13 @@ export default {
           this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
-          this.onFlatmapReady()
-          if (this._stateToBeSet) this.restoreMapState(this._stateToBeSet)
-          else {
-            this.restoreMapState(state)
-          }
+          const stateToSet = this._stateToBeSet ? this._stateToBeSet : state
+          this.onFlatmapReady(stateToSet)
+          this.$nextTick(() => this.restoreMapState(stateToSet))
         })
       } else if (state) {
         this._stateToBeSet = {
-          viewport: state.viewport,
-          searchTerm: state.searchTerm,
+          ...state
         }
         if (this.mapImp && !this.loading)
           this.restoreMapState(this._stateToBeSet)
@@ -2354,29 +2386,25 @@ export default {
      * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
      */
-    onFlatmapReady: function () {
+    onFlatmapReady: function (state) {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
       this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
-      } else if (this.mapImp.options?.style === 'centreline') {
-        this.isCentreLine = true
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      if (!this.isCentreLine) {
-        this.mapImp.enableCentrelines(false)
-      }
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
-      this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
+      //Async, pass the state for checking
+      this.processTaxon(this.mapImp.taxonIdentifiers, state ? state['taxonSelection'] : undefined)
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = !this.isCentreLine
+      this.drawerOpen = true;
       this.mapResize()
       this.handleMapClick();
       /**
@@ -2392,9 +2420,15 @@ export default {
      */
     handleMapClick: function () {
       const _map = this.mapImp._map;
-
       if (_map) {
         _map.on('click', (e) => {
+          //A little logic to make sure we are keeping track
+          //of selected term
+          if (this.statesTracking.activeClick) {
+            this.statesTracking.activeClick = false
+          } else {
+            this.statesTracking.activeTerm = ""
+          }
           if (this.tooltipEntry.featureId) {
             this.$emit('connectivity-info-close');
           }
@@ -2430,6 +2464,7 @@ export default {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
+          this.statesTracking.activeTerm = ""
           return true
         } else {
           const searchResults = this.mapImp.search(term)
@@ -2438,6 +2473,7 @@ export default {
             searchResults.results &&
             searchResults.results.length > 0
           ) {
+            this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
             if (
               displayLabel &&
@@ -2693,13 +2729,6 @@ export default {
           key: 'VALID',
         },
       ],
-      centreLines: [
-        {
-          label: 'Display Nerves',
-          key: 'centrelines',
-          enabled: false,
-        },
-      ],
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
@@ -2725,7 +2754,6 @@ export default {
       helpModeActiveIndex: this.helpModeInitialIndex,
       yellowstar: yellowstar,
       isFC: false,
-      isCentreLine: false,
       inHelp: false,
       currentBackground: 'white',
       availableBackground: ['white', 'lightskyblue', 'black'],
@@ -2791,7 +2819,11 @@ export default {
           with: true,
           without: true,
         }
-      })
+      }),
+      statesTracking: markRaw({
+        activeClick: false,
+        activeTerm: "",
+      }),
     }
   },
   computed: {
@@ -2939,6 +2971,11 @@ export default {
   left: 0px;
   transform: translateX(0);
   transition: all var(--el-transition-duration);
+  z-index: 99;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
   &.open {
     transform: translateX(0);
   }
@@ -3484,7 +3521,6 @@ export default {
   }
 }
 
-.open-drawer,
 .drawer-button {
   z-index: 8;
   width: 20px;
@@ -3494,18 +3530,6 @@ export default {
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
-}
-
-.open-drawer {
-  position: absolute;
-  left: 0px;
-  background-color: #f7faff;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-}
-
-.drawer-button {
-  float: left;
-  margin-top: calc(50% - 36px);
   background-color: #f9f2fc;
 
   i {
