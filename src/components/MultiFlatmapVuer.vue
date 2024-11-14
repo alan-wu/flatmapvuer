@@ -538,7 +538,7 @@ export default {
      */
     minZoom: {
       type: Number,
-      default: 4,
+      default: 1,
     },
     /**
      * The option to create map on component mounted.

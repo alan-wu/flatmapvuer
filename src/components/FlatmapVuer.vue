@@ -1203,6 +1203,22 @@ export default {
         this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
       }
     },
+    setInitMapState: function () {
+      if (this.mapImp) {
+        const map = this.mapImp._map;
+        const bounds = this.mapImp.options.bounds;
+        const initBounds = [
+          [bounds[0], bounds[1]],
+          [bounds[2], bounds[3]]
+        ];
+
+        map.setMaxBounds(null); // override default
+
+        this.initMapState = {
+          initBounds,
+        };
+      }
+    },
     /**
      * @public
      * Function to toggle paths to default.
@@ -1210,7 +1226,19 @@ export default {
      */
     resetView: function () {
       if (this.mapImp) {
-        this.mapImp.resetMap()
+        // fit to window
+        const map = this.mapImp._map;
+        const { initBounds } = this.initMapState;
+        // reset rotation
+        map.resetNorthPitch({
+          animate: false,
+        });
+        if (initBounds) {
+          // reset zoom and position
+          map.fitBounds(initBounds, {
+            animate: false
+          });
+        }
         if (this.$refs.skcanSelection) {
           this.$refs.skcanSelection.reset()
         }
@@ -2150,7 +2178,7 @@ export default {
       }
     },
     /**
-     * Function to set and restore the visibility state (object) of 
+     * Function to set and restore the visibility state (object) of
      * the map with the provided argument
      */
     setVisibilityState: function (state) {
@@ -2416,6 +2444,7 @@ export default {
       this.drawerOpen = true;
       this.mapResize()
       this.handleMapClick();
+      this.setInitMapState();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -2546,7 +2575,7 @@ export default {
      */
     minZoom: {
       type: Number,
-      default: 4,
+      default: 1,
     },
     /**
      * The option to add another feature label _(`FeatureSmallSymbolLayer`)_
@@ -2732,6 +2761,7 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
+      initMapState: {},
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
