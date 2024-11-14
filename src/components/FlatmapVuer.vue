@@ -1202,9 +1202,9 @@ export default {
 
         map.setMaxBounds(null); // override default
 
-        this.initMapState = {
+        this.initMapState = markRaw({
           initBounds,
-        };
+        });
       }
     },
     /**
@@ -2732,7 +2732,7 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
-      initMapState: {},
+      initMapState: markRaw({}),
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',

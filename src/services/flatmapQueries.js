@@ -219,6 +219,9 @@ let FlatmapQueries = function () {
       if (inArray(connectivity.axons, node)) {
         terminal = true
       }
+      if (connectivity.somas && inArray(connectivity.somas, node)) {
+        terminal = true
+      }
       if (inArray(connectivity.dendrites, node)) {
         terminal = true
       }
@@ -411,7 +414,15 @@ let FlatmapQueries = function () {
 
       // Remove duplicates
       let axons = removeDuplicates(connectivity.axons)
-      let dendrites = removeDuplicates(connectivity.dendrites)
+      //Somas will become part of origins, support this for future proof
+      let dendrites = []
+      if (connectivity.somas && connectivity.somas.length > 0) {
+        dendrites.push(...connectivity.somas)
+      }
+      if (connectivity.dendrites && connectivity.dendrites.length > 0) {
+        dendrites.push(...connectivity.dendrites)
+      }
+      dendrites = removeDuplicates(dendrites)
 
       // Create list of ids to get labels for
       let conIds = this.findAllIdsFromConnectivity(connectivity)
