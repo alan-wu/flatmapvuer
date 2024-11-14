@@ -623,7 +623,7 @@ Please use `const` to assign meaningful names to them...
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef, markRaw } from 'vue'
+import { inject, provide, shallowRef, markRaw } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -751,7 +751,11 @@ export default {
     this.setStateRequired = false
   },
   setup(props) {
-    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+    let annotator = inject('$annotator')
+    if (!annotator) {
+      annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+      provide('$annotator', annotator)
+    }
     return { annotator }
   },
   methods: {
@@ -765,12 +769,13 @@ export default {
       this.activeDrawMode = undefined
       this.drawnCreatedEvent = {}
     },
-    /**
+    /** 
      * @public
      * Function to cancel a newly drawn feature.
      */
     cancelDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
+        if (this.annotationSidebar) this.$emit("annotation-close")
         this.closeTooltip()
         this.annotationEntry = {
           ...this.drawnCreatedEvent.feature,
@@ -828,17 +833,23 @@ export default {
      * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
+      if (this.annotationSidebar) {
+        this.$emit("annotation-close")
+        if (!this.featureAnnotationSubmitted) {
+          this.rollbackAnnotationEvent()
+        }
+      }
       this.closeTooltip()
+      // rollback feature if not submitted
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
+      }
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
         // Deselect any feature when draw mode is changed
         this.changeAnnotationDrawMode({ mode: 'simple_select' })
         this.activeDrawMode = name
-        // rollback modified feature when exit edit/delete mode
-        if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-          this.rollbackAnnotationEvent()
-        }
       } else if (type === 'tool') {
         if (name) {
           const tool = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
@@ -957,6 +968,7 @@ export default {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
         if (this.annotationEntry.type === 'deleted') {
+          if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           this.annotationEntry = {}
         } else {
@@ -1707,7 +1719,12 @@ export default {
       if (modeName) {
         this.viewingMode = modeName
       }
+      if (this.annotationSidebar) this.$emit("annotation-close")
       this.closeTooltip()
+      // rollback feature if not submitted
+      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
+        this.rollbackAnnotationEvent()
+      }
     },
     /**
      * @public
@@ -1734,7 +1751,9 @@ export default {
             ) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
-              if (this.activeDrawTool) this.createConnectivityBody()
+              if (this.activeDrawTool) {
+                this.createConnectivityBody()
+              }
               this.displayTooltip(
                 data.feature.feature.id,
                 centroid(data.feature.feature.geometry)
@@ -2017,6 +2036,9 @@ export default {
         }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
+      if (this.annotationSidebar && this.viewingMode === 'Annotation') {
+        this.$emit('annotation-open', {annotationEntry: this.annotationEntry, commitCallback: this.commitAnnotationEvent});
+      }
       // If UI is not disabled,
       // And connectivityInfoSidebar is not set (default) or set to `false`
       // Provenance popup will be shown on map
@@ -2025,6 +2047,7 @@ export default {
         !this.disableUI && (
           (
             this.viewingMode === 'Annotation' &&
+            !this.annotationSidebar &&
             this.userInformation
           ) ||
           (
@@ -2709,12 +2732,18 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * The option to show annotation in sidebar
+     */
+    annotationSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   provide() {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      $annotator: this.annotator,
       getFeaturesAlert: () => this.featuresAlert,
       userApiKey: this.userToken,
     }
