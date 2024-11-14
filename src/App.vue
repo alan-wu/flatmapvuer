@@ -96,7 +96,8 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef } from 'vue';
+import { AnnotationService } from '@abi-software/sparc-annotation'
+import { markRaw, shallowRef } from 'vue';
 import { Setting as ElIconSetting } from '@element-plus/icons-vue'
 import {
   ElAutocomplete as Autocomplete,
@@ -228,6 +229,11 @@ export default {
       }
     },
   },
+  provide() {
+    return {
+      $annotator: this.annotator,
+    }
+  },
   data: function () {
     return {
       consoleOn: true,
@@ -301,13 +307,14 @@ export default {
       mapSettings: [],
       //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v2/"
       //flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v3/"
-      flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/",
-      //flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
+      //flatmapAPI: "https://mapcore-demo.org/current/flatmap/v3/",
+      flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
       //flatmapAPI: 'https://mapcore-demo.org/curation/flatmap/',
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
-      ElIconSetting: shallowRef(ElIconSetting)
+      ElIconSetting: shallowRef(ElIconSetting),
+      annotator: markRaw(new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`)),
     }
   },
   mounted: function () {
