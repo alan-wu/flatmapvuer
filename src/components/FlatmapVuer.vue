@@ -1616,6 +1616,8 @@ export default {
         if (data.type === 'created') this.drawnCreatedEvent = payload
         else this.checkAndCreatePopups(payload)
       }
+      if (data.type === 'deleted') this.previousDeletedEvent = data
+      else this.previousDeletedEvent = {}
     },
     /**
      * @public
@@ -1737,6 +1739,13 @@ export default {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         if (data.feature) {
+          if (this.annotationSidebar && this.previousDeletedEvent.type === 'deleted') {
+            this.annotationEntry = {
+              ...this.previousDeletedEvent,
+              resourceId: this.serverURL
+            }
+            this.annotationEventCallback({}, { type: 'aborted' })
+          }
           this.annotationEntry = {
             ...data.feature,
             resourceId: this.serverURL,
@@ -2838,6 +2847,7 @@ export default {
       activeDrawTool: undefined,
       featureAnnotationSubmitted: false,
       drawnCreatedEvent: {},
+      previousDeletedEvent: {},
       connectionEntry: {},
       existDrawnFeatures: [], // Store all exist drawn features
       doubleClickedFeature: false,
