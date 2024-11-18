@@ -1766,6 +1766,84 @@ export default {
       );
     },
     /**
+     * Function to show connectivity tooltips on the map
+     * and highlight the nerve.
+     * @arg {Object} `payload`
+     */
+    showConnectivityTooltips: function (payload) {
+      const { connectivityInfo, data } = payload;
+      const featuresToHighlight = [];
+      const connectivityData = [];
+      const filteredConnectivityData = [];
+      const errorData = [];
+
+      if (!data.length) {
+        // Close all tooltips on the current flatmap element
+        this.removeActiveTooltips();
+      } else {
+        data.forEach((item) => {
+          connectivityData.push({
+            id: item.id,
+            label: item.label,
+          });
+        });
+      }
+
+      // to keep the highlighted path on map
+      if (connectivityInfo && connectivityInfo.featureId) {
+        featuresToHighlight.push(...connectivityInfo.featureId);
+      }
+
+      // search the features on the map first
+      if (this.mapImp) {
+        connectivityData.forEach((connectivity, i) => {
+          const {id, label} = connectivity;
+          const response = this.mapImp.search(id);
+
+          if (response?.results.length) {
+            const featureId = response?.results[0].featureId;
+
+            filteredConnectivityData.push({
+              featureId,
+              id,
+              label,
+            });
+            featuresToHighlight.push(id);
+          } else {
+            errorData.push(connectivity);
+          }
+        });
+
+        if (filteredConnectivityData.length) {
+          // show tooltip of the first item
+          // with all labels
+          this.createTooltipForConnectivity(filteredConnectivityData);
+        } else {
+          errorData.push(...connectivityData);
+          // Close all tooltips on the current flatmap element
+          this.removeActiveTooltips();
+        }
+
+        // Emit error message for connectivity graph
+        if (errorData.length) {
+          this.emitConnectivityGraphError(errorData);
+        }
+
+        // highlight all available features
+        this.mapImp.zoomToFeatures(featuresToHighlight, { noZoomIn: true });
+      }
+    },
+    emitConnectivityGraphError: function (errorData) {
+      const errorMessage = 'cannot be found on the map!';
+
+      this.$emit('connectivity-graph-error', {
+        data: {
+          errorData: errorData,
+          errorMessage: errorMessage,
+        }
+      });
+    },
+    /**
      * @public
      * Function to create/display tooltips from the provided ``data``.
      * _checkNeuronClicked shows a neuron path pop up if a path was recently clicked._
