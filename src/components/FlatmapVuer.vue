@@ -971,10 +971,8 @@ export default {
           if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           this.annotationEntry = {}
-        } else {
-          // Update 'existDrawnFeatures' when created or updated event
-          this.addAnnotationFeature()
         }
+        this.addAnnotationFeature()
       }
     },
     /**
@@ -2913,9 +2911,7 @@ export default {
             this.showAnnotator(true)
             this.userInformation = userData
             this.setFeatureAnnotated()
-            if (this.existDrawnFeatures.length === 0) {
-              this.addAnnotationFeature()
-            }
+            this.addAnnotationFeature()
           }
           this.loading = false
         })
