@@ -769,7 +769,7 @@ export default {
       this.activeDrawMode = undefined
       this.drawnCreatedEvent = {}
     },
-    /** 
+    /**
      * @public
      * Function to cancel a newly drawn feature.
      */
@@ -1725,6 +1725,14 @@ export default {
       if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
         this.rollbackAnnotationEvent()
       }
+    },
+    /**
+     * @public
+     * Function to remove active tooltips on map.
+     */
+    removeActiveTooltips: function () {
+      const tooltips = this.$el.querySelectorAll('.flatmap-tooltip-popup');
+      tooltips.forEach((tooltip) => tooltip.remove());
     },
     /**
      * @public
