@@ -649,6 +649,7 @@ import {
   FlatmapQueries,
   findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
+import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -1733,6 +1734,36 @@ export default {
     removeActiveTooltips: function () {
       const tooltips = this.$el.querySelectorAll('.flatmap-tooltip-popup');
       tooltips.forEach((tooltip) => tooltip.remove());
+    },
+    /**
+     * Function to create tooltip for the provided connectivity data.
+     * @arg {Array} `connectivityData`
+     */
+    createTooltipForConnectivity: function (connectivityData) {
+      // combine all labels to show together
+      // content type must be DOM object to use HTML
+      const labelsContainer = document.createElement('div');
+      labelsContainer.classList.add('flatmap-feature-label');
+
+      connectivityData.forEach((connectivity, i) => {
+        const { label } = connectivity;
+        labelsContainer.append(capitalise(label));
+
+        if ((i + 1) < connectivityData.length) {
+          const hr = document.createElement('hr');
+          labelsContainer.appendChild(hr);
+        }
+      });
+
+      this.mapImp.showPopup(
+        connectivityData[0].featureId,
+        labelsContainer,
+        {
+          className: 'custom-popup flatmap-tooltip-popup',
+          positionAtLastClick: false,
+          preserveSelection: true,
+        }
+      );
     },
     /**
      * @public
