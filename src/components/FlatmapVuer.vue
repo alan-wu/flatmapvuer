@@ -1583,6 +1583,9 @@ export default {
         else this.featureAnnotationSubmitted = false
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
+        if (this.annotationSidebar && data.feature.mode === 'simple_select') {
+          this.annotationEventCallback({}, { type: 'aborted' })
+        }
       } else if (data.type === 'selectionChanged') {
         this.selectedDrawnFeature = data.feature.features.length === 0 ?
           undefined : data.feature.features[0]
