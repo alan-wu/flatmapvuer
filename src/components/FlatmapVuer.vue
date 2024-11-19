@@ -766,6 +766,7 @@ export default {
     manualAbortedOnClose: function () {
       if (this.annotationSidebar) this.$emit("annotation-close")
       this.closeTooltip()
+      this.annotationEntry = {}
       this.annotationEventCallback({}, { type: 'aborted' })
     },
     /**
