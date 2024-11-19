@@ -761,6 +761,15 @@ export default {
   methods: {
     /**
      * @public
+     * Function to manually send aborted signal when annotation tooltip popup or sidebar tab closed.
+     */
+    manualAbortedOnClose: function () {
+      if (this.annotationSidebar) this.$emit("annotation-close")
+      this.closeTooltip()
+      this.annotationEventCallback({}, { type: 'aborted' })
+    },
+    /**
+     * @public
      * Function to initialise drawing.
      */
     initialiseDrawing: function () {
@@ -833,17 +842,7 @@ export default {
      * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
-      if (this.annotationSidebar) {
-        this.$emit("annotation-close")
-        if (!this.featureAnnotationSubmitted) {
-          this.rollbackAnnotationEvent()
-        }
-      }
-      this.closeTooltip()
-      // rollback feature if not submitted
-      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-        this.rollbackAnnotationEvent()
-      }
+      this.manualAbortedOnClose()
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
@@ -1065,6 +1064,7 @@ export default {
     setDrawnType: function (flag) {
       this.drawnType = flag
       if (this.mapImp) {
+        this.manualAbortedOnClose()
         this.addAnnotationFeature()
         this.initialiseDrawing()
       }
@@ -1077,6 +1077,7 @@ export default {
     setAnnotatedType: function (flag) {
       this.annotatedType = flag
       if (this.mapImp) {
+        this.manualAbortedOnClose()
         this.addAnnotationFeature()
       }
     },
@@ -1722,12 +1723,7 @@ export default {
       if (modeName) {
         this.viewingMode = modeName
       }
-      if (this.annotationSidebar) this.$emit("annotation-close")
-      this.closeTooltip()
-      // rollback feature if not submitted
-      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-        this.rollbackAnnotationEvent()
-      }
+      this.manualAbortedOnClose()
     },
     /**
      * @public
