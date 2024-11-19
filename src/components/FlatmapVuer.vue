@@ -766,7 +766,6 @@ export default {
     manualAbortedOnClose: function () {
       if (this.annotationSidebar) this.$emit("annotation-close")
       this.closeTooltip()
-      this.annotationEntry = {}
       this.annotationEventCallback({}, { type: 'aborted' })
     },
     /**
@@ -1581,6 +1580,7 @@ export default {
         // Rollback drawing when no new annotation submitted
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
+        this.annotationEntry = {}
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
         if (this.annotationSidebar && data.feature.mode === 'simple_select') {
