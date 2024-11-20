@@ -2928,6 +2928,30 @@ export default {
       if (isUIDisabled) {
         this.closeTooltip()
       }
+    },
+    activeDrawTool: function (tool) {
+      if (tool) {
+        let clickPoints = {}
+        const events = ['keydown', 'click', 'dblclick']
+        const canvas = this.$el.querySelector('.maplibregl-canvas');
+        const invalidDrawHandler = () => {
+          if (!this.isValidDrawnCreated) this.activeDrawTool = undefined
+        }
+        events.forEach((e) => {
+          canvas.addEventListener(e, (event) => {
+            if (e === 'keydown' && event.key !== 'Escape') return;
+            if (e === 'click') {
+              if (!(event.x in clickPoints)) clickPoints[event.x] = []
+              if (!clickPoints[event.x].includes(event.y)) {
+                clickPoints[event.x].push(event.y)
+                return;
+              }
+            }
+            invalidDrawHandler()
+            canvas.removeEventListener(e, invalidDrawHandler)
+          })
+        })
+      }
     }
   },
   mounted: function () {
