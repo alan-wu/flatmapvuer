@@ -761,6 +761,15 @@ export default {
   methods: {
     /**
      * @public
+     * Function to manually send aborted signal when annotation tooltip popup or sidebar tab closed.
+     */
+    manualAbortedOnClose: function () {
+      if (this.annotationSidebar) this.$emit("annotation-close")
+      this.closeTooltip()
+      this.annotationEventCallback({}, { type: 'aborted' })
+    },
+    /**
+     * @public
      * Function to initialise drawing.
      */
     initialiseDrawing: function () {
@@ -833,17 +842,7 @@ export default {
      * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
-      if (this.annotationSidebar) {
-        this.$emit("annotation-close")
-        if (!this.featureAnnotationSubmitted) {
-          this.rollbackAnnotationEvent()
-        }
-      }
-      this.closeTooltip()
-      // rollback feature if not submitted
-      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-        this.rollbackAnnotationEvent()
-      }
+      this.manualAbortedOnClose()
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
@@ -971,10 +970,8 @@ export default {
           if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           this.annotationEntry = {}
-        } else {
-          // Update 'existDrawnFeatures' when created or updated event
-          this.addAnnotationFeature()
         }
+        this.addAnnotationFeature()
       }
     },
     /**
@@ -1067,6 +1064,7 @@ export default {
     setDrawnType: function (flag) {
       this.drawnType = flag
       if (this.mapImp) {
+        this.manualAbortedOnClose()
         this.addAnnotationFeature()
         this.initialiseDrawing()
       }
@@ -1079,6 +1077,7 @@ export default {
     setAnnotatedType: function (flag) {
       this.annotatedType = flag
       if (this.mapImp) {
+        this.manualAbortedOnClose()
         this.addAnnotationFeature()
       }
     },
@@ -1581,8 +1580,12 @@ export default {
         // Rollback drawing when no new annotation submitted
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
+        this.annotationEntry = {}
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
+        if (this.annotationSidebar && data.feature.mode === 'simple_select') {
+          this.annotationEventCallback({}, { type: 'aborted' })
+        }
       } else if (data.type === 'selectionChanged') {
         this.selectedDrawnFeature = data.feature.features.length === 0 ?
           undefined : data.feature.features[0]
@@ -1615,6 +1618,8 @@ export default {
         if (data.type === 'created') this.drawnCreatedEvent = payload
         else this.checkAndCreatePopups(payload)
       }
+      if (data.type === 'deleted') this.previousDeletedEvent = data
+      else this.previousDeletedEvent = {}
     },
     /**
      * @public
@@ -1719,12 +1724,7 @@ export default {
       if (modeName) {
         this.viewingMode = modeName
       }
-      if (this.annotationSidebar) this.$emit("annotation-close")
-      this.closeTooltip()
-      // rollback feature if not submitted
-      if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-        this.rollbackAnnotationEvent()
-      }
+      this.manualAbortedOnClose()
     },
     /**
      * @public
@@ -1736,6 +1736,13 @@ export default {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         if (data.feature) {
+          if (this.annotationSidebar && this.previousDeletedEvent.type === 'deleted') {
+            this.annotationEntry = {
+              ...this.previousDeletedEvent,
+              resourceId: this.serverURL
+            }
+            this.annotationEventCallback({}, { type: 'aborted' })
+          }
           this.annotationEntry = {
             ...data.feature,
             resourceId: this.serverURL,
@@ -2837,6 +2844,7 @@ export default {
       activeDrawTool: undefined,
       featureAnnotationSubmitted: false,
       drawnCreatedEvent: {},
+      previousDeletedEvent: {},
       connectionEntry: {},
       existDrawnFeatures: [], // Store all exist drawn features
       doubleClickedFeature: false,
@@ -2910,9 +2918,7 @@ export default {
             this.showAnnotator(true)
             this.userInformation = userData
             this.setFeatureAnnotated()
-            if (this.existDrawnFeatures.length === 0) {
-              this.addAnnotationFeature()
-            }
+            this.addAnnotationFeature()
           }
           this.loading = false
         })
