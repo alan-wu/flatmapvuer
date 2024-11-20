@@ -2931,13 +2931,13 @@ export default {
     },
     activeDrawTool: function (tool) {
       if (tool) {
-        let clickPoints = {}
+        let coordinates = {}
         const events = ['keydown', 'click', 'dblclick']
         const canvas = this.$el.querySelector('.maplibregl-canvas');
         const invalidDrawHandler = () => {
           if (!this.isValidDrawnCreated) {
             this.activeDrawTool = undefined
-            clickPoints = {}
+            coordinates = {}
           }
         }
         events.forEach((e) => {
@@ -2945,16 +2945,16 @@ export default {
             if (e === 'keydown') {
               if (event.key === 'Enter') {
                 if (
-                  (tool === 'LineString' && Object.keys(clickPoints).length >= 2) ||
-                  (tool === 'Polygon' && Object.keys(clickPoints).length >= 3)
+                  (tool === 'LineString' && Object.keys(coordinates).length >= 2) ||
+                  (tool === 'Polygon' && Object.keys(coordinates).length >= 3)
                 ) return;
               } else {
                 if (event.key !== 'Escape') return;
               }
             } else if (e === 'click') {
-              if (!(event.x in clickPoints)) clickPoints[event.x] = []
-              if (!clickPoints[event.x].includes(event.y)) {
-                clickPoints[event.x].push(event.y)
+              if (!(event.x in coordinates)) coordinates[event.x] = []
+              if (!coordinates[event.x].includes(event.y)) {
+                coordinates[event.x].push(event.y)
                 return;
               }
             }
