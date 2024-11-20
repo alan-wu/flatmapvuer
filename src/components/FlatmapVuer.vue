@@ -1771,7 +1771,7 @@ export default {
      * @arg {Object} `payload`
      */
     showConnectivityTooltips: function (payload) {
-      const { connectivityInfo, data } = payload;
+      const { connectivityInfo, data, clickEvent } = payload;
       const featuresToHighlight = [];
       const connectivityData = [];
       const filteredConnectivityData = [];
@@ -1825,7 +1825,7 @@ export default {
         }
 
         // Emit error message for connectivity graph
-        if (errorData.length) {
+        if (errorData.length && clickEvent) {
           this.emitConnectivityGraphError(errorData);
         }
 
