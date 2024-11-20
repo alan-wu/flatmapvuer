@@ -114,18 +114,21 @@ Please use `const` to assign meaningful names to them...
             </div>
           </template>
           <template #default>
-            <b>Neuron Connection mode</b>
+            <b>Connectivity Graph</b>
             <p>
-              You can now view the network of neurons connected to a selected
-              neuron. This mode is located in the settings at the bottom right.
-              Once discovery mode is on, click on a neuron to see its
-              connections.
+              You can now view individual connectivity after clicking
+              on a connection in exploration mode.
             </p>
-            <b>Now can display up to 6 panes</b>
+            <b>Interactive connectivity list and graph</b>
             <p>
-              You can now display up to 6 panes in the flatmap. This allows you
-              to compare between different datasets and/or different views of
-              the same dataset.
+              Corresponding features on the map can be located when
+              hovering or clicking on the features in the connecitivity
+              list and graph.
+            </p>
+            <b>Improved state storing</b>
+            <p>
+              Current selection and visibility filters are now stored
+              when creating a permalink.
             </p>
           </template>
         </el-popover>
