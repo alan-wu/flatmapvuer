@@ -2930,38 +2930,41 @@ export default {
       }
     },
     activeDrawTool: function (tool) {
-      if (tool) {
-        let coordinates = {}
-        const events = ['keydown', 'click', 'dblclick']
-        const canvas = this.$el.querySelector('.maplibregl-canvas');
-        const invalidDrawHandler = () => {
-          if (!this.isValidDrawnCreated) {
-            this.activeDrawTool = undefined
-            coordinates = {}
-          }
+      let coordinates = [];
+      let lastClick = { x: null, y: null };
+      const canvas = this.$el.querySelector('.maplibregl-canvas');
+      const removeListeners = () => {
+        canvas.removeEventListener('keydown', handleKeyboardEvent);
+        canvas.removeEventListener('click', handleMouseEvent);
+      };
+      const handleKeyboardEvent = (event) => {
+        if (!['Escape', 'Enter'].includes(event.key)) return;
+        const isValidDraw =
+          (tool === 'Point' && coordinates.length === 1) ||
+          (tool === 'LineString' && coordinates.length >= 2) ||
+          (tool === 'Polygon' && coordinates.length >= 3);
+        if (event.key === 'Escape' || (event.key === 'Enter' && !isValidDraw)) {
+          this.activeDrawTool = undefined;
         }
-        events.forEach((e) => {
-          canvas.addEventListener(e, (event) => {
-            if (e === 'keydown') {
-              if (event.key === 'Enter') {
-                if (
-                  (tool === 'LineString' && Object.keys(coordinates).length >= 2) ||
-                  (tool === 'Polygon' && Object.keys(coordinates).length >= 3)
-                ) return;
-              } else {
-                if (event.key !== 'Escape') return;
-              }
-            } else if (e === 'click') {
-              if (!(event.x in coordinates)) coordinates[event.x] = []
-              if (!coordinates[event.x].includes(event.y)) {
-                coordinates[event.x].push(event.y)
-                return;
-              }
-            }
-            invalidDrawHandler()
-          })
-          canvas.removeEventListener(e, invalidDrawHandler)
-        })
+        removeListeners();
+      };
+      const handleMouseEvent = (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const distance = Math.sqrt((x - lastClick.x) ** 2 + (y - lastClick.y) ** 2);
+        if (distance < 8) {
+          if (!this.isValidDrawnCreated) this.activeDrawTool = undefined;
+          removeListeners();
+          return;
+        }
+        lastClick = { x, y };
+        coordinates.push(lastClick);
+      };
+      if (tool) {
+        removeListeners();
+        canvas.addEventListener('keydown', handleKeyboardEvent);
+        canvas.addEventListener('click', handleMouseEvent);
       }
     }
   },
