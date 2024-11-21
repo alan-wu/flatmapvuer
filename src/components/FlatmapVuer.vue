@@ -3048,6 +3048,44 @@ export default {
       if (isUIDisabled) {
         this.closeTooltip()
       }
+    },
+    activeDrawTool: function (tool) {
+      let coordinates = [];
+      let lastClick = { x: null, y: null };
+      const canvas = this.$el.querySelector('.maplibregl-canvas');
+      const removeListeners = () => {
+        canvas.removeEventListener('keydown', handleKeyboardEvent);
+        canvas.removeEventListener('click', handleMouseEvent);
+      };
+      const handleKeyboardEvent = (event) => {
+        if (!['Escape', 'Enter'].includes(event.key)) return;
+        const isValidDraw =
+          (tool === 'Point' && coordinates.length === 1) ||
+          (tool === 'LineString' && coordinates.length >= 2) ||
+          (tool === 'Polygon' && coordinates.length >= 3);
+        if (event.key === 'Escape' || (event.key === 'Enter' && !isValidDraw)) {
+          this.activeDrawTool = undefined;
+        }
+        removeListeners();
+      };
+      const handleMouseEvent = (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const distance = Math.sqrt((x - lastClick.x) ** 2 + (y - lastClick.y) ** 2);
+        if (distance < 8) {
+          if (!this.isValidDrawnCreated) this.activeDrawTool = undefined;
+          removeListeners();
+          return;
+        }
+        lastClick = { x, y };
+        coordinates.push(lastClick);
+      };
+      if (tool) {
+        removeListeners();
+        canvas.addEventListener('keydown', handleKeyboardEvent);
+        canvas.addEventListener('click', handleMouseEvent);
+      }
     }
   },
   mounted: function () {
