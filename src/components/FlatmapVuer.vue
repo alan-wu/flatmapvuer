@@ -662,6 +662,8 @@ import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
+const ERROR_MESSAGE = 'cannot be found on the map.';
+
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
   let coordinates
@@ -1837,12 +1839,10 @@ export default {
       }
     },
     emitConnectivityGraphError: function (errorData) {
-      const errorMessage = 'cannot be found on the map!';
-
       this.$emit('connectivity-graph-error', {
         data: {
           errorData: errorData,
-          errorMessage: errorMessage,
+          errorMessage: ERROR_MESSAGE,
         }
       });
     },
