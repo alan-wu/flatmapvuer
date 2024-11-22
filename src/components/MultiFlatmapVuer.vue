@@ -83,6 +83,7 @@
       :displayMinimap="displayMinimap"
       :showStarInLegend="showStarInLegend"
       style="height: 100%"
+      :mapManager="mapManager"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
     />
@@ -123,6 +124,9 @@ export default {
     Select,
     Popover,
     FlatmapVuer,
+  },
+  created: function () {
+    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI));
   },
   mounted: function () {
     this.initialise()
@@ -410,12 +414,11 @@ export default {
             //uuid is in the state but should be checked if it is the latest map
             //for that taxon
             return new Promise(() => {
-              const mapManager = new flatmap.MapManager(this.flatmapAPI)
               //mapManager.findMap_ is an async function so we need to wrap this with a promise
               const identifier = { taxon: mapState.entry }
               if (mapState.biologicalSex)
                 identifier['biologicalSex'] = mapState.biologicalSex
-              mapManager
+              this.mapManager
                 .findMap_(identifier)
                 .then((map) => {
                   if (map.uuid !== mapState.uuid) {
@@ -739,6 +742,7 @@ export default {
       requireInitialisation: true,
       resolveList: markRaw([]),
       initialised: false,
+      mapManager: undefined,
     }
   },
   watch: {
