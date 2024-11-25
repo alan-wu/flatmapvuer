@@ -1,6 +1,6 @@
 <template>
   <div class="multi-container" ref="multiContainer">
-    <div style="position: absolute; z-index: 10" v-if="!disableUI">
+    <div style="position: absolute; z-index: 100" v-if="!disableUI">
       <div class="species-display-text">Species</div>
       <el-popover
         content="Select a species"
@@ -38,6 +38,12 @@
 
       </el-popover>
     </div>
+    <!--
+      This event is emitted when the user chooses a different map option
+      from ``openMapOptions`` props.
+      @event open-map
+      @arg {Object} `$event`
+    -->
     <FlatmapVuer
       v-for="(item, key) in speciesList"
       :key="key"
@@ -57,16 +63,14 @@
       @resource-selected="resourceSelected"
       @ready="FlatmapReady"
       @pan-zoom-callback="panZoomCallback"
+      :annotationSidebar="annotationSidebar"
+      @annotation-open="onAnnotationOpen"
+      @annotation-close="onAnnotationClose"
       :connectivityInfoSidebar="connectivityInfoSidebar"
       @connectivity-info-open="onConnectivityInfoOpen"
       @connectivity-info-close="onConnectivityInfoClose"
-      @open-map="
-        /**
-         * This event is emitted when the user chooses a different map option
-         * from ``openMapOptions`` props.
-         * @arg $event
-         */
-        $emit('open-map', $event)"
+      @connectivity-graph-error="onConnectivityGraphError"
+      @open-map="$emit('open-map', $event)"
       @pathway-selection-changed="onSelectionsDataChanged"
       :minZoom="minZoom"
       :helpMode="activeSpecies == key && helpMode"
@@ -88,7 +92,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { reactive } from 'vue'
+import { markRaw } from 'vue'
 import EventBus from './EventBus'
 import FlatmapVuer from './FlatmapVuer.vue'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -121,12 +125,6 @@ export default {
     Popover,
     FlatmapVuer,
   },
-  beforeMount() {
-    //List for resolving the promise in initialise
-    //if initialise is called multiple times
-    this._resolveList = []
-    this._initialised = false
-  },
   mounted: function () {
     this.initialise()
     EventBus.on('onActionClick', (action) => {
@@ -144,7 +142,7 @@ export default {
   },
   methods: {
     /**
-     * @vuese
+     * @public
      * Function to initialise the component when mounted.
      * It returns a promise.
      */
@@ -161,7 +159,7 @@ export default {
                 // First look through the uuid
                 const uuid = this.availableSpecies[key].uuid
                 if (uuid && data.map((e) => e.uuid).indexOf(uuid) > 0) {
-                  this.speciesList[key] = reactive(this.availableSpecies[key])
+                  this.speciesList[key] = this.availableSpecies[key]
                 } else {
                   for (let i = 0; i < data.length; i++) {
                     if ((this.availableSpecies[key].taxo && this.availableSpecies[key].taxo === data[i].taxon) ||
@@ -173,11 +171,11 @@ export default {
                           data[i].biologicalSex ===
                             this.availableSpecies[key].biologicalSex
                         ) {
-                          this.speciesList[key] = reactive(this.availableSpecies[key])
+                          this.speciesList[key] = this.availableSpecies[key]
                           break
                         }
                       } else {
-                        this.speciesList[key] = reactive(this.availableSpecies[key])
+                        this.speciesList[key] = this.availableSpecies[key]
                         break
                       }
                     }
@@ -208,26 +206,26 @@ export default {
                   5
                 )
               }
-              this._initialised = true
+              this.initialised = true
               resolve()
               //Resolve all other promises resolve in the list
-              this._resolveList.forEach((other) => {
+              this.resolveList.forEach((other) => {
                 other()
               })
             })
-        } else if (this._initialised) {
+        } else if (this.initialised) {
           //resolve as it has been initialised
           resolve()
         } else {
           //resolve when the async initialisation is finished
-          this._resolveList.push(resolve)
+          this.resolveList.push(resolve)
         }
       })
     },
     /**
-     * @vuese
+     * @public
      * Function to emit ``resource-selected`` event with provided ``resource``.
-     * @arg action
+     * @arg {Object} `action`
      */
      resourceSelected: function (action) {
       /**
@@ -236,9 +234,9 @@ export default {
       this.$emit('resource-selected', action)
     },
     /**
-     * @vuese
+     * @public
      * Function to emit ``ready`` event after the flatmap is loaded.
-     * @arg component
+     * @arg {Object} `component`
      */
     FlatmapReady: function (component) {
       /**
@@ -248,17 +246,17 @@ export default {
       this.$emit('ready', component)
     },
     /**
-     * @vuese
+     * @public
      * Function to get the current active map.
      */
     getCurrentFlatmap: function () {
       return this.$refs[this.activeSpecies][0]
     },
     /**
-     * @vuese
+     * @public
      * Function to emit ``pan-zoom-callback`` event
      * from the event emitted in ``callback`` function from ``MapManager.loadMap()``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     panZoomCallback: function (payload) {
       /**
@@ -267,45 +265,54 @@ export default {
        */
       this.$emit('pan-zoom-callback', payload)
     },
+    onAnnotationClose: function () {
+      this.$emit('annotation-close');
+    },
+    onAnnotationOpen: function (payload) {
+      this.$emit('annotation-open', payload);
+    },
     onConnectivityInfoClose: function () {
       this.$emit('connectivity-info-close');
     },
     onConnectivityInfoOpen: function (entryData) {
       this.$emit('connectivity-info-open', entryData);
     },
+    onConnectivityGraphError: function (errorInfo) {
+      this.$emit('connectivity-graph-error', errorInfo);
+    },
     onSelectionsDataChanged: function (data) {
       this.$emit('pathway-selection-changed', data);
     },
     /**
-     * @vuese
+     * @public
      * Function to show popup on map.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showPopup(featureId, node, options)
     },
     /**
-     * @vuese
+     * @public
      * Function to show marker popup.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showMarkerPopup: function (featureId, node, options) {
       let map = this.getCurrentFlatmap()
       map.showMarkerPopup(featureId, node, options)
     },
     /**
-     * @vuese
+     * @public
      * Function to set species.
      * This function is called on the first load and
      * when user changes the species.
-     * @arg species,
-     * @arg state,
-     * @arg numberOfRetry
+     * @arg {Array} `species`,
+     * @arg {Object} `state`,
+     * @arg {Number} `numberOfRetry`
      */
     setSpecies: function (species, state, numberOfRetry) {
       if (this.$refs && species in this.$refs) {
@@ -327,7 +334,6 @@ export default {
       }
     },
     /**
-     * @vuese
      * Function to switch to the latest existing map from
      * a legacy map of the same species.
      * @arg state
@@ -349,11 +355,9 @@ export default {
       }
     },
     /**
-     * @vuese
      * Create a legacy entry with the provided information
      * @arg state,
      * @arg taxo,
-     * @arg uuid
      *
      * @private
      */
@@ -364,11 +368,11 @@ export default {
           if (state.species.slice(0, 6) === 'Legacy') name = state.species
           else name = name + ` ${state.species}`
         }
-        this.speciesList[name] = reactive({
+        this.speciesList[name] = {
           taxo: taxo,
           isLegacy: true,
           displayWarning: true,
-        })
+        }
         return {
           species: name,
           state: {
@@ -381,7 +385,6 @@ export default {
       }
     },
     /**
-     * @vuese
      * Function used to translate the legacy map state to one that can be used in current
      * flatmap if required. If it is a legacy, an Select entry will be added
      * @arg state
@@ -440,11 +443,9 @@ export default {
       })
     },
     /**
-     * @vuese
+     * @public
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
-     *
-     * @public
      */
     getState: function () {
       let state = {
@@ -456,12 +457,10 @@ export default {
       return state
     },
     /**
-     * @vuese
+     * @public
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
-     * @arg state
-     *
-     * @public
+     * @arg {Object} state
      */
     setState: function (state) {
       if (state) {
@@ -482,8 +481,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to activate help mode tooltip by item index number
+     * @arg {Number} `index`
      */
     activateTooltipByIndex: function (index) {
       return (
@@ -492,8 +492,9 @@ export default {
       );
     },
     /**
-     * @vuese
+     * @public
      * Function to check the last item of help mode
+     * @arg {Boolean} `isLastItem`
      */
     onHelpModeLastItem: function (isLastItem) {
       if (isLastItem) {
@@ -501,7 +502,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to emit event after a tooltip is shown.
      */
     onTooltipShown: function () {
@@ -511,7 +512,7 @@ export default {
       this.$emit('shown-tooltip');
     },
     /**
-     * @vuese
+     * @public
      * Function to emit event after a tooltip on the map is shown.
      */
     onMapTooltipShown: function () {
@@ -519,6 +520,15 @@ export default {
        * This event is emitted after a tooltip on Flatmap's map is shown.
        */
       this.$emit('shown-map-tooltip');
+    },
+    /**
+     * @public
+     * Function to change the view mode of the map.
+     * @arg {String} `modeName`
+     */
+    changeViewingMode: function (modeName) {
+      let map = this.getCurrentFlatmap()
+      map.changeViewingMode(modeName)
     },
   },
   props: {
@@ -535,7 +545,7 @@ export default {
      */
     minZoom: {
       type: Number,
-      default: 4,
+      default: 1,
     },
     /**
      * The option to create map on component mounted.
@@ -717,12 +727,21 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * The option to show connectivity information in sidebar
+     */
+     annotationSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
       activeSpecies: undefined,
       speciesList: {},
       requireInitialisation: true,
+      resolveList: markRaw([]),
+      initialised: false,
     }
   },
   watch: {
@@ -756,9 +775,6 @@ export default {
 }
 
 .select-box {
-  width: 120px;
-  border-radius: 4px;
-  border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
@@ -770,6 +786,27 @@ export default {
     padding-top: 0.25em;
   }
   :deep() {
+    .el-select__wrapper {
+      position: relative;
+      width: fit-content;
+      box-shadow: none;
+      border-radius: 4px;
+      border: 1px solid var(--el-border-color);
+      &.is-focused {
+        border-color: $app-primary-color;
+      }
+    }
+    .el-select__selection {
+      width: fit-content;
+      position: relative;
+    }
+    .el-select__placeholder {
+      position: relative;
+      top: auto;
+      transform: none;
+      min-width: 80px;
+      width: fit-content;
+    }
     .el-input {
       .el-input__wrapper{
         &is-focus,

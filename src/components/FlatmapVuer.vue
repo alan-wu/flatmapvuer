@@ -54,7 +54,7 @@ Please use `const` to assign meaningful names to them...
                 SCKAN </a
               >.
             </p>
-            <p v-else @mouseover="showTooltip(6)" @mouseout="hideTooltip(6)">
+            <p v-else @mouseover="showTooltip(7)" @mouseout="hideTooltip(7)">
               This map displays the connectivity of neuron populations.
               Specifically, those from the primarily rat-based
               <a
@@ -76,8 +76,8 @@ Please use `const` to assign meaningful names to them...
               <div
                 class="warning-icon"
                 v-if="displayWarning"
-                @mouseover="showTooltip(6)"
-                @mouseout="hideTooltip(6)"
+                @mouseover="showTooltip(7)"
+                @mouseout="hideTooltip(7)"
               >
                 <el-icon><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
@@ -114,18 +114,21 @@ Please use `const` to assign meaningful names to them...
             </div>
           </template>
           <template #default>
-            <b>Neuron Connection mode</b>
+            <b>Connectivity Graph</b>
             <p>
-              You can now view the network of neurons connected to a selected
-              neuron. This mode is located in the settings at the bottom right.
-              Once discovery mode is on, click on a neuron to see its
-              connections.
+              You can now view individual connectivity after clicking
+              on a connection in exploration mode.
             </p>
-            <b>Now can display up to 6 panes</b>
+            <b>Interactive connectivity list and graph</b>
             <p>
-              You can now display up to 6 panes in the flatmap. This allows you
-              to compare between different datasets and/or different views of
-              the same dataset.
+              Corresponding features on the map can be located when
+              hovering or clicking on the features in the connecitivity
+              list and graph.
+            </p>
+            <b>Improved state storing</b>
+            <p>
+              Current selection and visibility filters are now stored
+              when creating a permalink.
             </p>
           </template>
         </el-popover>
@@ -176,13 +179,17 @@ Please use `const` to assign meaningful names to them...
           ref="zoomInPopover"
         >
           <template #reference>
-            <map-svg-icon
-              icon="zoomIn"
-              class="icon-button zoomIn"
+            <div
+              class="icon-button-container"
               @click="zoomIn()"
               @mouseover="showTooltip(1)"
               @mouseout="hideTooltip(1)"
-            />
+            >
+              <map-svg-icon
+                class="icon-button zoomIn"
+                icon="zoomIn"
+              />
+            </div>
           </template>
         </el-popover>
         <el-popover
@@ -196,13 +203,17 @@ Please use `const` to assign meaningful names to them...
           ref="zoomOutPopover"
         >
           <template #reference>
-            <map-svg-icon
-              icon="zoomOut"
-              class="icon-button zoomOut"
+            <div
+              class="icon-button-container"
               @click="zoomOut()"
               @mouseover="showTooltip(2)"
               @mouseout="hideTooltip(2)"
-            />
+            >
+              <map-svg-icon
+                class="icon-button zoomOut"
+                icon="zoomOut"
+              />
+            </div>
           </template>
         </el-popover>
         <el-popover
@@ -221,13 +232,17 @@ Please use `const` to assign meaningful names to them...
             window
           </div>
           <template #reference>
-            <map-svg-icon
-              icon="fitWindow"
-              class="icon-button fitWindow"
+            <div
+              class="icon-button-container"
               @click="resetView()"
               @mouseover="showTooltip(3)"
               @mouseout="hideTooltip(3)"
-            />
+            >
+              <map-svg-icon
+                class="icon-button fitWindow"
+                icon="fitWindow"
+              />
+            </div>
           </template>
         </el-popover>
       </div>
@@ -285,7 +300,7 @@ Please use `const` to assign meaningful names to them...
                 width="200"
                 trigger="manual"
                 popper-class="flatmap-popper flatmap-marker-popper"
-                :visible="hoverVisibilities[5].value"
+                :visible="hoverVisibilities[0].value"
                 ref="markerPopover"
               >
                 <template #reference>
@@ -363,7 +378,7 @@ Please use `const` to assign meaningful names to them...
                 key="pathwaysSelection"
               />
               <selections-group
-                v-if="!isFC && taxonConnectivity && taxonConnectivity.length > 0"
+                v-if="taxonConnectivity && taxonConnectivity.length > 0"
                 title="Studied in"
                 labelKey="label"
                 identifierKey="taxon"
@@ -375,17 +390,6 @@ Please use `const` to assign meaningful names to them...
                 @checkAll="checkAllTaxons"
                 ref="taxonSelection"
                 key="taxonSelection"
-              />
-              <selections-group
-                v-if="!isFC && centreLines && centreLines.length > 0"
-                title="Nerves"
-                labelKey="label"
-                identifierKey="key"
-                :selections="centreLines"
-                @changed="centreLinesSelected"
-                @selections-data-changed="onSelectionsDataChanged"
-                ref="centrelinesSelection"
-                key="centrelinesSelection"
               />
             </div>
             <div
@@ -410,13 +414,14 @@ Please use `const` to assign meaningful names to them...
         virtual-triggering
       >
         <el-row v-for="item in openMapOptions" :key="item.key">
+          <!--
+            This event is emitted when the user chooses a different map option
+            from ``openMapOptions`` props.
+            @event open-map
+            @arg {String} `mapOption.key`
+          -->
           <el-button type="primary" plain
-            @click="/**
-             * This event is emitted when the user chooses a different map option
-             * from ``openMapOptions`` props.
-             * @arg mapOption.key
-            * */
-            $emit('open-map', item.key)"
+            @click="$emit('open-map', item.key)"
           >
             {{ item.display }}
           </el-button>
@@ -437,19 +442,19 @@ Please use `const` to assign meaningful names to them...
           <el-row class="backgroundControl">
             <div style="margin-bottom: 2px;">
               <template
-                  v-for="(item, i) in viewingModes"
-                  :key="item + i"
+                  v-for="(value, key, index) in viewingModes"
+                  :key="key"
                 >
-                  <template v-if="item.name === viewingMode">
-                    <span class="viewing-mode-title"><b >{{ item.name }}</b></span>
+                  <template v-if="key === viewingMode">
+                    <span class="viewing-mode-title"><b >{{ key }}</b></span>
                   </template>
                   <template v-else>
-                    <span class="viewing-mode-unselected" @click="changeViewingMode(i)">{{ item.name }}</span>
+                    <span class="viewing-mode-unselected" @click="changeViewingMode(key)">{{ key }}</span>
                   </template>
               </template>
             </div>
             <el-row class="viewing-mode-description">
-              {{ viewingModes[viewingModeIndex].description}}
+              {{ viewingModes[viewingMode] }}
             </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
@@ -506,8 +511,8 @@ Please use `const` to assign meaningful names to them...
               class="flatmap-radio"
               @change="setFlightPath3D"
             >
-            <el-radio :label="false">2D</el-radio>
-            <el-radio :label="true">3D</el-radio>
+            <el-radio :value="false">2D</el-radio>
+            <el-radio :value="true">3D</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -518,8 +523,8 @@ Please use `const` to assign meaningful names to them...
               class="flatmap-radio"
               @change="setColour"
             >
-              <el-radio :label="true">Colour</el-radio>
-              <el-radio :label="false">Greyscale</el-radio>
+              <el-radio :value="true">Colour</el-radio>
+              <el-radio :value="false">Greyscale</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -530,8 +535,8 @@ Please use `const` to assign meaningful names to them...
               class="flatmap-radio"
               @change="setOutlines"
             >
-              <el-radio :label="true">Show</el-radio>
-              <el-radio :label="false">Hide</el-radio>
+              <el-radio :value="true">Show</el-radio>
+              <el-radio :value="false">Hide</el-radio>
             </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -565,14 +570,18 @@ Please use `const` to assign meaningful names to them...
             ref="openMapPopover"
           >
             <template #reference>
-              <map-svg-icon
+              <div
                 v-if="enableOpenMapUI && openMapOptions.length > 0"
                 ref="openMapRef"
-                icon="openMap"
-                class="icon-button open-map-button"
+                class="icon-button-container"
                 @mouseover="showTooltip(4)"
                 @mouseout="hideTooltip(4)"
-              />
+              >
+                <map-svg-icon
+                  icon="openMap"
+                  class="icon-button open-map-button"
+                />
+              </div>
             </template>
           </el-popover>
         </el-row>
@@ -587,13 +596,17 @@ Please use `const` to assign meaningful names to them...
             ref="settingsPopover"
           >
             <template #reference>
-              <map-svg-icon
+              <div
                 ref="backgroundIconRef"
-                icon="changeBckgd"
-                class="icon-button"
+                class="icon-button-container"
                 @mouseover="showTooltip(5)"
                 @mouseout="hideTooltip(5)"
-              />
+              >
+                <map-svg-icon
+                  icon="changeBckgd"
+                  class="icon-button"
+                />
+              </div>
             </template>
           </el-popover>
         </el-row>
@@ -613,7 +626,7 @@ Please use `const` to assign meaningful names to them...
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef, markRaw } from 'vue'
+import { inject, provide, shallowRef, markRaw } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -637,8 +650,9 @@ import {
 import flatmapMarker from '../icons/flatmap-marker'
 import {
   FlatmapQueries,
-  findTaxonomyLabel,
+  findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
+import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import * as flatmap from '@abi-software/flatmap-viewer'
@@ -647,6 +661,8 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+
+const ERROR_MESSAGE = 'cannot be found on the map.';
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -696,28 +712,6 @@ const processFTUs = (parent, key) => {
   return ftus
 }
 
-const processSystems = (systems) => {
-  const allSystems = []
-  if (systems && systems.length > 0) {
-    const data = { label: 'All', key: 'All', children: [] }
-    systems.forEach((system) => {
-      const child = {
-        colour: system.colour,
-        enabled: system.enabled,
-        label: system.id,
-        key: system.id,
-      }
-      const children = processFTUs(system, child.key)
-      if (children.length > 0) child.children = children
-      data.children.push(child)
-    })
-
-    allSystems.push(data)
-  }
-
-  return allSystems
-}
-
 const createUnfilledTooltipData = function () {
   return {
     destinations: [],
@@ -757,20 +751,31 @@ export default {
     DrawToolbar
   },
   beforeCreate: function () {
-    this.mapManager = undefined
-    this.mapImp = undefined
     //The state watcher may triggered before
     //created causing issue, This flag will
     //resolve this issue.
     this.setStateRequired = false
   },
   setup(props) {
-    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+    let annotator = inject('$annotator')
+    if (!annotator) {
+      annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+      provide('$annotator', annotator)
+    }
     return { annotator }
   },
   methods: {
     /**
-     * @vuese
+     * @public
+     * Function to manually send aborted signal when annotation tooltip popup or sidebar tab closed.
+     */
+    manualAbortedOnClose: function () {
+      if (this.annotationSidebar) this.$emit("annotation-close")
+      this.closeTooltip()
+      this.annotationEventCallback({}, { type: 'aborted' })
+    },
+    /**
+     * @public
      * Function to initialise drawing.
      */
     initialiseDrawing: function () {
@@ -780,11 +785,12 @@ export default {
       this.drawnCreatedEvent = {}
     },
     /**
-     * @vuese
+     * @public
      * Function to cancel a newly drawn feature.
      */
     cancelDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
+        if (this.annotationSidebar) this.$emit("annotation-close")
         this.closeTooltip()
         this.annotationEntry = {
           ...this.drawnCreatedEvent.feature,
@@ -795,9 +801,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display connected features' tooltip for drawn connectivity.
-     * @arg id
+     * @param {String} `id`
      */
     connectedFeatureTooltip: function (value) {
       if (this.mapImp) {
@@ -820,7 +826,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to confirm a newly drawn feature.
      */
     confirmDrawnFeature: function () {
@@ -836,22 +842,19 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to process the annotation toolbar click events.
-     * @arg type
+     * @arg {String} `type`
+     * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
-      this.closeTooltip()
+      this.manualAbortedOnClose()
       this.doubleClickedFeature = false
       this.connectionEntry = {}
       if (type === 'mode') {
         // Deselect any feature when draw mode is changed
         this.changeAnnotationDrawMode({ mode: 'simple_select' })
         this.activeDrawMode = name
-        // rollback modified feature when exit edit/delete mode
-        if (Object.keys(this.annotationEntry).length > 0 && !this.featureAnnotationSubmitted) {
-          this.rollbackAnnotationEvent()
-        }
       } else if (type === 'tool') {
         if (name) {
           const tool = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
@@ -865,10 +868,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fire annotation event based on the provided ``data``.
      * Either edit or delete action.
-     * @arg data
+     * @arg {Object} `data`
      */
     annotationDrawModeEvent: function (data) {
       if (this.activeDrawMode === 'Edit') {
@@ -907,9 +910,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to update the annotation draw mode.
-     * @arg mode
+     * @arg {Object} `mode`
      */
     changeAnnotationDrawMode: function (mode) {
       if (this.mapImp) {
@@ -917,7 +920,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to remove all drawn annotations from flatmap annotation layer.
      */
     clearAnnotationFeature: function () {
@@ -929,7 +932,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fire the ``trash`` action.
      * See https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#trash-draw for more details.
      */
@@ -942,7 +945,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to rollback the failure drawn from flatmap annotation layer.
      */
     rollbackAnnotationEvent: function () {
@@ -956,9 +959,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to commit the emitted ``annotation`` data from successful new drawn to flatmap annotation layer.
-     * @arg annotation
+     * @arg {Object} `annotation`
      */
     commitAnnotationEvent: function (annotation) {
       if (
@@ -970,19 +973,18 @@ export default {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
         if (this.annotationEntry.type === 'deleted') {
+          if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           this.annotationEntry = {}
-        } else {
-          // Update 'existDrawnFeatures' when created or updated event
-          this.addAnnotationFeature()
         }
+        this.addAnnotationFeature()
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fetch annotated item id.
-     * @arg userId,
-     * @arg participated
+     * @arg {String} `userId`,
+     * @arg {String} `participated`
      */
     fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
       let annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
@@ -991,7 +993,7 @@ export default {
       return annotatedItemIds
     },
     /**
-     * @vuese
+     * @public
      * Function to add existing drawn annotations to flatmap.
      */
     setFeatureAnnotated: async function () {
@@ -1003,10 +1005,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to fetch drawn features.
-     * @arg userId,
-     * @arg participated
+     * @arg {String} `userId`,
+     * @arg {String} `participated`
      */
     fetchDrawnFeatures: async function (userId, participated) {
       const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
@@ -1022,7 +1024,7 @@ export default {
       return drawnFeatures
     },
     /**
-     * @vuese
+     * @public
      * Function to draw existing drawn annotations based on selector.
      */
     addAnnotationFeature: async function () {
@@ -1048,9 +1050,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display annotator toolbar.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     showAnnotator: function (flag) {
       if (this.mapImp) {
@@ -1061,32 +1063,34 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to switch the type of annotation.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setDrawnType: function (flag) {
       this.drawnType = flag
       if (this.mapImp) {
+        this.manualAbortedOnClose()
         this.addAnnotationFeature()
         this.initialiseDrawing()
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to switch the type of person who annotated.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setAnnotatedType: function (flag) {
       this.annotatedType = flag
       if (this.mapImp) {
+        this.manualAbortedOnClose()
         this.addAnnotationFeature()
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to switch from 2D to 3D
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setFlightPath3D: function (flag) {
       this.flightPath3DRadio = flag
@@ -1095,7 +1099,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to view the latest map (example when you are on legacy map).
      */
     viewLatestMap: function () {
@@ -1115,10 +1119,10 @@ export default {
       this.$emit('view-latest-map', state)
     },
     /**
-     * @vuese
+     * @public
      * Function to change the background colour of the map
      * by providing the ``colour``.
-     * @arg colour
+     * @arg {String} `colour`
      */
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour
@@ -1127,9 +1131,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to process a list of a FC flatmap's systems.
-     * @arg systems
+     * @arg {Array} `systems`
      */
     processSystems: function (systems) {
       this.systems.length = 0
@@ -1146,67 +1150,99 @@ export default {
           if (children.length > 0) child.children = children
           data.children.push(child)
         })
-
         this.systems.push(data)
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to add taxon identifiers into the taxon connectivity array,
      * by retrieving their corresponding labels using the flatmap API.
-     * @arg flatmapAPI,
-     * @arg taxonIdentifiers
+     * @arg {String} `flatmapAPI`,
+     * @arg {Array} `taxonIdentifiers`
      */
-    processTaxon: function (flatmapAPI, taxonIdentifiers) {
+    processTaxon: function (taxonIdentifiers, state) {
       this.taxonConnectivity.length = 0
-      taxonIdentifiers.forEach((taxon) => {
-        findTaxonomyLabel(flatmapAPI, taxon).then((value) => {
-          const item = { taxon, label: value }
-          this.taxonConnectivity.push(item)
-        })
-      })
+      findTaxonomyLabels(this.mapImp, taxonIdentifiers).then((entityLabels) => {
+        if (entityLabels.length) {
+          entityLabels.forEach((entityLabel) => {
+            let enabled = true
+            if (state) {
+              enabled = state.checkAll ? true : state.checked.includes(entityLabel.taxon)
+            }
+            this.taxonConnectivity.push({...entityLabel, enabled});
+            if (this.mapImp) {
+              this.mapImp.enableConnectivityByTaxonIds(entityLabel.taxon, enabled)
+            }
+          });
+        }
+      });
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the display of the bottom-left drawer container.
      */
     toggleDrawer: function () {
       this.drawerOpen = !this.drawerOpen
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle colour/greyscale of organs.
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setColour: function (flag) {
       this.colourRadio = flag
       if (this.mapImp) {
-        this.mapImp.setColour({ colour: flag, outline: this.outlinesRadio })
+        this.mapImp.setPaint({ colour: flag, outline: this.outlinesRadio })
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle outlines f organs.
      * The parameter ``flag`` is a boolean, ``true`` to show outlines, ``false`` to hide outlines.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     setOutlines: function (flag) {
-      this.outlineRadio = flag
+      this.outlinesRadio = flag
       if (this.mapImp) {
-        this.mapImp.setColour({ colour: this.colourRadio, outline: flag })
+        this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
+      }
+    },
+    setInitMapState: function () {
+      if (this.mapImp) {
+        const map = this.mapImp._map;
+        const bounds = this.mapImp.options.bounds;
+        const initBounds = [
+          [bounds[0], bounds[1]],
+          [bounds[2], bounds[3]]
+        ];
+
+        map.setMaxBounds(null); // override default
+
+        this.initMapState = markRaw({
+          initBounds,
+        });
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle paths to default.
      * Also called when the associated button is pressed.
      */
     resetView: function () {
       if (this.mapImp) {
-        this.mapImp.resetMap()
-        if (this.$refs.centrelinesSelection) {
-          this.$refs.centrelinesSelection.reset()
+        // fit to window
+        const map = this.mapImp._map;
+        const { initBounds } = this.initMapState;
+        // reset rotation
+        map.resetNorthPitch({
+          animate: false,
+        });
+        if (initBounds) {
+          // reset zoom and position
+          map.fitBounds(initBounds, {
+            animate: false
+          });
         }
         if (this.$refs.skcanSelection) {
           this.$refs.skcanSelection.reset()
@@ -1223,7 +1259,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to zoom in.
      * Also called when the associated button is pressed.
      */
@@ -1233,25 +1269,13 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to zoom out.
      * Also called when the associated button is pressed.
      */
     zoomOut: function () {
       if (this.mapImp) {
         this.mapImp.zoomOut()
-      }
-    },
-    /**
-     * @vuese
-     * Function to show or hide centrelines and nodes.
-     * The parameter ``payload`` is an object with a boolean property, ``value``,
-     * ``payload.value = true/false``.
-     * @arg payload
-     */
-    centreLinesSelected: function (payload) {
-      if (this.mapImp) {
-        this.mapImp.enableCentrelines(payload.value)
       }
     },
     onSelectionsDataChanged: function (data) {
@@ -1281,10 +1305,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to highlight the connected paths
      * by providing path model identifier, ``pathId``.
-     * @arg pathId
+     * @arg {String} `pathId`
      */
     highlightConnectedPaths: async function (payload) {
       if (this.mapImp) {
@@ -1294,7 +1318,7 @@ export default {
         let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
 
         // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivity(payload)
+        let connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
 
         // Check and flatten the origins node graph
         let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
@@ -1355,10 +1379,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable mouse enter and leave event for
      * alert checkbox
-     * @arg payload
+     * @arg {Object} `payload`
      */
     alertMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
@@ -1380,10 +1404,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) pathways with/without alert
      * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
      alertSelected: function (payload) {
       if (this.mapImp) {
@@ -1404,10 +1428,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) all alerts
      * option by providing ``flag`` (true/false).
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
      checkAllAlerts: function (payload) {
       if (this.mapImp) {
@@ -1422,10 +1446,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) the system
      * by providing ``kay, value`` ``payload`` object ``{systemId, true/false}``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     systemSelected: function (payload) {
       if (this.mapImp) {
@@ -1433,10 +1457,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to enable/disable (show/hide) all systems
      * by providing ``flag`` (true/false).
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     checkAllSystems: function (flag) {
       if (this.mapImp) {
@@ -1446,18 +1470,18 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display features with annotation matching the provided term.
-     * @arg models
+     * @arg {String} `models`
      */
     ftuSelected: function (models) {
       this.searchAndShowResult(models, true)
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the layer
      * by providing ``{layerId, true/false}`` in ``payload``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     layersSelected: function (payload) {
       if (this.mapImp) {
@@ -1465,10 +1489,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide all layers
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     checkAllLayers: function (payload) {
       if (this.mapImp) {
@@ -1478,10 +1502,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide connectivity features studied in particular species
      * by providing ``{taxonId, true/false}`` in ``payload.key, payload.value``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     taxonsSelected: function (payload) {
       if (this.mapImp) {
@@ -1496,7 +1520,7 @@ export default {
           this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
           // reset visibility of paths
-          this.mapImp.selectGeoJSONFeatures("-1")
+          this.mapImp.unselectGeoJSONFeatures()
           payload.selections.forEach((item) => {
             let show = payload.checked.includes(item.taxon)
             this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
@@ -1505,10 +1529,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide connectivity features studied in particular species
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     checkAllTaxons: function (payload) {
       if (this.mapImp) {
@@ -1518,10 +1542,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to hide or show paths of a given type
      * by providing ``{pathType, true/false}`` in ``payload.key, payload.value``.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     pathwaysSelected: function (payload) {
       if (this.mapImp) {
@@ -1529,10 +1553,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to hide or show paths of a given type
      * by providing ``payload`` with ``payload.keys`` array and ``payload.value`` flag.
-     * @arg payload
+     * @arg {Object} `payload`
      */
     checkAllPathways: function (payload) {
       if (this.mapImp) {
@@ -1542,19 +1566,19 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to generate callbacks as a result of panning/zooming the map.
      * ``flag`` (boolean) - generate callbacks when ``true``, otherwise disable them.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     enablePanZoomEvents: function (flag) {
       this.mapImp.enablePanZoomEvents(flag)
     },
     /**
-     * @vuese
+     * @public
      * Function to process annotation callbacks, invoked when events occur with the map.
-     * @arg payload,
-     * @arg data
+     * @arg {Object} `payload`,
+     * @arg {Object} `data`
      */
     annotationEventCallback: function (payload, data) {
       // Popup closed will trigger aborted event this is used to control the tooltip
@@ -1562,8 +1586,12 @@ export default {
         // Rollback drawing when no new annotation submitted
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
+        this.annotationEntry = {}
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
+        if (this.annotationSidebar && data.feature.mode === 'simple_select') {
+          this.annotationEventCallback({}, { type: 'aborted' })
+        }
       } else if (data.type === 'selectionChanged') {
         this.selectedDrawnFeature = data.feature.features.length === 0 ?
           undefined : data.feature.features[0]
@@ -1596,9 +1624,11 @@ export default {
         if (data.type === 'created') this.drawnCreatedEvent = payload
         else this.checkAndCreatePopups(payload)
       }
+      if (data.type === 'deleted') this.previousDeletedEvent = data
+      else this.previousDeletedEvent = {}
     },
     /**
-     * @vuese
+     * @public
      * A callback function, invoked when events occur with the map.
      * The first parameter gives the type of event, the second provides details about the event.
      * _(This is the ``callback`` function from ``MapManager.loadMap()``)_.
@@ -1642,6 +1672,9 @@ export default {
             }
             if (eventType === 'click') {
               this.featuresAlert = data.alert
+              //The following will be used to track either a feature is selected
+              this.statesTracking.activeClick = true
+              this.statesTracking.activeTerm = data?.models
               if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
@@ -1689,30 +1722,149 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function triggered by viewing mode change.
      * (e.g., from 'Exploration' to 'Annotation')
      * All tooltips and popups currently showing on map will be closed
-     * when this function is triggered. Optional index can be provided, this will
-     * switch the provided view mode to the first index.
+     * @arg {String} `modeName`
      */
-     changeViewingMode: function (newModeIndex=null) {
-      if (newModeIndex !== null) {
-        //this.viewingMode = this.viewingModes[newModeIndex].name
-        this.viewingModeIndex = newModeIndex
+    changeViewingMode: function (modeName) {
+      if (modeName) {
+        this.viewingMode = modeName
       }
-      this.closeTooltip()
+      this.manualAbortedOnClose()
     },
     /**
-     * @vuese
+     * @public
+     * Function to remove active tooltips on map.
+     */
+    removeActiveTooltips: function () {
+      const tooltips = this.$el.querySelectorAll('.flatmap-tooltip-popup');
+      tooltips.forEach((tooltip) => tooltip.remove());
+    },
+    /**
+     * Function to create tooltip for the provided connectivity data.
+     * @arg {Array} `connectivityData`
+     */
+    createTooltipForConnectivity: function (connectivityData) {
+      // combine all labels to show together
+      // content type must be DOM object to use HTML
+      const labelsContainer = document.createElement('div');
+      labelsContainer.classList.add('flatmap-feature-label');
+
+      connectivityData.forEach((connectivity, i) => {
+        const { label } = connectivity;
+        labelsContainer.append(capitalise(label));
+
+        if ((i + 1) < connectivityData.length) {
+          const hr = document.createElement('hr');
+          labelsContainer.appendChild(hr);
+        }
+      });
+
+      this.mapImp.showPopup(
+        connectivityData[0].featureId,
+        labelsContainer,
+        {
+          className: 'custom-popup flatmap-tooltip-popup',
+          positionAtLastClick: false,
+          preserveSelection: true,
+        }
+      );
+    },
+    /**
+     * Function to show connectivity tooltips on the map
+     * and highlight the nerve.
+     * @arg {Object} `payload`
+     */
+    showConnectivityTooltips: function (payload) {
+      const { connectivityInfo, data } = payload;
+      const featuresToHighlight = [];
+      const connectivityData = [];
+      const filteredConnectivityData = [];
+      const errorData = [];
+
+      if (!data.length) {
+        // Close all tooltips on the current flatmap element
+        this.removeActiveTooltips();
+      } else {
+        data.forEach((item) => {
+          connectivityData.push({
+            id: item.id,
+            label: item.label,
+          });
+        });
+      }
+
+      // to keep the highlighted path on map
+      if (connectivityInfo && connectivityInfo.featureId) {
+        featuresToHighlight.push(...connectivityInfo.featureId);
+      }
+
+      // search the features on the map first
+      if (this.mapImp) {
+        connectivityData.forEach((connectivity, i) => {
+          const {id, label} = connectivity;
+          const response = this.mapImp.search(id);
+
+          if (response?.results.length) {
+            const featureId = response?.results[0].featureId;
+
+            filteredConnectivityData.push({
+              featureId,
+              id,
+              label,
+            });
+            featuresToHighlight.push(id);
+          } else {
+            errorData.push(connectivity);
+          }
+        });
+
+        if (filteredConnectivityData.length) {
+          // show tooltip of the first item
+          // with all labels
+          this.createTooltipForConnectivity(filteredConnectivityData);
+        } else {
+          errorData.push(...connectivityData);
+          // Close all tooltips on the current flatmap element
+          this.removeActiveTooltips();
+        }
+
+        // Emit error message for connectivity graph
+        if (errorData.length) {
+          this.emitConnectivityGraphError(errorData);
+        }
+
+        // highlight all available features
+        this.mapImp.zoomToFeatures(featuresToHighlight, { noZoomIn: true });
+      }
+    },
+    emitConnectivityGraphError: function (errorData) {
+      this.$emit('connectivity-graph-error', {
+        data: {
+          errorData: errorData,
+          errorMessage: ERROR_MESSAGE,
+        }
+      });
+    },
+    /**
+     * @public
      * Function to create/display tooltips from the provided ``data``.
      * _checkNeuronClicked shows a neuron path pop up if a path was recently clicked._
-     * @arg data
+     * @arg {Object} `data`
      */
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         if (data.feature) {
+          if (this.annotationSidebar && this.previousDeletedEvent.type === 'deleted') {
+            this.annotationEntry = {
+              ...this.previousDeletedEvent,
+              resourceId: this.serverURL
+            }
+            this.annotationEventCallback({}, { type: 'aborted' })
+          }
           this.annotationEntry = {
             ...data.feature,
             resourceId: this.serverURL,
@@ -1728,7 +1880,9 @@ export default {
             ) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
-              if (this.activeDrawTool) this.createConnectivityBody()
+              if (this.activeDrawTool) {
+                this.createConnectivityBody()
+              }
               this.displayTooltip(
                 data.feature.feature.id,
                 centroid(data.feature.feature.geometry)
@@ -1741,13 +1895,13 @@ export default {
           this.annotation = {}
         }
       } else {
+        //require data.resource && data.feature.source
         let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(data)
+          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // The line below only creates the tooltip if some data was found on the path
-        // result 0 is the connection, result 1 is the pubmed results from flatmap
+        // the pubmed URLs are in knowledge response.references
         if (
-          results[0] ||
-          results[1] ||
+          (results && results[0]) ||
           (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
         ) {
           this.resourceForTooltip = data.resource[0]
@@ -1776,7 +1930,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to close tooltip.
      */
     closeTooltip: function () {
@@ -1786,20 +1940,20 @@ export default {
       })
     },
     /**
-     * @vuese
+     * @public
      * Function to create tooltip from Neuron Curation ``data``.
-     * @arg data
+     * @arg {Object} `data`
      */
     createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(data)
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
       this.displayTooltip(data.resource[0])
     },
     /**
-     * @vuese
+     * @public
      * Function to show popup on map.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showPopup: function (featureId, node, options) {
       // Keeping this as an API
@@ -1814,11 +1968,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show marker popup.
-     * @arg featureId,
-     * @arg node,
-     * @arg options
+     * @arg {String} `featureId`,
+     * @arg {Object} `node`,
+     * @arg {Object} `options`
      */
     showMarkerPopup: function (featureId, node, options) {
       if (this.mapImp) {
@@ -1826,7 +1980,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to close minimap.
      */
     closeMinimap: function () {
@@ -1861,10 +2015,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to set help mode
      * by providing flag ``helpMode`` (true/false).
-     * @arg helpMode
+     * @arg {Boolean} `helpMode`
      */
     setHelpMode: function (helpMode) {
       const toolTipsLength = this.hoverVisibilities.length;
@@ -1946,10 +2100,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show tooltip
      * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
+     * @arg {Number} `tooltipNumber`
+     * @arg {Number} `timeout` _(default: `500`)_
      */
     showTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
@@ -1965,10 +2120,11 @@ export default {
     },
 
     /**
-     * @vuese
+     * @public
      * Function to hide tooltip
      * by providing ``tooltipNumber``.
-     * @arg tooltipNumber
+     * @arg {Number} `tooltipNumber`
+     * @arg {Number} `timeout` _(default: `500`)_
      */
     hideTooltip: function (tooltipNumber, timeout = 500) {
       if (!this.inHelp) {
@@ -1979,10 +2135,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to display tooltip
      * by providing featureId (``feature``).
-     * @arg feature
+     * @arg {String} `feature`
+     * @arg {String} `geometry` _(default: `undefined`)_
      */
     displayTooltip: function (feature, geometry = undefined) {
       let featureId = undefined
@@ -2003,7 +2160,13 @@ export default {
         // this method is moved to sidebar connectivity info
         // const featureIds = [feature];
         // this.moveMap(featureIds);
+        if (this.featuresAlert) {
+          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
+        }
         this.$emit('connectivity-info-open', this.tooltipEntry);
+      }
+      if (this.annotationSidebar && this.viewingMode === 'Annotation') {
+        this.$emit('annotation-open', {annotationEntry: this.annotationEntry, commitCallback: this.commitAnnotationEvent});
       }
       // If UI is not disabled,
       // And connectivityInfoSidebar is not set (default) or set to `false`
@@ -2011,7 +2174,11 @@ export default {
       // Tooltip will be shown for Annotation view
       if (
         !this.disableUI && (
-          this.viewingMode === 'Annotation' ||
+          (
+            this.viewingMode === 'Annotation' &&
+            !this.annotationSidebar &&
+            this.userInformation
+          ) ||
           (
             this.viewingMode === 'Exploration' &&
             !this.connectivityInfoSidebar &&
@@ -2077,7 +2244,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to open Flatmap Help Popup.
      */
     openFlatmapHelpPopup: function () {
@@ -2097,7 +2264,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to close Flatmap Help Popup.
      */
     closeFlatmapHelpPopup: function () {
@@ -2108,7 +2275,7 @@ export default {
         })
     },
     /**
-     * @vuese
+     * @public
      * Function to get annotation labels.
      */
     getLabels: function () {
@@ -2122,7 +2289,49 @@ export default {
       }
     },
     /**
-     * @vuese
+     * Function to get and store the state (object) of the map in
+     * the provided argument
+     */
+    getVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        let comp = this.$refs[ref]
+        if (comp) {
+          state[ref] = comp.getState()
+        }
+      })
+      if (this.$refs.treeControls) {
+        const checkedKeys = this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+        //Only store first level systems (terms without .)
+        state['systemsSelection'] = checkedKeys.filter(term => !term.includes('.'))
+      }
+    },
+    /**
+     * Function to set and restore the visibility state (object) of
+     * the map with the provided argument
+     */
+    setVisibilityState: function (state) {
+      const refs = ['alertSelection', 'pathwaysSelection', 'taxonSelection']
+      refs.forEach(ref => {
+        const settings = state[ref]
+        if (settings) {
+          const comp = this.$refs[ref]
+          if (comp) {
+            comp.setState(settings)
+          }
+        }
+      })
+      if ('systemsSelection' in state) {
+        if (this.$refs.treeControls) {
+          this.$refs.treeControls.$refs.regionTree.setCheckedKeys(state['systemsSelection']);
+          this.systems[0].children.forEach((item) => {
+            this.mapImp.enableSystem(item.key, state['systemsSelection'].includes(item.key))
+          })
+        }
+      }
+    },
+    /**
+     * @public
      * Function to get the state (object) of the map.
      */
     getState: function () {
@@ -2137,14 +2346,21 @@ export default {
         else if (identifier && identifier.biologicalSex)
           state['biologicalSex'] = identifier.biologicalSex
         if (identifier && identifier.uuid) state['uuid'] = identifier.uuid
+        state['viewingMode'] = this.viewingMode
+        state['searchTerm'] = this.statesTracking.activeTerm
+        state['flightPath3D'] = this.flightPath3DRadio
+        state['colour'] = this.colourRadio
+        state['outlinesRadio'] = this.outlinesRadio
+        state['background'] = this.currentBackground
+        this.getVisibilityState(state)
         return state
       }
       return undefined
     },
     /**
-     * @vuese
+     * @public
      * Function to set state (object) for the map.
-     * @arg state
+     * @arg {Object} `state`
      */
     setState: function (state) {
       if (state) {
@@ -2154,9 +2370,7 @@ export default {
           (state.flatmapId && this.flatmapId == state.flatmapId)) &&
           (!state.biologicalSex || state.biologicalSex === this.biologicalSex)
         ) {
-          if (state.viewport) {
-            this.mapImp.setState(state.viewport)
-          }
+          this.restoreMapState(state)
         } else {
           this.createFlatmap(state)
         }
@@ -2164,23 +2378,49 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to restore map's state
      * from the ``state`` provided.
-     * @arg state
+     * @arg {Object} `state`
      */
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
-        if (state.searchTerm) this.searchAndShowResult(state.searchTerm, true)
+        if (state.viewingMode) this.changeViewingMode(state.viewingMode)
+        //The following three are boolean
+        if ('flightPath3D' in state) this.setFlightPath3D(state.flightPath3D)
+        if ('colour' in state) this.setColour(state.colour)
+        if ('outlines' in state) this.setOutlines(state.outlines)
+        if (state.background) this.backgroundChangeCallback(state.background)
+        if (state.searchTerm) {
+          const searchTerm = state.searchTerm
+          this.searchAndShowResult(searchTerm, true)
+          if (state.viewingMode === "Neuron Connection") {
+            this.highlightConnectedPaths([searchTerm])
+          } else {
+            const geoID = this.mapImp.modelFeatureIds(searchTerm)
+            if (geoID.length > 0) {
+              const feature = this.mapImp.featureProperties(geoID[0])
+              this.searchAndShowResult(searchTerm, true)
+              const data = {
+                resource: [feature.source],
+                feature,
+                label: feature.label,
+                provenanceTaxonomy: feature.taxons
+              }
+              this.checkAndCreatePopups(data)
+            }
+          }
+        }
+        this.setVisibilityState(state)
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show flight path option
      * (3D option)
      * based on the map version (currently 1.6 and above).
-     * @arg mapVersion
+     * @arg {String} `mapVersion`
      */
     setFlightPathInfo: function (mapVersion) {
       const mapVersionForFlightPath = 1.6
@@ -2192,10 +2432,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to create Flatmap
      * by providing the ``state``.
-     * @arg state
+     * @arg {Object} `state`
      */
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
@@ -2278,23 +2518,20 @@ export default {
           this.serverURL = this.mapImp.makeServerUrl('').slice(0, -1)
           let mapVersion = this.mapImp.details.version
           this.setFlightPathInfo(mapVersion)
-          this.onFlatmapReady()
-          if (this._stateToBeSet) this.restoreMapState(this._stateToBeSet)
-          else {
-            this.restoreMapState(state)
-          }
+          const stateToSet = this._stateToBeSet ? this._stateToBeSet : state
+          this.onFlatmapReady(stateToSet)
+          this.$nextTick(() => this.restoreMapState(stateToSet))
         })
       } else if (state) {
         this._stateToBeSet = {
-          viewport: state.viewport,
-          searchTerm: state.searchTerm,
+          ...state
         }
         if (this.mapImp && !this.loading)
           this.restoreMapState(this._stateToBeSet)
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to compute path controls maximum height.
      */
     computePathControlsMaximumHeight() {
@@ -2308,7 +2545,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to resize the map.
      */
     mapResize: function () {
@@ -2326,32 +2563,31 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
      */
-    onFlatmapReady: function () {
+    onFlatmapReady: function (state) {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
-      this.sensor = new ResizeSensor(this.$refs.display, this.mapResize)
-      if (this.mapImp.options && this.mapImp.options.style === 'functional') {
+      this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
+      if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       }
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      this.mapImp.enableCentrelines(false)
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
-      if (this.mapImp.taxonIdentifiers) {
-        this.processTaxon(this.flatmapAPI, this.mapImp.taxonIdentifiers)
-      }
+      //Async, pass the state for checking
+      this.processTaxon(this.mapImp.taxonIdentifiers, state ? state['taxonSelection'] : undefined)
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = true
+      this.drawerOpen = true;
       this.mapResize()
       this.handleMapClick();
+      this.setInitMapState();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -2359,15 +2595,21 @@ export default {
       this.$emit('ready', this)
     },
     /**
-     * @vuese
+     * @public
      * Function to handle mouse click on map area
      * after the map is loaded.
      */
     handleMapClick: function () {
       const _map = this.mapImp._map;
-
       if (_map) {
         _map.on('click', (e) => {
+          //A little logic to make sure we are keeping track
+          //of selected term
+          if (this.statesTracking.activeClick) {
+            this.statesTracking.activeClick = false
+          } else {
+            this.statesTracking.activeTerm = ""
+          }
           if (this.tooltipEntry.featureId) {
             this.$emit('connectivity-info-close');
           }
@@ -2375,34 +2617,35 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the minimap
      * by providing ``flag`` (boolean) value.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     showMinimap: function (flag) {
       if (this.mapImp) this.mapImp.showMinimap(flag)
     },
     /**
-     * @vuese
+     * @public
      * Function to show or hide the pathways drawer
      * by providing ``flag`` (boolean) value.
-     * @arg flag
+     * @arg {Boolean} `flag`
      */
     showPathwaysDrawer: function (flag) {
       this.drawerOpen = flag
     },
     /**
-     * @vuese
+     * @public
      * Function to display features with annotation matching the provided term,
      * with the option to display the label using displayLabel flag.
-     * @arg term,
-     * @arg displayLabel
+     * @arg {String} `term`,
+     * @arg {String} `displayLabel`
      */
     searchAndShowResult: function (term, displayLabel) {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
+          this.statesTracking.activeTerm = ""
           return true
         } else {
           const searchResults = this.mapImp.search(term)
@@ -2411,6 +2654,7 @@ export default {
             searchResults.results &&
             searchResults.results.length > 0
           ) {
+            this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
             if (
               displayLabel &&
@@ -2437,10 +2681,10 @@ export default {
       return false
     },
     /**
-     * @vuese
+     * @public
      * Function to show search suggestions
      * from the ``term`` provided.
-     * @arg term
+     * @arg {String} `term`
      */
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
@@ -2477,7 +2721,7 @@ export default {
      */
     minZoom: {
       type: Number,
-      default: 4,
+      default: 1,
     },
     /**
      * The option to add another feature label _(`FeatureSmallSymbolLayer`)_
@@ -2634,18 +2878,27 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * The option to show annotation in sidebar
+     */
+    annotationSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   provide() {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      $annotator: this.annotator,
       getFeaturesAlert: () => this.featuresAlert,
       userApiKey: this.userToken,
     }
   },
   data: function () {
     return {
+      sensor: null,
+      mapManager: undefined,
+      flatmapQueries: undefined,
       annotationEntry: {},
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
@@ -2654,22 +2907,17 @@ export default {
       serverURL: undefined,
       layers: [],
       pathways: [],
+      initMapState: markRaw({}),
       sckanDisplay: [
         {
           label: 'Display Path with SCKAN',
           key: 'VALID',
         },
       ],
-      centreLines: [
-        {
-          label: 'Display Nerves',
-          key: 'centrelines',
-          enabled: false,
-        },
-      ],
       systems: [],
       taxonConnectivity: [],
       pathwaysMaxHeight: 1000,
+      tooltipWait: markRaw([]),
       hoverVisibilities: [
         { value: false, ref: 'markerPopover' }, // 0
         { value: false, ref: 'zoomInPopover' }, // 1
@@ -2709,20 +2957,11 @@ export default {
       currentActive: '',
       selectedDrawnFeature: undefined, // Clicked drawn annotation
       currentHover: '',
-      viewingModeIndex: 0,
+      viewingMode: 'Exploration',
       viewingModes: {
-        0: {
-          name: 'Exploration',
-          description:'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources'
-        },
-        1: {
-          name: 'Neuron Connection',
-          description: 'Discover Neuron connections by selecting a neuron and viewing its associated network connections'
-        },
-        2: {
-          name: 'Annotation',
-          description: 'View internal identifiers of features'
-        }
+        'Exploration': 'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources',
+        'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
+        'Annotation': 'View internal identifiers of features'
       },
       drawnType: 'All tools',
       drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
@@ -2744,6 +2983,7 @@ export default {
       activeDrawTool: undefined,
       featureAnnotationSubmitted: false,
       drawnCreatedEvent: {},
+      previousDeletedEvent: {},
       connectionEntry: {},
       existDrawnFeatures: [], // Store all exist drawn features
       doubleClickedFeature: false,
@@ -2765,16 +3005,17 @@ export default {
           with: true,
           without: true,
         }
-      })
+      }),
+      statesTracking: markRaw({
+        activeClick: false,
+        activeTerm: "",
+      }),
     }
   },
   computed: {
     ...mapState(useMainStore, ['userToken']),
     isValidDrawnCreated: function () {
       return Object.keys(this.drawnCreatedEvent).length > 0
-    },
-    viewingMode: function() {
-      return this.viewingModes[this.viewingModeIndex].name
     },
   },
   watch: {
@@ -2812,13 +3053,11 @@ export default {
       if (mode === 'Annotation') {
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
-          if (userData.name && userData.email) {
+          if (userData.name && userData.email && userData.canUpdate) {
             this.showAnnotator(true)
             this.userInformation = userData
             this.setFeatureAnnotated()
-            if (this.existDrawnFeatures.length === 0) {
-              this.addAnnotationFeature()
-            }
+            this.addAnnotationFeature()
           }
           this.loading = false
         })
@@ -2828,15 +3067,52 @@ export default {
       if (isUIDisabled) {
         this.closeTooltip()
       }
+    },
+    activeDrawTool: function (tool) {
+      let coordinates = [];
+      let lastClick = { x: null, y: null };
+      const canvas = this.$el.querySelector('.maplibregl-canvas');
+      const removeListeners = () => {
+        canvas.removeEventListener('keydown', handleKeyboardEvent);
+        canvas.removeEventListener('click', handleMouseEvent);
+      };
+      const handleKeyboardEvent = (event) => {
+        if (!['Escape', 'Enter'].includes(event.key)) return;
+        const isValidDraw =
+          (tool === 'Point' && coordinates.length === 1) ||
+          (tool === 'LineString' && coordinates.length >= 2) ||
+          (tool === 'Polygon' && coordinates.length >= 3);
+        if (event.key === 'Escape' || (event.key === 'Enter' && !isValidDraw)) {
+          this.activeDrawTool = undefined;
+        }
+        removeListeners();
+      };
+      const handleMouseEvent = (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const distance = Math.sqrt((x - lastClick.x) ** 2 + (y - lastClick.y) ** 2);
+        if (distance < 8) {
+          if (!this.isValidDrawnCreated) this.activeDrawTool = undefined;
+          removeListeners();
+          return;
+        }
+        lastClick = { x, y };
+        coordinates.push(lastClick);
+      };
+      if (tool) {
+        removeListeners();
+        canvas.addEventListener('keydown', handleKeyboardEvent);
+        canvas.addEventListener('click', handleMouseEvent);
+      }
     }
   },
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
-    this.tooltipWait = []
     this.tooltipWait.length = this.hoverVisibilities.length
-    this.mapManager = new flatmap.MapManager(this.flatmapAPI)
-    this.flatmapQueries = new FlatmapQueries()
+    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI))
+    this.flatmapQueries = markRaw(new FlatmapQueries())
     this.flatmapQueries.initialise(this.flatmapAPI)
     if (this.state) {
       //State is set and require to set the state
@@ -2914,12 +3190,19 @@ export default {
 .pathway-location {
   position: absolute;
   bottom: 0px;
+  left: 0px;
+  transform: translateX(0);
   transition: all var(--el-transition-duration);
+  z-index: 99;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
   &.open {
-    left: 0px;
+    transform: translateX(0);
   }
   &.close {
-    left: -298px;
+    transform: translateX(-100%);
   }
 }
 
@@ -2937,6 +3220,8 @@ export default {
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
+  border-left: 0;
+  border-bottom: 0;
   padding-bottom: 16px;
   background: #ffffff;
   overflow-x: hidden;
@@ -3277,6 +3562,10 @@ export default {
   }
 }
 
+.icon-button-container {
+  display: inline-block;
+}
+
 .icon-button {
   height: 24px !important;
   width: 24px !important;
@@ -3454,7 +3743,6 @@ export default {
   }
 }
 
-.open-drawer,
 .drawer-button {
   z-index: 8;
   width: 20px;
@@ -3464,18 +3752,6 @@ export default {
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
-}
-
-.open-drawer {
-  position: absolute;
-  left: 0px;
-  background-color: #f7faff;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-}
-
-.drawer-button {
-  float: left;
-  margin-top: calc(50% - 36px);
   background-color: #f9f2fc;
 
   i {
@@ -3489,6 +3765,7 @@ export default {
     }
   }
   &.close {
+    transform: translateX(22px); // button + border width
     i {
       transform: rotate(180deg) scaleY(2);
     }

@@ -8,6 +8,7 @@ const removeDuplicates = function (arrayOfAnything) {
 }
 
 const cachedLabels = {}
+const cachedTaxonLabels = [];
 
 const findTaxonomyLabel = async function (flatmapAPI, taxonomy) {
   if (cachedLabels && cachedLabels.hasOwnProperty(taxonomy)) {
@@ -35,6 +36,38 @@ const findTaxonomyLabel = async function (flatmapAPI, taxonomy) {
   })
 }
 
+const findTaxonomyLabels = async function (mapImp, taxonomies) {
+  const intersectionTaxonomies = taxonomies.filter((taxonomy) =>
+    cachedTaxonLabels.some((obj) => obj.taxon === taxonomy)
+  );
+
+  const foundCachedTaxonLabels = cachedTaxonLabels.filter((obj) =>
+    intersectionTaxonomies.includes(obj.taxon)
+  );
+
+  const leftoverTaxonomies = taxonomies.filter((taxonomy) =>
+    !intersectionTaxonomies.includes(taxonomy)
+  );
+
+  if (!leftoverTaxonomies.length) {
+    return foundCachedTaxonLabels;
+  } else {
+    const entityLabels = await mapImp.queryLabels(leftoverTaxonomies);
+    if (entityLabels.length) {
+      entityLabels.forEach((entityLabel) => {
+        let { entity: taxon, label } = entityLabel;
+        if (label === 'Mammalia') {
+          label = 'Mammalia not otherwise specified'
+        }
+        const item = { taxon, label };
+        foundCachedTaxonLabels.push(item);
+        cachedTaxonLabels.push(item);
+      });
+      return foundCachedTaxonLabels;
+    }
+  }
+}
+
 const inArray = function (ar1, ar2) {
   if (!ar1 || !ar2) return false
   let as1 = JSON.stringify(ar1)
@@ -54,7 +87,7 @@ let FlatmapQueries = function () {
     this.lookUp = []
   }
 
-  this.createTooltipData = async function (eventData) {
+  this.createTooltipData = async function (mapImp, eventData) {
     let hyperlinks = []
     if (
       eventData.feature.hyperlinks &&
@@ -67,13 +100,12 @@ let FlatmapQueries = function () {
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
       taxonomyLabel = []
-      for (let i = 0; eventData.provenanceTaxonomy.length > i; i++) {
-        taxonomyLabel.push(
-          await findTaxonomyLabel(
-            this.flatmapAPI,
-            eventData.provenanceTaxonomy[i]
-          )
-        )
+      const entityLabels = await findTaxonomyLabels(mapImp, eventData.provenanceTaxonomy);
+      if (entityLabels.length) {
+        entityLabels.forEach((entityLabel) => {
+          const { label } = entityLabel;
+          taxonomyLabel.push(label);
+        });
       }
     }
 
@@ -104,33 +136,22 @@ let FlatmapQueries = function () {
     return labelList
   }
 
-  this.createLabelLookup = function (uberons) {
-    return new Promise((resolve) => {
+  this.createLabelLookup = function (mapImp, uberons) {
+    return new Promise(async (resolve) => {
       let uberonMap = {}
       this.uberons = []
-      const data = { sql: this.buildLabelSqlStatement(uberons) }
-      fetch(`${this.flatmapApi}knowledge/query/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((payload) => {
-          const entity = payload.keys.indexOf('entity')
-          const label = payload.keys.indexOf('label')
-          if (entity > -1 && label > -1) {
-            payload.values.forEach((pair) => {
-              uberonMap[pair[entity]] = pair[label]
-              this.uberons.push({
-                id: pair[entity],
-                name: pair[label],
-              })
-            })
-          }
-          resolve(uberonMap)
-        })
+      const entityLabels = await findTaxonomyLabels(mapImp, uberons);
+      if (entityLabels.length) {
+        entityLabels.forEach((entityLabel) => {
+          const { taxon: entity, label } = entityLabel;
+          uberonMap[entity] = label;
+          this.uberons.push({
+            id: entity,
+            name: label,
+          })
+        });
+        resolve(uberonMap)
+      }
     })
   }
 
@@ -198,6 +219,9 @@ let FlatmapQueries = function () {
       if (inArray(connectivity.axons, node)) {
         terminal = true
       }
+      if (connectivity.somas && inArray(connectivity.somas, node)) {
+        terminal = true
+      }
       if (inArray(connectivity.dendrites, node)) {
         terminal = true
       }
@@ -209,7 +233,7 @@ let FlatmapQueries = function () {
     return found
   }
 
-  this.retrieveFlatmapKnowledgeForEvent = async function (eventData) {
+  this.retrieveFlatmapKnowledgeForEvent = async function (mapImp, eventData) {
     // check if there is an existing query
     if (this.controller) this.controller.abort()
 
@@ -221,15 +245,58 @@ let FlatmapQueries = function () {
     this.destinations = []
     this.origins = []
     this.components = []
-    if (!keastIds || keastIds.length == 0) return
+    this.urls = []
+    if (!keastIds || keastIds.length == 0 || !keastIds[0]) return
 
-    let prom1 = this.queryForConnectivity(keastIds, signal) // This on returns a promise so dont need 'await'
-    let prom2 = await this.pubmedQueryOnIds(eventData)
-    let results = await Promise.all([prom1, prom2])
+    let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
+    // let prom2 = await this.pubmedQueryOnIds(eventData)
+    let results = await Promise.all([prom1])
     return results
   }
 
-  this.queryForConnectivity = function (keastIds, signal, processConnectivity=true) {
+  this.queryForConnectivityNew = function (mapImp, keastIds, signal, processConnectivity=true) {
+    return new Promise((resolve) => {
+      mapImp.queryKnowledge(keastIds[0])
+        .then((response) => {
+          if (this.checkConnectivityExists(response)) {
+            let connectivity = response;
+            if (processConnectivity) {
+              this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
+                // response.references is publication urls
+                if (response.references) {
+                  // with publications
+                  this.getURLsForPubMed(response.references).then((urls) => {
+                    // TODO: if empty urls array is returned,
+                    // the urls are not on PubMed.
+                    // Those urls, response.references, will be shown in another way.
+                    this.urls = urls;
+                    resolve(processedConnectivity)
+                  })
+                } else {
+                  // without publications
+                  resolve(processedConnectivity)
+                }
+              })
+            }
+            else resolve(connectivity)
+          } else {
+            resolve(false)
+          }
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') {
+            // This error is from AbortController's abort method.
+          } else {
+            // console.error('Error:', error)
+            // TODO: to update after queryKnowledge method update
+            console.warn(`Unable to get the knowledge for the entity ${keastIds[0]}.`)
+          }
+          resolve(false)
+        })
+    })
+  }
+
+  this.queryForConnectivity = function (mapImp, keastIds, signal, processConnectivity=true) {
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
     const headers = {
       method: 'POST',
@@ -246,7 +313,7 @@ let FlatmapQueries = function () {
           if (this.connectivityExists(data)) {
             let connectivity = JSON.parse(data.values[0][0])
             if (processConnectivity) {
-              this.processConnectivity(connectivity).then((processedConnectivity) => {
+              this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
                 resolve(processedConnectivity)
               })
             }
@@ -256,11 +323,19 @@ let FlatmapQueries = function () {
           }
         })
         .catch((error) => {
-          console.error('Error:', error)
+          if (error.name === 'AbortError') {
+            // This error is from AbortController's abort method.
+          } else {
+            console.error('Error:', error)
+          }
           resolve(false)
         })
     })
   }
+
+  this.checkConnectivityExists = function (data) {
+    return data && data.connectivity?.length;
+  };
 
   this.connectivityExists = function (data) {
     if (
@@ -332,20 +407,28 @@ let FlatmapQueries = function () {
     )
   }
 
-  this.processConnectivity = function (connectivity) {
+  this.processConnectivity = function (mapImp, connectivity) {
     return new Promise((resolve) => {
       // Filter the origin and destinations from components
       let components = this.findComponents(connectivity)
 
       // Remove duplicates
       let axons = removeDuplicates(connectivity.axons)
-      let dendrites = removeDuplicates(connectivity.dendrites)
+      //Somas will become part of origins, support this for future proof
+      let dendrites = []
+      if (connectivity.somas && connectivity.somas.length > 0) {
+        dendrites.push(...connectivity.somas)
+      }
+      if (connectivity.dendrites && connectivity.dendrites.length > 0) {
+        dendrites.push(...connectivity.dendrites)
+      }
+      dendrites = removeDuplicates(dendrites)
 
       // Create list of ids to get labels for
       let conIds = this.findAllIdsFromConnectivity(connectivity)
 
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
-      this.createLabelLookup(conIds).then((lookUp) => {
+      this.createLabelLookup(mapImp, conIds).then((lookUp) => {
         this.destinations = axons.map((a) =>
           this.createLabelFromNeuralNode(a, lookUp)
         )
@@ -390,6 +473,128 @@ let FlatmapQueries = function () {
     return pubmedId.split(':')[1]
   }
 
+  this.getPMID = function(idsList) {
+    return new Promise((resolve) => {
+      if (idsList.length > 0) {
+        //Muliple term search does not work well,
+        //DOIs term get splitted unexpectedly
+        //
+        const promises = []
+        const results = []
+        idsList.forEach((id) => {
+          const wrapped = '"' + id + '"'
+          const params = new URLSearchParams({
+            db: 'pubmed',
+            term: wrapped,
+            format: 'json'
+          })
+          const promise = fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?${params}`, {
+            method: 'GET',
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            const newIds = data.esearchresult ? data.esearchresult.idlist : []
+            results.push(...newIds)
+          })
+          promises.push(promise)
+        })
+
+        Promise.all(promises).then(() => {
+          resolve(results)
+        }).catch(() => {
+          resolve(results)
+        })
+      } else {
+        resolve([])
+      }
+    })
+  }
+
+  this.convertPublicationIds = function (ids) {
+    return new Promise((resolve) => {
+      const pmids = []
+      const toBeConverted = []
+      ids.forEach((id) => {
+        if (id.type === "pmid") {
+          pmids.push(id.id)
+        } else if (id.type === "doi" || id.type === "pmc") {
+          toBeConverted.push(id.id)
+        }
+      })
+      this.getPMID(toBeConverted).then((idList) => {
+        pmids.push(...idList)
+        resolve(pmids)
+      })
+      .catch(() => {
+        resolve(pmids)
+      })
+    })
+  }
+
+  this.extractPublicationIdFromURLString = function (urlStr) {
+    if (!urlStr) return
+
+    const str = decodeURIComponent(urlStr)
+
+    let term = {id: '', type: ''}
+
+    const names = [
+      'doi.org/',
+      'nih.gov/pubmed/',
+      'pmc/articles/',
+      'pubmed.ncbi.nlm.nih.gov/',
+    ]
+
+    names.forEach((name) => {
+      const lastIndex = str.lastIndexOf(name)
+      if (lastIndex !== -1) {
+        term.id = str.slice(lastIndex + name.length)
+        if (name === 'doi.org/') {
+          term.type = "doi"
+        } else if (name === 'pmc/articles/') {
+          term.type = "pmc"
+        } else {
+          term.type = "pmid"
+        }
+      }
+    })
+
+    //Backward compatability with doi: and PMID:
+    if (term.id === '') {
+      if (urlStr.includes("doi:")) {
+        term.id = this.stripPMIDPrefix(urlStr)
+        term.type = "doi"
+      } else if (urlStr.includes("PMID:")) {
+        term.id = this.stripPMIDPrefix(urlStr)
+        term.type = "pmid"
+      }
+    }
+
+    if (term.id.endsWith('/')) {
+      term.id = term.id.slice(0, -1)
+    }
+
+    return term
+  }
+
+  this.getURLsForPubMed = function (data) {
+    return new Promise((resolve) => {
+      const ids = data.map((id) =>
+        (typeof id === 'object') ?
+        this.extractPublicationIdFromURLString(id[0]) :
+        this.extractPublicationIdFromURLString(id)
+      )
+      this.convertPublicationIds(ids).then((pmids) => {
+        if (pmids.length > 0) {
+          const transformedIDs = pmids.join()
+          resolve([this.pubmedSearchUrl(transformedIDs)])
+        } else {
+          resolve([])
+        }
+      })
+    })
+  }
+
   this.buildPubmedSqlStatement = function (keastIds) {
     let sql = 'select distinct publication from publications where entity in ('
     if (keastIds.length === 1) {
@@ -430,12 +635,18 @@ let FlatmapQueries = function () {
       this.flatmapQuery(sql).then((data) => {
         // Create pubmed url on paths if we have them
         if (data.values.length > 0) {
-          this.urls = [
-            this.pubmedSearchUrl(
-              data.values.map((id) => this.stripPMIDPrefix(id[0]))
-            ),
-          ]
-          resolve(true)
+           this.getURLsForPubMed(data.values).then((urls) => {
+            this.urls = urls
+            if (urls.length) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          })
+          .catch(() => {
+            this.urls = []
+            resolve(false)
+          })
         } else {
           // Create pubmed url on models
           this.pubmedQueryOnModels(source).then((result) => {
@@ -451,12 +662,14 @@ let FlatmapQueries = function () {
       this.buildPubmedSqlStatementForModels(source)
     ).then((data) => {
       if (Array.isArray(data.values) && data.values.length > 0) {
-        this.urls = [
-          this.pubmedSearchUrl(
-            data.values.map((id) => this.stripPMIDPrefix(id[0]))
-          ),
-        ]
-        return true
+        this.getURLsForPubMed(data.values).then((urls) => {
+          this.urls = urls
+          return true
+        })
+        .catch(() => {
+          this.urls = []
+          return false
+        })
       } else {
         this.urls = [] // Clears the pubmed search button
       }
@@ -467,10 +680,9 @@ let FlatmapQueries = function () {
   this.pubmedSearchUrl = function (ids) {
     let url = 'https://pubmed.ncbi.nlm.nih.gov/?'
     let params = new URLSearchParams()
-    const decodedIDs = ids.map((id) => decodeURIComponent(id));
-    params.append('term', decodedIDs);
+    params.append('term', ids)
     return url + params.toString()
   }
 }
 
-export { FlatmapQueries, findTaxonomyLabel }
+export { FlatmapQueries, findTaxonomyLabel, findTaxonomyLabels }

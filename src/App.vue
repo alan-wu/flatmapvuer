@@ -96,7 +96,8 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef } from 'vue';
+import { AnnotationService } from '@abi-software/sparc-annotation'
+import { markRaw, shallowRef } from 'vue';
 import { Setting as ElIconSetting } from '@element-plus/icons-vue'
 import {
   ElAutocomplete as Autocomplete,
@@ -133,6 +134,15 @@ export default {
     FlatmapSelected: function (resource) {
       if (resource.eventType === 'click') {
         if (this.consoleOn) console.log('resource', resource)
+
+        // Show marker on centreline of right vagus X nerve trunk
+        const { kind, models, location } = resource.feature;
+        if (window.flatmapImp && models && location && kind === 'centreline') {
+          window.flatmapImp.clearMarkers();
+          window.flatmapImp.addMarker(models, {
+            location: location
+          });
+        }
       }
     },
     onOpenPubmedUrl: function (url) {
@@ -150,6 +160,7 @@ export default {
       //component.showPathwaysDrawer(false);
       if (this.consoleOn) console.log(taxon, id)
       //component.searchAndShowResult("heart");
+      // component.changeViewingMode('Annotation')
     },
     panZoomcallback: function (payload) {
       this.payload = payload
@@ -165,7 +176,8 @@ export default {
         const results = this.$refs.multi
           .getCurrentFlatmap()
           .searchSuggestions(term)
-        results.__featureIds.forEach((id) => {
+        const featureIds = results.__featureIds || results.featureIds;
+        featureIds.forEach((id) => {
           const annotation = this.$refs.multi
             .getCurrentFlatmap()
             .mapImp.annotation(id)
@@ -185,8 +197,12 @@ export default {
         .getCurrentFlatmap()
         .searchAndShowResult(this.searchText, true)
     },
-    onFlatmapChanged: function () {
+    onFlatmapChanged: function (activeSpecies) {
       this.helpMode = false;
+      // Update current flatmapImp after changing species
+      if (this.$refs.multi.$refs[activeSpecies][0].mapImp) {
+        window.flatmapImp = this.$refs.multi.$refs[activeSpecies][0].mapImp;
+      }
     },
     onHelpModeShowNext: function () {
       this.helpModeActiveItem += 1;
@@ -213,12 +229,17 @@ export default {
       }
     },
   },
+  provide() {
+    return {
+      $annotator: this.annotator,
+    }
+  },
   data: function () {
     return {
       consoleOn: true,
       searchText: '',
       disableUI: false,
-      minZoom: 4,
+      minZoom: 1,
       availableSpecies: {
         'Human Female': {
           taxo: 'NCBITaxon:9606',
@@ -260,6 +281,10 @@ export default {
           iconClass: 'mapicon-icon_cat',
           displayWarning: true,
         },
+        Vagus: {
+          taxo: 'UBERON:0001759',
+          displayWarning: true,
+        },
         Sample: { taxo: 'NCBITaxon:1', displayWarning: true },
         'Functional Connectivity': {
           taxo: 'FunctionalConnectivity',
@@ -289,10 +314,12 @@ export default {
       //flatmapAPI: "https://mapcoe-demo.org/current/flatmap/v3/",
       //flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
       flatmapAPI: 'https://mapcore-demo.org/isan/flatmap/',
+      //flatmapAPI: 'https://mapcore-demo.org/curation/flatmap/',
       //flatmapAPI: "https://mapcore-demo.org/fccb/flatmap/"
       //flatmapAPI: "https://mapcore-demo.org/staging/flatmap/v1/"
       // flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v1/",
-      ElIconSetting: shallowRef(ElIconSetting)
+      ElIconSetting: shallowRef(ElIconSetting),
+      annotator: markRaw(new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`)),
     }
   },
   mounted: function () {
