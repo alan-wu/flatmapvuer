@@ -3101,6 +3101,11 @@ export default {
       this.mapManagerRef = this.mapManager;
     } else {
       this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
+      /**
+       * The event emitted after a new mapManager is loaded.
+       * This mapManager can be used to create new flatmaps.
+       */
+      this.$emit('mapmanager-loaded', this.mapManagerRef);
     }
   },
   mounted: function () {

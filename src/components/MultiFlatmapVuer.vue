@@ -83,7 +83,7 @@
       :displayMinimap="displayMinimap"
       :showStarInLegend="showStarInLegend"
       style="height: 100%"
-      :mapManager="mapManager"
+      :mapManager="mapManagerRef"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
     />
@@ -126,7 +126,16 @@ export default {
     FlatmapVuer,
   },
   created: function () {
-    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI));
+    if (this.mapManager) {
+      this.mapManagerRef = this.mapManager;
+    } else {
+      this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
+      /**
+       * The event emitted after a new mapManager is loaded.
+       * This mapManager can be used to create new flatmaps.
+       */
+      this.$emit('mapmanager-loaded', this.mapManagerRef);
+    }
   },
   mounted: function () {
     this.initialise()
@@ -418,7 +427,7 @@ export default {
               const identifier = { taxon: mapState.entry }
               if (mapState.biologicalSex)
                 identifier['biologicalSex'] = mapState.biologicalSex
-              this.mapManager
+              this.mapManagerRef
                 .findMap_(identifier)
                 .then((map) => {
                   if (map.uuid !== mapState.uuid) {
@@ -700,6 +709,14 @@ export default {
       default: undefined,
     },
     /**
+     * Flatmap's Map Manager to use as single Map Manager
+     * when the value is provided.
+     */
+    mapManager: {
+      type: Object,
+      default: undefined,
+    },
+    /**
      * Specify the endpoint of the flatmap server.
      */
     flatmapAPI: {
@@ -742,7 +759,7 @@ export default {
       requireInitialisation: true,
       resolveList: markRaw([]),
       initialised: false,
-      mapManager: undefined,
+      mapManagerRef: undefined,
     }
   },
   watch: {
