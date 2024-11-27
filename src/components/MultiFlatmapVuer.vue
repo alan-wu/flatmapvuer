@@ -126,18 +126,7 @@ export default {
     FlatmapVuer,
   },
   created: function () {
-    if (!this.mapManagerRef) {
-      if (this.mapManager) {
-        this.mapManagerRef = this.mapManager;
-      } else {
-        this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
-        /**
-         * The event emitted after a new mapManager is loaded.
-         * This mapManager can be used to create new flatmaps.
-         */
-        this.$emit('mapmanager-loaded', this.mapManagerRef);
-      }
-    }
+    this.loadMapManager();
   },
   mounted: function () {
     this.initialise()
@@ -233,6 +222,23 @@ export default {
           this.resolveList.push(resolve)
         }
       })
+    },
+    /**
+     * Function to load `mapManager` to create flatmap.
+     */
+    loadMapManager: function () {
+      if (!this.mapManagerRef) {
+        if (this.mapManager) {
+          this.mapManagerRef = this.mapManager;
+        } else {
+          this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
+          /**
+           * The event emitted after a new mapManager is loaded.
+           * This mapManager can be used to create new flatmaps.
+           */
+          this.$emit('mapmanager-loaded', this.mapManagerRef);
+        }
+      }
     },
     /**
      * @public
@@ -476,9 +482,7 @@ export default {
     setState: function (state) {
       if (state) {
         // Update undefined mapManagerRef for setState happens before created event
-        if (!this.mapManagerRef && this.mapManager) {
-          this.mapManagerRef = this.mapManager;
-        }
+        this.loadMapManager();
 
         //Update state if required
         this.updateState(state).then((currentState) => {
