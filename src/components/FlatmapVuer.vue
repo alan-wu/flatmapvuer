@@ -2483,7 +2483,7 @@ export default {
           }
         }
 
-        let promise1 = this.mapManager.loadMap(
+        let promise1 = this.mapManagerRef.loadMap(
           identifier,
           this.$refs.display,
           this.eventCallback(),
@@ -2832,6 +2832,14 @@ export default {
       default: undefined,
     },
     /**
+     * Flatmap's Map Manager to use as single Map Manager
+     * if the FlatmapVuer is loaded from MultiFlatmapVuer.
+     */
+    mapManager: {
+      type: Object,
+      default: undefined,
+    },
+    /**
      * Specify the endpoint of the flatmap server.
      */
     flatmapAPI: {
@@ -2878,7 +2886,7 @@ export default {
   data: function () {
     return {
       sensor: null,
-      mapManager: undefined,
+      mapManagerRef: undefined,
       flatmapQueries: undefined,
       annotationEntry: {},
       //tooltip display has to be set to false until it is rendered
@@ -3019,7 +3027,7 @@ export default {
     state: {
       handler: function (state, oldVal) {
         if (state !== oldVal) {
-          if (this.mapManager) {
+          if (this.mapManagerRef) {
             this.setState(state)
           } else {
             //this component has not been mounted yet
@@ -3088,11 +3096,22 @@ export default {
       }
     }
   },
+  created: function () {
+    if (this.mapManager) {
+      this.mapManagerRef = this.mapManager;
+    } else {
+      this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
+      /**
+       * The event emitted after a new mapManager is loaded.
+       * This mapManager can be used to create new flatmaps.
+       */
+      this.$emit('mapmanager-loaded', this.mapManagerRef);
+    }
+  },
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef)
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.tooltipWait.length = this.hoverVisibilities.length
-    this.mapManager = markRaw(new flatmap.MapManager(this.flatmapAPI))
     this.flatmapQueries = markRaw(new FlatmapQueries())
     this.flatmapQueries.initialise(this.flatmapAPI)
     if (this.state) {
