@@ -2042,7 +2042,11 @@ export default {
             isPathwayContainer(parentElement) ||
             isPathwayContainer(nextElementSibling)
           ) {
-            this.drawerOpen = true;
+            if (this.requiresDrawer) {
+              this.drawerOpen = true;
+            } else {
+              this.helpModeActiveIndex += 1;
+            }
           }
         } else {
           // skip the unavailable tooltips
