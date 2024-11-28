@@ -84,6 +84,7 @@
       :displayMinimap="displayMinimap"
       :showStarInLegend="showStarInLegend"
       style="height: 100%"
+      :mapManager="mapManagerRef"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
     />
@@ -124,6 +125,9 @@ export default {
     Select,
     Popover,
     FlatmapVuer,
+  },
+  created: function () {
+    this.loadMapManager();
   },
   mounted: function () {
     this.initialise()
@@ -221,6 +225,23 @@ export default {
           this.resolveList.push(resolve)
         }
       })
+    },
+    /**
+     * Function to load `mapManager` to create flatmap.
+     */
+    loadMapManager: function () {
+      if (!this.mapManagerRef) {
+        if (this.mapManager) {
+          this.mapManagerRef = this.mapManager;
+        } else {
+          this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
+          /**
+           * The event emitted after a new mapManager is loaded.
+           * This mapManager can be used to create new flatmaps.
+           */
+          this.$emit('mapmanager-loaded', this.mapManagerRef);
+        }
+      }
     },
     /**
      * @public
@@ -413,12 +434,11 @@ export default {
             //uuid is in the state but should be checked if it is the latest map
             //for that taxon
             return new Promise(() => {
-              const mapManager = new flatmap.MapManager(this.flatmapAPI)
               //mapManager.findMap_ is an async function so we need to wrap this with a promise
               const identifier = { taxon: mapState.entry }
               if (mapState.biologicalSex)
                 identifier['biologicalSex'] = mapState.biologicalSex
-              mapManager
+              this.mapManagerRef
                 .findMap_(identifier)
                 .then((map) => {
                   if (map.uuid !== mapState.uuid) {
@@ -464,6 +484,9 @@ export default {
      */
     setState: function (state) {
       if (state) {
+        // Update undefined mapManagerRef for setState happens before created event
+        this.loadMapManager();
+
         //Update state if required
         this.updateState(state).then((currentState) => {
           this.initialise().then(() => {
@@ -700,6 +723,14 @@ export default {
       default: undefined,
     },
     /**
+     * Flatmap's Map Manager to use as single Map Manager
+     * when the value is provided.
+     */
+    mapManager: {
+      type: Object,
+      default: undefined,
+    },
+    /**
      * Specify the endpoint of the flatmap server.
      */
     flatmapAPI: {
@@ -742,6 +773,7 @@ export default {
       requireInitialisation: true,
       resolveList: markRaw([]),
       initialised: false,
+      mapManagerRef: undefined,
     }
   },
   watch: {
