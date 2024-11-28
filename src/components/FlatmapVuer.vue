@@ -260,7 +260,7 @@ Please use `const` to assign meaningful names to them...
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
-            v-show="!disableUI"
+            v-show="!disableUI && requiresDrawer"
           >
             <div
               class="pathway-container"
@@ -270,27 +270,27 @@ Please use `const` to assign meaningful names to them...
             >
               <svg-legends v-if="!isFC" class="svg-legends-container" />
               <template v-if="showStarInLegend">
-              <el-popover
-                content="Location of the featured dataset"
-                placement="right"
-                :teleported="true"
-                trigger="manual"
-                width="max-content"
-                :offset="-10"
-                popper-class="flatmap-popper flatmap-teleport-popper"
-                :visible="hoverVisibilities[9].value"
-                ref="featuredMarkerPopover"
-              >
-                <template #reference>
-                  <div
-                    v-popover:featuredMarkerPopover
-                    class="yellow-star-legend"
-                    v-html="yellowstar"
-                    @mouseover="showTooltip(9)"
-                    @mouseout="hideTooltip(9)"
-                  ></div>
-                </template>
-              </el-popover>
+                <el-popover
+                  content="Location of the featured dataset"
+                  placement="right"
+                  :teleported="true"
+                  trigger="manual"
+                  width="max-content"
+                  :offset="-10"
+                  popper-class="flatmap-popper flatmap-teleport-popper"
+                  :visible="hoverVisibilities[9].value"
+                  ref="featuredMarkerPopover"
+                >
+                  <template #reference>
+                    <div
+                      v-popover:featuredMarkerPopover
+                      class="yellow-star-legend"
+                      v-html="yellowstar"
+                      @mouseover="showTooltip(9)"
+                      @mouseout="hideTooltip(9)"
+                    ></div>
+                  </template>
+                </el-popover>
               </template>
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
@@ -3006,6 +3006,23 @@ export default {
     isValidDrawnCreated: function () {
       return Object.keys(this.drawnCreatedEvent).length > 0
     },
+    requiresDrawer: function() {
+      if (!this.isFC) {
+        this.drawerOpen = true
+        return true
+      } else {
+        if ((this.systems && this.systems.length > 0) ||
+          (this.containsAlert && this.alertOptions) ||
+          (this.pathways && this.pathways.length > 0) ||
+          (this.taxonConnectivity && this.taxonConnectivity.length > 0)
+        ) {
+          this.drawerOpen = true
+          return true
+        }
+      }
+      this.drawerOpen = false
+      return false
+    }
   },
   watch: {
     entry: function () {
