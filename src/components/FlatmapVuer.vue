@@ -2556,6 +2556,7 @@ export default {
      */
     onFlatmapReady: function (state) {
       // onFlatmapReady is used for functions that need to run immediately after the flatmap is loaded
+      console.log(this.mapImp.options)
       this.sensor = markRaw(new ResizeSensor(this.$refs.display, this.mapResize))
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
@@ -2572,7 +2573,6 @@ export default {
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
-      this.drawerOpen = true;
       this.mapResize()
       this.handleMapClick();
       this.setInitMapState();
@@ -3011,21 +3011,25 @@ export default {
       return Object.keys(this.drawnCreatedEvent).length > 0
     },
     requiresDrawer: function() {
+      if (this.loading) {
+        this.drawerOpen = false
+        return false
+      }
       if (!this.isFC) {
         this.drawerOpen = true
         return true
       } else {
-        if ((this.systems && this.systems.length > 0) ||
+        if ((this.systems?.length > 0) ||
           (this.containsAlert && this.alertOptions) ||
-          (this.pathways && this.pathways.length > 0) ||
-          (this.taxonConnectivity && this.taxonConnectivity.length > 0)
+          (this.pathways?.length > 0) ||
+          (this.taxonConnectivity?.length > 0)
         ) {
           this.drawerOpen = true
           return true
         }
       }
       this.drawerOpen = false
-      return false
+      return true
     }
   },
   watch: {
@@ -3229,6 +3233,7 @@ export default {
 
 .svg-legends-container {
   width: 70%;
+  min-width:183px;
   height: auto;
   position: relative;
   max-height: 140px;
