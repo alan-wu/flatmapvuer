@@ -453,7 +453,7 @@ Please use `const` to assign meaningful names to them...
               </template>
             </div>
             <el-row class="viewing-mode-description">
-              {{ viewingModes[viewingMode] }}
+              {{ modeDescription }}
             </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
@@ -2913,7 +2913,7 @@ export default {
       viewingModes: {
         'Exploration': 'Find relevant research and view detail of neural pathways by selecting a pathway to view its connections and data sources',
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
-        'Annotation': 'View internal identifiers of features'
+        'Annotation': ['View feature annotations', 'Add, comment on and view feature annotations']
       },
       annotationFrom: 'Anyone',
       annotatedSource: ['Anyone', 'Me', 'Others'],
@@ -2988,7 +2988,17 @@ export default {
       }
       this.drawerOpen = false
       return true
-    }
+    },
+    modeDescription: function () {
+      let description = this.viewingModes[this.viewingMode]
+      if (this.viewingMode === 'Annotation') {
+        if (this.userInformation) {
+          return description[1]
+        }
+        return description[0]
+      }
+      return description
+    },
   },
   watch: {
     entry: function () {
