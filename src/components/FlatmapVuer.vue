@@ -152,7 +152,6 @@ Please use `const` to assign meaningful names to them...
           class: '.maplibregl-canvas',
         }"
         :toolbarOptions="toolbarOptions"
-        :drawnType="drawnType"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
         :newlyDrawnEntry="drawnCreatedEvent"
@@ -458,40 +457,18 @@ Please use `const` to assign meaningful names to them...
             </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && userInformation">
-            <el-row class="backgroundText">Drawn By*</el-row>
+            <el-row class="backgroundText">Annotations From</el-row>
             <el-row class="backgroundControl">
               <el-select
                 :teleported="false"
-                v-model="drawnType"
+                v-model="annotationFrom"
                 placeholder="Select"
                 class="select-box"
                 popper-class="flatmap_dropdown"
-                @change="setDrawnType"
+                @change="setAnnotationFrom"
               >
                 <el-option
-                  v-for="item in drawnTypes"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-                >
-                  <el-row>
-                    <el-col :span="12">{{ item }}</el-col>
-                  </el-row>
-                </el-option>
-              </el-select>
-            </el-row>
-            <el-row class="backgroundText">Annotated By*</el-row>
-            <el-row class="backgroundControl">
-              <el-select
-                :teleported="false"
-                v-model="annotatedType"
-                placeholder="Select"
-                class="select-box"
-                popper-class="flatmap_dropdown"
-                @change="setAnnotatedType"
-              >
-                <el-option
-                  v-for="item in annotatedTypes"
+                  v-for="item in annotatedSource"
                   :key="item"
                   :label="item"
                   :value="item"
@@ -1015,12 +992,6 @@ export default {
       let drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
       // The annotator has `resource` and `features` fields
       if ('resource' in drawnFeatures) drawnFeatures = drawnFeatures.features
-      // Use to switch the displayed feature type
-      if (this.drawnType !== 'All tools') {
-        drawnFeatures = drawnFeatures.filter((feature) => {
-          return feature.geometry.type === this.drawnType
-        })
-      }
       return drawnFeatures
     },
     /**
@@ -1030,21 +1001,19 @@ export default {
     addAnnotationFeature: async function () {
       if (this.mapImp) {
         if (!this.featureAnnotationSubmitted) this.clearAnnotationFeature()
-        if (this.drawnType !== 'None') {
-          if (!this.featureAnnotationSubmitted) this.loading = true
-          const userId = this.annotatedType === 'Anyone' ?
-            undefined : this.userInformation.orcid ?
-              this.userInformation.orcid : '0000-0000-0000-0000'
-          const participated = this.annotatedType === 'Anyone' ?
-            undefined : this.annotatedType === 'Me' ?
-              true : false
-          const drawnFeatures = await this.fetchDrawnFeatures(userId, participated)
-          this.existDrawnFeatures = drawnFeatures
-          this.loading = false
-          if (!this.featureAnnotationSubmitted) {
-            for (const feature of drawnFeatures) {
-              this.mapImp.addAnnotationFeature(feature)
-            }
+        if (!this.featureAnnotationSubmitted) this.loading = true
+        const userId = this.annotationFrom === 'Anyone' ?
+          undefined : this.userInformation.orcid ?
+            this.userInformation.orcid : '0000-0000-0000-0000'
+        const participated = this.annotationFrom === 'Anyone' ?
+          undefined : this.annotationFrom === 'Me' ?
+            true : false
+        const drawnFeatures = await this.fetchDrawnFeatures(userId, participated)
+        this.existDrawnFeatures = drawnFeatures
+        this.loading = false
+        if (!this.featureAnnotationSubmitted) {
+          for (const feature of drawnFeatures) {
+            this.mapImp.addAnnotationFeature(feature)
           }
         }
       }
@@ -1064,24 +1033,11 @@ export default {
     },
     /**
      * @public
-     * Function to switch the type of annotation.
-     * @arg {Boolean} `flag`
-     */
-    setDrawnType: function (flag) {
-      this.drawnType = flag
-      if (this.mapImp) {
-        this.manualAbortedOnClose()
-        this.addAnnotationFeature()
-        this.initialiseDrawing()
-      }
-    },
-    /**
-     * @public
      * Function to switch the type of person who annotated.
      * @arg {Boolean} `flag`
      */
-    setAnnotatedType: function (flag) {
-      this.annotatedType = flag
+    setAnnotationFrom: function (flag) {
+      this.annotationFrom = flag
       if (this.mapImp) {
         this.manualAbortedOnClose()
         this.addAnnotationFeature()
@@ -2955,10 +2911,8 @@ export default {
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
         'Annotation': 'View internal identifiers of features'
       },
-      drawnType: 'All tools',
-      drawnTypes: ['All tools', 'Point', 'LineString', 'Polygon', 'None'],
-      annotatedType: 'Anyone',
-      annotatedTypes: ['Anyone', 'Me', 'Others'],
+      annotationFrom: 'Anyone',
+      annotatedSource: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
       backgroundIconRef: undefined,
       toolbarOptions: [
