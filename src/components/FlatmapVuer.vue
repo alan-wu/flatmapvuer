@@ -862,8 +862,7 @@ export default {
           }
           this.doubleClickedFeature = false
         }
-      }
-      if (this.activeDrawMode === 'Delete') {
+      } else if (this.activeDrawMode === 'Delete') {
         this.changeAnnotationDrawMode({
           mode: 'simple_select',
           options: { featureIds: [data.feature.feature.id] }
@@ -1545,7 +1544,7 @@ export default {
         this.annotationEntry = {}
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
-        if (this.annotationSidebar && data.feature.mode === 'simple_select') {
+        if (this.annotationSidebar && data.feature.mode === 'simple_select' && this.activeDrawMode === 'Deleted') {
           this.annotationEventCallback({}, { type: 'aborted' })
         }
       } else if (data.type === 'selectionChanged') {
@@ -1580,6 +1579,7 @@ export default {
         if (data.type === 'created') this.drawnCreatedEvent = payload
         else this.checkAndCreatePopups(payload)
       }
+      if (data.type === 'updated') this.previousEditEvent = data
       if (data.type === 'deleted') this.previousDeletedEvent = data
       else this.previousDeletedEvent = {}
     },
@@ -1667,6 +1667,14 @@ export default {
               !this.activeDrawTool
             ) {
               this.checkAndCreatePopups(payload)
+              if (this.annotationSidebar && this.previousEditEvent.type === 'updated') {
+                this.annotationEntry = {
+                  ...this.previousEditEvent,
+                  resourceId: this.serverURL
+                }
+                this.annotationEventCallback({}, { type: 'aborted' })
+              }
+              this.previousEditEvent = {}
             }
             this.$emit('resource-selected', payload)
           } else {
@@ -1826,12 +1834,8 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
-            // in drawing or edit/delete mode is on or has connectivity
-            if (
-              this.activeDrawTool ||
-              this.activeDrawMode ||
-              Object.keys(this.connectionEntry).length > 0
-            ) {
+            // in drawing or edit/delete mode is on or valid drawn
+            if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
               this.featureAnnotationSubmitted = false
               this.annotationEntry.featureId = data.feature.feature.id
               if (this.activeDrawTool) {
@@ -2929,6 +2933,7 @@ export default {
       activeDrawTool: undefined,
       featureAnnotationSubmitted: false,
       drawnCreatedEvent: {},
+      previousEditEvent: {},
       previousDeletedEvent: {},
       connectionEntry: {},
       existDrawnFeatures: [], // Store all exist drawn features
