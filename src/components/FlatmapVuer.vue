@@ -2138,8 +2138,7 @@ export default {
         !this.disableUI && (
           (
             this.viewingMode === 'Annotation' &&
-            !this.annotationSidebar &&
-            this.userInformation
+            !this.annotationSidebar
           ) ||
           (
             this.viewingMode === 'Exploration' &&
@@ -2153,7 +2152,6 @@ export default {
           this.mapImp.showPopup(featureId, this.$refs.tooltip.$el, options);
           this.popUpCssHacks();
         });
-
       }
     },
     hasTooltipEntry: function () {
