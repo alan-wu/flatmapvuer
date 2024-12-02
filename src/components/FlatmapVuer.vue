@@ -750,6 +750,7 @@ export default {
       if (this.annotationSidebar) this.$emit("annotation-close")
       this.closeTooltip()
       this.annotationEventCallback({}, { type: 'aborted' })
+      this.initialiseDrawing()
     },
     /**
      * @public
@@ -951,6 +952,7 @@ export default {
         if (this.annotationEntry.type === 'deleted') {
           if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
+          // Only delete need, keep the annotation tooltip/sidebar open if created/updated
           this.annotationEntry = {}
         }
         this.addAnnotationFeature()
