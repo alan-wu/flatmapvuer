@@ -1003,8 +1003,10 @@ export default {
      */
     addAnnotationFeature: async function () {
       if (this.mapImp) {
-        if (!this.featureAnnotationSubmitted) this.clearAnnotationFeature()
-        if (!this.featureAnnotationSubmitted) this.loading = true
+        if (!this.featureAnnotationSubmitted) {
+          this.clearAnnotationFeature()
+          this.loading = true
+        }
         const userId = this.annotationFrom === 'Anyone' ?
           undefined : this.userInformation.orcid ?
             this.userInformation.orcid : '0000-0000-0000-0000'
