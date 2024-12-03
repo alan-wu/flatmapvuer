@@ -645,20 +645,24 @@ const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
   let coordinates
   if (geometry.type === "Polygon") {
-    coordinates = geometry.coordinates[0]
+    if (geometry.coordinates.length) {
+      coordinates = geometry.coordinates[0]
+    }
   } else {
     coordinates = geometry.coordinates
   }
-  if (!(geometry.type === 'Point')) {
-    coordinates.map((coor) => {
-      featureGeometry.lng += parseFloat(coor[0])
-      featureGeometry.lat += parseFloat(coor[1])
-    })
-    featureGeometry.lng = featureGeometry.lng / coordinates.length
-    featureGeometry.lat = featureGeometry.lat / coordinates.length
-  } else {
-    featureGeometry.lng += parseFloat(coordinates[0])
-    featureGeometry.lat += parseFloat(coordinates[1])
+  if (coordinates) {    
+    if (!(geometry.type === 'Point')) {
+      coordinates.map((coor) => {
+        featureGeometry.lng += parseFloat(coor[0])
+        featureGeometry.lat += parseFloat(coor[1])
+      })
+      featureGeometry.lng = featureGeometry.lng / coordinates.length
+      featureGeometry.lat = featureGeometry.lat / coordinates.length
+    } else {
+      featureGeometry.lng += parseFloat(coordinates[0])
+      featureGeometry.lat += parseFloat(coordinates[1])
+    }
   }
   return featureGeometry
 }
