@@ -828,7 +828,6 @@ export default {
     toolbarEvent: function (type, name) {
       this.manualAbortedOnClose()
       this.doubleClickedFeature = false
-      this.connectionEntry = {}
       if (type === 'mode') {
         // Deselect any feature when draw mode is changed
         this.changeAnnotationDrawMode({ mode: 'simple_select' })
@@ -837,7 +836,6 @@ export default {
         if (name) {
           const tool = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
           this.changeAnnotationDrawMode({ mode: `draw${tool}` })
-          this.initialiseDrawing()
         } else {
           this.changeAnnotationDrawMode({ mode: 'simple_select' })
           this.cancelDrawnFeature()
@@ -1564,6 +1562,15 @@ export default {
               this.connectionEntry = drawnFeature.connection
             }
             this.annotationDrawModeEvent(payload)
+          } else {
+            if (this.annotationSidebar && this.previousEditEvent.type === 'updated') {
+              this.annotationEntry = {
+                ...this.previousEditEvent,
+                resourceId: this.serverURL
+              }
+              this.annotationEventCallback({}, { type: 'aborted' })
+            }
+            this.previousEditEvent = {}
           }
         }
       } else {
@@ -1669,14 +1676,6 @@ export default {
               !this.activeDrawTool
             ) {
               this.checkAndCreatePopups(payload)
-              if (this.annotationSidebar && this.previousEditEvent.type === 'updated') {
-                this.annotationEntry = {
-                  ...this.previousEditEvent,
-                  resourceId: this.serverURL
-                }
-                this.annotationEventCallback({}, { type: 'aborted' })
-              }
-              this.previousEditEvent = {}
             }
             this.$emit('resource-selected', payload)
           } else {
