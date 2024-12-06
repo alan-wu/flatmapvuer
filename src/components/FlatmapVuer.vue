@@ -951,7 +951,9 @@ export default {
       ) {
         this.featureAnnotationSubmitted = true
         this.mapImp.commitAnnotationEvent(this.annotationEntry)
-        if (this.annotationEntry.type === 'deleted') {
+        if (annotation.body.comment === "Position Updated") {
+          this.annotationEntry.positionUpdated = false
+        } else if (this.annotationEntry.type === 'deleted') {
           if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           // Only delete need, keep the annotation tooltip/sidebar open if created/updated
