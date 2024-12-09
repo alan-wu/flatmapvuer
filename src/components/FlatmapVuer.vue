@@ -830,19 +830,19 @@ export default {
      * @arg {String} `name`
      */
     toolbarEvent: function (type, name) {
+      if (this.isValidDrawnCreated) return;
       this.manualAbortedOnClose()
       this.doubleClickedFeature = false
+      // Deselect any feature when draw mode/tool is changed
+      this.changeAnnotationDrawMode({ mode: 'simple_select' })
       if (type === 'mode') {
-        // Deselect any feature when draw mode is changed
-        this.changeAnnotationDrawMode({ mode: 'simple_select' })
         this.activeDrawMode = name
       } else if (type === 'tool') {
+        // Remove any unsubmitted drawn
+        this.cancelDrawnFeature()
         if (name) {
           const tool = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
           this.changeAnnotationDrawMode({ mode: `draw${tool}` })
-        } else {
-          this.changeAnnotationDrawMode({ mode: 'simple_select' })
-          this.cancelDrawnFeature()
         }
         this.activeDrawTool = name
       }
