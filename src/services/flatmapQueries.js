@@ -264,6 +264,7 @@ let FlatmapQueries = function () {
               this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
                 // response.references is publication urls
                 if (response.references) {
+                  const nonPubMedURLs = this.getNonPubMedURLs(response.references);
                   // with publications
                   this.getURLsForPubMed(response.references).then((urls) => {
                     // TODO: if empty urls array is returned,
@@ -533,6 +534,17 @@ let FlatmapQueries = function () {
     })
   }
 
+  this.getPubMedDomains = function () {
+    const names = [
+      'doi.org/',
+      'nih.gov/pubmed/',
+      'pmc/articles/',
+      'pubmed.ncbi.nlm.nih.gov/',
+    ]
+
+    return names;
+  }
+
   this.extractPublicationIdFromURLString = function (urlStr) {
     if (!urlStr) return
 
@@ -540,12 +552,7 @@ let FlatmapQueries = function () {
 
     let term = {id: '', type: ''}
 
-    const names = [
-      'doi.org/',
-      'nih.gov/pubmed/',
-      'pmc/articles/',
-      'pubmed.ncbi.nlm.nih.gov/',
-    ]
+    const names = this.getPubMedDomains()
 
     names.forEach((name) => {
       const lastIndex = str.lastIndexOf(name)
@@ -577,6 +584,25 @@ let FlatmapQueries = function () {
     }
 
     return term
+  }
+
+  this.getNonPubMedURLs = function (urls) {
+    const nonPubMedURLs = [];
+    const names = this.getPubMedDomains();
+
+    urls.forEach((url) => {
+      let count = 0;
+      names.forEach((name) => {
+        if (url.includes(name)) {
+          count++;
+        }
+      });
+      if (!count) {
+        nonPubMedURLs.push(url);
+      }
+    });
+
+    return nonPubMedURLs;
   }
 
   this.getURLsForPubMed = function (data) {
