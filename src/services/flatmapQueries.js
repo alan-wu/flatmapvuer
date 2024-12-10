@@ -614,8 +614,11 @@ let FlatmapQueries = function () {
       )
       this.convertPublicationIds(ids).then((pmids) => {
         if (pmids.length > 0) {
-          const transformedIDs = pmids.join()
-          resolve([this.pubmedSearchUrl(transformedIDs)])
+          const transformedIDs = [];
+          pmids.forEach(pmid => {
+            transformedIDs.push(this.pubmedSearchUrl(pmid))
+          })
+          resolve(transformedIDs)
         } else {
           resolve([])
         }
