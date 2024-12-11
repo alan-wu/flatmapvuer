@@ -95,7 +95,11 @@ let FlatmapQueries = function () {
     ) {
       hyperlinks = eventData.feature.hyperlinks
     } else {
-      hyperlinks = this.urls.map((url) => ({ url: url, id: 'pubmed' }))
+      hyperlinks = this.urls.map((url) => ({
+        url: url.link,
+        dataId: url.id,
+        id: 'pubmed'
+      }))
     }
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
@@ -616,7 +620,10 @@ let FlatmapQueries = function () {
         if (pmids.length > 0) {
           const transformedIDs = [];
           pmids.forEach(pmid => {
-            transformedIDs.push(this.pubmedSearchUrl(pmid))
+            transformedIDs.push({
+              id: pmid,
+              link: this.pubmedSearchUrl(pmid),
+            })
           })
           resolve(transformedIDs)
         } else {
