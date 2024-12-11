@@ -512,10 +512,9 @@ Please use `const` to assign meaningful names to them...
                 class="flatmap-radio"
                 @change="setConnectionPath"
               >
-              <el-radio :value="1">All</el-radio>
-              <el-radio :value="2">Origin</el-radio>
-              <el-radio :value="3">Destination</el-radio>
-              <el-radio :value="4">Others</el-radio>
+              <el-radio value="origins">Origin</el-radio>
+              <el-radio value="destinations">Destination</el-radio>
+              <el-radio value="others">Others</el-radio>
               </el-radio-group>
             </el-row>
           </div>
@@ -1339,9 +1338,10 @@ export default {
      * by providing path model identifier, ``pathId`` or ``anatomicalId``.
      * @arg {String} `pathId` or `anatomicalId`
      */
-    highlightConnectedPaths: async function (payload) {
+    highlightConnectedPaths: async function (payload, type = undefined) {
       if (this.mapImp) {
         // The line below is to get the path features from the geojson ids
+        const connectedType = type ? type : this.connectionPathRadio
         const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)]
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload)
         let toHighlight = payload
@@ -1360,29 +1360,20 @@ export default {
             const pathsL2 = this.mapImp.nodePathModels(featureId)
             pathsL2.forEach((path) => {
               highlight = true
-              let target = []
-              let intersection
               // nodes of the second level path
               const nodeFeatureIdsL2 = this.mapImp.pathModelNodes(path)
-              const nodeFeaturesL2 = nodeFeatureIdsL2.map((featureIdL2) => {
+              const nodeModelsL2 = nodeFeatureIdsL2.map((featureIdL2) => {
                 return this.mapImp.featureProperties(featureIdL2).models
               })
-              if (this.connectionPathRadio === 2) {
-                target = originsFlat
-              } else if (this.connectionPathRadio === 3) {
-                target = destinationsFlat
-              } else if (this.connectionPathRadio === 4) {
-                target = originsFlat.concat(destinationsFlat)
-              }
-              intersection = target.filter(element => nodeFeaturesL2.includes(element));
-              if (
-                (
-                  (this.connectionPathRadio === 2 || this.connectionPathRadio === 3) &&
-                  !intersection.length
-                ) ||
-                (this.connectionPathRadio === 4 && intersection.length)
-              ) {
-                highlight = false
+              const target = connectedType === "origins" ?
+                originsFlat : connectedType === "destinations" ?
+                  destinationsFlat : connectedType === "others" ?
+                    originsFlat.concat(destinationsFlat) : []
+              const intersection = target.filter(element => nodeModelsL2.includes(element));
+              if (intersection.length) {
+                if (connectedType === "others") highlight = false
+              } else {
+                if (connectedType === "origins" || connectedType === "destinations") highlight = false
               }
               if (highlight && !toHighlight.includes(path)) {
                 toHighlight.push(path)
@@ -2985,7 +2976,7 @@ export default {
       connectivityTooltipVisible: false,
       drawerOpen: false,
       featuresAlert: undefined,
-      connectionPathRadio: 1,
+      connectionPathRadio: 'origins',
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
