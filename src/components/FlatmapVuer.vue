@@ -2649,12 +2649,14 @@ export default {
               searchResults.results
             ) {
               let annotation = undefined;
+              let featureId = undefined;
               for (let i = 0; i < searchResults.results.length && !(annotation?.label); i++) {
-                annotation = this.mapImp.annotation(searchResults.results[i].featureId)
+                featureId = searchResults.results[i].featureId
+                annotation = this.mapImp.annotation(featureId)
               }
               if (annotation?.label) {
                 this.mapImp.showPopup(
-                  searchResults.results[0].featureId,
+                  featureId,
                   capitalise(annotation.label),
                   {
                     className: 'custom-popup',
