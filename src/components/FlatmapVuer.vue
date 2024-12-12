@@ -1929,8 +1929,7 @@ export default {
         }
       } else {
         //require data.resource && data.feature.source
-        let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+        const results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // The line below only creates the tooltip if some data was found on the path
         // the pubmed URLs are in knowledge response.references
         if (
@@ -1940,6 +1939,8 @@ export default {
           this.resourceForTooltip = data.resource[0]
           data.resourceForTooltip = this.resourceForTooltip
           this.createTooltipFromNeuronCuration(data)
+        } else {
+          this.createTooltipFromEntityCuration(data)
         }
       }
     },
@@ -1979,7 +1980,36 @@ export default {
      */
     createTooltipFromNeuronCuration: async function (data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
+      this.tooltipEntry.neuronCuration = true
       this.displayTooltip(data.resource[0])
+    },
+    /**
+     * @public
+     * Function to create tooltip from Neuron Curation ``data``.
+     * @arg {Object} `data`
+     */
+    createTooltipFromEntityCuration: async function (data) {
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
+      this.tooltipEntry.entityCuration = true
+      let labels = []
+      const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
+      if (pathsOfEntities.length) {
+        pathsOfEntities.forEach((path) => {
+          const featureIds = this.mapImp.pathModelNodes(path)
+          featureIds.forEach((id) => {
+            const featureLabel = this.mapImp.featureProperties(id).label
+            if (!labels.includes(featureLabel)) {
+              labels.push(featureLabel)
+            }
+          })
+        })
+        this.tooltipEntry = {
+          ...this.tooltipEntry,
+          origins: [data.label],
+          components: labels,
+        }
+        this.displayTooltip(data.resource[0])
+      }
     },
     /**
      * @public
