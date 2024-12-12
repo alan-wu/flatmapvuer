@@ -104,7 +104,7 @@ let FlatmapQueries = function () {
       const openLibHyperlinks = this.openLibraryURLs.map((url) => ({
         url: url.link,
         dataId: url.id,
-        id: 'openlib'
+        id: url.type || 'openlib'
       }))
       hyperlinks = [...pubMedHyperlinks, ...openLibHyperlinks];
     }
@@ -627,17 +627,34 @@ let FlatmapQueries = function () {
       return 'ISBN:' + isbnId;
     });
     const isbnIDsKey = isbnIDs.join(',');
+    const failedIDs = isbnIDs.slice();
 
     const openlibAPI = `https://openlibrary.org/api/books?bibkeys=${isbnIDsKey}&format=json`;
     const response = await fetch(openlibAPI);
     const data = await response.json();
 
     for (const key in data) {
+      const successKeyIndex = failedIDs.indexOf(key);
+      failedIDs.splice(successKeyIndex, 1);
+
       transformedURLs.push({
         id: key.split(':')[1], // Key => "ISBN:1234"
         link: data[key].info_url,
       });
     }
+
+    failedIDs.forEach((failedID) => {
+      const id = failedID.split(':')[1];
+      // TODO: to replace ISBN DB ?
+      // Data does not exist in OpenLibrary
+      // Provide ISBN DB link
+      const link = `https://isbndb.com/book/${id}`;
+      transformedURLs.push({
+        id: id,
+        link: link,
+        type: 'isbndb'
+      });
+    });
 
     return transformedURLs;
   }
