@@ -82,7 +82,7 @@ let FlatmapQueries = function () {
     this.origins = []
     this.components = []
     this.pubMedURLs = []
-    this.nonPubMedURLs = []
+    this.openLibraryURLs = []
     this.controller = undefined
     this.uberons = []
     this.lookUp = []
@@ -96,11 +96,17 @@ let FlatmapQueries = function () {
     ) {
       hyperlinks = eventData.feature.hyperlinks
     } else {
-      hyperlinks = this.pubMedURLs.map((url) => ({
+      const pubMedHyperlinks = this.pubMedURLs.map((url) => ({
         url: url.link,
         dataId: url.id,
         id: 'pubmed'
       }))
+      const openLibHyperlinks = this.openLibraryURLs.map((url) => ({
+        url: url.link,
+        dataId: url.id,
+        id: 'openlib'
+      }))
+      hyperlinks = [...pubMedHyperlinks, ...openLibHyperlinks];
     }
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
@@ -251,7 +257,7 @@ let FlatmapQueries = function () {
     this.origins = []
     this.components = []
     this.pubMedURLs = []
-    this.nonPubMedURLs = []
+    this.openLibraryURLs = []
     if (!keastIds || keastIds.length == 0 || !keastIds[0]) return
 
     let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
@@ -270,13 +276,13 @@ let FlatmapQueries = function () {
               this.processConnectivity(mapImp, connectivity).then((processedConnectivity) => {
                 // response.references is publication urls
                 if (response.references) {
-                  this.nonPubMedURLs = this.getNonPubMedURLs(response.references);
-                  // with publications
-                  this.getURLsForPubMed(response.references).then((urls) => {
-                    // TODO: if empty urls array is returned,
-                    // the urls are not on PubMed.
-                    // Those urls, response.references, will be shown in another way.
-                    this.pubMedURLs = urls;
+                  // with publications from both PubMed and Others
+                  Promise.all([
+                    this.getOpenLibraryURLs(response.references),
+                    this.getURLsForPubMed(response.references)
+                  ]).then((urls) => {
+                    this.openLibraryURLs = urls[0];
+                    this.pubMedURLs = urls[1];
                     resolve(processedConnectivity)
                   })
                 } else {
@@ -592,8 +598,8 @@ let FlatmapQueries = function () {
     return term
   }
 
-  this.getNonPubMedURLs = function (urls) {
-    const nonPubMedURLs = [];
+  this.extractNonPubMedURLs = function (urls) {
+    const extractedURLs = [];
     const names = this.getPubMedDomains();
 
     urls.forEach((url) => {
@@ -604,11 +610,36 @@ let FlatmapQueries = function () {
         }
       });
       if (!count) {
-        nonPubMedURLs.push(url);
+        extractedURLs.push(url);
       }
     });
 
-    return nonPubMedURLs;
+    return extractedURLs;
+  }
+
+  this.getOpenLibraryURLs = async function (urls) {
+    const transformedURLs = [];
+    const nonPubMedURLs = this.extractNonPubMedURLs(urls);
+    const openLibraryURLs = nonPubMedURLs.filter((url) => url.indexOf('isbn') !== -1);
+
+    const isbnIDs = openLibraryURLs.map((url) => {
+      const isbnId = url.split('/').pop();
+      return 'ISBN:' + isbnId;
+    });
+    const isbnIDsKey = isbnIDs.join(',');
+
+    const openlibAPI = `https://openlibrary.org/api/books?bibkeys=${isbnIDsKey}&format=json`;
+    const response = await fetch(openlibAPI);
+    const data = await response.json();
+
+    for (const key in data) {
+      transformedURLs.push({
+        id: key.split(':')[1], // Key => "ISBN:1234"
+        link: data[key].info_url,
+      });
+    }
+
+    return transformedURLs;
   }
 
   this.getURLsForPubMed = function (data) {
