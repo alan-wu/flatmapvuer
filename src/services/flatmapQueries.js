@@ -81,6 +81,7 @@ let FlatmapQueries = function () {
     this.destinations = []
     this.origins = []
     this.components = []
+    this.rawURLs = []
     this.pubMedURLs = []
     this.openLibraryURLs = []
     this.controller = undefined
@@ -96,17 +97,22 @@ let FlatmapQueries = function () {
     ) {
       hyperlinks = eventData.feature.hyperlinks
     } else {
-      const pubMedHyperlinks = this.pubMedURLs.map((url) => ({
-        url: url.link,
-        dataId: url.id,
-        id: 'pubmed'
-      }))
-      const openLibHyperlinks = this.openLibraryURLs.map((url) => ({
-        url: url.link,
-        dataId: url.id,
-        id: url.type || 'openlib'
-      }))
-      hyperlinks = [...pubMedHyperlinks, ...openLibHyperlinks];
+      // TODO: move to externalresourcecard
+      // const pubMedHyperlinks = this.pubMedURLs.map((url) => ({
+      //   url: url.link,
+      //   dataId: url.id,
+      //   id: 'pubmed'
+      // }))
+      // const openLibHyperlinks = this.openLibraryURLs.map((url) => ({
+      //   url: url.link,
+      //   dataId: url.id,
+      //   id: url.type || 'openlib'
+      // }))
+      // hyperlinks = [
+      //   ...pubMedHyperlinks,
+      //   ...openLibHyperlinks
+      // ];
+      hyperlinks = this.rawURLs;
     }
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
@@ -256,6 +262,7 @@ let FlatmapQueries = function () {
     this.destinations = []
     this.origins = []
     this.components = []
+    this.rawURLs = []
     this.pubMedURLs = []
     this.openLibraryURLs = []
     if (!keastIds || keastIds.length == 0 || !keastIds[0]) return
@@ -277,14 +284,17 @@ let FlatmapQueries = function () {
                 // response.references is publication urls
                 if (response.references) {
                   // with publications from both PubMed and Others
-                  Promise.all([
-                    this.getOpenLibraryURLs(response.references),
-                    this.getURLsForPubMed(response.references)
-                  ]).then((urls) => {
-                    this.openLibraryURLs = urls[0];
-                    this.pubMedURLs = urls[1];
-                    resolve(processedConnectivity)
-                  })
+                  this.rawURLs = [...response.references];
+                  resolve(processedConnectivity)
+                  // TODO: move to externalResourceCard
+                  // Promise.all([
+                  //   this.getOpenLibraryURLs(response.references),
+                  //   this.getURLsForPubMed(response.references)
+                  // ]).then((urls) => {
+                  //   this.openLibraryURLs = urls[0];
+                  //   this.pubMedURLs = urls[1];
+                  //   resolve(processedConnectivity)
+                  // })
                 } else {
                   // without publications
                   resolve(processedConnectivity)
