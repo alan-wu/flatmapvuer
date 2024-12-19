@@ -513,8 +513,8 @@ Please use `const` to assign meaningful names to them...
                 @change="setConnectionPath"
               >
               <el-radio value="origins">Origin</el-radio>
+              <el-radio value="components">Component</el-radio>
               <el-radio value="destinations">Destination</el-radio>
-              <el-radio value="others">Others</el-radio>
               </el-radio-group>
             </el-row>
           </div>
@@ -1338,21 +1338,29 @@ export default {
      * by providing path model identifier, ``pathId`` or ``anatomicalId``.
      * @arg {String} `pathId` or `anatomicalId`
      */
-    highlightConnectedPaths: async function (payload, type = undefined) {
+    highlightConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
         // The line below is to get the path features from the geojson ids
-        const connectedType = type ? type : this.connectionPathRadio
+        const connectedType = options.type || this.connectionPathRadio
         const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)]
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload)
-        let toHighlight = payload
+        let toHighlight = []
         let highlight = false
 
         if (nodeFeatureIds.length) {
-          // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-          const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
-          // Check and flatten the origins node graph
-          const originsFlat = connectivity?.ids?.dendrites?.flat().flat()
-          const destinationsFlat = connectivity?.ids?.axons?.flat().flat()
+          let target = options.target || []
+          if (!target.length) {
+            // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
+            // Check and flatten the origins node graph
+            const originsFlat = connectivity?.ids?.dendrites?.flat().flat()
+            const componentsFlat = connectivity?.ids?.components?.flat().flat()
+            const destinationsFlat = connectivity?.ids?.axons?.flat().flat()
+            target = connectedType === "origins" ?
+              originsFlat : connectedType === "components" ?
+                componentsFlat : connectedType === "destinations" ?
+                  destinationsFlat : []
+          }
 
           // Loop through the node features and check if we have certain nodes
           nodeFeatureIds.forEach((featureId) => {
@@ -1365,19 +1373,9 @@ export default {
               const nodeModelsL2 = nodeFeatureIdsL2.map((featureIdL2) => {
                 return this.mapImp.featureProperties(featureIdL2).models
               })
-              const target = connectedType === "origins" ?
-                originsFlat : connectedType === "destinations" ?
-                  destinationsFlat : connectedType === "others" ?
-                    originsFlat.concat(destinationsFlat) : []
               const intersection = target.filter(element => nodeModelsL2.includes(element));
-              if (intersection.length) {
-                if (connectedType === "others") highlight = false
-              } else {
-                if (connectedType === "origins" || connectedType === "destinations") highlight = false
-              }
-              if (highlight && !toHighlight.includes(path)) {
-                toHighlight.push(path)
-              }
+              if (!intersection.length) highlight = false
+              if (highlight && !toHighlight.includes(path)) toHighlight.push(path)
             })
           })
         } else if (pathsOfEntities.length) {
