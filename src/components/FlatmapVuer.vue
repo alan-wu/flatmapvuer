@@ -1992,19 +1992,25 @@ export default {
       let labels = []
       const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
       if (pathsOfEntities.length) {
+        let componentsWithDatasets = []
         pathsOfEntities.forEach((path) => {
           const featureIds = this.mapImp.pathModelNodes(path)
           featureIds.forEach((id) => {
-            const featureLabel = this.mapImp.featureProperties(id).label
-            if (!labels.includes(featureLabel)) {
-              labels.push(featureLabel)
+            const feature = this.mapImp.featureProperties(id)
+            if (!labels.includes(feature.label)) {
+              labels.push(feature.label)
+              componentsWithDatasets.push({ id: feature.models, name: feature.label })
             }
           })
         })
         this.tooltipEntry = {
           ...this.tooltipEntry,
           origins: [data.label],
+          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
           components: labels,
+          componentsWithDatasets: componentsWithDatasets,
+          destinations: [],
+          destinationsWithDatasets: [],
         }
         this.displayTooltip(data.resource[0])
       }
