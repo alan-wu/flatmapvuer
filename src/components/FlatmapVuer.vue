@@ -1378,6 +1378,7 @@ export default {
               if (highlight && !toHighlight.includes(path)) toHighlight.push(path)
             })
           })
+          toHighlight = [...new Set([...toHighlight, ...payload])]
         } else if (pathsOfEntities.length) {
           toHighlight = pathsOfEntities
         }
