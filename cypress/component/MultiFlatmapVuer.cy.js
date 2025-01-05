@@ -209,8 +209,8 @@ describe('MultiFlatmapVuer', () => {
           taxon: 'NCBITaxon:9606'
         },
         {
-          name: 'Rat (NPO)',
-          taxon: 'NCBITaxon:10116'
+          name: "Human Male",
+          taxon: "NCBITaxon:9606"
         },
         {
           name: 'Functional Connectivity',
