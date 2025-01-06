@@ -1373,14 +1373,21 @@ export default {
               const nodeModelsL2 = nodeFeatureIdsL2.map((featureIdL2) => {
                 return this.mapImp.featureProperties(featureIdL2).models
               })
-              const intersection = target.filter(element => nodeModelsL2.includes(element));
+              const intersection = target.filter(element => nodeModelsL2.includes(element))
               if (!intersection.length) highlight = false
               if (highlight && !toHighlight.includes(path)) toHighlight.push(path)
             })
           })
           toHighlight = [...new Set([...toHighlight, ...payload])]
         } else if (pathsOfEntities.length) {
-          toHighlight = pathsOfEntities
+          pathsOfEntities.forEach((path) => {
+            const nodeFeatureIds = this.mapImp.pathModelNodes(path)
+            const nodeModels = nodeFeatureIds.map((featureId) => {
+              return this.mapImp.featureProperties(featureId).models
+            })
+            if (nodeModels.includes(options.target[0])) toHighlight.push(path)
+          })
+          if (!toHighlight.length) toHighlight = options.target
         }
         // display connected paths
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
