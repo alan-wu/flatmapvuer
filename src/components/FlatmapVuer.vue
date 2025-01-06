@@ -2481,8 +2481,9 @@ export default {
         this._stateToBeSet = {
           ...state
         }
-        if (this.mapImp && !this.loading)
+        if (this.mapImp && !this.loading) {
           this.restoreMapState(this._stateToBeSet)
+        }
       }
     },
     /**
@@ -2612,21 +2613,25 @@ export default {
             this.mapImp.showSearchResults(searchResults)
             if (
               displayLabel &&
-              searchResults.results[0].featureId &&
-              searchResults.results[0].text
+              searchResults.results
             ) {
-              const annotation = this.mapImp.annotation(
-                searchResults.results[0].featureId
-              )
-              this.mapImp.showPopup(
-                searchResults.results[0].featureId,
-                annotation.label,
-                {
-                  className: 'custom-popup',
-                  positionAtLastClick: false,
-                  preserveSelection: true,
-                }
-              )
+              let annotation = undefined;
+              let featureId = undefined;
+              for (let i = 0; i < searchResults.results.length && !(annotation?.label); i++) {
+                featureId = searchResults.results[i].featureId
+                annotation = this.mapImp.annotation(featureId)
+              }
+              if (annotation?.label) {
+                this.mapImp.showPopup(
+                  featureId,
+                  capitalise(annotation.label),
+                  {
+                    className: 'custom-popup',
+                    positionAtLastClick: false,
+                    preserveSelection: true,
+                  }
+                )
+              }
             }
             return true
           } else this.mapImp.clearSearchResults()
