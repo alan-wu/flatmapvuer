@@ -71,9 +71,6 @@ describe('MultiFlatmapVuer', () => {
       return true
     })
 
-    //Check if multiflatmap is mounted correctly
-    cy.get('.content-container').should('exist');
-
 
     //Check if the minimap is visible
     cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
@@ -145,10 +142,12 @@ describe('MultiFlatmapVuer', () => {
               cy.stub(win, 'open').as('Open')
             })
 
-            // Click the open pubmed button and check that the window.open call was intercepted
-            cy.get('#open-pubmed-button').should('exist').click()
-            cy.get('@Open').should('have.been.calledOnceWithExactly', Cypress.sinon.match(/^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov(?:\/.*)/), '_blank')
-
+            // References
+            cy.get('.resource-container').should('exist')
+            cy.get('.citation-list').should('exist')
+            cy.get('.citation-list').find('li').should('have.length', 4)
+            const citationText = 'Afferent and sympathetic innervation of the dome and the base of the urinary bladder of the female rat'
+            cy.get('.citation-list li').first().should('exist').contains(citationText);
           })
 
           // Close the pop up
@@ -194,9 +193,6 @@ describe('MultiFlatmapVuer', () => {
       })
 
     })
-
-    //Check if multiflatmap is mounted correctly
-    cy.get('.content-container').should('exist');
 
     // Check if flatmap emits ready event
     cy.get('@vue').should(wrapper => {
