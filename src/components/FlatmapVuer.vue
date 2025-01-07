@@ -1808,7 +1808,7 @@ export default {
         }
 
         // highlight all available features
-        this.mapImp.zoomToFeatures(featuresToHighlight, { noZoomIn: true });
+        this.mapImp.selectFeatures(featuresToHighlight);
       }
     },
     emitConnectivityGraphError: function (errorData) {
