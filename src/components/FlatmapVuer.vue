@@ -113,16 +113,10 @@ Please use `const` to assign meaningful names to them...
             </div>
           </template>
           <template #default>
-            <b>Connectivity Graph</b>
+            <b>Connectivity References</b>
             <p>
-              You can now view individual connectivity after clicking
-              on a connection in exploration mode.
-            </p>
-            <b>Interactive connectivity list and graph</b>
-            <p>
-              Corresponding features on the map can be located when
-              hovering or clicking on the features in the connecitivity
-              list and graph.
+              Connectivity references have been improved and available
+              in various formats.
             </p>
             <b>Improved state storing</b>
             <p>
