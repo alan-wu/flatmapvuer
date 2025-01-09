@@ -75,18 +75,17 @@ Please use `const` to assign meaningful names to them...
             <template #reference>
               <div
                 class="warning-icon"
-                v-if="displayWarning"
                 @mouseover="showTooltip(7)"
                 @mouseout="hideTooltip(7)"
               >
-                <el-icon><el-icon-warning-filled /></el-icon>
+                <el-icon v-if="displayWarning || isLegacy"><el-icon-warning-filled /></el-icon>
                 <template v-if="isLegacy">
                   <span class="warning-text">Legacy Map</span>
                   <div class="latest-map-text" @click="viewLatestMap">
                     Click here for the latest map
                   </div>
                 </template>
-                <template v-else>
+                <template v-else-if="displayWarning">
                   <span class="warning-text">Beta</span>
                 </template>
               </div>
