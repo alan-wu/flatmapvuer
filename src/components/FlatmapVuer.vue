@@ -644,7 +644,7 @@ const centroid = (geometry) => {
   } else {
     coordinates = geometry.coordinates
   }
-  if (coordinates) {    
+  if (coordinates) {
     if (!(geometry.type === 'Point')) {
       coordinates.map((coor) => {
         featureGeometry.lng += parseFloat(coor[0])
@@ -1703,6 +1703,15 @@ export default {
      * Function to remove active tooltips on map.
      */
     removeActiveTooltips: function () {
+      // Remove active tooltip/popup on map
+      if (this.mapImp) {
+        const currentPopup = this.mapImp._userInteractions?._currentPopup;
+        if (currentPopup) {
+          currentPopup.remove();
+        }
+      }
+
+      // Fallback: remove any existing toolitp on DOM
       const tooltips = this.$el.querySelectorAll('.flatmap-tooltip-popup');
       tooltips.forEach((tooltip) => tooltip.remove());
     },
