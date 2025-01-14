@@ -3411,6 +3411,12 @@ export default {
       border-style: solid;
       flex-shrink: 0;
     }
+
+    hr {
+      margin: 0.5rem 0;
+      border: 0;
+      border-top: 1px solid var(--el-border-color);
+    }
   }
   .maplibregl-popup-tip {
     display: none;
