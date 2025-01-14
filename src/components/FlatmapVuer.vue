@@ -1705,10 +1705,7 @@ export default {
     removeActiveTooltips: function () {
       // Remove active tooltip/popup on map
       if (this.mapImp) {
-        const currentPopup = this.mapImp._userInteractions?._currentPopup;
-        if (currentPopup) {
-          currentPopup.remove();
-        }
+        this.mapImp.removePopup();
       }
 
       // Fallback: remove any existing toolitp on DOM
