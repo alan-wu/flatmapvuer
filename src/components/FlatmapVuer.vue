@@ -2618,20 +2618,19 @@ export default {
             ) {
               let annotation = undefined;
               let featureId = undefined;
-              for (let i = 0; i < searchResults.results.length && !(annotation?.label); i++) {
+              for (let i = 0; i < searchResults.results.length; i++) {
                 featureId = searchResults.results[i].featureId
                 annotation = this.mapImp.annotation(featureId)
               }
-              if (annotation?.label) {
-                this.mapImp.showPopup(
-                  featureId,
-                  capitalise(annotation.label),
-                  {
-                    className: 'custom-popup',
-                    positionAtLastClick: false,
-                    preserveSelection: true,
-                  }
-                )
+              if (featureId) {
+                const feature = this.mapImp.featureProperties(featureId)
+                const data = {
+                  resource: [feature.source],
+                  feature,
+                  label: feature.label,
+                  provenanceTaxonomy: feature.taxons,
+                }
+                this.checkAndCreatePopups(data)
               }
             }
             return true
