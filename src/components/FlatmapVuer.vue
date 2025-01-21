@@ -1716,7 +1716,7 @@ export default {
      * Function to create tooltip for the provided connectivity data.
      * @arg {Array} `connectivityData`
      */
-    createTooltipForConnectivity: function (connectivityData) {
+    createTooltipForConnectivity: function (connectivityData, geojsonId) {
       // combine all labels to show together
       // content type must be DOM object to use HTML
       const labelsContainer = document.createElement('div');
@@ -1733,7 +1733,7 @@ export default {
       });
 
       this.mapImp.showPopup(
-        connectivityData[0].featureId,
+        geojsonId,
         labelsContainer,
         {
           className: 'custom-popup flatmap-tooltip-popup',
@@ -1750,6 +1750,7 @@ export default {
     showConnectivityTooltips: function (payload) {
       const { connectivityInfo, data } = payload;
       const featuresToHighlight = [];
+      const geojsonHighlights = [];
       const connectivityData = [];
       const filteredConnectivityData = [];
       const errorData = [];
@@ -1785,16 +1786,31 @@ export default {
               id,
               label,
             });
-            featuresToHighlight.push(id);
           } else {
             errorData.push(connectivity);
           }
         });
 
         if (filteredConnectivityData.length) {
-          // show tooltip of the first item
-          // with all labels
-          this.createTooltipForConnectivity(filteredConnectivityData);
+          let geojsonId = filteredConnectivityData[0].featureId;
+
+          this.mapImp.annotations.forEach((annotation) => {
+            const anatomicalNodes = annotation['anatomical-nodes'];
+
+            if (anatomicalNodes) {
+              const anatomicalNodesString = anatomicalNodes.join('');
+              const foundItem = filteredConnectivityData.every((item) =>
+                anatomicalNodesString.indexOf(item.id) !== -1
+              );
+
+              if (foundItem) {
+                geojsonId = annotation.featureId;
+                geojsonHighlights.push(geojsonId);
+              }
+            }
+          });
+
+          this.createTooltipForConnectivity(filteredConnectivityData, geojsonId);
         } else {
           errorData.push(...connectivityData);
           // Close all tooltips on the current flatmap element
@@ -1807,7 +1823,13 @@ export default {
         }
 
         // highlight all available features
-        this.mapImp.selectFeatures(featuresToHighlight);
+        const featureIdsToHighlight = this.mapImp.modelFeatureIdList(featuresToHighlight);
+        const allFeaturesToHighlight = [
+          ...featureIdsToHighlight,
+          ...geojsonHighlights
+        ];
+
+        this.mapImp.selectGeoJSONFeatures(allFeaturesToHighlight);
       }
     },
     emitConnectivityGraphError: function (errorData) {
