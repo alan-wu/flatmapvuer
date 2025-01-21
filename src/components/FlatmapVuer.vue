@@ -2362,22 +2362,10 @@ export default {
         if (state.background) this.backgroundChangeCallback(state.background)
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
-          this.searchAndShowResult(searchTerm, true)
           if (state.viewingMode === "Neuron Connection") {
             this.highlightConnectedPaths([searchTerm])
           } else {
-            const geoID = this.mapImp.modelFeatureIds(searchTerm)
-            if (geoID.length > 0) {
-              const feature = this.mapImp.featureProperties(geoID[0])
-              this.searchAndShowResult(searchTerm, true)
-              const data = {
-                resource: [feature.source],
-                feature,
-                label: feature.label,
-                provenanceTaxonomy: feature.taxons
-              }
-              this.checkAndCreatePopups(data)
-            }
+            this.searchAndShowResult(searchTerm, true)
           }
         }
         this.setVisibilityState(state)
