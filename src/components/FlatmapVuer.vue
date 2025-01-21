@@ -1862,8 +1862,7 @@ export default {
         }
       } else {
         //require data.resource && data.feature.source
-        let results =
-          await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+        let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // The line below only creates the tooltip if some data was found on the path
         // the pubmed URLs are in knowledge response.references
         if (
@@ -2593,11 +2592,11 @@ export default {
     /**
      * @public
      * Function to display features with annotation matching the provided term,
-     * with the option to display the label using displayLabel flag.
+     * with the option to display the label/connectivity information using displayInfo flag.
      * @arg {String} `term`,
-     * @arg {String} `displayLabel`
+     * @arg {String} `displayInfo`
      */
-    searchAndShowResult: function (term, displayLabel) {
+    searchAndShowResult: function (term, displayInfo) {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
@@ -2605,22 +2604,15 @@ export default {
           return true
         } else {
           const searchResults = this.mapImp.search(term)
-          if (
-            searchResults &&
-            searchResults.results &&
-            searchResults.results.length > 0
-          ) {
+          if (searchResults?.results?.length) {
             this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
-            if (
-              displayLabel &&
-              searchResults.results
-            ) {
-              let annotation = undefined;
+            if (displayInfo) {
               let featureId = undefined;
               for (let i = 0; i < searchResults.results.length; i++) {
                 featureId = searchResults.results[i].featureId
-                annotation = this.mapImp.annotation(featureId)
+                const annotation = this.mapImp.annotation(featureId)
+                if (featureId && annotation?.label) break;
               }
               if (featureId) {
                 const feature = this.mapImp.featureProperties(featureId)
