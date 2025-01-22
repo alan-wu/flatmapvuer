@@ -2588,6 +2588,7 @@ export default {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
+          this.$emit('connectivity-info-close');
           this.statesTracking.activeTerm = ""
           return true
         } else {
