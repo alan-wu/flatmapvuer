@@ -1654,6 +1654,7 @@ export default {
               if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
+                this.currentActive = data.models ? data.models : ''
                 // Drawing connectivity between features
                 if (this.activeDrawTool && !this.isValidDrawnCreated) {
                   // Check if flatmap features or existing drawn features
