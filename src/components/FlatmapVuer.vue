@@ -2613,17 +2613,12 @@ export default {
                 }
                 if (this.viewingMode === "Exploration") {
                   this.checkAndCreatePopups(data)
-                } else {
-                  this.mapImp.showPopup(
-                    featureId,
-                    capitalise(feature.label),
-                    {
-                      className: 'custom-popup',
-                      positionAtLastClick: false,
-                      preserveSelection: true,
-                    }
-                  )
                 }
+                this.mapImp.showPopup(featureId, capitalise(feature.label), {
+                  className: 'custom-popup',
+                  positionAtLastClick: false,
+                  preserveSelection: true,
+                })
               }
             }
             return true
