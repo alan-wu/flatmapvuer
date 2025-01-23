@@ -473,20 +473,18 @@ Please use `const` to assign meaningful names to them...
               </el-select>
             </el-row>
           </template>
-          <div v-else>
-            <el-row class="backgroundSpacer" v-if="displayFlightPathOption"></el-row>
-            <el-row class="backgroundText" v-if="displayFlightPathOption">Flight path display</el-row>
-            <el-row class="backgroundControl" v-if="displayFlightPathOption">
-              <el-radio-group
-                v-model="flightPath3DRadio"
-                class="flatmap-radio"
-                @change="setFlightPath3D"
-              >
-              <el-radio :value="false">2D</el-radio>
-              <el-radio :value="true">3D</el-radio>
-              </el-radio-group>
-            </el-row>
-          </div>
+          <el-row class="backgroundSpacer" v-if="displayFlightPathOption"></el-row>
+          <el-row class="backgroundText" v-if="displayFlightPathOption">Flight path display</el-row>
+          <el-row class="backgroundControl" v-if="displayFlightPathOption">
+            <el-radio-group
+              v-model="flightPath3DRadio"
+              class="flatmap-radio"
+              @change="setFlightPath3D"
+            >
+            <el-radio :value="false">2D</el-radio>
+            <el-radio :value="true">3D</el-radio>
+            </el-radio-group>
+          </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText">Organs display</el-row>
           <el-row class="backgroundControl">
