@@ -2588,7 +2588,11 @@ export default {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
-          this.$emit('connectivity-info-close');
+          if (this.viewingMode === "Exploration") {
+            this.$emit('connectivity-info-close');
+          } else if (this.viewingMode === "Annotation") {
+            this.manualAbortedOnClose()
+          }
           this.statesTracking.activeTerm = ""
           return true
         } else {
@@ -2607,12 +2611,16 @@ export default {
                 const feature = this.mapImp.featureProperties(featureId)
                 const data = {
                   resource: [feature.source],
-                  feature,
+                  feature: {...feature, models: feature.models || feature.source},
                   label: feature.label,
                   provenanceTaxonomy: feature.taxons,
                 }
-                if (this.viewingMode === "Exploration") {
+                if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
                   this.checkAndCreatePopups(data)
+                } else if (this.viewingMode === 'Neuron Connection') {
+                  setTimeout(() => {
+                    this.highlightConnectedPaths(data.resource)
+                  }, 1000)
                 }
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
                   className: 'custom-popup',
