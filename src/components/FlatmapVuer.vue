@@ -633,6 +633,7 @@ import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
 const ERROR_MESSAGE = 'cannot be found on the map.';
+const CACHE_LIFETIME = 24 * 60 * 60 * 1000; // One day
 
 const centroid = (geometry) => {
   let featureGeometry = { lng: 0, lat: 0, }
@@ -1938,7 +1939,29 @@ export default {
         }
       }
     },
-    // TODO: add expiry
+    removeAllCacheData: function () {
+      const keys = [
+        'flatmap-knowledges',
+        'flatmap-knowledges-expiry',
+      ];
+      keys.forEach((key) => {
+        sessionStorage.removeItem(key);
+      });
+    },
+    refreshCache: function () {
+      const expiry = sessionStorage.getItem('flatmap-knowledges-expiry');
+      const now = new Date();
+
+      if (now.getTime() > expiry) {
+        this.removeAllCacheData();
+      }
+    },
+    updateCacheExpiry: function () {
+      const now = new Date();
+      const expiry = now.getTime() + CACHE_LIFETIME;
+
+      sessionStorage.setItem('flatmap-knowledges-expiry', expiry);
+    },
     loadAndStoreKnowledges: function (mapImp) {
       const knowledgeSource = this.getKnowledgeSource(mapImp);
       const sql = `select knowledge from knowledge
@@ -1951,6 +1974,7 @@ export default {
           const mappedData = response.values.map(x => x[0]);
           const parsedData = mappedData.map(x => JSON.parse(x));
           sessionStorage.setItem('flatmap-knowledges', JSON.stringify(parsedData));
+          this.updateCacheExpiry();
         });
       }
     },
@@ -3223,6 +3247,7 @@ export default {
     } else if (this.renderAtMounted) {
       this.createFlatmap()
     }
+    this.refreshCache();
   },
 }
 </script>
