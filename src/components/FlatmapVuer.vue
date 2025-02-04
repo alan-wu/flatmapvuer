@@ -1847,7 +1847,7 @@ export default {
 
       if (flatmapKnowledgesRaw) {
         const flatmapKnowledges = JSON.parse(flatmapKnowledgesRaw);
-        const dataWithRefs = flatmapKnowledges.filter(x => x.references && x.references.length);
+        const dataWithRefs = flatmapKnowledges.filter((x) => x.references && x.references.length);
         const foundData = dataWithRefs.filter((x) => x.references.includes(resource));
 
         if (foundData.length) {
@@ -1864,8 +1864,8 @@ export default {
         knowledge like "%${resource}%" order by source desc`;
 
       this.flatmapQueries.flatmapQuery(sql).then((response) => {
-        const mappedData = response.values.map(x => x[0]);
-        const parsedData = mappedData.map(x => JSON.parse(x));
+        const mappedData = response.values.map((x) => x[0]);
+        const parsedData = mappedData.map((x) => JSON.parse(x));
         const featureIds = parsedData.map((x) => x.id);
         this.mapImp.selectFeatures(featureIds);
       });
