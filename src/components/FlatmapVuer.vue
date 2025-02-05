@@ -1834,9 +1834,9 @@ export default {
       }
     },
     showConnectivitiesByReference: function (resource) {
-      const flatmapKnowledges = sessionStorage.getItem('flatmap-knowledges');
+      const flatmapKnowledge = sessionStorage.getItem('flatmap-knowledge');
 
-      if (!flatmapKnowledges) {
+      if (!flatmapKnowledge) {
         this.highlightReferenceConnectivitiesByAPI(resource);
       } else {
         this.highlightReferenceConnectivitiesFromStorage(resource);
@@ -1844,11 +1844,11 @@ export default {
     },
     // Store in storage and highlight
     highlightReferenceConnectivitiesFromStorage: function (resource) {
-      const flatmapKnowledgesRaw = sessionStorage.getItem('flatmap-knowledges');
+      const flatmapKnowledgeRaw = sessionStorage.getItem('flatmap-knowledge');
 
-      if (flatmapKnowledgesRaw) {
-        const flatmapKnowledges = JSON.parse(flatmapKnowledgesRaw);
-        const dataWithRefs = flatmapKnowledges.filter((x) => x.references && x.references.length);
+      if (flatmapKnowledgeRaw) {
+        const flatmapKnowledge = JSON.parse(flatmapKnowledgeRaw);
+        const dataWithRefs = flatmapKnowledge.filter((x) => x.references && x.references.length);
         const foundData = dataWithRefs.filter((x) => x.references.includes(resource));
 
         if (foundData.length) {
@@ -1925,8 +1925,8 @@ export default {
         //require data.resource && data.feature.source
         let results =
           await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
-        // load and store knowledges
-        this.loadAndStoreKnowledges(this.mapImp);
+        // load and store knowledge
+        this.loadAndStoreKnowledge(this.mapImp);
         // The line below only creates the tooltip if some data was found on the path
         // the pubmed URLs are in knowledge response.references
         if (
@@ -1941,15 +1941,15 @@ export default {
     },
     removeAllCacheData: function () {
       const keys = [
-        'flatmap-knowledges',
-        'flatmap-knowledges-expiry',
+        'flatmap-knowledge',
+        'flatmap-knowledge-expiry',
       ];
       keys.forEach((key) => {
         sessionStorage.removeItem(key);
       });
     },
     refreshCache: function () {
-      const expiry = sessionStorage.getItem('flatmap-knowledges-expiry');
+      const expiry = sessionStorage.getItem('flatmap-knowledge-expiry');
       const now = new Date();
 
       if (now.getTime() > expiry) {
@@ -1960,20 +1960,20 @@ export default {
       const now = new Date();
       const expiry = now.getTime() + CACHE_LIFETIME;
 
-      sessionStorage.setItem('flatmap-knowledges-expiry', expiry);
+      sessionStorage.setItem('flatmap-knowledge-expiry', expiry);
     },
-    loadAndStoreKnowledges: function (mapImp) {
+    loadAndStoreKnowledge: function (mapImp) {
       const knowledgeSource = this.getKnowledgeSource(mapImp);
       const sql = `select knowledge from knowledge
         where source="${knowledgeSource}"
         order by source desc`;
-      const flatmapKnowledges = sessionStorage.getItem('flatmap-knowledges');
+      const flatmapKnowledge = sessionStorage.getItem('flatmap-knowledge');
 
-      if (!flatmapKnowledges) {
+      if (!flatmapKnowledge) {
         this.flatmapQueries.flatmapQuery(sql).then((response) => {
           const mappedData = response.values.map(x => x[0]);
           const parsedData = mappedData.map(x => JSON.parse(x));
-          sessionStorage.setItem('flatmap-knowledges', JSON.stringify(parsedData));
+          sessionStorage.setItem('flatmap-knowledge', JSON.stringify(parsedData));
           this.updateCacheExpiry();
         });
       }
