@@ -1472,9 +1472,9 @@ export default {
       if (this.mapImp) {
         if (payload.value) {
           clearTimeout(this.taxonLeaveDelay)
-            let gid = this.mapImp.taxonFeatureIds(payload.key)
-            this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
-            this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
+          let gid = this.mapImp.taxonFeatureIds(payload.key)
+          this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
+          this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
           this.taxonLeaveDelay = setTimeout(() => {
             // reset visibility of paths
