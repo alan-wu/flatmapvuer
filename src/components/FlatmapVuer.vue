@@ -1676,6 +1676,7 @@ export default {
               // Disable popup when drawing
               !this.activeDrawTool
             ) {
+              this.connectivityDataSource = data.source;
               this.checkAndCreatePopups(payload)
             }
             this.$emit('resource-selected', payload)
@@ -2597,9 +2598,10 @@ export default {
           } else {
             this.statesTracking.activeTerm = ""
           }
-          if (this.tooltipEntry.featureId) {
+          if (!this.connectivityDataSource) {
             this.$emit('connectivity-info-close');
           }
+          this.connectivityDataSource = ''; // reset
         });
       }
     },
@@ -2941,6 +2943,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
+      connectivityDataSource: '',
       connectivityTooltipVisible: false,
       drawerOpen: false,
       featuresAlert: undefined,
