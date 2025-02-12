@@ -495,8 +495,4 @@ let FlatmapQueries = function () {
   }
 }
 
-export {
-  FlatmapQueries,
-  findTaxonomyLabel,
-  findTaxonomyLabels,
-}
+export { FlatmapQueries, findTaxonomyLabel, findTaxonomyLabels }
