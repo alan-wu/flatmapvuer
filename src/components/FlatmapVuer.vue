@@ -622,6 +622,13 @@ import {
   FlatmapQueries,
   findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
+import {
+  getReferenceConnectivitiesFromStorage,
+  loadAndStoreKnowledge,
+  refreshFlatmapKnowledgeCache,
+  getKnowledgeSource,
+  getReferenceConnectivitiesByAPI,
+} from '../services/flatmapKnowledge.js'
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -1851,6 +1858,22 @@ export default {
         this.mapImp.selectGeoJSONFeatures(allFeaturesToHighlight);
       }
     },
+    showConnectivitiesByReference: function (resource) {
+      this.searchConnectivitiesByReference(resource).then((featureIds) => {
+        this.mapImp.selectFeatures(featureIds);
+      });
+    },
+    searchConnectivitiesByReference: async function (resource) {
+      const flatmapKnowledge = sessionStorage.getItem('flatmap-knowledge');
+      let featureIds = [];
+
+      if (flatmapKnowledge) {
+        featureIds = await getReferenceConnectivitiesFromStorage(resource);
+      } else {
+        featureIds = await getReferenceConnectivitiesByAPI(this.mapImp, resource, this.flatmapQueries);
+      }
+      return featureIds;
+    },
     emitConnectivityGraphError: function (errorData) {
       this.$emit('connectivity-graph-error', {
         data: {
@@ -1904,6 +1927,8 @@ export default {
       } else {
         //require data.resource && data.feature.source
         let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+        // load and store knowledge
+        loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
         // The line below only creates the tooltip if some data was found on the path
         // the pubmed URLs are in knowledge response.references
         if (
@@ -2177,12 +2202,7 @@ export default {
         }
         // Get connectivity knowledge source | SCKAN release
         if (this.mapImp.provenance?.connectivity) {
-          const sckanProvenance = this.mapImp.provenance.connectivity;
-          if ('knowledge-source' in sckanProvenance) {
-            this.tooltipEntry['knowledge-source'] = sckanProvenance['knowledge-source'];
-          } else if ('npo' in sckanProvenance) {
-            this.tooltipEntry['knowledge-source'] = `${sckanProvenance.npo.release}-npo`;
-          }
+          this.tooltipEntry['knowledge-source'] = getKnowledgeSource(this.mapImp);
         }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
@@ -3176,6 +3196,7 @@ export default {
     } else if (this.renderAtMounted) {
       this.createFlatmap()
     }
+    refreshFlatmapKnowledgeCache();
   },
 }
 </script>
