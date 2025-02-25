@@ -2260,7 +2260,7 @@ export default {
       if (this.mapImp) {
         const { offsetX = 0, offsetY = 0, zoom = 4 } = options;
         const Map = this.mapImp.map;
-        const bbox = this.mapImp._bounds.toArray();
+        const bbox = this.mapImp.bounds.toArray();
 
         // Zoom the map to features first
         this.mapImp.zoomToFeatures(featureIds, { noZoomIn: true });
@@ -2568,9 +2568,6 @@ export default {
         if (this.mapImp) {
           this.mapImp.resize()
           this.showMinimap(this.displayMinimap)
-          if (this.mapImp._minimap) {
-            this.mapImp._minimap._miniMap.resize()
-          }
         }
       } catch {
         console.error('Map resize error')
