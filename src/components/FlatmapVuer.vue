@@ -2586,6 +2586,7 @@ export default {
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       }
+      console.log(this.mapImp)
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
