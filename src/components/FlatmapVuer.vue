@@ -139,7 +139,7 @@ Please use `const` to assign meaningful names to them...
       </el-icon>
 
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
+        v-if="viewingMode === 'Annotation' && authorisedUser && !disableUI"
         :mapCanvas="{
           containerHTML: this.$el,
           class: '.maplibregl-canvas',
@@ -449,7 +449,7 @@ Please use `const` to assign meaningful names to them...
               {{ modeDescription }}
             </el-row>
           </el-row>
-          <template v-if="viewingMode === 'Annotation' && userInformation">
+          <template v-if="viewingMode === 'Annotation' && authorisedUser">
             <el-row class="backgroundText">Annotations From</el-row>
             <el-row class="backgroundControl">
               <el-select
@@ -1010,8 +1010,8 @@ export default {
           this.loading = true
         }
         const userId = this.annotationFrom === 'Anyone' ?
-          undefined : this.userInformation.orcid ?
-            this.userInformation.orcid : '0000-0000-0000-0000'
+          undefined : this.authorisedUser.orcid ?
+            this.authorisedUser.orcid : '0000-0000-0000-0000'
         const participated = this.annotationFrom === 'Anyone' ?
           undefined : this.annotationFrom === 'Me' ?
             true : false
@@ -3008,7 +3008,7 @@ export default {
         "Connection",
       ],
       annotator: undefined,
-      userInformation: undefined,
+      authorisedUser: undefined,
       activeDrawMode: undefined,
       activeDrawTool: undefined,
       featureAnnotationSubmitted: false,
@@ -3073,7 +3073,7 @@ export default {
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode]
       if (this.viewingMode === 'Annotation') {
-        if (this.userInformation) {
+        if (this.authorisedUser) {
           return description[1]
         }
         return description[0]
@@ -3118,7 +3118,7 @@ export default {
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email && userData.canUpdate) {
             this.showAnnotator(true)
-            this.userInformation = userData
+            this.authorisedUser = userData
             this.setFeatureAnnotated()
             this.addAnnotationFeature()
           }
