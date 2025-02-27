@@ -903,10 +903,7 @@ export default {
      * Function to remove all drawn annotations from flatmap annotation layer.
      */
     clearAnnotationFeature: function () {
-      if (
-        this.mapImp &&
-        this.existDrawnFeatures.length > 0
-      ) {
+      if (this.mapImp) {
         this.mapImp.clearAnnotationFeature()
       }
     },
@@ -3117,14 +3114,13 @@ export default {
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email && userData.canUpdate) {
-            this.showAnnotator(true)
             this.authorisedUser = userData
             this.setFeatureAnnotated()
             this.addAnnotationFeature()
           }
           this.loading = false
         })
-      } else this.showAnnotator(false)
+      } else this.clearAnnotationFeature()
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
