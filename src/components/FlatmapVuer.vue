@@ -139,7 +139,7 @@ Please use `const` to assign meaningful names to them...
       </el-icon>
 
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && authorisedUser && !disableUI"
+        v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotate) && !disableUI"
         :mapCanvas="{
           containerHTML: this.$el,
           class: '.maplibregl-canvas',
@@ -447,6 +447,9 @@ Please use `const` to assign meaningful names to them...
             </div>
             <el-row class="viewing-mode-description">
               {{ modeDescription }}
+            </el-row>
+            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotate" class="viewing-mode-description">
+              (Offline annotate)
             </el-row>
           </el-row>
           <template v-if="viewingMode === 'Annotation' && authorisedUser">
@@ -940,23 +943,28 @@ export default {
      * @arg {Object} `annotation`
      */
     commitAnnotationEvent: function (annotation) {
-      if (
-        this.mapImp &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type) &&
-        // Only when annotation comments stored successfully
-        annotation
-      ) {
-        this.featureAnnotationSubmitted = true
-        this.mapImp.commitAnnotationEvent(this.annotationEntry)
-        if (annotation.body.comment === "Position Updated") {
-          this.annotationEntry.positionUpdated = false
-        } else if (this.annotationEntry.type === 'deleted') {
-          if (this.annotationSidebar) this.$emit("annotation-close")
-          this.closeTooltip()
-          // Only delete need, keep the annotation tooltip/sidebar open if created/updated
-          this.annotationEntry = {}
+      if (this.mapImp) {
+        if (this.offlineAnnotate) {
+          this.offlineAnnotation.push(annotation)
+          if (this.annotationEntry.type === 'deleted') {
+            this.offlineAnnotation = this.offlineAnnotation.filter((offline) => {
+              return !(offline.resource === this.serverURL && offline.item.id === annotation.item.id)
+            })
+          }
         }
-        this.addAnnotationFeature()
+        if (['created', 'updated', 'deleted'].includes(this.annotationEntry.type)) {
+          this.featureAnnotationSubmitted = true
+          this.mapImp.commitAnnotationEvent(this.annotationEntry)
+          if (annotation.body.comment === "Position Updated") {
+            this.annotationEntry.positionUpdated = false
+          } else if (this.annotationEntry.type === 'deleted') {
+            if (this.annotationSidebar) this.$emit("annotation-close")
+            this.closeTooltip()
+            // Only delete need, keep the annotation tooltip/sidebar open if created/updated
+            this.annotationEntry = {}
+          }
+          this.addAnnotationFeature()
+        }
       }
     },
     /**
@@ -1899,6 +1907,7 @@ export default {
           this.annotationEntry = {
             ...data.feature,
             resourceId: this.serverURL,
+            offline: this.offlineAnnotate
           }
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
@@ -2992,6 +3001,8 @@ export default {
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
         'Annotation': ['View feature annotations', 'Add, comment on and view feature annotations']
       },
+      offlineAnnotate: false,
+      offlineAnnotation: [],
       annotationFrom: 'Anyone',
       annotatedSource: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
@@ -3111,13 +3122,16 @@ export default {
     },
     viewingMode: function (mode) {
       if (mode === 'Annotation') {
+        this.offlineAnnotate = false
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email && userData.canUpdate) {
             this.authorisedUser = userData
-            this.setFeatureAnnotated()
-            this.addAnnotationFeature()
+          } else {
+            this.offlineAnnotate = true
           }
+          this.setFeatureAnnotated()
+          this.addAnnotationFeature()
           this.loading = false
         })
       } else this.clearAnnotationFeature()
