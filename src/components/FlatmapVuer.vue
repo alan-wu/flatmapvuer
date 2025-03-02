@@ -951,6 +951,7 @@ export default {
               return !(offline.resource === this.serverURL && offline.item.id === annotation.item.id)
             })
           }
+          localStorage.setItem('flatmap-offline-annotation', JSON.stringify(this.offlineAnnotation))
         }
         if (['created', 'updated', 'deleted'].includes(this.annotationEntry.type)) {
           this.featureAnnotationSubmitted = true
@@ -974,9 +975,17 @@ export default {
      * @arg {String} `participated`
      */
     fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
-      let annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
-      // The annotator has `resource` and `items` fields
-      if ('resource' in annotatedItemIds) annotatedItemIds = annotatedItemIds.itemIds
+      let annotatedItemIds
+      if (this.offlineAnnotate) {
+        this.offlineAnnotation = JSON.parse(localStorage.getItem('flatmap-offline-annotation')) || []
+        annotatedItemIds = this.offlineAnnotation.filter((offline) => {
+          return offline.resource === this.serverURL
+        }).map(offline => offline.item.id)
+      } else {
+        annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
+        // The annotator has `resource` and `items` fields
+        if ('resource' in annotatedItemIds) annotatedItemIds = annotatedItemIds.itemIds
+      }
       return annotatedItemIds
     },
     /**
@@ -998,10 +1007,18 @@ export default {
      * @arg {String} `participated`
      */
     fetchDrawnFeatures: async function (userId, participated) {
-      const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
-      let drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
-      // The annotator has `resource` and `features` fields
-      if ('resource' in drawnFeatures) drawnFeatures = drawnFeatures.features
+      let drawnFeatures
+      if (this.offlineAnnotate) {
+        this.offlineAnnotation = JSON.parse(localStorage.getItem('flatmap-offline-annotation')) || []
+        drawnFeatures = this.offlineAnnotation.filter((offline) => {
+          return offline.feature && offline.resource === this.serverURL
+        }).map(offline => offline.feature)
+      } else {
+        const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
+        drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
+        // The annotator has `resource` and `features` fields
+        if ('resource' in drawnFeatures) drawnFeatures = drawnFeatures.features
+      }
       return drawnFeatures
     },
     /**
@@ -2396,6 +2413,9 @@ export default {
         state['colour'] = this.colourRadio
         state['outlinesRadio'] = this.outlinesRadio
         state['background'] = this.currentBackground
+        if (this.offlineAnnotate) {
+          state['offlineAnnotation'] = JSON.stringify(this.offlineAnnotation)
+        }
         this.getVisibilityState(state)
         return state
       }
@@ -2443,6 +2463,9 @@ export default {
           } else {
             this.searchAndShowResult(searchTerm, true)
           }
+        }
+        if (state.offlineAnnotation) {
+          localStorage.setItem('flatmap-offline-annotation', state.offlineAnnotation)
         }
         this.setVisibilityState(state)
       }
