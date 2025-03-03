@@ -2444,6 +2444,9 @@ export default {
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
+        if (state.offlineAnnotation) {
+          localStorage.setItem('flatmap-offline-annotation', state.offlineAnnotation)
+        }
         if (state.viewingMode) this.changeViewingMode(state.viewingMode)
         //The following three are boolean
         if ('flightPath3D' in state) this.setFlightPath3D(state.flightPath3D)
@@ -2457,9 +2460,6 @@ export default {
           } else {
             this.searchAndShowResult(searchTerm, true)
           }
-        }
-        if (state.offlineAnnotation) {
-          localStorage.setItem('flatmap-offline-annotation', state.offlineAnnotation)
         }
         this.setVisibilityState(state)
       }
@@ -3145,6 +3145,7 @@ export default {
           if (userData.name && userData.email && userData.canUpdate) {
             this.authorisedUser = userData
           } else {
+            this.authorisedUser = undefined
             this.offlineAnnotate = true
           }
           this.setFeatureAnnotated()
