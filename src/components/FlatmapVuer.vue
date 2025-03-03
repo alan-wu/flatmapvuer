@@ -794,16 +794,10 @@ export default {
       if (this.mapImp) {
         if (value) {
           const numericId = Number(value)
-          let payload = { feature: {} }
-          if (numericId) {
-            const data = this.mapImp.featureProperties(numericId)
-            payload.feature = data
-          } else {
-            const drawnFeature = this.existDrawnFeatures.find(
-              (feature) => feature.id === value.replace(' ', '')
-            )
-            payload.feature.feature = drawnFeature
-          }
+          const featureObject = numericId
+            ? this.mapImp.featureProperties(numericId)
+            : { feature: this.existDrawnFeatures.find(feature => feature.id === value.trim()) };
+          let payload = { feature: featureObject }
           this.checkAndCreatePopups(payload)
         } else {
           this.closeTooltip()
@@ -1929,10 +1923,10 @@ export default {
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
           } else if (data.feature.feature) {
+            this.annotationEntry.featureId = data.feature.feature.id
             // in drawing or edit/delete mode is on or valid drawn
             if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
               this.featureAnnotationSubmitted = false
-              this.annotationEntry.featureId = data.feature.feature.id
               if (this.activeDrawTool) {
                 this.createConnectivityBody()
               }
