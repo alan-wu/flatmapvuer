@@ -2408,7 +2408,10 @@ export default {
         state['outlinesRadio'] = this.outlinesRadio
         state['background'] = this.currentBackground
         if (this.offlineAnnotate) {
-          state['offlineAnnotation'] = JSON.stringify(this.offlineAnnotation)
+          state['offlineAnnotation'] = {
+            expire: new Date().getTime() + 24 * 60 * 60 * 1000,
+            value: JSON.stringify(this.offlineAnnotation)
+          }
         }
         this.getVisibilityState(state)
         return state
@@ -2445,7 +2448,10 @@ export default {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
         if (state.offlineAnnotation) {
-          localStorage.setItem('flatmap-offline-annotation', state.offlineAnnotation)
+          localStorage.removeItem('flatmap-offline-annotation')
+          if (state.offlineAnnotation.expire > new Date().getTime()) {
+            localStorage.setItem('flatmap-offline-annotation', state.offlineAnnotation.value)
+          }
         }
         if (state.viewingMode) this.changeViewingMode(state.viewingMode)
         //The following three are boolean
@@ -3138,12 +3144,13 @@ export default {
       deep: true,
     },
     viewingMode: function (mode) {
+      this.clearAnnotationFeature()
       if (mode === 'Annotation') {
-        this.offlineAnnotate = false
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email && userData.canUpdate) {
             this.authorisedUser = userData
+            this.offlineAnnotate = false
           } else {
             this.authorisedUser = undefined
             this.offlineAnnotate = true
@@ -3152,7 +3159,7 @@ export default {
           this.addAnnotationFeature()
           this.loading = false
         })
-      } else this.clearAnnotationFeature()
+      }
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
