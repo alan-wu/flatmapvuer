@@ -945,7 +945,7 @@ export default {
               return !(offline.resource === this.serverURL && offline.item.id === annotation.item.id)
             })
           }
-          sessionStorage.setItem('flatmap-offline-annotation', JSON.stringify(this.offlineAnnotation))
+          sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotation))
         }
         if (['created', 'updated', 'deleted'].includes(this.annotationEntry.type)) {
           this.featureAnnotationSubmitted = true
@@ -971,7 +971,7 @@ export default {
     fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
       let annotatedItemIds
       if (this.offlineAnnotate) {
-        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('flatmap-offline-annotation')) || []
+        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
         annotatedItemIds = this.offlineAnnotation.filter((offline) => {
           return offline.resource === this.serverURL
         }).map(offline => offline.item.id)
@@ -1003,7 +1003,7 @@ export default {
     fetchDrawnFeatures: async function (userId, participated) {
       let drawnFeatures
       if (this.offlineAnnotate) {
-        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('flatmap-offline-annotation')) || []
+        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
         drawnFeatures = this.offlineAnnotation.filter((offline) => {
           return offline.feature && offline.resource === this.serverURL
         }).map(offline => offline.feature)
@@ -2448,9 +2448,8 @@ export default {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
         if (state.offlineAnnotation) {
-          sessionStorage.removeItem('flatmap-offline-annotation')
-          if (state.offlineAnnotation.expire > new Date().getTime()) {
-            sessionStorage.setItem('flatmap-offline-annotation', state.offlineAnnotation.value)
+          if (state.offlineAnnotation.expiry > new Date().getTime()) {
+            sessionStorage.setItem('offline-annotation', state.offlineAnnotation.value)
           }
         }
         if (state.viewingMode) this.changeViewingMode(state.viewingMode)
