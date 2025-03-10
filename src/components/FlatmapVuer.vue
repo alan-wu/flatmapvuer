@@ -939,10 +939,11 @@ export default {
     commitAnnotationEvent: function (annotation) {
       if (this.mapImp) {
         if (this.offlineAnnotate) {
+          this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
           this.offlineAnnotation.push(annotation)
           if (this.annotationEntry.type === 'deleted') {
             this.offlineAnnotation = this.offlineAnnotation.filter((offline) => {
-              return !(offline.resource === this.serverURL && offline.item.id === annotation.item.id)
+              return offline.resource !== this.serverURL || offline.item.id !== annotation.item.id
             })
           }
           sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotation))
