@@ -1643,11 +1643,7 @@ export default {
               provenanceTaxonomy: taxons,
             }
             if (eventType === 'click') {
-              this.setConnectivityDataSource(this.viewingMode, data);
               this.featuresAlert = data.alert
-              //The following will be used to track either a feature is selected
-              this.statesTracking.activeClick = true
-              this.statesTracking.activeTerm = data?.models
               if (this.viewingMode === 'Neuron Connection') {
                 this.highlightConnectedPaths([data.models])
               } else {
@@ -1692,23 +1688,6 @@ export default {
             this.$emit('pan-zoom-callback', data)
           }
         }
-      }
-    },
-    /**
-     * The data for connectivity data source is just a placeholder data
-     * to check which part of the map is clicked, e.g., path or feture or empty area,
-     * based on the viewing mode.
-     * The "connectivity-info-close" event will be emitted based on this data
-     * when there has a click event on map.
-     * @param viewingMode
-     * @param data
-     */
-    setConnectivityDataSource: function (viewingMode, data) {
-      // for Exploration mode, only path click will be used as data source
-      this.connectivityDataSource = data.source;
-      // for other modes, it can be feature or path
-      if (viewingMode === 'Neuron Connection' || viewingMode === 'Annotation') {
-        this.connectivityDataSource = data.featureId;
       }
     },
     /**
@@ -2385,10 +2364,10 @@ export default {
           state['biologicalSex'] = identifier.biologicalSex
         if (identifier && identifier.uuid) state['uuid'] = identifier.uuid
         state['viewingMode'] = this.viewingMode
-        state['searchTerm'] = this.statesTracking.activeTerm
+        state['searchTerm'] = this.searchTerm
         state['flightPath3D'] = this.flightPath3DRadio
         state['colour'] = this.colourRadio
-        state['outlinesRadio'] = this.outlinesRadio
+        state['outlines'] = this.outlinesRadio
         state['background'] = this.currentBackground
         this.getVisibilityState(state)
         return state
@@ -2586,7 +2565,6 @@ export default {
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       }
-      console.log(this.mapImp)
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
@@ -2600,36 +2578,12 @@ export default {
       this.loading = false
       this.computePathControlsMaximumHeight()
       this.mapResize()
-      this.handleMapClick();
       this.setInitMapState();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
        */
       this.$emit('ready', this)
-    },
-    /**
-     * @public
-     * Function to handle mouse click on map area
-     * after the map is loaded.
-     */
-    handleMapClick: function () {
-      const _map = this.mapImp._map;
-      if (_map) {
-        _map.on('click', (e) => {
-          //A little logic to make sure we are keeping track
-          //of selected term
-          if (this.statesTracking.activeClick) {
-            this.statesTracking.activeClick = false
-          } else {
-            this.statesTracking.activeTerm = ""
-          }
-          if (!this.connectivityDataSource) {
-            this.$emit('connectivity-info-close');
-          }
-          this.connectivityDataSource = ''; // reset
-        });
-      }
     },
     /**
      * @public
@@ -2665,12 +2619,11 @@ export default {
           } else if (this.viewingMode === "Annotation") {
             this.manualAbortedOnClose()
           }
-          this.statesTracking.activeTerm = ""
+          this.searchTerm = ""
           return true
         } else {
           const searchResults = this.mapImp.search(term)
           if (searchResults?.results?.length) {
-            this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
             if (displayInfo) {
               let featureId = undefined;
@@ -2701,6 +2654,7 @@ export default {
                 })
               }
             }
+            this.searchTerm = term
             return true
           } else this.mapImp.clearSearchResults()
         }
@@ -3038,10 +2992,7 @@ export default {
           without: true,
         }
       }),
-      statesTracking: markRaw({
-        activeClick: false,
-        activeTerm: "",
-      }),
+      searchTerm: "",
       taxonLeaveDelay: undefined,
     }
   },
