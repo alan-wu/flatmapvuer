@@ -1270,47 +1270,59 @@ export default {
     /**
      * @public
      * Function to highlight the connected paths
-     * by providing path model identifier, ``pathId``.
-     * @arg {String} `pathId`
+     * by providing path model identifier, ``pathId`` or ``anatomicalId``.
+     * @arg {String} `pathId` or `anatomicalId`
      */
-    highlightConnectedPaths: async function (payload) {
+    highlightConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
-        let paths = [...this.mapImp.pathModelNodes(payload)]
-
+        let connectedTarget = options.target || []
         // The line below is to get the path features from the geojson ids
-        let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
-
-        // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
-
-        // Check and flatten the origins node graph
-        let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
-
+        const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)]
+        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload)
         let toHighlight = []
-        let highlight = false
-
-        // Loop through the path features and check if we have origin nodes
-        pathFeatures.forEach((p) => {
-
-          // Get the nodes from each path feature
-          this.mapImp.nodePathModels(p.featureId).forEach((f) => {
-            highlight = true
-            // s2 here is the second level paths
-            let s2 = this.mapImp.pathModelNodes(f)
-            s2.forEach((s) => {
-              let s2Feature = this.mapImp.featureProperties([s]) // get the feature properties for s2
-              if (originsFlat.includes(s2Feature.models)) {
-                highlight = false // if we have an origin node, we don't want to highlight the path
-                return
-              }
+        if (nodeFeatureIds.length) {
+          if (!connectedTarget.length) {
+            const connectedType = options.type || "origins"
+            // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
+            // Check and flatten the origins node graph
+            const originsFlat = connectivity?.ids?.dendrites?.flat().flat()
+            const componentsFlat = connectivity?.ids?.components?.flat().flat()
+            const destinationsFlat = connectivity?.ids?.axons?.flat().flat()
+            connectedTarget = connectedType === "origins" ?
+              originsFlat : connectedType === "components" ?
+                componentsFlat : connectedType === "destinations" ?
+                  destinationsFlat : []
+          }
+          // Loop through the node features and check if we have certain nodes
+          nodeFeatureIds.forEach((featureId) => {
+            // Get the paths from each node feature
+            const pathsL2 = this.mapImp.nodePathModels(featureId)
+            pathsL2.forEach((path) => {
+              // nodes of the second level path
+              const nodeFeatureIdsL2 = this.mapImp.pathModelNodes(path)
+              const nodeModelsL2 = nodeFeatureIdsL2.map((featureIdL2) => {
+                return this.mapImp.featureProperties(featureIdL2).models
+              })
+              const intersection = connectedTarget.filter(element => nodeModelsL2.includes(element))
+              if (intersection.length && !toHighlight.includes(path)) toHighlight.push(path)
             })
-
-            if (highlight) {
-              toHighlight.push(f)
-            }
           })
-        })
-
+          toHighlight = [...new Set([...toHighlight, ...payload])]
+        } else if (pathsOfEntities.length) {
+          if (connectedTarget.length) {
+            pathsOfEntities.forEach((path) => {
+              const nodeFeatureIds = this.mapImp.pathModelNodes(path)
+              const nodeModels = nodeFeatureIds.map((featureId) => {
+                return this.mapImp.featureProperties(featureId).models
+              })
+              const intersection = connectedTarget.filter(element => nodeModels.includes(element))
+              if (intersection.length && !toHighlight.includes(path)) toHighlight.push(path)
+            })
+          } else {
+            toHighlight = pathsOfEntities
+          }
+        }
         // display connected paths
         this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
       }
