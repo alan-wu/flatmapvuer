@@ -622,6 +622,13 @@ import {
   FlatmapQueries,
   findTaxonomyLabels,
 } from '../services/flatmapQueries.js'
+import {
+  getReferenceConnectivitiesFromStorage,
+  loadAndStoreKnowledge,
+  refreshFlatmapKnowledgeCache,
+  getKnowledgeSource,
+  getReferenceConnectivitiesByAPI,
+} from '../services/flatmapKnowledge.js'
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -644,7 +651,7 @@ const centroid = (geometry) => {
   } else {
     coordinates = geometry.coordinates
   }
-  if (coordinates) {    
+  if (coordinates) {
     if (!(geometry.type === 'Point')) {
       coordinates.map((coor) => {
         featureGeometry.lng += parseFloat(coor[0])
@@ -1483,16 +1490,19 @@ export default {
     taxonMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
+          clearTimeout(this.taxonLeaveDelay)
           let gid = this.mapImp.taxonFeatureIds(payload.key)
           this.mapImp.enableConnectivityByTaxonIds(payload.key, payload.value) // make sure path is visible
           this.mapImp.zoomToGeoJSONFeatures(gid, {noZoomIn: true})
         } else {
-          // reset visibility of paths
-          this.mapImp.unselectGeoJSONFeatures()
-          payload.selections.forEach((item) => {
-            let show = payload.checked.includes(item.taxon)
-            this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
-          })
+          this.taxonLeaveDelay = setTimeout(() => {
+            // reset visibility of paths
+            this.mapImp.unselectGeoJSONFeatures()
+            payload.selections.forEach((item) => {
+              let show = payload.checked.includes(item.taxon)
+              this.mapImp.enableConnectivityByTaxonIds(item.taxon, show)
+            })
+          }, 1000);
         }
       }
     },
@@ -1504,9 +1514,7 @@ export default {
      */
     checkAllTaxons: function (payload) {
       if (this.mapImp) {
-        payload.keys.forEach((key) =>
-          this.mapImp.enableConnectivityByTaxonIds(key, payload.value)
-        )
+        this.mapImp.enableConnectivityByTaxonIds(payload.keys, payload.value)
       }
     },
     /**
@@ -1647,6 +1655,7 @@ export default {
               provenanceTaxonomy: taxons,
             }
             if (eventType === 'click') {
+              this.setConnectivityDataSource(this.viewingMode, data);
               this.featuresAlert = data.alert
               //The following will be used to track either a feature is selected
               this.statesTracking.activeClick = true
@@ -1698,6 +1707,23 @@ export default {
       }
     },
     /**
+     * The data for connectivity data source is just a placeholder data
+     * to check which part of the map is clicked, e.g., path or feture or empty area,
+     * based on the viewing mode.
+     * The "connectivity-info-close" event will be emitted based on this data
+     * when there has a click event on map.
+     * @param viewingMode
+     * @param data
+     */
+    setConnectivityDataSource: function (viewingMode, data) {
+      // for Exploration mode, only path click will be used as data source
+      this.connectivityDataSource = data.source;
+      // for other modes, it can be feature or path
+      if (viewingMode === 'Neuron Connection' || viewingMode === 'Annotation') {
+        this.connectivityDataSource = data.featureId;
+      }
+    },
+    /**
      * @public
      * Function triggered by viewing mode change.
      * (e.g., from 'Exploration' to 'Annotation')
@@ -1715,6 +1741,12 @@ export default {
      * Function to remove active tooltips on map.
      */
     removeActiveTooltips: function () {
+      // Remove active tooltip/popup on map
+      if (this.mapImp) {
+        this.mapImp.removePopup();
+      }
+
+      // Fallback: remove any existing toolitp on DOM
       const tooltips = this.$el.querySelectorAll('.flatmap-tooltip-popup');
       tooltips.forEach((tooltip) => tooltip.remove());
     },
@@ -1722,7 +1754,7 @@ export default {
      * Function to create tooltip for the provided connectivity data.
      * @arg {Array} `connectivityData`
      */
-    createTooltipForConnectivity: function (connectivityData) {
+    createTooltipForConnectivity: function (connectivityData, geojsonId) {
       // combine all labels to show together
       // content type must be DOM object to use HTML
       const labelsContainer = document.createElement('div');
@@ -1739,7 +1771,7 @@ export default {
       });
 
       this.mapImp.showPopup(
-        connectivityData[0].featureId,
+        geojsonId,
         labelsContainer,
         {
           className: 'custom-popup flatmap-tooltip-popup',
@@ -1756,6 +1788,7 @@ export default {
     showConnectivityTooltips: function (payload) {
       const { connectivityInfo, data } = payload;
       const featuresToHighlight = [];
+      const geojsonHighlights = [];
       const connectivityData = [];
       const filteredConnectivityData = [];
       const errorData = [];
@@ -1791,16 +1824,31 @@ export default {
               id,
               label,
             });
-            featuresToHighlight.push(id);
           } else {
             errorData.push(connectivity);
           }
         });
 
         if (filteredConnectivityData.length) {
-          // show tooltip of the first item
-          // with all labels
-          this.createTooltipForConnectivity(filteredConnectivityData);
+          let geojsonId = filteredConnectivityData[0].featureId;
+
+          this.mapImp.annotations.forEach((annotation) => {
+            const anatomicalNodes = annotation['anatomical-nodes'];
+
+            if (anatomicalNodes) {
+              const anatomicalNodesString = anatomicalNodes.join('');
+              const foundItem = filteredConnectivityData.every((item) =>
+                anatomicalNodesString.indexOf(item.id) !== -1
+              );
+
+              if (foundItem) {
+                geojsonId = annotation.featureId;
+                geojsonHighlights.push(geojsonId);
+              }
+            }
+          });
+
+          this.createTooltipForConnectivity(filteredConnectivityData, geojsonId);
         } else {
           errorData.push(...connectivityData);
           // Close all tooltips on the current flatmap element
@@ -1813,8 +1861,30 @@ export default {
         }
 
         // highlight all available features
-        this.mapImp.selectFeatures(featuresToHighlight);
+        const featureIdsToHighlight = this.mapImp.modelFeatureIdList(featuresToHighlight);
+        const allFeaturesToHighlight = [
+          ...featureIdsToHighlight,
+          ...geojsonHighlights
+        ];
+
+        this.mapImp.selectGeoJSONFeatures(allFeaturesToHighlight);
       }
+    },
+    showConnectivitiesByReference: function (resource) {
+      this.searchConnectivitiesByReference(resource).then((featureIds) => {
+        this.mapImp.selectFeatures(featureIds);
+      });
+    },
+    searchConnectivitiesByReference: async function (resource) {
+      const flatmapKnowledge = sessionStorage.getItem('flatmap-knowledge');
+      let featureIds = [];
+
+      if (flatmapKnowledge) {
+        featureIds = await getReferenceConnectivitiesFromStorage(resource);
+      } else {
+        featureIds = await getReferenceConnectivitiesByAPI(this.mapImp, resource, this.flatmapQueries);
+      }
+      return featureIds;
     },
     emitConnectivityGraphError: function (errorData) {
       this.$emit('connectivity-graph-error', {
@@ -1868,7 +1938,9 @@ export default {
         }
       } else {
         //require data.resource && data.feature.source
-        const results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+        let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+        // load and store knowledge
+        loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
         // The line below only creates the tooltip if some data was found on the path
         // the pubmed URLs are in knowledge response.references
         if (
@@ -2140,6 +2212,10 @@ export default {
         if (this.featuresAlert) {
           this.tooltipEntry['featuresAlert'] = this.featuresAlert;
         }
+        // Get connectivity knowledge source | SCKAN release
+        if (this.mapImp.provenance?.connectivity) {
+          this.tooltipEntry['knowledge-source'] = getKnowledgeSource(this.mapImp);
+        }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       if (this.annotationSidebar && this.viewingMode === 'Annotation') {
@@ -2368,22 +2444,10 @@ export default {
         if (state.background) this.backgroundChangeCallback(state.background)
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
-          this.searchAndShowResult(searchTerm, true)
           if (state.viewingMode === "Neuron Connection") {
             this.highlightConnectedPaths([searchTerm])
           } else {
-            const geoID = this.mapImp.modelFeatureIds(searchTerm)
-            if (geoID.length > 0) {
-              const feature = this.mapImp.featureProperties(geoID[0])
-              this.searchAndShowResult(searchTerm, true)
-              const data = {
-                resource: [feature.source],
-                feature,
-                label: feature.label,
-                provenanceTaxonomy: feature.taxons
-              }
-              this.checkAndCreatePopups(data)
-            }
+            this.searchAndShowResult(searchTerm, true)
           }
         }
         this.setVisibilityState(state)
@@ -2534,6 +2598,7 @@ export default {
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       }
+      console.log(this.mapImp)
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
@@ -2571,9 +2636,10 @@ export default {
           } else {
             this.statesTracking.activeTerm = ""
           }
-          if (this.tooltipEntry.featureId) {
+          if (!this.connectivityDataSource) {
             this.$emit('connectivity-info-close');
           }
+          this.connectivityDataSource = ''; // reset
         });
       }
     },
@@ -2598,45 +2664,53 @@ export default {
     /**
      * @public
      * Function to display features with annotation matching the provided term,
-     * with the option to display the label using displayLabel flag.
+     * with the option to display the label/connectivity information using displayInfo flag.
      * @arg {String} `term`,
-     * @arg {String} `displayLabel`
+     * @arg {String} `displayInfo`
      */
-    searchAndShowResult: function (term, displayLabel) {
+    searchAndShowResult: function (term, displayInfo) {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
+          if (this.viewingMode === "Exploration") {
+            this.$emit('connectivity-info-close');
+          } else if (this.viewingMode === "Annotation") {
+            this.manualAbortedOnClose()
+          }
           this.statesTracking.activeTerm = ""
           return true
         } else {
           const searchResults = this.mapImp.search(term)
-          if (
-            searchResults &&
-            searchResults.results &&
-            searchResults.results.length > 0
-          ) {
+          if (searchResults?.results?.length) {
             this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
-            if (
-              displayLabel &&
-              searchResults.results
-            ) {
-              let annotation = undefined;
+            if (displayInfo) {
               let featureId = undefined;
-              for (let i = 0; i < searchResults.results.length && !(annotation?.label); i++) {
+              for (let i = 0; i < searchResults.results.length; i++) {
                 featureId = searchResults.results[i].featureId
-                annotation = this.mapImp.annotation(featureId)
+                const annotation = this.mapImp.annotation(featureId)
+                if (featureId && annotation?.label) break;
               }
-              if (annotation?.label) {
-                this.mapImp.showPopup(
-                  featureId,
-                  capitalise(annotation.label),
-                  {
-                    className: 'custom-popup',
-                    positionAtLastClick: false,
-                    preserveSelection: true,
-                  }
-                )
+              if (featureId) {
+                const feature = this.mapImp.featureProperties(featureId)
+                const data = {
+                  resource: [feature.source],
+                  feature: {...feature, models: feature.models || feature.source},
+                  label: feature.label,
+                  provenanceTaxonomy: feature.taxons,
+                }
+                if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
+                  this.checkAndCreatePopups(data)
+                } else if (this.viewingMode === 'Neuron Connection') {
+                  setTimeout(() => {
+                    this.highlightConnectedPaths(data.resource)
+                  }, 1000)
+                }
+                this.mapImp.showPopup(featureId, capitalise(feature.label), {
+                  className: 'custom-popup',
+                  positionAtLastClick: false,
+                  preserveSelection: true,
+                })
               }
             }
             return true
@@ -2915,6 +2989,7 @@ export default {
       loading: false,
       flatmapMarker: flatmapMarker,
       tooltipEntry: createUnfilledTooltipData(),
+      connectivityDataSource: '',
       connectivityTooltipVisible: false,
       drawerOpen: false,
       featuresAlert: undefined,
@@ -2979,6 +3054,7 @@ export default {
         activeClick: false,
         activeTerm: "",
       }),
+      taxonLeaveDelay: undefined,
     }
   },
   computed: {
@@ -3133,6 +3209,7 @@ export default {
     } else if (this.renderAtMounted) {
       this.createFlatmap()
     }
+    refreshFlatmapKnowledgeCache();
   },
 }
 </script>
@@ -3415,6 +3492,12 @@ export default {
       height: 0;
       border-style: solid;
       flex-shrink: 0;
+    }
+
+    hr {
+      margin: 0.5rem 0;
+      border: 0;
+      border-top: 1px solid var(--el-border-color);
     }
   }
   .maplibregl-popup-tip {
