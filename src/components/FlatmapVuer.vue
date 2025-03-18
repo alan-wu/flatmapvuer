@@ -1275,16 +1275,14 @@ export default {
      */
     retrieveConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
-        let connectedTarget = options.target || []
+        let connectedTarget = options.target ?? []
         // The line below is to get the path features from the geojson ids
         const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)]
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload)
         let connectedPaths = []
         if (nodeFeatureIds.length) {
           if (!connectedTarget.length) {
-            const connectedType = options.type.length ?
-              Object.values(options.type.map(f => f.facet.toLowerCase())) :
-              ["all"];
+            const connectedType = options.type?.length ? options.type.map(f => f.facet.toLowerCase()) : ["all"];
             const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
             const originsFlat = (connectivity?.ids?.dendrites ?? []).flat(Infinity);
             const componentsFlat = (connectivity?.ids?.components ?? []).flat(Infinity);
@@ -1659,7 +1657,9 @@ export default {
             if (eventType === 'click') {
               this.featuresAlert = data.alert
               if (this.viewingMode === 'Neuron Connection') {
-                this.highlightConnectedPaths([data.models])
+                this.retrieveConnectedPaths([data.models]).then((paths) => {
+                  this.mapImp.zoomToFeatures(paths)
+                })
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Drawing connectivity between features
@@ -2426,7 +2426,9 @@ export default {
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
           if (state.viewingMode === "Neuron Connection") {
-            this.highlightConnectedPaths([searchTerm])
+            this.retrieveConnectedPaths([searchTerm]).then((paths) => {
+              this.mapImp.zoomToFeatures(paths)
+            })
           } else {
             this.searchAndShowResult(searchTerm, true)
           }
@@ -2657,9 +2659,9 @@ export default {
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
                   this.checkAndCreatePopups(data)
                 } else if (this.viewingMode === 'Neuron Connection') {
-                  setTimeout(() => {
-                    this.highlightConnectedPaths(data.resource)
-                  }, 1000)
+                  this.retrieveConnectedPaths(data.resource).then((paths) => {
+                    this.mapImp.zoomToFeatures(paths)
+                  })
                 }
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
                   className: 'custom-popup',
