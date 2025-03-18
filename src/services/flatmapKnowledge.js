@@ -36,25 +36,29 @@ function getKnowledgeSource(mapImp) {
       mapKnowledgeSource = `${sckanProvenance.npo.release}-npo`;
     }
   }
-
   return mapKnowledgeSource;
 }
 
-function loadAndStoreKnowledge(mapImp, flatmapQueries) {
+async function loadAndStoreKnowledge(mapImp, flatmapQueries) {
   const knowledgeSource = getKnowledgeSource(mapImp);
   const sql = `select knowledge from knowledge
-    where source="${knowledgeSource}"
-    order by source desc`;
+  where source="${knowledgeSource}"
+  order by source desc`;
+
+  refreshFlatmapKnowledgeCache()
   const flatmapKnowledge = sessionStorage.getItem('flatmap-knowledge');
 
   if (!flatmapKnowledge) {
-    flatmapQueries.flatmapQuery(sql).then((response) => {
-      const mappedData = response.values.map(x => x[0]);
-      const parsedData = mappedData.map(x => JSON.parse(x));
-      sessionStorage.setItem('flatmap-knowledge', JSON.stringify(parsedData));
-      updateFlatmapKnowledgeCache();
-    });
+    const response = await flatmapQueries.flatmapQuery(sql);
+    const mappedData = response.values.map(x => x[0]);
+    const parsedData = mappedData.map(x => JSON.parse(x));
+
+    sessionStorage.setItem('flatmap-knowledge', JSON.stringify(parsedData));
+    updateFlatmapKnowledgeCache();
+
+    return parsedData;
   }
+  return JSON.parse(flatmapKnowledge);
 }
 
 function updateFlatmapKnowledgeCache() {
@@ -70,6 +74,7 @@ function removeFlatmapKnowledgeCache() {
     'flatmap-knowledge',
     'flatmap-knowledge-expiry',
   ];
+
   keys.forEach((key) => {
     sessionStorage.removeItem(key);
   });
