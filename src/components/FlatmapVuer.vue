@@ -1273,26 +1273,28 @@ export default {
      * by providing path model identifier, ``pathId`` or ``anatomicalId``.
      * @arg {String} `pathId` or `anatomicalId`
      */
-    highlightConnectedPaths: async function (payload, options = {}) {
+    retrieveConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
         let connectedTarget = options.target || []
         // The line below is to get the path features from the geojson ids
         const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)]
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload)
-        let toHighlight = []
+        let connectedPaths = []
         if (nodeFeatureIds.length) {
           if (!connectedTarget.length) {
-            const connectedType = options.type || "origins"
-            // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
+            const connectedType = options.type.length ?
+              Object.values(options.type.map(f => f.facet.toLowerCase())) :
+              ["all"];
             const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
-            // Check and flatten the origins node graph
-            const originsFlat = connectivity?.ids?.dendrites?.flat().flat()
-            const componentsFlat = connectivity?.ids?.components?.flat().flat()
-            const destinationsFlat = connectivity?.ids?.axons?.flat().flat()
-            connectedTarget = connectedType === "origins" ?
-              originsFlat : connectedType === "components" ?
-                componentsFlat : connectedType === "destinations" ?
-                  destinationsFlat : []
+            const originsFlat = (connectivity?.ids?.dendrites ?? []).flat(Infinity);
+            const componentsFlat = (connectivity?.ids?.components ?? []).flat(Infinity);
+            const destinationsFlat = (connectivity?.ids?.axons ?? []).flat(Infinity);
+            const connected = new Set();
+            if (connectedType.includes("origins")) connected.add(...originsFlat);
+            if (connectedType.includes("components")) connected.add(...componentsFlat);
+            if (connectedType.includes("destinations")) connected.add(...destinationsFlat);
+            if (connectedType.includes("all")) connected.add(...originsFlat).add(...componentsFlat).add(...destinationsFlat);
+            connectedTarget = [...connected];
           }
           // Loop through the node features and check if we have certain nodes
           nodeFeatureIds.forEach((featureId) => {
@@ -1305,10 +1307,10 @@ export default {
                 return this.mapImp.featureProperties(featureIdL2).models
               })
               const intersection = connectedTarget.filter(element => nodeModelsL2.includes(element))
-              if (intersection.length && !toHighlight.includes(path)) toHighlight.push(path)
+              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path)
             })
           })
-          toHighlight = [...new Set([...toHighlight, ...payload])]
+          connectedPaths = [...connectedPaths, ...payload]
         } else if (pathsOfEntities.length) {
           if (connectedTarget.length) {
             pathsOfEntities.forEach((path) => {
@@ -1317,14 +1319,14 @@ export default {
                 return this.mapImp.featureProperties(featureId).models
               })
               const intersection = connectedTarget.filter(element => nodeModels.includes(element))
-              if (intersection.length && !toHighlight.includes(path)) toHighlight.push(path)
+              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path)
             })
           } else {
-            toHighlight = pathsOfEntities
+            connectedPaths = pathsOfEntities
           }
         }
-        // display connected paths
-        this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
+        connectedPaths = [...new Set(connectedPaths)]
+        return connectedPaths;
       }
     },
     resetMapFilter: function() {
