@@ -1275,15 +1275,15 @@ export default {
      */
     retrieveConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
-        let connectedTarget = options.target ?? []
+        let connectedTarget = options.target?.length ? options.target : [];
         // The line below is to get the path features from the geojson ids
-        const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)]
-        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload)
-        let connectedPaths = []
+        const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)];
+        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload);
+        let connectedPaths = [];
         if (nodeFeatureIds.length) {
           if (!connectedTarget.length) {
-            const connectedType = options.type?.length ? options.type.map(f => f.facet.toLowerCase()) : ["all"];
-            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
+            const connectedType = options.type?.length ? options.type : ["all"];
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload);
             const originsFlat = (connectivity?.ids?.dendrites ?? []).flat(Infinity);
             const componentsFlat = (connectivity?.ids?.components ?? []).flat(Infinity);
             const destinationsFlat = (connectivity?.ids?.axons ?? []).flat(Infinity);
@@ -1297,33 +1297,33 @@ export default {
           // Loop through the node features and check if we have certain nodes
           nodeFeatureIds.forEach((featureId) => {
             // Get the paths from each node feature
-            const pathsL2 = this.mapImp.nodePathModels(featureId)
+            const pathsL2 = this.mapImp.nodePathModels(featureId);
             pathsL2.forEach((path) => {
               // nodes of the second level path
-              const nodeFeatureIdsL2 = this.mapImp.pathModelNodes(path)
+              const nodeFeatureIdsL2 = this.mapImp.pathModelNodes(path);
               const nodeModelsL2 = nodeFeatureIdsL2.map((featureIdL2) => {
-                return this.mapImp.featureProperties(featureIdL2).models
-              })
-              const intersection = connectedTarget.filter(element => nodeModelsL2.includes(element))
-              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path)
-            })
-          })
-          connectedPaths = [...connectedPaths, ...payload]
+                return this.mapImp.featureProperties(featureIdL2).models;
+              });
+              const intersection = connectedTarget.filter(element => nodeModelsL2.includes(element));
+              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path);
+            });
+          });
+          connectedPaths = [...connectedPaths, ...payload];
         } else if (pathsOfEntities.length) {
           if (connectedTarget.length) {
             pathsOfEntities.forEach((path) => {
-              const nodeFeatureIds = this.mapImp.pathModelNodes(path)
+              const nodeFeatureIds = this.mapImp.pathModelNodes(path);
               const nodeModels = nodeFeatureIds.map((featureId) => {
-                return this.mapImp.featureProperties(featureId).models
-              })
-              const intersection = connectedTarget.filter(element => nodeModels.includes(element))
-              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path)
-            })
+                return this.mapImp.featureProperties(featureId).models;
+              });
+              const intersection = connectedTarget.filter(element => nodeModels.includes(element));
+              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path);
+            });
           } else {
-            connectedPaths = pathsOfEntities
+            connectedPaths = pathsOfEntities;
           }
         }
-        connectedPaths = [...new Set(connectedPaths)]
+        connectedPaths = [...new Set(connectedPaths)];
         return connectedPaths;
       }
     },
