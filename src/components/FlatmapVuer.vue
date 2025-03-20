@@ -1271,28 +1271,27 @@ export default {
      * @public
      * Function to highlight the connected paths
      * by providing path model identifier, ``pathId`` or ``anatomicalId``.
-     * @arg {String} `pathId` or `anatomicalId`
+     * @arg {string | string[]} `pathId` (string) or `anatomicalId` (array)
      */
     retrieveConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
-        let connectedTarget = options.target?.length ? options.target : [];
-        // The line below is to get the path features from the geojson ids
-        const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)];
-        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload);
         let connectedPaths = [];
-        if (nodeFeatureIds.length) {
+        let connectedTarget = options.target?.length ? options.target : [];
+        if (typeof payload === 'string') {          
+          // The line below is to get the path features from the geojson ids
+          const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)];
           if (!connectedTarget.length) {
             const connectedType = options.type?.length ? options.type : ["all"];
-            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload);
-            const originsFlat = (connectivity?.ids?.dendrites ?? []).flat(Infinity);
-            const componentsFlat = (connectivity?.ids?.components ?? []).flat(Infinity);
-            const destinationsFlat = (connectivity?.ids?.axons ?? []).flat(Infinity);
-            const connected = new Set();
-            if (connectedType.includes("origins")) connected.add(...originsFlat);
-            if (connectedType.includes("components")) connected.add(...componentsFlat);
-            if (connectedType.includes("destinations")) connected.add(...destinationsFlat);
-            if (connectedType.includes("all")) connected.add(...originsFlat).add(...componentsFlat).add(...destinationsFlat);
-            connectedTarget = [...connected];
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, [payload]);
+            const originsFlat = connectivity?.ids?.dendrites.flat(Infinity);
+            const componentsFlat = connectivity?.ids?.components.flat(Infinity);
+            const destinationsFlat = connectivity?.ids?.axons.flat(Infinity);
+            let connected = [];
+            if (connectedType.includes("origins")) connected.push(...originsFlat);
+            if (connectedType.includes("components")) connected.push(...componentsFlat);
+            if (connectedType.includes("destinations")) connected.push(...destinationsFlat);
+            if (connectedType.includes("all")) connected.push(...originsFlat, ...componentsFlat, ...destinationsFlat);
+            connectedTarget = [...new Set(connected)];
           }
           // Loop through the node features and check if we have certain nodes
           nodeFeatureIds.forEach((featureId) => {
@@ -1308,8 +1307,9 @@ export default {
               if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path);
             });
           });
-          connectedPaths = [...connectedPaths, ...payload];
-        } else if (pathsOfEntities.length) {
+          connectedPaths = [...connectedPaths, payload];
+        } else if (Array.isArray(payload)) {
+          const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload);
           if (connectedTarget.length) {
             pathsOfEntities.forEach((path) => {
               const nodeFeatureIds = this.mapImp.pathModelNodes(path);
@@ -1322,6 +1322,7 @@ export default {
           } else {
             connectedPaths = pathsOfEntities;
           }
+          connectedPaths = [...connectedPaths, ...payload];
         }
         connectedPaths = [...new Set(connectedPaths)];
         return connectedPaths;
