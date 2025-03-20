@@ -1268,6 +1268,15 @@ export default {
       }
     },
     /**
+     * Function to highlight paths and features
+     * @param data 
+     */
+    zoomToFeatures: function (data) {
+      if (this.mapImp) {
+        this.mapImp.zoomToFeatures(data)
+      }
+    },
+    /**
      * @public
      * Function to highlight the connected paths
      * by providing path model identifier, ``pathId`` or ``anatomicalId``.
@@ -1659,7 +1668,7 @@ export default {
               this.featuresAlert = data.alert
               if (this.viewingMode === 'Neuron Connection') {
                 this.retrieveConnectedPaths([data.models]).then((paths) => {
-                  this.mapImp.zoomToFeatures(paths)
+                  this.zoomToFeatures(paths)
                 })
               } else {
                 this.currentActive = data.models ? data.models : ''
@@ -2428,7 +2437,7 @@ export default {
           const searchTerm = state.searchTerm
           if (state.viewingMode === "Neuron Connection") {
             this.retrieveConnectedPaths([searchTerm]).then((paths) => {
-              this.mapImp.zoomToFeatures(paths)
+              this.zoomToFeatures(paths)
             })
           } else {
             this.searchAndShowResult(searchTerm, true)
@@ -2661,7 +2670,7 @@ export default {
                   this.checkAndCreatePopups(data)
                 } else if (this.viewingMode === 'Neuron Connection') {
                   this.retrieveConnectedPaths(data.resource).then((paths) => {
-                    this.mapImp.zoomToFeatures(paths)
+                    this.zoomToFeatures(paths)
                   })
                 }
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
