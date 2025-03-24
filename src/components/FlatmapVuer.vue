@@ -1280,18 +1280,19 @@ export default {
      * @public
      * Function to highlight the connected paths
      * by providing path model identifier, ``pathId`` or ``anatomicalId``.
-     * @arg {string | string[]} `pathId` (string) or `anatomicalId` (array)
+     * @arg {string} `pathId` or `anatomicalId`
      */
     retrieveConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
         let connectedPaths = [];
         let connectedTarget = options.target?.length ? options.target : [];
-        if (typeof payload === 'string') {          
-          // The line below is to get the path features from the geojson ids
-          const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)];
+        // The line below is to get the path features from the geojson ids
+        const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)];
+        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload);
+        if (nodeFeatureIds.length) {
           if (!connectedTarget.length) {
             const connectedType = options.type?.length ? options.type : ["all"];
-            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, [payload]);
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload);
             const originsFlat = connectivity?.ids?.dendrites.flat(Infinity);
             const componentsFlat = connectivity?.ids?.components.flat(Infinity);
             const destinationsFlat = connectivity?.ids?.axons.flat(Infinity);
@@ -1316,9 +1317,7 @@ export default {
               if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path);
             });
           });
-          connectedPaths = [...connectedPaths, payload];
-        } else if (Array.isArray(payload)) {
-          const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload);
+        } else if (pathsOfEntities.length) {
           if (connectedTarget.length) {
             pathsOfEntities.forEach((path) => {
               const nodeFeatureIds = this.mapImp.pathModelNodes(path);
@@ -1331,9 +1330,8 @@ export default {
           } else {
             connectedPaths = pathsOfEntities;
           }
-          connectedPaths = [...connectedPaths, ...payload];
         }
-        connectedPaths = [...new Set(connectedPaths)];
+        connectedPaths = [...new Set([...connectedPaths, ...payload])];
         return connectedPaths;
       }
     },
