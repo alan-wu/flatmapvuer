@@ -1943,34 +1943,28 @@ export default {
           this.annotation = {}
         }
       } else {
-        let features = []
-        this.tooltipEntry = []
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
+        let prom1 = []
         for (let index = 0; index < data.length; index++) {
           const entry = data[index]
-          const resource = entry.resource[0]
-          //require data.resource && data.feature.source
-          let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, entry)
-          // The line below only creates the tooltip if some data was found on the path
-          // the pubmed URLs are in knowledge response.references
-          if (
-            (results && results[0]) ||
-            (entry.feature.hyperlinks && entry.feature.hyperlinks.length > 0)
-          ) {
-            features.push(resource)
-            let tooltip = await this.flatmapQueries.createTooltipData(this.mapImp, entry)
-            if (entry.alert) {
-              tooltip['featuresAlert'] = entry.alert;
-            }
-            // Get connectivity knowledge source | SCKAN release
-            if (this.mapImp.provenance?.connectivity) {
-              tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
-            }
-            this.tooltipEntry.push(tooltip)
-          }
+          prom1.push(await this.getKnowledgeTooltip(entry))
         }
-        this.displayTooltip(features)
+        this.tooltipEntry = await Promise.all(prom1)
+        const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
+        this.displayTooltip(featureIds)
+      }
+    },
+    getKnowledgeTooltip: async function (data) {
+      //require data.resource && data.feature.source
+      let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+      // The line below only creates the tooltip if some data was found on the path
+      // the pubmed URLs are in knowledge response.references
+      if ((results && results[0]) || (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)) {
+        let tooltip = await this.flatmapQueries.createTooltipData(this.mapImp, data)
+        tooltip['featuresAlert'] = data.alert;
+        tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
+        return tooltip;
       }
     },
     /**
