@@ -693,18 +693,6 @@ const processFTUs = (parent, key) => {
   return ftus
 }
 
-const createUnfilledTooltipData = function () {
-  return {
-    destinations: [],
-    origins: [],
-    components: [],
-    destinationsWithDatasets: [],
-    originsWithDatasets: [],
-    componentsWithDatasets: [],
-    resource: undefined,
-  }
-}
-
 /**
  * A vue component of the flatmap viewer.
  */
@@ -1622,6 +1610,7 @@ export default {
             const resource = [data.models]
             const taxonomy = this.entry
             const biologicalSex = this.biologicalSex
+            const featuresAlert = data.alert
             let taxons = undefined
             if (data.taxons) {
               // check if data.taxons is string or array
@@ -1631,7 +1620,7 @@ export default {
                 taxons = data.taxons
               }
             }
-            const payload = {
+            let payload = {
               dataset: data.dataset,
               biologicalSex: biologicalSex,
               taxonomy: taxonomy,
@@ -1641,10 +1630,39 @@ export default {
               userData: args,
               eventType: eventType,
               provenanceTaxonomy: taxons,
+              alert: featuresAlert
             }
             if (eventType === 'click') {
+              payload = [payload]
+              if (Array.isArray(data)) {
+                payload = []
+                data.forEach((d) => {
+                  const label = d.label
+                  const resource = [d.models]
+                  let taxons = undefined
+                  if (d.taxons) {
+                    // check if data.taxons is string or array
+                    if (typeof d.taxons !== 'object') {
+                      taxons = JSON.parse(d.taxons)
+                    } else {
+                      taxons = d.taxons
+                    }
+                  }
+                  payload.push({
+                    dataset: d.dataset,
+                    biologicalSex: biologicalSex,
+                    taxonomy: taxonomy,
+                    resource: resource,
+                    label: label,
+                    feature: d,
+                    userData: args,
+                    eventType: eventType,
+                    provenanceTaxonomy: taxons,
+                    alert: d.alert
+                  })
+                })
+              }
               this.setConnectivityDataSource(this.viewingMode, data);
-              this.featuresAlert = data.alert
               //The following will be used to track either a feature is selected
               this.statesTracking.activeClick = true
               this.statesTracking.activeTerm = data?.models
@@ -1925,20 +1943,34 @@ export default {
           this.annotation = {}
         }
       } else {
-        //require data.resource && data.feature.source
-        let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+        let features = []
+        this.tooltipEntry = []
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
-        // The line below only creates the tooltip if some data was found on the path
-        // the pubmed URLs are in knowledge response.references
-        if (
-          (results && results[0]) ||
-          (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
-        ) {
-          this.resourceForTooltip = data.resource[0]
-          data.resourceForTooltip = this.resourceForTooltip
-          this.createTooltipFromNeuronCuration(data)
+        for (let index = 0; index < data.length; index++) {
+          const entry = data[index]
+          const resource = entry.resource[0]
+          //require data.resource && data.feature.source
+          let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, entry)
+          // The line below only creates the tooltip if some data was found on the path
+          // the pubmed URLs are in knowledge response.references
+          if (
+            (results && results[0]) ||
+            (entry.feature.hyperlinks && entry.feature.hyperlinks.length > 0)
+          ) {
+            features.push(resource)
+            let tooltip = await this.flatmapQueries.createTooltipData(this.mapImp, entry)
+            if (entry.alert) {
+              tooltip['featuresAlert'] = entry.alert;
+            }
+            // Get connectivity knowledge source | SCKAN release
+            if (this.mapImp.provenance?.connectivity) {
+              tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
+            }
+            this.tooltipEntry.push(tooltip)
+          }
         }
+        this.displayTooltip(features)
       }
     },
     /**
@@ -2185,25 +2217,18 @@ export default {
         featureId = feature
         options.annotationFeatureGeometry = geometry
       } else {
-        featureId = this.mapImp.modelFeatureIds(feature)[0]
+        const entry = Array.isArray(feature) ? feature[0] : feature
+        featureId = this.mapImp.modelFeatureIds(entry)[0]
         if (!this.activeDrawTool) {
           options.positionAtLastClick = true
         }
       }
       // If connectivityInfoSidebar is set to `true`
       // Connectivity info will show in sidebar
-      if ((this.connectivityInfoSidebar && this.hasTooltipEntry()) && this.viewingMode !== 'Annotation') {
-        // move the map center to highlighted area
-        // this method is moved to sidebar connectivity info
-        // const featureIds = [feature];
-        // this.moveMap(featureIds);
-        if (this.featuresAlert) {
-          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
-        }
-        // Get connectivity knowledge source | SCKAN release
-        if (this.mapImp.provenance?.connectivity) {
-          this.tooltipEntry['knowledge-source'] = getKnowledgeSource(this.mapImp);
-        }
+      if (
+        (this.connectivityInfoSidebar && this.tooltipEntry.length) &&
+        this.viewingMode !== 'Annotation'
+      ) {
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       if (this.annotationSidebar && this.viewingMode === 'Annotation') {
@@ -2214,16 +2239,10 @@ export default {
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
       if (
-        !this.disableUI && (
-          (
-            this.viewingMode === 'Annotation' &&
-            !this.annotationSidebar
-          ) ||
-          (
-            this.viewingMode === 'Exploration' &&
-            !this.connectivityInfoSidebar &&
-            this.hasTooltipEntry()
-          )
+        !this.disableUI &&
+        (
+          (this.viewingMode === 'Annotation' && !this.annotationSidebar) ||
+          (this.viewingMode === 'Exploration' && !this.connectivityInfoSidebar)
         )
       ) {
         this.tooltipDisplay = true;
@@ -2232,23 +2251,6 @@ export default {
           this.popUpCssHacks();
         });
       }
-    },
-    hasTooltipEntry: function () {
-      const {
-        components,
-        destinations,
-        origins,
-        provenanceTaxonomy,
-        provenanceTaxonomyLabel
-      } = this.tooltipEntry;
-
-      return Boolean(
-        components?.length ||
-        destinations?.length ||
-        origins?.length ||
-        provenanceTaxonomy?.length ||
-        provenanceTaxonomyLabel?.length
-      );
     },
     /**
      * Move the map to the left side
@@ -2918,7 +2920,6 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      getFeaturesAlert: () => this.featuresAlert,
       userApiKey: this.userToken,
     }
   },
@@ -2972,11 +2973,10 @@ export default {
       availableBackground: ['white', 'lightskyblue', 'black'],
       loading: false,
       flatmapMarker: flatmapMarker,
-      tooltipEntry: createUnfilledTooltipData(),
+      tooltipEntry: [],
       connectivityDataSource: '',
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      featuresAlert: undefined,
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
