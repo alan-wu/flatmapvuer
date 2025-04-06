@@ -2204,6 +2204,10 @@ export default {
         if (this.mapImp.provenance?.connectivity) {
           this.tooltipEntry['knowledge-source'] = getKnowledgeSource(this.mapImp);
         }
+        // Map uuid to load connectivity information from the map
+        if (this.mapImp?.uuid) {
+          this.tooltipEntry['mapuuid'] = this.mapImp.uuid;
+        }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       if (this.annotationSidebar && this.viewingMode === 'Annotation') {
