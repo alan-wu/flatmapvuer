@@ -2203,10 +2203,10 @@ export default {
         // Get connectivity knowledge source | SCKAN release
         if (this.mapImp.provenance?.connectivity) {
           this.tooltipEntry['knowledge-source'] = getKnowledgeSource(this.mapImp);
-        }
-        // Map uuid to load connectivity information from the map
-        if (this.mapImp?.uuid) {
-          this.tooltipEntry['mapuuid'] = this.mapImp.uuid;
+
+          // Map id and uuid to load connectivity information from the map
+          this.tooltipEntry['mapId'] = this.mapImp.provenance.id;
+          this.tooltipEntry['mapuuid'] = this.mapImp.provenance.uuid;
         }
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
