@@ -139,7 +139,7 @@ Please use `const` to assign meaningful names to them...
       </el-icon>
 
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotate) && !disableUI"
+        v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotationEnabled) && !disableUI"
         :mapCanvas="{
           containerHTML: this.$el,
           class: '.maplibregl-canvas',
@@ -448,7 +448,7 @@ Please use `const` to assign meaningful names to them...
             <el-row class="viewing-mode-description">
               {{ modeDescription }}
             </el-row>
-            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotate" class="viewing-mode-description">
+            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
               (Offline annotate)
             </el-row>
           </el-row>
@@ -938,15 +938,15 @@ export default {
      */
     commitAnnotationEvent: function (annotation) {
       if (this.mapImp) {
-        if (this.offlineAnnotate) {
-          this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
-          this.offlineAnnotation.push(annotation)
+        if (this.offlineAnnotationEnabled) {
+          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
+          this.offlineAnnotations.push(annotation)
           if (this.annotationEntry.type === 'deleted') {
-            this.offlineAnnotation = this.offlineAnnotation.filter((offline) => {
+            this.offlineAnnotations = this.offlineAnnotations.filter((offline) => {
               return offline.resource !== this.serverURL || offline.item.id !== annotation.item.id
             })
           }
-          sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotation))
+          sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations))
         }
         if (['created', 'updated', 'deleted'].includes(this.annotationEntry.type)) {
           this.featureAnnotationSubmitted = true
@@ -971,9 +971,9 @@ export default {
      */
     fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
       let annotatedItemIds
-      if (this.offlineAnnotate) {
-        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
-        annotatedItemIds = this.offlineAnnotation.filter((offline) => {
+      if (this.offlineAnnotationEnabled) {
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
+        annotatedItemIds = this.offlineAnnotations.filter((offline) => {
           return offline.resource === this.serverURL
         }).map(offline => offline.item.id)
       } else {
@@ -1003,9 +1003,9 @@ export default {
      */
     fetchDrawnFeatures: async function (userId, participated) {
       let drawnFeatures
-      if (this.offlineAnnotate) {
-        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
-        drawnFeatures = this.offlineAnnotation.filter((offline) => {
+      if (this.offlineAnnotationEnabled) {
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || []
+        drawnFeatures = this.offlineAnnotations.filter((offline) => {
           return offline.feature && offline.resource === this.serverURL
         }).map(offline => offline.feature)
       } else {
@@ -1919,7 +1919,7 @@ export default {
           this.annotationEntry = {
             ...data.feature,
             resourceId: this.serverURL,
-            offline: this.offlineAnnotate
+            offline: this.offlineAnnotationEnabled
           }
           if (data.feature.featureId && data.feature.models) {
             this.displayTooltip(data.feature.models)
@@ -2408,10 +2408,10 @@ export default {
         state['colour'] = this.colourRadio
         state['outlinesRadio'] = this.outlinesRadio
         state['background'] = this.currentBackground
-        if (this.offlineAnnotate) {
+        if (this.offlineAnnotationEnabled) {
           const expiry = new Date().getTime() + 24 * 60 * 60 * 1000;
           sessionStorage.setItem('offline-annotation-expiry', expiry);
-          state['offlineAnnotation'] = {
+          state['offlineAnnotations'] = {
             expiry: sessionStorage.getItem('offline-annotation-expiry'),
             value: sessionStorage.getItem('offline-annotation')
           }
@@ -2450,9 +2450,9 @@ export default {
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
-        if (state.offlineAnnotation) {
-          if (state.offlineAnnotation.expiry > new Date().getTime()) {
-            sessionStorage.setItem('offline-annotation', state.offlineAnnotation.value)
+        if (state.offlineAnnotations) {
+          if (state.offlineAnnotations.expiry > new Date().getTime()) {
+            sessionStorage.setItem('offline-annotation', state.offlineAnnotations.value)
           }
         }
         if (state.viewingMode) this.changeViewingMode(state.viewingMode)
@@ -3027,8 +3027,8 @@ export default {
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
         'Annotation': ['View feature annotations', 'Add, comment on and view feature annotations']
       },
-      offlineAnnotate: false,
-      offlineAnnotation: [],
+      offlineAnnotationEnabled: false,
+      offlineAnnotations: [],
       annotationFrom: 'Anyone',
       annotatedSource: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
@@ -3153,10 +3153,10 @@ export default {
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email && userData.canUpdate) {
             this.authorisedUser = userData
-            this.offlineAnnotate = false
+            this.offlineAnnotationEnabled = false
           } else {
             this.authorisedUser = undefined
-            this.offlineAnnotate = true
+            this.offlineAnnotationEnabled = true
           }
           this.setFeatureAnnotated()
           this.addAnnotationFeature()
