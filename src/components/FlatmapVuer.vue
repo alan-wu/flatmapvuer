@@ -1620,7 +1620,7 @@ export default {
                 taxons = data.taxons
               }
             }
-            let payload = {
+            let payload = [{
               dataset: data.dataset,
               biologicalSex: biologicalSex,
               taxonomy: taxonomy,
@@ -1631,37 +1631,34 @@ export default {
               eventType: eventType,
               provenanceTaxonomy: taxons,
               alert: featuresAlert
-            }
-            if (eventType === 'click') {
-              payload = [payload]
-              if (Array.isArray(data)) {
-                payload = []
-                data.forEach((d) => {
-                  const label = d.label
-                  const resource = [d.models]
-                  let taxons = undefined
-                  if (d.taxons) {
-                    // check if data.taxons is string or array
-                    if (typeof d.taxons !== 'object') {
-                      taxons = JSON.parse(d.taxons)
-                    } else {
-                      taxons = d.taxons
-                    }
+            }]
+            if (Array.isArray(data)) {
+              payload = []
+              data.forEach((d) => {
+                const label = d.label
+                const resource = [d.models]
+                let taxons = undefined
+                if (d.taxons) {
+                  // check if data.taxons is string or array
+                  if (typeof d.taxons !== 'object') {
+                    taxons = JSON.parse(d.taxons)
+                  } else {
+                    taxons = d.taxons
                   }
-                  payload.push({
-                    dataset: d.dataset,
-                    biologicalSex: biologicalSex,
-                    taxonomy: taxonomy,
-                    resource: resource,
-                    label: label,
-                    feature: d,
-                    userData: args,
-                    eventType: eventType,
-                    provenanceTaxonomy: taxons,
-                    alert: d.alert
-                  })
+                }
+                payload.push({
+                  dataset: d.dataset,
+                  biologicalSex: biologicalSex,
+                  taxonomy: taxonomy,
+                  resource: resource,
+                  label: label,
+                  feature: d,
+                  userData: args,
+                  eventType: eventType,
+                  provenanceTaxonomy: taxons,
+                  alert: d.alert
                 })
-              }
+              })
               this.setConnectivityDataSource(this.viewingMode, data);
               //The following will be used to track either a feature is selected
               this.statesTracking.activeClick = true
