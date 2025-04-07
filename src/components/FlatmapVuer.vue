@@ -1948,8 +1948,10 @@ export default {
           prom1.push(await this.getKnowledgeTooltip(entry))
         }
         this.tooltipEntry = await Promise.all(prom1)
-        const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
-        this.displayTooltip(featureIds)
+        const featureIds = this.tooltipEntry.filter(tooltip => tooltip).map(tooltip => tooltip.featureId[0])
+        if (featureIds.length > 0) {
+          this.displayTooltip(featureIds)
+        }
       }
     },
     getKnowledgeTooltip: async function (data) {
