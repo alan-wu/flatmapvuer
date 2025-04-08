@@ -2409,12 +2409,7 @@ export default {
         state['outlinesRadio'] = this.outlinesRadio
         state['background'] = this.currentBackground
         if (this.offlineAnnotationEnabled) {
-          const expiry = new Date().getTime() + 24 * 60 * 60 * 1000;
-          sessionStorage.setItem('offline-annotation-expiry', expiry);
-          state['offlineAnnotations'] = {
-            expiry: sessionStorage.getItem('offline-annotation-expiry'),
-            value: sessionStorage.getItem('offline-annotation')
-          }
+          state['offlineAnnotations'] = sessionStorage.getItem('offline-annotation')
         }
         this.getVisibilityState(state)
         return state
@@ -2451,9 +2446,7 @@ export default {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
         if (state.offlineAnnotations) {
-          if (state.offlineAnnotations.expiry > new Date().getTime()) {
-            sessionStorage.setItem('offline-annotation', state.offlineAnnotations.value)
-          }
+          sessionStorage.setItem('offline-annotation', state.offlineAnnotations)
         }
         if (state.viewingMode) this.changeViewingMode(state.viewingMode)
         //The following three are boolean
