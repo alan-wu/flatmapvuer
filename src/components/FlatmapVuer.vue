@@ -589,6 +589,7 @@ Please use `const` to assign meaningful names to them...
         :tooltipEntry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
+        @onActionClick="onActionClick"
       />
     </div>
   </div>
@@ -638,6 +639,7 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import EventBus from './EventBus.js'
 
 const ERROR_MESSAGE = 'cannot be found on the map.';
 
@@ -2720,6 +2722,9 @@ export default {
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
       return []
+    },
+    onActionClick: function (data) {
+      EventBus.emit('onActionClick', data)
     },
   },
   props: {
