@@ -207,7 +207,7 @@ let FlatmapQueries = function () {
     return found.flat()
   }
 
-  this.findComponents = function (connectivity) {
+  this.findComponents = function (connectivity, axons, dendrites) {
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -216,13 +216,10 @@ let FlatmapQueries = function () {
     nodes.forEach((node) => {
       terminal = false
       // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-      if (inArray(connectivity.axons, node)) {
+      if (inArray(axons, node)) {
         terminal = true
       }
-      if (connectivity.somas && inArray(connectivity.somas, node)) {
-        terminal = true
-      }
-      if (inArray(connectivity.dendrites, node)) {
+      if (inArray(dendrites, node)) {
         terminal = true
       }
       if (!terminal) {
@@ -404,26 +401,20 @@ let FlatmapQueries = function () {
   this.processConnectivity = function (mapImp, connectivity) {
     const sourceKey = ["ilxtr:hasSomaLocatedIn"]
     const destinationKey = ["ilxtr:hasAxonPresynapticElementIn", "ilxtr:hasAxonSensorySubcellularElementIn"]
-    const viaKey = Object.keys(connectivity["node-phenotypes"]).filter((key)=>{
-      return !sourceKey.includes(key) && !destinationKey.includes(key)
-    })
+
     return new Promise((resolve) => {
       let dendrites = []
-      let components = []
       let axons = []
 
       sourceKey.forEach((key)=>{
         dendrites.push(...connectivity["node-phenotypes"][key])
       })
       dendrites = removeDuplicates(dendrites)
-      viaKey.forEach((key)=>{
-        components.push(...connectivity["node-phenotypes"][key])
-      })
-      components = removeDuplicates(components)
       destinationKey.forEach((key)=>{
         axons.push(...connectivity["node-phenotypes"][key])
       })
       axons = removeDuplicates(axons)
+      const components = this.findComponents(connectivity, axons, dendrites)
 
       // Create list of ids to get labels for
       const conIds = this.findAllIdsFromConnectivity(connectivity)
@@ -453,20 +444,6 @@ let FlatmapQueries = function () {
         })
       })
     })
-  }
-
-  this.flattenConntectivity = function (connectivity) {
-    let dnodes = connectivity.flat() // get nodes from edgelist
-    let nodes = [...new Set(dnodes)] // remove duplicates
-    let found = []
-    nodes.forEach((n) => {
-      if (Array.isArray(n)) {
-        found.push(n.flat())
-      } else {
-        found.push(n)
-      }
-    })
-    return found.flat()
   }
 
   this.buildPubmedSqlStatement = function (keastIds) {
