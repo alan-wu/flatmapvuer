@@ -383,21 +383,21 @@ let FlatmapQueries = function () {
     return label
   }
 
-  this.flattenAndFindDatasets = function (source, via, destination) {
+  this.flattenAndFindDatasets = function (dendrites, components, axons) {
     // process the nodes for finding datasets (Note this is not critical to the tooltip, only for the 'search on components' button)
-    let sourceFlat = this.flattenConnectivity(source)
-    let viaFlat = this.flattenConnectivity(via)
-    let destinationFlat = this.flattenConnectivity(destination)
+    let dendritesFlat = this.flattenConnectivity(dendrites)
+    let componentsFlat = this.flattenConnectivity(components)
+    let axonsFlat = this.flattenConnectivity(axons)
 
     // Filter for the anatomy which is annotated on datasets
     this.originsWithDatasets = this.uberons.filter(
-      (ub) => sourceFlat.indexOf(ub.id) !== -1
+      (ub) => dendritesFlat.indexOf(ub.id) !== -1
     )
     this.componentsWithDatasets = this.uberons.filter(
-      (ub) => viaFlat.indexOf(ub.id) !== -1
+      (ub) => componentsFlat.indexOf(ub.id) !== -1
     )
     this.destinationsWithDatasets = this.uberons.filter(
-      (ub) => destinationFlat.indexOf(ub.id) !== -1
+      (ub) => axonsFlat.indexOf(ub.id) !== -1
     )
   }
 
@@ -408,42 +408,42 @@ let FlatmapQueries = function () {
       return !sourceKey.includes(key) && !destinationKey.includes(key)
     })
     return new Promise((resolve) => {
-      let source = []
-      let via = []
-      let destination = []
+      let dendrites = []
+      let components = []
+      let axons = []
 
       sourceKey.forEach((key)=>{
-        source.push(...connectivity["node-phenotypes"][key])
+        dendrites.push(...connectivity["node-phenotypes"][key])
       })
-      source = removeDuplicates(source)
+      dendrites = removeDuplicates(dendrites)
       viaKey.forEach((key)=>{
-        via.push(...connectivity["node-phenotypes"][key])
+        components.push(...connectivity["node-phenotypes"][key])
       })
-      via = removeDuplicates(via)
+      components = removeDuplicates(components)
       destinationKey.forEach((key)=>{
-        destination.push(...connectivity["node-phenotypes"][key])
+        axons.push(...connectivity["node-phenotypes"][key])
       })
-      destination = removeDuplicates(destination)
+      axons = removeDuplicates(axons)
 
       // Create list of ids to get labels for
-      const connectivityIds = this.findAllIdsFromConnectivity(connectivity)
+      const conIds = this.findAllIdsFromConnectivity(connectivity)
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
-      this.createLabelLookup(mapImp, connectivityIds).then((lookUp) => {
-        this.origins = source.map((s) =>
-          this.createLabelFromNeuralNode(s, lookUp)
-        )
-        this.components = via.map((v) =>
-          this.createLabelFromNeuralNode(v, lookUp)
-        )
-        this.destinations = destination.map((d) =>
+      this.createLabelLookup(mapImp, conIds).then((lookUp) => {
+        this.origins = dendrites.map((d) =>
           this.createLabelFromNeuralNode(d, lookUp)
         )
-        this.flattenAndFindDatasets(source, via, destination)
+        this.components = components.map((c) =>
+          this.createLabelFromNeuralNode(c, lookUp)
+        )
+        this.destinations = axons.map((a) =>
+          this.createLabelFromNeuralNode(a, lookUp)
+        )
+        this.flattenAndFindDatasets(dendrites, components, axons)
         resolve({
           ids: {
-            source: source,
-            via: via,
-            destination: destination,
+            dendrites: dendrites,
+            components: components,
+            axons: axons,
           },
           labels: {
             origins: this.origins,
