@@ -2694,6 +2694,7 @@ export default {
                   provenanceTaxonomy: feature.taxons,
                 }
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
+                  this.featuresAlert = feature.alert
                   this.checkAndCreatePopups(data)
                 } else if (this.viewingMode === 'Neuron Connection') {
                   setTimeout(() => {
