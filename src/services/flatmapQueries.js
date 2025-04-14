@@ -207,7 +207,7 @@ let FlatmapQueries = function () {
     return found.flat()
   }
 
-  this.findComponents = function (connectivity, axons, dendrites) {
+  this.findComponents = function (connectivity, axons, dendrites, somas) {
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -217,6 +217,9 @@ let FlatmapQueries = function () {
       terminal = false
       // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
       if (inArray(axons, node)) {
+        terminal = true
+      }
+      if (somas && inArray(somas, node)) {
         terminal = true
       }
       if (inArray(dendrites, node)) {
@@ -399,23 +402,35 @@ let FlatmapQueries = function () {
   }
 
   this.processConnectivity = function (mapImp, connectivity) {
-    const sourceKey = ["ilxtr:hasSomaLocatedIn"]
-    const destinationKey = ["ilxtr:hasAxonPresynapticElementIn", "ilxtr:hasAxonSensorySubcellularElementIn"]
-
     return new Promise((resolve) => {
       let dendrites = []
       let axons = []
+      let somas = undefined
+      if (connectivity && connectivity["node-phenotypes"]) {
+        const sourceKey = ["ilxtr:hasSomaLocatedIn"]
+        const destinationKey = ["ilxtr:hasAxonPresynapticElementIn", "ilxtr:hasAxonSensorySubcellularElementIn"]
+        sourceKey.forEach((key)=>{
+          dendrites.push(...connectivity["node-phenotypes"][key])
+        })
+        dendrites = removeDuplicates(dendrites)
+        destinationKey.forEach((key)=>{
+          axons.push(...connectivity["node-phenotypes"][key])
+        })
+        axons = removeDuplicates(axons)
+      } else {
+        // Remove duplicates
+        axons = removeDuplicates(connectivity.axons)
+        //Somas will become part of origins, support this for future proof
+        if (connectivity.somas && connectivity.somas.length > 0) {
+          dendrites.push(...connectivity.somas)
+        }
+        if (connectivity.dendrites && connectivity.dendrites.length > 0) {
+          dendrites.push(...connectivity.dendrites)
+        }
+        somas = connectivity.somas
+      }
 
-      sourceKey.forEach((key)=>{
-        dendrites.push(...connectivity["node-phenotypes"][key])
-      })
-      dendrites = removeDuplicates(dendrites)
-      destinationKey.forEach((key)=>{
-        axons.push(...connectivity["node-phenotypes"][key])
-      })
-      axons = removeDuplicates(axons)
-      const components = this.findComponents(connectivity, axons, dendrites)
-
+      const components = this.findComponents(connectivity, axons, dendrites, somas)
       // Create list of ids to get labels for
       const conIds = this.findAllIdsFromConnectivity(connectivity)
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
