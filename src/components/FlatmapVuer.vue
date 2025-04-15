@@ -1965,11 +1965,16 @@ export default {
         tooltip['featuresAlert'] = data.alert;
         tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
       } else {
+        tooltip = {
+          ...tooltip,
+          origins: [data.label],
+          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
+          components: [],
+          componentsWithDatasets: [],
+          destinations: [],
+          destinationsWithDatasets: [],
+        }
         let featureIds = []
-        let components = []
-        let componentsWithDatasets = []
-        let destinations = []
-        let destinationsWithDatasets = []
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
         if (pathsOfEntities.length) {
           pathsOfEntities.forEach((path) => {
@@ -1983,27 +1988,20 @@ export default {
             }
             if (featureId) {
               const feature = this.mapImp.featureProperties(featureId)
-              components.push(feature.label)
-              componentsWithDatasets.push({ id: feature.models, name: feature.label })
+              if (!tooltip.components.includes(feature.label)) {
+                tooltip.components.push(feature.label)
+                tooltip.componentsWithDatasets.push({ id: feature.models, name: feature.label })
+              }
             }
           })
           featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
           featureIds.forEach((id) => {
             const feature = this.mapImp.featureProperties(id)
-            if (!destinations.includes(feature.label)) {
-              destinations.push(feature.label)
-              destinationsWithDatasets.push({ id: feature.models, name: feature.label })
+            if (!tooltip.destinations.includes(feature.label)) {
+              tooltip.destinations.push(feature.label)
+              tooltip.destinationsWithDatasets.push({ id: feature.models, name: feature.label })
             }
           })
-          tooltip = {
-            ...tooltip,
-            origins: [data.label],
-            originsWithDatasets: [{ id: data.resource[0], name: data.label }],
-            components: components,
-            componentsWithDatasets: componentsWithDatasets,
-            destinations: destinations,
-            destinationsWithDatasets: destinationsWithDatasets,
-          }
         }
       }
       return tooltip;
