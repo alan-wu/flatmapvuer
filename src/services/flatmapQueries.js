@@ -260,7 +260,10 @@ let FlatmapQueries = function () {
     this.rawURLs = []
     if (!keastIds || keastIds.length == 0 || !keastIds[0]) return
 
-    let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
+    // set connectivity source if available
+    const connectivitySource = localStorage.getItem('connectivity-source');
+
+    let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal, connectivitySource) // This on returns a promise so dont need 'await'
     let results = await Promise.all([prom1])
     return results
   }
