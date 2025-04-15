@@ -693,18 +693,6 @@ const processFTUs = (parent, key) => {
   return ftus
 }
 
-const createUnfilledTooltipData = function () {
-  return {
-    destinations: [],
-    origins: [],
-    components: [],
-    destinationsWithDatasets: [],
-    originsWithDatasets: [],
-    componentsWithDatasets: [],
-    resource: undefined,
-  }
-}
-
 /**
  * A vue component of the flatmap viewer.
  */
@@ -1173,7 +1161,7 @@ export default {
     },
     setInitMapState: function () {
       if (this.mapImp) {
-        const map = this.mapImp._map;
+        const map = this.mapImp.map;
         const bounds = this.mapImp.options.bounds;
         const initBounds = [
           [bounds[0], bounds[1]],
@@ -1195,7 +1183,7 @@ export default {
     resetView: function () {
       if (this.mapImp) {
         // fit to window
-        const map = this.mapImp._map;
+        const map = this.mapImp.map;
         const { initBounds } = this.initMapState;
         // reset rotation
         map.resetNorthPitch({
@@ -1268,51 +1256,71 @@ export default {
       }
     },
     /**
+     * Function to highlight paths and features
+     * @param data 
+     */
+    zoomToFeatures: function (data) {
+      if (this.mapImp) {
+        this.mapImp.zoomToFeatures(data)
+      }
+    },
+    /**
      * @public
      * Function to highlight the connected paths
-     * by providing path model identifier, ``pathId``.
-     * @arg {String} `pathId`
+     * by providing path model identifier, ``pathId`` or ``anatomicalId``.
+     * @arg {string} `pathId` or `anatomicalId`
      */
-    highlightConnectedPaths: async function (payload) {
+    retrieveConnectedPaths: async function (payload, options = {}) {
       if (this.mapImp) {
-        let paths = [...this.mapImp.pathModelNodes(payload)]
-
+        let connectedPaths = [];
+        let connectedTarget = options.target?.length ? options.target : [];
         // The line below is to get the path features from the geojson ids
-        let pathFeatures = paths.map((p) => this.mapImp.featureProperties(p))
-
-        // Query the flatmap knowledge graph for connectivity, we use this to grab the origins
-        let connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload)
-
-        // Check and flatten the origins node graph
-        let originsFlat = connectivity?.ids?.dendrites?.flat().flat()
-
-        let toHighlight = []
-        let highlight = false
-
-        // Loop through the path features and check if we have origin nodes
-        pathFeatures.forEach((p) => {
-
-          // Get the nodes from each path feature
-          this.mapImp.nodePathModels(p.featureId).forEach((f) => {
-            highlight = true
-            // s2 here is the second level paths
-            let s2 = this.mapImp.pathModelNodes(f)
-            s2.forEach((s) => {
-              let s2Feature = this.mapImp.featureProperties([s]) // get the feature properties for s2
-              if (originsFlat.includes(s2Feature.models)) {
-                highlight = false // if we have an origin node, we don't want to highlight the path
-                return
-              }
-            })
-
-            if (highlight) {
-              toHighlight.push(f)
-            }
-          })
-        })
-
-        // display connected paths
-        this.mapImp.zoomToFeatures(toHighlight, { noZoomIn: true })
+        const nodeFeatureIds = [...this.mapImp.pathModelNodes(payload)];
+        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(payload);
+        if (nodeFeatureIds.length) {
+          if (!connectedTarget.length) {
+            const connectedType = options.type?.length ? options.type : ["all"];
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload[0]);
+            const originsFlat = connectivity?.ids?.dendrites.flat(Infinity);
+            const componentsFlat = connectivity?.ids?.components.flat(Infinity);
+            const destinationsFlat = connectivity?.ids?.axons.flat(Infinity);
+            let connected = [];
+            if (connectedType.includes("origins")) connected.push(...originsFlat);
+            if (connectedType.includes("components")) connected.push(...componentsFlat);
+            if (connectedType.includes("destinations")) connected.push(...destinationsFlat);
+            if (connectedType.includes("all")) connected.push(...originsFlat, ...componentsFlat, ...destinationsFlat);
+            connectedTarget = [...new Set(connected)];
+          }
+          // Loop through the node features and check if we have certain nodes
+          nodeFeatureIds.forEach((featureId) => {
+            // Get the paths from each node feature
+            const pathsL2 = this.mapImp.nodePathModels(featureId);
+            pathsL2.forEach((path) => {
+              // nodes of the second level path
+              const nodeFeatureIdsL2 = this.mapImp.pathModelNodes(path);
+              const nodeModelsL2 = nodeFeatureIdsL2.map((featureIdL2) => {
+                return this.mapImp.featureProperties(featureIdL2).models;
+              });
+              const intersection = connectedTarget.filter(element => nodeModelsL2.includes(element));
+              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path);
+            });
+          });
+        } else if (pathsOfEntities.length) {
+          if (connectedTarget.length) {
+            pathsOfEntities.forEach((path) => {
+              const nodeFeatureIds = this.mapImp.pathModelNodes(path);
+              const nodeModels = nodeFeatureIds.map((featureId) => {
+                return this.mapImp.featureProperties(featureId).models;
+              });
+              const intersection = connectedTarget.filter(element => nodeModels.includes(element));
+              if (intersection.length && !connectedPaths.includes(path)) connectedPaths.push(path);
+            });
+          } else {
+            connectedPaths = pathsOfEntities;
+          }
+        }
+        connectedPaths = [...new Set([...connectedPaths, ...payload])];
+        return connectedPaths;
       }
     },
     resetMapFilter: function() {
@@ -1622,6 +1630,7 @@ export default {
             const resource = [data.models]
             const taxonomy = this.entry
             const biologicalSex = this.biologicalSex
+            const featuresAlert = data.alert
             let taxons = undefined
             if (data.taxons) {
               // check if data.taxons is string or array
@@ -1631,7 +1640,7 @@ export default {
                 taxons = data.taxons
               }
             }
-            const payload = {
+            let payload = [{
               dataset: data.dataset,
               biologicalSex: biologicalSex,
               taxonomy: taxonomy,
@@ -1641,15 +1650,39 @@ export default {
               userData: args,
               eventType: eventType,
               provenanceTaxonomy: taxons,
-            }
-            if (eventType === 'click') {
-              this.setConnectivityDataSource(this.viewingMode, data);
-              this.featuresAlert = data.alert
-              //The following will be used to track either a feature is selected
-              this.statesTracking.activeClick = true
-              this.statesTracking.activeTerm = data?.models
+              alert: featuresAlert
+            }]
+            if (Array.isArray(data)) {
+              payload = []
+              data.forEach((d) => {
+                const label = d.label
+                const resource = [d.models]
+                let taxons = undefined
+                if (d.taxons) {
+                  // check if data.taxons is string or array
+                  if (typeof d.taxons !== 'object') {
+                    taxons = JSON.parse(d.taxons)
+                  } else {
+                    taxons = d.taxons
+                  }
+                }
+                payload.push({
+                  dataset: d.dataset,
+                  biologicalSex: biologicalSex,
+                  taxonomy: taxonomy,
+                  resource: resource,
+                  label: label,
+                  feature: d,
+                  userData: args,
+                  eventType: eventType,
+                  provenanceTaxonomy: taxons,
+                  alert: d.alert
+                })
+              })
               if (this.viewingMode === 'Neuron Connection') {
-                this.highlightConnectedPaths([data.models])
+                this.retrieveConnectedPaths([data.models]).then((paths) => {
+                  this.zoomToFeatures(paths)
+                })
               } else {
                 this.currentActive = data.models ? data.models : ''
                 // Drawing connectivity between features
@@ -1692,23 +1725,6 @@ export default {
             this.$emit('pan-zoom-callback', data)
           }
         }
-      }
-    },
-    /**
-     * The data for connectivity data source is just a placeholder data
-     * to check which part of the map is clicked, e.g., path or feture or empty area,
-     * based on the viewing mode.
-     * The "connectivity-info-close" event will be emitted based on this data
-     * when there has a click event on map.
-     * @param viewingMode
-     * @param data
-     */
-    setConnectivityDataSource: function (viewingMode, data) {
-      // for Exploration mode, only path click will be used as data source
-      this.connectivityDataSource = data.source;
-      // for other modes, it can be feature or path
-      if (viewingMode === 'Neuron Connection' || viewingMode === 'Annotation') {
-        this.connectivityDataSource = data.featureId;
       }
     },
     /**
@@ -1925,21 +1941,72 @@ export default {
           this.annotation = {}
         }
       } else {
-        //require data.resource && data.feature.source
-        let results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
-        // The line below only creates the tooltip if some data was found on the path
-        // the pubmed URLs are in knowledge response.references
-        if (
-          (results && results[0]) ||
-          (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
-        ) {
-          this.resourceForTooltip = data.resource[0]
-          data.resourceForTooltip = this.resourceForTooltip
-          this.createTooltipFromNeuronCuration(data)
+        let prom1 = []
+        for (let index = 0; index < data.length; index++) {
+          const entry = data[index]
+          prom1.push(await this.getKnowledgeTooltip(entry))
+        }
+        this.tooltipEntry = await Promise.all(prom1)
+        const featureIds = this.tooltipEntry.filter(tooltip => tooltip).map(tooltip => tooltip.featureId[0])
+        if (featureIds.length > 0) {
+          this.displayTooltip(featureIds)
         }
       }
+    },
+    getKnowledgeTooltip: async function (data) {
+      //require data.resource && data.feature.source
+      const results = await this.flatmapQueries.retrieveFlatmapKnowledgeForEvent(this.mapImp, data)
+      let tooltip = await this.flatmapQueries.createTooltipData(this.mapImp, data)
+      // The line below only creates the tooltip if some data was found on the path
+      // the pubmed URLs are in knowledge response.references
+      if ((results && results[0]) || (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)) {
+        tooltip['featuresAlert'] = data.alert;
+        tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
+      } else {
+        let featureIds = []
+        let components = []
+        let componentsWithDatasets = []
+        let destinations = []
+        let destinationsWithDatasets = []
+        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
+        if (pathsOfEntities.length) {
+          pathsOfEntities.forEach((path) => {
+            featureIds.push(...this.mapImp.pathModelNodes(path))
+            const searchResults = this.mapImp.search(path)
+            let featureId = undefined;
+            for (let i = 0; i < searchResults.results.length; i++) {
+              featureId = searchResults.results[i].featureId
+              const annotation = this.mapImp.annotation(featureId)
+              if (featureId && annotation?.label) break;
+            }
+            if (featureId) {
+              const feature = this.mapImp.featureProperties(featureId)
+              components.push(feature.label)
+              componentsWithDatasets.push({ id: feature.models, name: feature.label })
+            }
+          })
+          featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
+          featureIds.forEach((id) => {
+            const feature = this.mapImp.featureProperties(id)
+            if (!destinations.includes(feature.label)) {
+              destinations.push(feature.label)
+              destinationsWithDatasets.push({ id: feature.models, name: feature.label })
+            }
+          })
+          tooltip = {
+            ...tooltip,
+            origins: [data.label],
+            originsWithDatasets: [{ id: data.resource[0], name: data.label }],
+            components: components,
+            componentsWithDatasets: componentsWithDatasets,
+            destinations: destinations,
+            destinationsWithDatasets: destinationsWithDatasets,
+          }
+        }
+      }
+      return tooltip;
     },
     /**
      * A hack to remove flatmap tooltips while popup is open
@@ -1980,6 +2047,41 @@ export default {
     createTooltipFromNeuronCuration: async function (data) {
       this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
       this.displayTooltip(data.resource[0])
+    },
+    /**
+     * @public
+     * Function to create tooltip from Entity Curation ``data``.
+     * @arg {Object} `data`
+     */
+    createTooltipFromEntityCuration: async function (data) {
+      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
+      let featureIds = []
+      let destinations = []
+      let destinationsWithDatasets = []
+      const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
+      if (pathsOfEntities.length) {
+        pathsOfEntities.forEach((path) => {
+          featureIds.push(...this.mapImp.pathModelNodes(path))
+        })
+        featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
+        featureIds.forEach((id) => {
+          const feature = this.mapImp.featureProperties(id)
+          if (!destinations.includes(feature.label)) {
+            destinations.push(feature.label)
+            destinationsWithDatasets.push({ id: feature.models, name: feature.label })
+          }
+        })
+        this.tooltipEntry = {
+          ...this.tooltipEntry,
+          origins: [data.label],
+          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
+          components: [],
+          componentsWithDatasets: [],
+          destinations: destinations,
+          destinationsWithDatasets: destinationsWithDatasets,
+        }
+        this.displayTooltip(data.resource[0])
+      }
     },
     /**
      * @public
@@ -2185,25 +2287,18 @@ export default {
         featureId = feature
         options.annotationFeatureGeometry = geometry
       } else {
-        featureId = this.mapImp.modelFeatureIds(feature)[0]
+        const entry = Array.isArray(feature) ? feature[0] : feature
+        featureId = this.mapImp.modelFeatureIds(entry)[0]
         if (!this.activeDrawTool) {
           options.positionAtLastClick = true
         }
       }
       // If connectivityInfoSidebar is set to `true`
       // Connectivity info will show in sidebar
-      if ((this.connectivityInfoSidebar && this.hasTooltipEntry()) && this.viewingMode !== 'Annotation') {
-        // move the map center to highlighted area
-        // this method is moved to sidebar connectivity info
-        // const featureIds = [feature];
-        // this.moveMap(featureIds);
-        if (this.featuresAlert) {
-          this.tooltipEntry['featuresAlert'] = this.featuresAlert;
-        }
-        // Get connectivity knowledge source | SCKAN release
-        if (this.mapImp.provenance?.connectivity) {
-          this.tooltipEntry['knowledge-source'] = getKnowledgeSource(this.mapImp);
-        }
+      if (
+        (this.connectivityInfoSidebar && this.tooltipEntry.length) &&
+        this.viewingMode !== 'Annotation'
+      ) {
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
       if (this.annotationSidebar && this.viewingMode === 'Annotation') {
@@ -2214,16 +2309,10 @@ export default {
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
       if (
-        !this.disableUI && (
-          (
-            this.viewingMode === 'Annotation' &&
-            !this.annotationSidebar
-          ) ||
-          (
-            this.viewingMode === 'Exploration' &&
-            !this.connectivityInfoSidebar &&
-            this.hasTooltipEntry()
-          )
+        !this.disableUI &&
+        (
+          (this.viewingMode === 'Annotation' && !this.annotationSidebar) ||
+          (this.viewingMode === 'Exploration' && !this.connectivityInfoSidebar)
         )
       ) {
         this.tooltipDisplay = true;
@@ -2232,23 +2321,6 @@ export default {
           this.popUpCssHacks();
         });
       }
-    },
-    hasTooltipEntry: function () {
-      const {
-        components,
-        destinations,
-        origins,
-        provenanceTaxonomy,
-        provenanceTaxonomyLabel
-      } = this.tooltipEntry;
-
-      return Boolean(
-        components?.length ||
-        destinations?.length ||
-        origins?.length ||
-        provenanceTaxonomy?.length ||
-        provenanceTaxonomyLabel?.length
-      );
     },
     /**
      * Move the map to the left side
@@ -2259,8 +2331,8 @@ export default {
      moveMap: function (featureIds, options = {}) {
       if (this.mapImp) {
         const { offsetX = 0, offsetY = 0, zoom = 4 } = options;
-        const Map = this.mapImp._map;
-        const bbox = this.mapImp._bounds.toArray();
+        const Map = this.mapImp.map;
+        const bbox = this.mapImp.bounds.toArray();
 
         // Zoom the map to features first
         this.mapImp.zoomToFeatures(featureIds, { noZoomIn: true });
@@ -2385,10 +2457,10 @@ export default {
           state['biologicalSex'] = identifier.biologicalSex
         if (identifier && identifier.uuid) state['uuid'] = identifier.uuid
         state['viewingMode'] = this.viewingMode
-        state['searchTerm'] = this.statesTracking.activeTerm
+        state['searchTerm'] = this.searchTerm
         state['flightPath3D'] = this.flightPath3DRadio
         state['colour'] = this.colourRadio
-        state['outlinesRadio'] = this.outlinesRadio
+        state['outlines'] = this.outlinesRadio
         state['background'] = this.currentBackground
         this.getVisibilityState(state)
         return state
@@ -2433,7 +2505,9 @@ export default {
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
           if (state.viewingMode === "Neuron Connection") {
-            this.highlightConnectedPaths([searchTerm])
+            this.retrieveConnectedPaths([searchTerm]).then((paths) => {
+              this.zoomToFeatures(paths)
+            })
           } else {
             this.searchAndShowResult(searchTerm, true)
           }
@@ -2514,7 +2588,6 @@ export default {
 
         let promise1 = this.mapManagerRef.loadMap(
           identifier,
-          this.$refs.display,
           this.eventCallback(),
           {
             //fullscreenControl: false,
@@ -2523,6 +2596,7 @@ export default {
             minZoom: this.minZoom,
             tooltips: this.tooltips,
             minimap: minimap,
+            container: this.$refs.display,
             // tooltipDelay: 15, // new feature to delay tooltips showing
           }
         )
@@ -2568,9 +2642,6 @@ export default {
         if (this.mapImp) {
           this.mapImp.resize()
           this.showMinimap(this.displayMinimap)
-          if (this.mapImp._minimap) {
-            this.mapImp._minimap._miniMap.resize()
-          }
         }
       } catch {
         console.error('Map resize error')
@@ -2586,7 +2657,6 @@ export default {
       if (this.mapImp.options?.style === 'functional') {
         this.isFC = true
       }
-      console.log(this.mapImp)
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
@@ -2600,36 +2670,12 @@ export default {
       this.loading = false
       this.computePathControlsMaximumHeight()
       this.mapResize()
-      this.handleMapClick();
       this.setInitMapState();
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
        */
       this.$emit('ready', this)
-    },
-    /**
-     * @public
-     * Function to handle mouse click on map area
-     * after the map is loaded.
-     */
-    handleMapClick: function () {
-      const _map = this.mapImp._map;
-      if (_map) {
-        _map.on('click', (e) => {
-          //A little logic to make sure we are keeping track
-          //of selected term
-          if (this.statesTracking.activeClick) {
-            this.statesTracking.activeClick = false
-          } else {
-            this.statesTracking.activeTerm = ""
-          }
-          if (!this.connectivityDataSource) {
-            this.$emit('connectivity-info-close');
-          }
-          this.connectivityDataSource = ''; // reset
-        });
-      }
     },
     /**
      * @public
@@ -2665,12 +2711,11 @@ export default {
           } else if (this.viewingMode === "Annotation") {
             this.manualAbortedOnClose()
           }
-          this.statesTracking.activeTerm = ""
+          this.searchTerm = ""
           return true
         } else {
           const searchResults = this.mapImp.search(term)
           if (searchResults?.results?.length) {
-            this.statesTracking.activeTerm = term
             this.mapImp.showSearchResults(searchResults)
             if (displayInfo) {
               let featureId = undefined;
@@ -2688,11 +2733,12 @@ export default {
                   provenanceTaxonomy: feature.taxons,
                 }
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
-                  this.checkAndCreatePopups(data)
+                  const payload = this.viewingMode === "Exploration" ? [data] : data
+                  this.checkAndCreatePopups(payload)
                 } else if (this.viewingMode === 'Neuron Connection') {
-                  setTimeout(() => {
-                    this.highlightConnectedPaths(data.resource)
-                  }, 1000)
+                  this.retrieveConnectedPaths(data.resource).then((paths) => {
+                    this.zoomToFeatures(paths)
+                  })
                 }
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
                   className: 'custom-popup',
@@ -2701,6 +2747,7 @@ export default {
                 })
               }
             }
+            this.searchTerm = term
             return true
           } else this.mapImp.clearSearchResults()
         }
@@ -2922,7 +2969,6 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       sparcAPI: this.sparcAPI,
-      getFeaturesAlert: () => this.featuresAlert,
       userApiKey: this.userToken,
     }
   },
@@ -2976,11 +3022,10 @@ export default {
       availableBackground: ['white', 'lightskyblue', 'black'],
       loading: false,
       flatmapMarker: flatmapMarker,
-      tooltipEntry: createUnfilledTooltipData(),
+      tooltipEntry: [],
       connectivityDataSource: '',
       connectivityTooltipVisible: false,
       drawerOpen: false,
-      featuresAlert: undefined,
       flightPath3DRadio: false,
       displayFlightPathOption: false,
       colourRadio: true,
@@ -3038,10 +3083,7 @@ export default {
           without: true,
         }
       }),
-      statesTracking: markRaw({
-        activeClick: false,
-        activeTerm: "",
-      }),
+      searchTerm: "",
       taxonLeaveDelay: undefined,
     }
   },
@@ -3175,7 +3217,7 @@ export default {
     if (this.mapManager) {
       this.mapManagerRef = this.mapManager;
     } else {
-      this.mapManagerRef = markRaw(new flatmap.MapManager(this.flatmapAPI));
+      this.mapManagerRef = markRaw(new flatmap.MapViewer(this.flatmapAPI, { container: undefined }));
       /**
        * The event emitted after a new mapManager is loaded.
        * This mapManager can be used to create new flatmaps.

@@ -246,16 +246,16 @@ let FlatmapQueries = function () {
     this.origins = []
     this.components = []
     this.rawURLs = []
-    if (!keastIds || keastIds.length == 0 || !keastIds[0]) return
+    if (!keastIds || keastIds.length === 0 || !keastIds[0]) return
 
-    let prom1 = this.queryForConnectivityNew(mapImp, keastIds, signal) // This on returns a promise so dont need 'await'
+    let prom1 = this.queryForConnectivityNew(mapImp, keastIds[0]) // This on returns a promise so dont need 'await'
     let results = await Promise.all([prom1])
     return results
   }
 
-  this.queryForConnectivityNew = function (mapImp, keastIds, signal, processConnectivity=true) {
+  this.queryForConnectivityNew = function (mapImp, keastId, processConnectivity = true) {
     return new Promise((resolve) => {
-      mapImp.queryKnowledge(keastIds[0])
+      mapImp.queryKnowledge(keastId)
         .then((response) => {
           if (this.checkConnectivityExists(response)) {
             let connectivity = response;
@@ -265,11 +265,8 @@ let FlatmapQueries = function () {
                 if (response.references) {
                   // with publications from both PubMed and Others
                   this.rawURLs = [...response.references];
-                  resolve(processedConnectivity)
-                } else {
-                  // without publications
-                  resolve(processedConnectivity)
                 }
+                resolve(processedConnectivity)
               })
             }
             else resolve(connectivity)
@@ -283,7 +280,7 @@ let FlatmapQueries = function () {
           } else {
             // console.error('Error:', error)
             // TODO: to update after queryKnowledge method update
-            console.warn(`Unable to get the knowledge for the entity ${keastIds[0]}.`)
+            console.warn(`Unable to get the knowledge for the entity ${keastId}.`)
           }
           resolve(false)
         })
