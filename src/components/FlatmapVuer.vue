@@ -1884,6 +1884,15 @@ export default {
         }
       });
     },
+    changeConnectivitySource: function (payload) {
+      const { connectivityInfo, connectivitySource } = payload;
+      const { featureId } = connectivityInfo;
+      const newwPromise = this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId, null, connectivitySource);
+      Promise.resolve(newwPromise).then((result) => {
+        this.tooltipEntry = this.flatmapQueries.updateTooltipData(this.tooltipEntry);
+        this.$emit('connectivity-info-open', this.tooltipEntry);
+      })
+    },
     /**
      * @public
      * Function to create/display tooltips from the provided ``data``.
