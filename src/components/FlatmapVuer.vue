@@ -1280,7 +1280,7 @@ export default {
         if (nodeFeatureIds.length) {
           if (!connectedTarget.length) {
             const connectedType = options.type?.length ? options.type : ["all"];
-            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload);
+            const connectivity = await this.flatmapQueries.queryForConnectivityNew(this.mapImp, payload[0]);
             const originsFlat = connectivity?.ids?.dendrites.flat(Infinity);
             const componentsFlat = connectivity?.ids?.components.flat(Infinity);
             const destinationsFlat = connectivity?.ids?.axons.flat(Infinity);
