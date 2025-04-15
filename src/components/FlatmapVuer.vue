@@ -1966,12 +1966,26 @@ export default {
         tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
       } else {
         let featureIds = []
+        let components = []
+        let componentsWithDatasets = []
         let destinations = []
         let destinationsWithDatasets = []
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
         if (pathsOfEntities.length) {
           pathsOfEntities.forEach((path) => {
             featureIds.push(...this.mapImp.pathModelNodes(path))
+            const searchResults = this.mapImp.search(path)
+            let featureId = undefined;
+            for (let i = 0; i < searchResults.results.length; i++) {
+              featureId = searchResults.results[i].featureId
+              const annotation = this.mapImp.annotation(featureId)
+              if (featureId && annotation?.label) break;
+            }
+            if (featureId) {
+              const feature = this.mapImp.featureProperties(featureId)
+              components.push(feature.label)
+              componentsWithDatasets.push({ id: feature.models, name: feature.label })
+            }
           })
           featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
           featureIds.forEach((id) => {
@@ -1985,8 +1999,8 @@ export default {
             ...tooltip,
             origins: [data.label],
             originsWithDatasets: [{ id: data.resource[0], name: data.label }],
-            components: [],
-            componentsWithDatasets: [],
+            components: components,
+            componentsWithDatasets: componentsWithDatasets,
             destinations: destinations,
             destinationsWithDatasets: destinationsWithDatasets,
           }
