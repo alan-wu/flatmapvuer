@@ -1885,8 +1885,7 @@ export default {
       });
     },
     changeConnectivitySource: function (payload) {
-      const { connectivityInfo, connectivitySource } = payload;
-      const { featureId } = connectivityInfo;
+      const { featureId, connectivitySource } = payload;
       const newwPromise = this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId, null, connectivitySource);
       Promise.resolve(newwPromise).then((result) => {
         this.tooltipEntry = this.flatmapQueries.updateTooltipData(this.tooltipEntry);
