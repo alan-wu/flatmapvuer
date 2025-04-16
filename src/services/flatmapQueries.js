@@ -125,6 +125,18 @@ let FlatmapQueries = function () {
     return tooltipData
   }
 
+  this.updateTooltipData = function (tooltipEntry) {
+    return {
+      ...tooltipEntry,
+      origins: this.origins,
+      originsWithDatasets: this.originsWithDatasets,
+      components: this.components,
+      componentsWithDatasets: this.componentsWithDatasets,
+      destinations: this.destinations,
+      destinationsWithDatasets: this.destinationsWithDatasets,
+    };
+  }
+
   this.createComponentsLabelList = function (components, lookUp) {
     let labelList = []
     components.forEach((n) => {
@@ -193,7 +205,7 @@ let FlatmapQueries = function () {
     return [...new Set(found.flat())]
   }
 
-  this.flattenConntectivity = function (connectivity) {
+  this.flattenConnectivity = function (connectivity) {
     let dnodes = connectivity.flat() // get nodes from edgelist
     let nodes = [...new Set(dnodes)] // remove duplicates
     let found = []
@@ -207,7 +219,7 @@ let FlatmapQueries = function () {
     return found.flat()
   }
 
-  this.findComponents = function (connectivity) {
+  this.findComponents = function (connectivity, axons, dendrites, somas) {
     let dnodes = connectivity.connectivity.flat() // get nodes from edgelist
     let nodes = removeDuplicates(dnodes)
 
@@ -216,13 +228,13 @@ let FlatmapQueries = function () {
     nodes.forEach((node) => {
       terminal = false
       // Check if the node is an destination or origin (note that they are labelled dendrite and axon as opposed to origin and destination)
-      if (inArray(connectivity.axons, node)) {
+      if (inArray(axons, node)) {
         terminal = true
       }
-      if (connectivity.somas && inArray(connectivity.somas, node)) {
+      if (somas && inArray(somas, node)) {
         terminal = true
       }
-      if (inArray(connectivity.dendrites, node)) {
+      if (inArray(dendrites, node)) {
         terminal = true
       }
       if (!terminal) {
@@ -248,14 +260,21 @@ let FlatmapQueries = function () {
     this.rawURLs = []
     if (!keastIds || keastIds.length === 0 || !keastIds[0]) return
 
-    let prom1 = this.queryForConnectivityNew(mapImp, keastIds[0]) // This on returns a promise so dont need 'await'
+    // set connectivity source if available
+    const connectivitySource = localStorage.getItem('connectivity-source');
+
+    let prom1 = this.queryForConnectivityNew(mapImp, keastIds[0], connectivitySource) // This on returns a promise so dont need 'await'
     let results = await Promise.all([prom1])
     return results
   }
 
-  this.queryForConnectivityNew = function (mapImp, keastId, processConnectivity = true) {
+  this.queryForConnectivityNew = function (mapImp, keastId, connectivitySource, processConnectivity = true) {
     return new Promise((resolve) => {
-      mapImp.queryKnowledge(keastId)
+      const queryAPI = connectivitySource === 'map'
+        ? this.queryMapConnectivity(mapImp.provenance.uuid, keastId)
+        : mapImp.queryKnowledge(keastId);
+
+      queryAPI
         .then((response) => {
           if (this.checkConnectivityExists(response)) {
             let connectivity = response;
@@ -286,6 +305,21 @@ let FlatmapQueries = function () {
         })
     })
   }
+
+  this.queryMapConnectivity = async function (mapuuid, pathId) {
+    const url = this.flatmapApi + `flatmap/${mapuuid}/connectivity/${pathId}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
 
   this.queryForConnectivity = function (mapImp, keastIds, signal, processConnectivity=true) {
     const data = { sql: this.buildConnectivitySqlStatement(keastIds) }
@@ -380,84 +414,82 @@ let FlatmapQueries = function () {
     return label
   }
 
-  this.flattenAndFindDatasets = function (components, axons, dendrites) {
+  this.flattenAndFindDatasets = function (dendrites, components, axons) {
     // process the nodes for finding datasets (Note this is not critical to the tooltip, only for the 'search on components' button)
-    let componentsFlat = this.flattenConntectivity(components)
-    let axonsFlat = this.flattenConntectivity(axons)
-    let dendritesFlat = this.flattenConntectivity(dendrites)
+    let dendritesFlat = this.flattenConnectivity(dendrites)
+    let componentsFlat = this.flattenConnectivity(components)
+    let axonsFlat = this.flattenConnectivity(axons)
 
     // Filter for the anatomy which is annotated on datasets
-    this.destinationsWithDatasets = this.uberons.filter(
-      (ub) => axonsFlat.indexOf(ub.id) !== -1
-    )
     this.originsWithDatasets = this.uberons.filter(
       (ub) => dendritesFlat.indexOf(ub.id) !== -1
     )
     this.componentsWithDatasets = this.uberons.filter(
       (ub) => componentsFlat.indexOf(ub.id) !== -1
     )
+    this.destinationsWithDatasets = this.uberons.filter(
+      (ub) => axonsFlat.indexOf(ub.id) !== -1
+    )
   }
 
   this.processConnectivity = function (mapImp, connectivity) {
     return new Promise((resolve) => {
-      // Filter the origin and destinations from components
-      let components = this.findComponents(connectivity)
-
-      // Remove duplicates
-      let axons = removeDuplicates(connectivity.axons)
-      //Somas will become part of origins, support this for future proof
       let dendrites = []
-      if (connectivity.somas && connectivity.somas.length > 0) {
-        dendrites.push(...connectivity.somas)
+      let axons = []
+      let somas = undefined
+      if (connectivity && connectivity["node-phenotypes"]) {
+        const sourceKey = ["ilxtr:hasSomaLocatedIn"]
+        const destinationKey = ["ilxtr:hasAxonPresynapticElementIn", "ilxtr:hasAxonSensorySubcellularElementIn"]
+        sourceKey.forEach((key)=>{
+          dendrites.push(...connectivity["node-phenotypes"][key])
+        })
+        dendrites = removeDuplicates(dendrites)
+        destinationKey.forEach((key)=>{
+          axons.push(...connectivity["node-phenotypes"][key])
+        })
+        axons = removeDuplicates(axons)
+      } else {
+        // Remove duplicates
+        axons = removeDuplicates(connectivity.axons)
+        //Somas will become part of origins, support this for future proof
+        if (connectivity.somas && connectivity.somas.length > 0) {
+          dendrites.push(...connectivity.somas)
+        }
+        if (connectivity.dendrites && connectivity.dendrites.length > 0) {
+          dendrites.push(...connectivity.dendrites)
+        }
+        somas = connectivity.somas
       }
-      if (connectivity.dendrites && connectivity.dendrites.length > 0) {
-        dendrites.push(...connectivity.dendrites)
-      }
-      dendrites = removeDuplicates(dendrites)
 
+      const components = this.findComponents(connectivity, axons, dendrites, somas)
       // Create list of ids to get labels for
-      let conIds = this.findAllIdsFromConnectivity(connectivity)
-
+      const conIds = this.findAllIdsFromConnectivity(connectivity)
       // Create readable labels from the nodes. Setting this to 'this.origins' updates the display
       this.createLabelLookup(mapImp, conIds).then((lookUp) => {
-        this.destinations = axons.map((a) =>
-          this.createLabelFromNeuralNode(a, lookUp)
-        )
         this.origins = dendrites.map((d) =>
           this.createLabelFromNeuralNode(d, lookUp)
         )
         this.components = components.map((c) =>
           this.createLabelFromNeuralNode(c, lookUp)
         )
-        this.flattenAndFindDatasets(components, axons, dendrites)
+        this.destinations = axons.map((a) =>
+          this.createLabelFromNeuralNode(a, lookUp)
+        )
+        this.flattenAndFindDatasets(dendrites, components, axons)
         resolve({
           ids: {
-            axons: axons,
             dendrites: dendrites,
             components: components,
+            axons: axons,
           },
           labels: {
-            destinations: this.destinations,
             origins: this.origins,
             components: this.components,
+            destinations: this.destinations,
           }
         })
       })
     })
-  }
-
-  this.flattenConntectivity = function (connectivity) {
-    let dnodes = connectivity.flat() // get nodes from edgelist
-    let nodes = [...new Set(dnodes)] // remove duplicates
-    let found = []
-    nodes.forEach((n) => {
-      if (Array.isArray(n)) {
-        found.push(n.flat())
-      } else {
-        found.push(n)
-      }
-    })
-    return found.flat()
   }
 
   this.buildPubmedSqlStatement = function (keastIds) {

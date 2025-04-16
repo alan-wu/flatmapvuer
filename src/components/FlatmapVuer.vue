@@ -589,6 +589,7 @@ Please use `const` to assign meaningful names to them...
         :tooltipEntry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
+        @onActionClick="onActionClick"
       />
     </div>
   </div>
@@ -638,6 +639,7 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import EventBus from './EventBus.js'
 
 const ERROR_MESSAGE = 'cannot be found on the map.';
 
@@ -1898,6 +1900,14 @@ export default {
         }
       });
     },
+    changeConnectivitySource: function (payload) {
+      const { featureId, connectivitySource } = payload;
+      const newwPromise = this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId, null, connectivitySource);
+      Promise.resolve(newwPromise).then((result) => {
+        this.tooltipEntry = this.flatmapQueries.updateTooltipData(this.tooltipEntry);
+        this.$emit('connectivity-info-open', this.tooltipEntry);
+      })
+    },
     /**
      * @public
      * Function to create/display tooltips from the provided ``data``.
@@ -1964,6 +1974,9 @@ export default {
       if ((results && results[0]) || (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)) {
         tooltip['featuresAlert'] = data.alert;
         tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
+        // Map id and uuid to load connectivity information from the map
+        tooltip['mapId'] = this.mapImp.provenance.id;
+        tooltip['mapuuid'] = this.mapImp.provenance.uuid;
       } else {
         tooltip = {
           ...tooltip,
@@ -2761,6 +2774,9 @@ export default {
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
       return []
+    },
+    onActionClick: function (data) {
+      EventBus.emit('onActionClick', data)
     },
   },
   props: {
