@@ -1900,13 +1900,16 @@ export default {
         }
       });
     },
-    changeConnectivitySource: function (payload) {
+    changeConnectivitySource: async function (payload) {
       const { featureId, connectivitySource } = payload;
-      const newwPromise = this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId, null, connectivitySource);
-      Promise.resolve(newwPromise).then((result) => {
-        this.tooltipEntry = this.flatmapQueries.updateTooltipData(this.tooltipEntry);
-        this.$emit('connectivity-info-open', this.tooltipEntry);
+      await this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId[0], connectivitySource);
+      this.tooltipEntry = this.tooltipEntry.map((tooltip) => {
+        if (tooltip.featureId[0] === featureId[0]) {
+          return this.flatmapQueries.updateTooltipData(tooltip);
+        }
+        return tooltip;
       })
+      this.$emit('connectivity-info-open', this.tooltipEntry);
     },
     /**
      * @public
