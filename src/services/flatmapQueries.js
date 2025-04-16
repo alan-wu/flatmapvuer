@@ -85,6 +85,7 @@ let FlatmapQueries = function () {
     this.controller = undefined
     this.uberons = []
     this.lookUp = []
+    this.connectivitySource = 'sckan'
   }
 
   this.createTooltipData = async function (mapImp, eventData) {
@@ -121,6 +122,7 @@ let FlatmapQueries = function () {
       hyperlinks: hyperlinks,
       provenanceTaxonomy: eventData.provenanceTaxonomy,
       provenanceTaxonomyLabel: taxonomyLabel,
+      connectivitySource: this.connectivitySource
     }
     return tooltipData
   }
@@ -134,6 +136,7 @@ let FlatmapQueries = function () {
       componentsWithDatasets: this.componentsWithDatasets,
       destinations: this.destinations,
       destinationsWithDatasets: this.destinationsWithDatasets,
+      connectivitySource: this.connectivitySource
     };
   }
 
@@ -260,15 +263,13 @@ let FlatmapQueries = function () {
     this.rawURLs = []
     if (!keastIds || keastIds.length === 0 || !keastIds[0]) return
 
-    // set connectivity source if available
-    const connectivitySource = localStorage.getItem('connectivity-source');
-
-    let prom1 = this.queryForConnectivityNew(mapImp, keastIds[0], connectivitySource) // This on returns a promise so dont need 'await'
+    let prom1 = this.queryForConnectivityNew(mapImp, keastIds[0]) // This on returns a promise so dont need 'await'
     let results = await Promise.all([prom1])
     return results
   }
 
-  this.queryForConnectivityNew = function (mapImp, keastId, connectivitySource, processConnectivity = true) {
+  this.queryForConnectivityNew = function (mapImp, keastId, connectivitySource = 'sckan', processConnectivity = true) {
+    this.connectivitySource = connectivitySource
     return new Promise((resolve) => {
       const queryAPI = connectivitySource === 'map'
         ? this.queryMapConnectivity(mapImp.provenance.uuid, keastId)
