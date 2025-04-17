@@ -589,6 +589,7 @@ Please use `const` to assign meaningful names to them...
         :tooltipEntry="tooltipEntry"
         :annotationDisplay="viewingMode === 'Annotation'"
         @annotation="commitAnnotationEvent"
+        @onActionClick="onActionClick"
       />
     </div>
   </div>
@@ -638,6 +639,7 @@ import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import EventBus from './EventBus.js'
 
 const ERROR_MESSAGE = 'cannot be found on the map.';
 
@@ -1898,6 +1900,25 @@ export default {
         }
       });
     },
+    checkConnectivityTooltipEntry: function(tooltipEntry) {
+      if (tooltipEntry?.length) {
+        return undefined !== (tooltipEntry.find(entry => entry?.destinations?.length || entry?.components?.length))
+      }
+      return false
+    },
+    changeConnectivitySource: async function (payload) {
+      const { featureId, connectivitySource } = payload;
+      await this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId[0], connectivitySource);
+      this.tooltipEntry = this.tooltipEntry.map((tooltip) => {
+        if (tooltip.featureId[0] === featureId[0]) {
+          return this.flatmapQueries.updateTooltipData(tooltip);
+        }
+        return tooltip;
+      })
+      if (this.checkConnectivityTooltipEntry()) {
+        this.$emit('connectivity-info-open', this.tooltipEntry);
+      }
+    },
     /**
      * @public
      * Function to create/display tooltips from the provided ``data``.
@@ -1964,12 +1985,20 @@ export default {
       if ((results && results[0]) || (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)) {
         tooltip['featuresAlert'] = data.alert;
         tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
+        // Map id and uuid to load connectivity information from the map
+        tooltip['mapId'] = this.mapImp.provenance.id;
+        tooltip['mapuuid'] = this.mapImp.provenance.uuid;
       } else {
+        tooltip = {
+          ...tooltip,
+          origins: [data.label],
+          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
+          components: [],
+          componentsWithDatasets: [],
+          destinations: [],
+          destinationsWithDatasets: [],
+        }
         let featureIds = []
-        let components = []
-        let componentsWithDatasets = []
-        let destinations = []
-        let destinationsWithDatasets = []
         const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
         if (pathsOfEntities.length) {
           pathsOfEntities.forEach((path) => {
@@ -1983,27 +2012,20 @@ export default {
             }
             if (featureId) {
               const feature = this.mapImp.featureProperties(featureId)
-              components.push(feature.label)
-              componentsWithDatasets.push({ id: feature.models, name: feature.label })
+              if (!tooltip.components.includes(feature.label)) {
+                tooltip.components.push(feature.label)
+                tooltip.componentsWithDatasets.push({ id: feature.models, name: feature.label })
+              }
             }
           })
           featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
           featureIds.forEach((id) => {
             const feature = this.mapImp.featureProperties(id)
-            if (!destinations.includes(feature.label)) {
-              destinations.push(feature.label)
-              destinationsWithDatasets.push({ id: feature.models, name: feature.label })
+            if (!tooltip.destinations.includes(feature.label)) {
+              tooltip.destinations.push(feature.label)
+              tooltip.destinationsWithDatasets.push({ id: feature.models, name: feature.label })
             }
           })
-          tooltip = {
-            ...tooltip,
-            origins: [data.label],
-            originsWithDatasets: [{ id: data.resource[0], name: data.label }],
-            components: components,
-            componentsWithDatasets: componentsWithDatasets,
-            destinations: destinations,
-            destinationsWithDatasets: destinationsWithDatasets,
-          }
         }
       }
       return tooltip;
@@ -2299,7 +2321,9 @@ export default {
         (this.connectivityInfoSidebar && this.tooltipEntry.length) &&
         this.viewingMode !== 'Annotation'
       ) {
-        this.$emit('connectivity-info-open', this.tooltipEntry);
+        if (this.checkConnectivityTooltipEntry(this.tooltipEntry)) {
+          this.$emit('connectivity-info-open', this.tooltipEntry);
+        }
       }
       if (this.annotationSidebar && this.viewingMode === 'Annotation') {
         this.$emit('annotation-open', {annotationEntry: this.annotationEntry, commitCallback: this.commitAnnotationEvent});
@@ -2763,6 +2787,9 @@ export default {
     searchSuggestions: function (term) {
       if (this.mapImp) return this.mapImp.search(term)
       return []
+    },
+    onActionClick: function (data) {
+      EventBus.emit('onActionClick', data)
     },
   },
   props: {

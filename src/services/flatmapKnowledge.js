@@ -42,18 +42,20 @@ function getKnowledgeSource(mapImp) {
 async function loadAndStoreKnowledge(mapImp, flatmapQueries) {
   const knowledgeSource = getKnowledgeSource(mapImp);
   const sql = `select knowledge from knowledge
-  where source="${knowledgeSource}"
-  order by source desc`;
+    where source="${knowledgeSource}"
+    order by source desc`;
 
   refreshFlatmapKnowledgeCache()
   const flatmapKnowledge = sessionStorage.getItem('flatmap-knowledge');
+  const flatmapKnowledgeSource = sessionStorage.getItem('flatmap-knowledge-source');
 
-  if (!flatmapKnowledge) {
+  if (!flatmapKnowledge || flatmapKnowledgeSource !== knowledgeSource) {
     const response = await flatmapQueries.flatmapQuery(sql);
     const mappedData = response.values.map(x => x[0]);
     const parsedData = mappedData.map(x => JSON.parse(x));
 
     sessionStorage.setItem('flatmap-knowledge', JSON.stringify(parsedData));
+    sessionStorage.setItem('flatmap-knowledge-source', knowledgeSource);
     updateFlatmapKnowledgeCache();
 
     return parsedData;
@@ -73,6 +75,7 @@ function removeFlatmapKnowledgeCache() {
   const keys = [
     'flatmap-knowledge',
     'flatmap-knowledge-expiry',
+    'flatmap-knowledge-source',
   ];
 
   keys.forEach((key) => {
