@@ -791,7 +791,7 @@ export default {
             )
             payload.feature.feature = drawnFeature
           }
-          this.checkAndCreatePopups(payload)
+          this.checkAndCreatePopups([payload])
         } else {
           this.closeTooltip()
         }
@@ -803,7 +803,7 @@ export default {
      */
     confirmDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
-        this.checkAndCreatePopups(this.drawnCreatedEvent)
+        this.checkAndCreatePopups([this.drawnCreatedEvent])
         // Add connection if exist to annotationEntry
         // Connection will only be added in creating new drawn feature annotation
         // And will not be updated if move drawn features
@@ -1605,7 +1605,7 @@ export default {
         // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
         // Hence disable direct popup when 'created' event, dialog will be used instead.
         if (data.type === 'created') this.drawnCreatedEvent = payload
-        else this.checkAndCreatePopups(payload)
+        else this.checkAndCreatePopups([payload])
       }
       if (data.type === 'updated') this.previousEditEvent = data
       if (data.type === 'deleted') this.previousDeletedEvent = data
@@ -1920,7 +1920,8 @@ export default {
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
-        if (data.feature) {
+        const tempEntry = data[0]
+        if (tempEntry.feature) {
           if (this.annotationSidebar && this.previousDeletedEvent.type === 'deleted') {
             this.annotationEntry = {
               ...this.previousDeletedEvent,
@@ -1929,22 +1930,22 @@ export default {
             this.annotationEventCallback({}, { type: 'aborted' })
           }
           this.annotationEntry = {
-            ...data.feature,
+            ...tempEntry.feature,
             resourceId: this.serverURL,
           }
-          if (data.feature.featureId && data.feature.models) {
-            this.displayTooltip(data.feature.models)
-          } else if (data.feature.feature) {
+          if (tempEntry.feature.featureId && tempEntry.feature.models) {
+            this.displayTooltip(tempEntry.feature.models)
+          } else if (tempEntry.feature.feature) {
             // in drawing or edit/delete mode is on or valid drawn
             if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
               this.featureAnnotationSubmitted = false
-              this.annotationEntry.featureId = data.feature.feature.id
+              this.annotationEntry.featureId = tempEntry.feature.feature.id
               if (this.activeDrawTool) {
                 this.createConnectivityBody()
               }
               this.displayTooltip(
-                data.feature.feature.id,
-                centroid(data.feature.feature.geometry)
+                tempEntry.feature.feature.id,
+                centroid(tempEntry.feature.feature.geometry)
               )
             } else {
               this.rollbackAnnotationEvent()
@@ -2747,8 +2748,7 @@ export default {
                   provenanceTaxonomy: feature.taxons,
                 }
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
-                  const payload = this.viewingMode === "Exploration" ? [data] : data
-                  this.checkAndCreatePopups(payload)
+                  this.checkAndCreatePopups([data])
                 } else if (this.viewingMode === 'Neuron Connection') {
                   this.retrieveConnectedPaths(data.resource).then((paths) => {
                     this.zoomToFeatures(paths)
