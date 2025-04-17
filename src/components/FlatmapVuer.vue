@@ -1900,6 +1900,12 @@ export default {
         }
       });
     },
+    checkConnectivityTooltipEntry: function(tooltipEntry) {
+      if (tooltipEntry?.length) {
+        return undefined !== (tooltipEntry.find(entry => entry?.destinations?.length || entry?.components?.length))
+      }
+      return false
+    },
     changeConnectivitySource: async function (payload) {
       const { featureId, connectivitySource } = payload;
       await this.flatmapQueries.queryForConnectivityNew(this.mapImp, featureId[0], connectivitySource);
@@ -1909,7 +1915,9 @@ export default {
         }
         return tooltip;
       })
-      this.$emit('connectivity-info-open', this.tooltipEntry);
+      if (this.checkConnectivityTooltipEntry()) {
+        this.$emit('connectivity-info-open', this.tooltipEntry);
+      }
     },
     /**
      * @public
@@ -2314,7 +2322,9 @@ export default {
         (this.connectivityInfoSidebar && this.tooltipEntry.length) &&
         this.viewingMode !== 'Annotation'
       ) {
-        this.$emit('connectivity-info-open', this.tooltipEntry);
+        if (this.checkConnectivityTooltipEntry(this.tooltipEntry)) {
+          this.$emit('connectivity-info-open', this.tooltipEntry);
+        }
       }
       if (this.annotationSidebar && this.viewingMode === 'Annotation') {
         this.$emit('annotation-open', {annotationEntry: this.annotationEntry, commitCallback: this.commitAnnotationEvent});
