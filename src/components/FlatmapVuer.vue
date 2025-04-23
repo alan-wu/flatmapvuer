@@ -1657,33 +1657,37 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
-              if (Array.isArray(data)) {
+              if (!Object.keys(data).includes('id')) {
                 payload = []
-                data.forEach((d) => {
-                  const label = d.label
-                  const resource = [d.models]
-                  let taxons = undefined
-                  if (d.taxons) {
-                    // check if data.taxons is string or array
-                    if (typeof d.taxons !== 'object') {
-                      taxons = JSON.parse(d.taxons)
-                    } else {
-                      taxons = d.taxons
+                const mapuuid = data.mapUUID
+                for (let [key, value] of Object.entries(data)) {
+                  if (key !== 'mapUUID') {
+                    const label = value.label
+                    const resource = [value.models]
+                    let taxons = undefined
+                    if (value.taxons) {
+                      // check if data.taxons is string or array
+                      if (typeof value.taxons !== 'object') {
+                        taxons = JSON.parse(value.taxons)
+                      } else {
+                        taxons = value.taxons
+                      }
                     }
+                    payload.push({
+                      dataset: value.dataset,
+                      biologicalSex: biologicalSex,
+                      taxonomy: taxonomy,
+                      resource: resource,
+                      label: label,
+                      feature: value,
+                      userData: args,
+                      eventType: eventType,
+                      provenanceTaxonomy: taxons,
+                      alert: value.alert,
+                      mapUUID: mapuuid
+                    })
                   }
-                  payload.push({
-                    dataset: d.dataset,
-                    biologicalSex: biologicalSex,
-                    taxonomy: taxonomy,
-                    resource: resource,
-                    label: label,
-                    feature: d,
-                    userData: args,
-                    eventType: eventType,
-                    provenanceTaxonomy: taxons,
-                    alert: d.alert
-                  })
-                })
+                }
               }
               if (this.viewingMode === 'Neuron Connection') {
                 this.retrieveConnectedPaths([data.models]).then((paths) => {
