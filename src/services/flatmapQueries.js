@@ -119,12 +119,16 @@ let FlatmapQueries = function () {
     let taxonomyLabel = undefined
     if (eventData.provenanceTaxonomy) {
       taxonomyLabel = []
-      const entityLabels = await findTaxonomyLabels(mapImp, eventData.provenanceTaxonomy);
-      if (entityLabels.length) {
-        entityLabels.forEach((entityLabel) => {
-          const { label } = entityLabel;
-          taxonomyLabel.push(label);
-        });
+      try {
+        const entityLabels = await findTaxonomyLabels(mapImp, eventData.provenanceTaxonomy);
+        if (entityLabels.length) {
+          entityLabels.forEach((entityLabel) => {
+            const { label } = entityLabel;
+            taxonomyLabel.push(label);
+          });
+        }
+      } catch (error) {
+        console.log(error)
       }
     }
 
