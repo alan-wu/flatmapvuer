@@ -762,10 +762,10 @@ export default {
       if (this.isValidDrawnCreated) {
         if (this.annotationSidebar) this.$emit("annotation-close")
         this.closeTooltip()
-        this.annotationEntry = {
+        this.annotationEntry = [{
           ...this.drawnCreatedEvent.feature,
           resourceId: this.serverURL,
-        }
+        }]
         this.rollbackAnnotationEvent()
         this.initialiseDrawing()
       }
@@ -789,7 +789,7 @@ export default {
             )
             payload.feature.feature = drawnFeature
           }
-          this.checkAndCreatePopups(payload)
+          this.checkAndCreatePopups([payload])
         } else {
           this.closeTooltip()
         }
@@ -801,12 +801,12 @@ export default {
      */
     confirmDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
-        this.checkAndCreatePopups(this.drawnCreatedEvent)
+        this.checkAndCreatePopups([this.drawnCreatedEvent])
         // Add connection if exist to annotationEntry
         // Connection will only be added in creating new drawn feature annotation
         // And will not be updated if move drawn features
         if (Object.keys(this.connectionEntry).length > 0) {
-          this.annotationEntry.feature.connection = this.connectionEntry
+          this.annotationEntry[0].feature.connection = this.connectionEntry
         }
         this.initialiseDrawing()
       }
@@ -873,7 +873,7 @@ export default {
           target: features[features.length - 1],
           intermediates: features.filter((f, index) => index !== 0 && index !== features.length - 1),
         }
-        this.annotationEntry.body = body
+        this.annotationEntry[0].body = body
       }
     },
     /**
@@ -919,10 +919,11 @@ export default {
       // For 'updated' and 'deleted' callback
       if (
         this.mapImp &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
+        this.annotationEntry.length > 0 &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry[0].type)
       ) {
-        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
-        this.annotationEntry = {}
+        this.mapImp.rollbackAnnotationEvent(this.annotationEntry[0])
+        this.annotationEntry = []
       }
     },
     /**
@@ -933,19 +934,20 @@ export default {
     commitAnnotationEvent: function (annotation) {
       if (
         this.mapImp &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type) &&
+        this.annotationEntry.length > 0 &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry[0].type) &&
         // Only when annotation comments stored successfully
         annotation
       ) {
         this.featureAnnotationSubmitted = true
-        this.mapImp.commitAnnotationEvent(this.annotationEntry)
+        this.mapImp.commitAnnotationEvent(this.annotationEntry[0])
         if (annotation.body.comment === "Position Updated") {
-          this.annotationEntry.positionUpdated = false
-        } else if (this.annotationEntry.type === 'deleted') {
+          this.annotationEntry[0].positionUpdated = false
+        } else if (this.annotationEntry[0].type === 'deleted') {
           if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           // Only delete need, keep the annotation tooltip/sidebar open if created/updated
-          this.annotationEntry = {}
+          this.annotationEntry = []
         }
         this.addAnnotationFeature()
       }
@@ -1538,7 +1540,7 @@ export default {
         // Rollback drawing when no new annotation submitted
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
-        this.annotationEntry = {}
+        this.annotationEntry = []
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
         if (this.annotationSidebar && data.feature.mode === 'simple_select' && this.activeDrawMode === 'Deleted') {
@@ -1561,10 +1563,10 @@ export default {
             this.annotationDrawModeEvent(payload)
           } else {
             if (this.annotationSidebar && this.previousEditEvent.type === 'updated') {
-              this.annotationEntry = {
+              this.annotationEntry = [{
                 ...this.previousEditEvent,
                 resourceId: this.serverURL
-              }
+              }]
               this.annotationEventCallback({}, { type: 'aborted' })
             }
             this.previousEditEvent = {}
@@ -1583,7 +1585,7 @@ export default {
         // Once double click mouse to confirm drawing, 'aborted' event will be triggered.
         // Hence disable direct popup when 'created' event, dialog will be used instead.
         if (data.type === 'created') this.drawnCreatedEvent = payload
-        else this.checkAndCreatePopups(payload)
+        else this.checkAndCreatePopups([payload])
       }
       if (data.type === 'updated') this.previousEditEvent = data
       if (data.type === 'deleted') this.previousDeletedEvent = data
@@ -1908,34 +1910,43 @@ export default {
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
-        if (data.feature) {
+        const features = data.filter(d => d.feature).map(d => d.feature)
+        if (features.length > 0) {
           if (this.annotationSidebar && this.previousDeletedEvent.type === 'deleted') {
-            this.annotationEntry = {
+            this.annotationEntry = [{
               ...this.previousDeletedEvent,
               resourceId: this.serverURL
-            }
+            }]
             this.annotationEventCallback({}, { type: 'aborted' })
           }
-          this.annotationEntry = {
-            ...data.feature,
-            resourceId: this.serverURL,
-          }
-          if (data.feature.featureId && data.feature.models) {
-            this.displayTooltip(data.feature.models)
-          } else if (data.feature.feature) {
+          this.annotationEntry = []
+          features.forEach(feature => {
+            this.annotationEntry.push({
+              ...feature,
+              resourceId: this.serverURL,
+              featureId: feature.featureId ? feature.featureId : feature.feature.id
+            })
+          });
+          if (features[0].feature) {
             // in drawing or edit/delete mode is on or valid drawn
             if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
               this.featureAnnotationSubmitted = false
-              this.annotationEntry.featureId = data.feature.feature.id
               if (this.activeDrawTool) {
                 this.createConnectivityBody()
               }
               this.displayTooltip(
-                data.feature.feature.id,
-                centroid(data.feature.feature.geometry)
+                features[0].feature.id,
+                centroid(features[0].feature.geometry)
               )
             } else {
               this.rollbackAnnotationEvent()
+            }
+          } else {
+            const featureIds = this.annotationEntry
+              .filter(annotation => annotation.featureId && annotation.models)
+              .map(annotation => annotation.models)
+            if (featureIds.length > 0) {
+              this.displayTooltip(featureIds)
             }
           }
         } else {
@@ -2681,8 +2692,7 @@ export default {
                   provenanceTaxonomy: feature.taxons,
                 }
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
-                  const payload = this.viewingMode === "Exploration" ? [data] : data
-                  this.checkAndCreatePopups(payload)
+                  this.checkAndCreatePopups([data])
                 } else if (this.viewingMode === 'Neuron Connection') {
                   setTimeout(() => {
                     this.highlightConnectedPaths(data.resource)
@@ -2924,7 +2934,7 @@ export default {
       sensor: null,
       mapManagerRef: undefined,
       flatmapQueries: undefined,
-      annotationEntry: {},
+      annotationEntry: [],
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
