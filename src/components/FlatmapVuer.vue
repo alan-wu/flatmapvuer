@@ -1657,7 +1657,8 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
-              if (!Object.keys(data).includes('id')) {
+              const singleSelection = Object.keys(data).includes('id')
+              if (!singleSelection) {
                 payload = []
                 const mapuuid = data.mapUUID
                 for (let [key, value] of Object.entries(data)) {
@@ -1689,26 +1690,28 @@ export default {
                   }
                 }
               }
+              const clickedItem = singleSelection ? data : data[0]
               if (this.viewingMode === 'Neuron Connection') {
-                this.retrieveConnectedPaths([data.models]).then((paths) => {
+                this.retrieveConnectedPaths([clickedItem.models]).then((paths) => {
                   this.zoomToFeatures(paths)
                 })
               } else {
-                this.currentActive = data.models ? data.models : ''
-                // Drawing connectivity between features
+                this.currentActive = clickedItem.models ? clickedItem.models : '' // This is for FC map
+                // This is for annotation mode - draw connectivity between features/paths
                 if (this.activeDrawTool && !this.isValidDrawnCreated) {
                   // Check if flatmap features or existing drawn features
-                  const validDrawnFeature = data.featureId || this.existDrawnFeatures.find(
-                    (feature) => feature.id === data.id
+                  const validDrawnFeature = clickedItem.featureId || this.existDrawnFeatures.find(
+                    (feature) => feature.id === clickedItem.id
                   )
                   // Only the linestring will have connection
                   if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
-                    const key = data.featureId ? data.featureId : data.id
-                    const nodeLabel = data.label ? data.label : `Feature ${data.id}`
+                    const key = clickedItem.featureId ? clickedItem.featureId : clickedItem.id
+                    const nodeLabel = clickedItem.label ? clickedItem.label : `Feature ${clickedItem.id}`
                     // Add space before key to make sure properties follows adding order
-                    this.connectionEntry[` ${key}`] = Object.assign({ label: nodeLabel },
+                    this.connectionEntry[` ${key}`] = Object.assign(
+                      { label: nodeLabel },
                       Object.fromEntries(
-                        Object.entries(data)
+                        Object.entries(clickedItem)
                           .filter(([key]) => ['featureId', 'models'].includes(key))
                           .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
                   }
