@@ -764,10 +764,10 @@ export default {
       if (this.isValidDrawnCreated) {
         if (this.annotationSidebar) this.$emit("annotation-close")
         this.closeTooltip()
-        this.annotationEntry = {
+        this.annotationEntry = [{
           ...this.drawnCreatedEvent.feature,
           resourceId: this.serverURL,
-        }
+        }]
         this.rollbackAnnotationEvent()
         this.initialiseDrawing()
       }
@@ -808,7 +808,7 @@ export default {
         // Connection will only be added in creating new drawn feature annotation
         // And will not be updated if move drawn features
         if (Object.keys(this.connectionEntry).length > 0) {
-          this.annotationEntry.feature.connection = this.connectionEntry
+          this.annotationEntry[0].feature.connection = this.connectionEntry
         }
         this.initialiseDrawing()
       }
@@ -875,7 +875,7 @@ export default {
           target: features[features.length - 1],
           intermediates: features.filter((f, index) => index !== 0 && index !== features.length - 1),
         }
-        this.annotationEntry.body = body
+        this.annotationEntry[0].body = body
       }
     },
     /**
@@ -921,10 +921,11 @@ export default {
       // For 'updated' and 'deleted' callback
       if (
         this.mapImp &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type)
+        this.annotationEntry.length > 0 &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry[0].type)
       ) {
-        this.mapImp.rollbackAnnotationEvent(this.annotationEntry)
-        this.annotationEntry = {}
+        this.mapImp.rollbackAnnotationEvent(this.annotationEntry[0])
+        this.annotationEntry = []
       }
     },
     /**
@@ -935,19 +936,20 @@ export default {
     commitAnnotationEvent: function (annotation) {
       if (
         this.mapImp &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry.type) &&
+        this.annotationEntry.length > 0 &&
+        ['created', 'updated', 'deleted'].includes(this.annotationEntry[0].type) &&
         // Only when annotation comments stored successfully
         annotation
       ) {
         this.featureAnnotationSubmitted = true
-        this.mapImp.commitAnnotationEvent(this.annotationEntry)
+        this.mapImp.commitAnnotationEvent(this.annotationEntry[0])
         if (annotation.body.comment === "Position Updated") {
-          this.annotationEntry.positionUpdated = false
-        } else if (this.annotationEntry.type === 'deleted') {
+          this.annotationEntry[0].positionUpdated = false
+        } else if (this.annotationEntry[0].type === 'deleted') {
           if (this.annotationSidebar) this.$emit("annotation-close")
           this.closeTooltip()
           // Only delete need, keep the annotation tooltip/sidebar open if created/updated
-          this.annotationEntry = {}
+          this.annotationEntry = []
         }
         this.addAnnotationFeature()
       }
@@ -1560,7 +1562,7 @@ export default {
         // Rollback drawing when no new annotation submitted
         if (!this.featureAnnotationSubmitted) this.rollbackAnnotationEvent()
         else this.featureAnnotationSubmitted = false
-        this.annotationEntry = {}
+        this.annotationEntry = []
       } else if (data.type === 'modeChanged') {
         if (data.feature.mode === 'direct_select') this.doubleClickedFeature = true
         if (this.annotationSidebar && data.feature.mode === 'simple_select' && this.activeDrawMode === 'Deleted') {
@@ -1583,10 +1585,10 @@ export default {
             this.annotationDrawModeEvent(payload)
           } else {
             if (this.annotationSidebar && this.previousEditEvent.type === 'updated') {
-              this.annotationEntry = {
+              this.annotationEntry = [{
                 ...this.previousEditEvent,
                 resourceId: this.serverURL
-              }
+              }]
               this.annotationEventCallback({}, { type: 'aborted' })
             }
             this.previousEditEvent = {}
@@ -1654,33 +1656,35 @@ export default {
               provenanceTaxonomy: taxons,
               alert: featuresAlert
             }]
-            if (Array.isArray(data)) {
-              payload = []
-              data.forEach((d) => {
-                const label = d.label
-                const resource = [d.models]
-                let taxons = undefined
-                if (d.taxons) {
-                  // check if data.taxons is string or array
-                  if (typeof d.taxons !== 'object') {
-                    taxons = JSON.parse(d.taxons)
-                  } else {
-                    taxons = d.taxons
+            if (eventType === 'click') {
+              if (Array.isArray(data)) {
+                payload = []
+                data.forEach((d) => {
+                  const label = d.label
+                  const resource = [d.models]
+                  let taxons = undefined
+                  if (d.taxons) {
+                    // check if data.taxons is string or array
+                    if (typeof d.taxons !== 'object') {
+                      taxons = JSON.parse(d.taxons)
+                    } else {
+                      taxons = d.taxons
+                    }
                   }
-                }
-                payload.push({
-                  dataset: d.dataset,
-                  biologicalSex: biologicalSex,
-                  taxonomy: taxonomy,
-                  resource: resource,
-                  label: label,
-                  feature: d,
-                  userData: args,
-                  eventType: eventType,
-                  provenanceTaxonomy: taxons,
-                  alert: d.alert
+                  payload.push({
+                    dataset: d.dataset,
+                    biologicalSex: biologicalSex,
+                    taxonomy: taxonomy,
+                    resource: resource,
+                    label: label,
+                    feature: d,
+                    userData: args,
+                    eventType: eventType,
+                    provenanceTaxonomy: taxons,
+                    alert: d.alert
+                  })
                 })
-              })
+              }
               if (this.viewingMode === 'Neuron Connection') {
                 this.retrieveConnectedPaths([data.models]).then((paths) => {
                   this.zoomToFeatures(paths)
@@ -1928,35 +1932,43 @@ export default {
     checkAndCreatePopups: async function (data) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
-        const tempEntry = data[0]
-        if (tempEntry.feature) {
+        const features = data.filter(d => d.feature).map(d => d.feature)
+        if (features.length > 0) {
           if (this.annotationSidebar && this.previousDeletedEvent.type === 'deleted') {
-            this.annotationEntry = {
+            this.annotationEntry = [{
               ...this.previousDeletedEvent,
               resourceId: this.serverURL
-            }
+            }]
             this.annotationEventCallback({}, { type: 'aborted' })
           }
-          this.annotationEntry = {
-            ...tempEntry.feature,
-            resourceId: this.serverURL,
-          }
-          if (tempEntry.feature.featureId && tempEntry.feature.models) {
-            this.displayTooltip(tempEntry.feature.models)
-          } else if (tempEntry.feature.feature) {
+          this.annotationEntry = []
+          features.forEach(feature => {
+            this.annotationEntry.push({
+              ...feature,
+              resourceId: this.serverURL,
+              featureId: feature.featureId ? feature.featureId : feature.feature.id
+            })
+          });
+          if (features[0].feature) {
             // in drawing or edit/delete mode is on or valid drawn
             if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
               this.featureAnnotationSubmitted = false
-              this.annotationEntry.featureId = tempEntry.feature.feature.id
               if (this.activeDrawTool) {
                 this.createConnectivityBody()
               }
               this.displayTooltip(
-                tempEntry.feature.feature.id,
-                centroid(tempEntry.feature.feature.geometry)
+                features[0].feature.id,
+                centroid(features[0].feature.geometry)
               )
             } else {
               this.rollbackAnnotationEvent()
+            }
+          } else {
+            const featureIds = this.annotationEntry
+              .filter(annotation => annotation.featureId && annotation.models)
+              .map(annotation => annotation.models)
+            if (featureIds.length > 0) {
+              this.displayTooltip(featureIds)
             }
           }
         } else {
@@ -3004,7 +3016,7 @@ export default {
       sensor: null,
       mapManagerRef: undefined,
       flatmapQueries: undefined,
-      annotationEntry: {},
+      annotationEntry: [],
       //tooltip display has to be set to false until it is rendered
       //for the first time, otherwise it may display an arrow at a
       //undesired location.
