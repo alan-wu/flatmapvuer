@@ -436,7 +436,7 @@ export default {
               if (mapState.biologicalSex)
                 identifier['biologicalSex'] = mapState.biologicalSex
               this.mapManagerRef
-                .findMap_(identifier)
+                .findMap(identifier)
                 .then((map) => {
                   if (map.uuid !== mapState.uuid) {
                     return this.createLegacyEntry(
