@@ -74,6 +74,10 @@
     "vitepress": "^1.0.0-rc.44",
     "vue-docgen-api": "^4.79.2"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.23.0",
+    "@esbuild/linux-x64": "0.25.3"
+  },
   "eslintConfig": {
     "root": true,
     "env": {
