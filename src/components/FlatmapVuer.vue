@@ -2548,13 +2548,7 @@ export default {
         if (state.background) this.backgroundChangeCallback(state.background)
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
-          if (state.viewingMode === "Neuron Connection") {
-            this.retrieveConnectedPaths([searchTerm]).then((paths) => {
-              this.zoomToFeatures(paths)
-            })
-          } else {
-            this.searchAndShowResult(searchTerm, true)
-          }
+          this.searchAndShowResult(searchTerm, true)
         }
         this.setVisibilityState(state)
       }
@@ -2771,8 +2765,8 @@ export default {
               if (featureId) {
                 const feature = this.mapImp.featureProperties(featureId)
                 const data = {
-                  resource: [feature.source],
-                  feature: {...feature, models: feature.models || feature.source},
+                  resource: [feature.models],
+                  feature: feature,
                   label: feature.label,
                   provenanceTaxonomy: feature.taxons,
                 }
