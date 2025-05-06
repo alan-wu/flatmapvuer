@@ -2083,50 +2083,6 @@ export default {
     },
     /**
      * @public
-     * Function to create tooltip from Neuron Curation ``data``.
-     * @arg {Object} `data`
-     */
-    createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
-      this.displayTooltip(data.resource[0])
-    },
-    /**
-     * @public
-     * Function to create tooltip from Entity Curation ``data``.
-     * @arg {Object} `data`
-     */
-    createTooltipFromEntityCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
-      let featureIds = []
-      let destinations = []
-      let destinationsWithDatasets = []
-      const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
-      if (pathsOfEntities.length) {
-        pathsOfEntities.forEach((path) => {
-          featureIds.push(...this.mapImp.pathModelNodes(path))
-        })
-        featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
-        featureIds.forEach((id) => {
-          const feature = this.mapImp.featureProperties(id)
-          if (!destinations.includes(feature.label)) {
-            destinations.push(feature.label)
-            destinationsWithDatasets.push({ id: feature.models, name: feature.label })
-          }
-        })
-        this.tooltipEntry = {
-          ...this.tooltipEntry,
-          origins: [data.label],
-          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
-          components: [],
-          componentsWithDatasets: [],
-          destinations: destinations,
-          destinationsWithDatasets: destinationsWithDatasets,
-        }
-        this.displayTooltip(data.resource[0])
-      }
-    },
-    /**
-     * @public
      * Function to show popup on map.
      * @arg {String} `featureId`,
      * @arg {Object} `node`,
