@@ -1926,7 +1926,7 @@ export default {
         }
         return tooltip;
       })
-      if (this.checkConnectivityTooltipEntry()) {
+      if (this.checkConnectivityTooltipEntry(this.tooltipEntry)) {
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
     },
