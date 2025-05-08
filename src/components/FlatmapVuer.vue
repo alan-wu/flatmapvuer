@@ -1926,7 +1926,7 @@ export default {
         }
         return tooltip;
       })
-      if (this.checkConnectivityTooltipEntry()) {
+      if (this.checkConnectivityTooltipEntry(this.tooltipEntry)) {
         this.$emit('connectivity-info-open', this.tooltipEntry);
       }
     },
@@ -1985,12 +1985,20 @@ export default {
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
         let prom1 = []
+        // When there are multiple paths, emit placeholders first.
+        // This may contain invalid connectivity.
+        if (data.length > 1) {
+          this.tooltipEntry = data.map((tooltip) => {
+            return { title: tooltip.label, featureId: tooltip.resource, ready: false }
+          })
+          this.$emit('connectivity-info-open', this.tooltipEntry);
+        }
+        // While having placeholders displayed, get details for all paths and then replace.
         for (let index = 0; index < data.length; index++) {
-          const entry = data[index]
-          prom1.push(await this.getKnowledgeTooltip(entry))
+          prom1.push(await this.getKnowledgeTooltip(data[index]))
         }
         this.tooltipEntry = await Promise.all(prom1)
-        const featureIds = this.tooltipEntry.filter(tooltip => tooltip).map(tooltip => tooltip.featureId[0])
+        const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
         if (featureIds.length > 0) {
           this.displayTooltip(featureIds)
         }
@@ -2048,6 +2056,7 @@ export default {
           })
         }
       }
+      tooltip['ready'] = true;
       return tooltip;
     },
     /**
@@ -2080,50 +2089,6 @@ export default {
       document.querySelectorAll('.maplibregl-popup').forEach((item) => {
         item.style.display = 'none'
       })
-    },
-    /**
-     * @public
-     * Function to create tooltip from Neuron Curation ``data``.
-     * @arg {Object} `data`
-     */
-    createTooltipFromNeuronCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
-      this.displayTooltip(data.resource[0])
-    },
-    /**
-     * @public
-     * Function to create tooltip from Entity Curation ``data``.
-     * @arg {Object} `data`
-     */
-    createTooltipFromEntityCuration: async function (data) {
-      this.tooltipEntry = await this.flatmapQueries.createTooltipData(this.mapImp, data)
-      let featureIds = []
-      let destinations = []
-      let destinationsWithDatasets = []
-      const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
-      if (pathsOfEntities.length) {
-        pathsOfEntities.forEach((path) => {
-          featureIds.push(...this.mapImp.pathModelNodes(path))
-        })
-        featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
-        featureIds.forEach((id) => {
-          const feature = this.mapImp.featureProperties(id)
-          if (!destinations.includes(feature.label)) {
-            destinations.push(feature.label)
-            destinationsWithDatasets.push({ id: feature.models, name: feature.label })
-          }
-        })
-        this.tooltipEntry = {
-          ...this.tooltipEntry,
-          origins: [data.label],
-          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
-          components: [],
-          componentsWithDatasets: [],
-          destinations: destinations,
-          destinationsWithDatasets: destinationsWithDatasets,
-        }
-        this.displayTooltip(data.resource[0])
-      }
     },
     /**
      * @public
@@ -2548,13 +2513,7 @@ export default {
         if (state.background) this.backgroundChangeCallback(state.background)
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
-          if (state.viewingMode === "Neuron Connection") {
-            this.retrieveConnectedPaths([searchTerm]).then((paths) => {
-              this.zoomToFeatures(paths)
-            })
-          } else {
-            this.searchAndShowResult(searchTerm, true)
-          }
+          this.searchAndShowResult(searchTerm, true)
         }
         this.setVisibilityState(state)
       }
@@ -2771,8 +2730,8 @@ export default {
               if (featureId) {
                 const feature = this.mapImp.featureProperties(featureId)
                 const data = {
-                  resource: [feature.source],
-                  feature: {...feature, models: feature.models || feature.source},
+                  resource: [feature.models],
+                  feature: feature,
                   label: feature.label,
                   provenanceTaxonomy: feature.taxons,
                 }
