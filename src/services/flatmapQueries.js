@@ -345,7 +345,7 @@ let FlatmapQueries = function () {
   }
 
   this.queryMapPaths =  async function (mapuuid) {
-    const url = this.flatmapApI + `flatmap/${mapuuid}/pathways`;
+    const url = this.flatmapApi + `flatmap/${mapuuid}/pathways`;
 
     try {
       const response = await fetch(url);
