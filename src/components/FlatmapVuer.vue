@@ -788,7 +788,7 @@ export default {
             ? this.mapImp.featureProperties(numericId)
             : { feature: this.existDrawnFeatures.find(feature => feature.id === value.trim()) };
           let payload = { feature: featureObject }
-          this.checkAndCreatePopups(payload)
+          this.checkAndCreatePopups([payload])
         } else {
           this.closeTooltip()
         }
@@ -1969,10 +1969,11 @@ export default {
             this.annotationEntry.push({
               ...feature,
               resourceId: this.serverURL,
-              featureId: feature.featureId ? feature.featureId : feature.feature.id,
+              featureId: feature.featureId ? feature.featureId : feature.feature?.id,
               offline: this.offlineAnnotationEnabled
             })
           });
+          // Drawn feature annotationEntry will always have length of 1
           if (features[0].feature) {
             // in drawing or edit/delete mode is on or valid drawn
             if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
