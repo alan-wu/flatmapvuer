@@ -139,7 +139,7 @@ Please use `const` to assign meaningful names to them...
       </el-icon>
 
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && userInformation && !disableUI"
+        v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotationEnabled) && !disableUI"
         :mapCanvas="{
           containerHTML: this.$el,
           class: '.maplibregl-canvas',
@@ -448,8 +448,11 @@ Please use `const` to assign meaningful names to them...
             <el-row class="viewing-mode-description">
               {{ modeDescription }}
             </el-row>
+            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
+              (Anonymous annotate)
+            </el-row>
           </el-row>
-          <template v-if="viewingMode === 'Annotation' && userInformation">
+          <template v-if="viewingMode === 'Annotation' && authorisedUser">
             <el-row class="backgroundText">Annotations From</el-row>
             <el-row class="backgroundControl">
               <el-select
@@ -781,16 +784,10 @@ export default {
       if (this.mapImp) {
         if (value) {
           const numericId = Number(value)
-          let payload = { feature: {} }
-          if (numericId) {
-            const data = this.mapImp.featureProperties(numericId)
-            payload.feature = data
-          } else {
-            const drawnFeature = this.existDrawnFeatures.find(
-              (feature) => feature.id === value.replace(' ', '')
-            )
-            payload.feature.feature = drawnFeature
-          }
+          const featureObject = numericId
+            ? this.mapImp.featureProperties(numericId)
+            : { feature: this.existDrawnFeatures.find(feature => feature.id === value.trim()) };
+          let payload = { feature: featureObject }
           this.checkAndCreatePopups([payload])
         } else {
           this.closeTooltip()
@@ -893,10 +890,7 @@ export default {
      * Function to remove all drawn annotations from flatmap annotation layer.
      */
     clearAnnotationFeature: function () {
-      if (
-        this.mapImp &&
-        this.existDrawnFeatures.length > 0
-      ) {
+      if (this.mapImp) {
         this.mapImp.clearAnnotationFeature()
       }
     },
@@ -934,24 +928,30 @@ export default {
      * @arg {Object} `annotation`
      */
     commitAnnotationEvent: function (annotation) {
-      if (
-        this.mapImp &&
-        this.annotationEntry.length > 0 &&
-        ['created', 'updated', 'deleted'].includes(this.annotationEntry[0].type) &&
-        // Only when annotation comments stored successfully
-        annotation
-      ) {
-        this.featureAnnotationSubmitted = true
-        this.mapImp.commitAnnotationEvent(this.annotationEntry[0])
-        if (annotation.body.comment === "Position Updated") {
-          this.annotationEntry[0].positionUpdated = false
-        } else if (this.annotationEntry[0].type === 'deleted') {
-          if (this.annotationSidebar) this.$emit("annotation-close")
-          this.closeTooltip()
-          // Only delete need, keep the annotation tooltip/sidebar open if created/updated
-          this.annotationEntry = []
+      if (this.mapImp) {
+        if (this.offlineAnnotationEnabled) {
+          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || []
+          this.offlineAnnotations.push(annotation)
+          if (this.annotationEntry[0].type === 'deleted') {
+            this.offlineAnnotations = this.offlineAnnotations.filter((offline) => {
+              return offline.resource !== this.serverURL || offline.item.id !== annotation.item.id
+            })
+          }
+          sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations))
         }
-        this.addAnnotationFeature()
+        if (['created', 'updated', 'deleted'].includes(this.annotationEntry[0].type)) {
+          this.featureAnnotationSubmitted = true
+          this.mapImp.commitAnnotationEvent(this.annotationEntry[0])
+          if (annotation.body.comment === "Position Updated") {
+            this.annotationEntry[0].positionUpdated = false
+          } else if (this.annotationEntry[0].type === 'deleted') {
+            if (this.annotationSidebar) this.$emit("annotation-close")
+            this.closeTooltip()
+            // Only delete need, keep the annotation tooltip/sidebar open if created/updated
+            this.annotationEntry = []
+          }
+          this.addAnnotationFeature()
+        }
       }
     },
     /**
@@ -961,9 +961,17 @@ export default {
      * @arg {String} `participated`
      */
     fetchAnnotatedItemIds: async function (userId = undefined, participated = undefined) {
-      let annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
-      // The annotator has `resource` and `items` fields
-      if ('resource' in annotatedItemIds) annotatedItemIds = annotatedItemIds.itemIds
+      let annotatedItemIds
+      if (this.offlineAnnotationEnabled) {
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || []
+        annotatedItemIds = this.offlineAnnotations.filter((offline) => {
+          return offline.resource === this.serverURL
+        }).map(offline => offline.item.id)
+      } else {
+        annotatedItemIds = await this.annotator.annotatedItemIds(this.userToken, this.serverURL, userId, participated)
+        // The annotator has `resource` and `items` fields
+        if ('resource' in annotatedItemIds) annotatedItemIds = annotatedItemIds.itemIds
+      }
       return annotatedItemIds
     },
     /**
@@ -985,10 +993,18 @@ export default {
      * @arg {String} `participated`
      */
     fetchDrawnFeatures: async function (userId, participated) {
-      const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
-      let drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
-      // The annotator has `resource` and `features` fields
-      if ('resource' in drawnFeatures) drawnFeatures = drawnFeatures.features
+      let drawnFeatures
+      if (this.offlineAnnotationEnabled) {
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || []
+        drawnFeatures = this.offlineAnnotations.filter((offline) => {
+          return offline.feature && offline.resource === this.serverURL
+        }).map(offline => offline.feature)
+      } else {
+        const annotatedItemIds = await this.fetchAnnotatedItemIds(userId, participated)
+        drawnFeatures = await this.annotator.drawnFeatures(this.userToken, this.serverURL, annotatedItemIds)
+        // The annotator has `resource` and `features` fields
+        if ('resource' in drawnFeatures) drawnFeatures = drawnFeatures.features
+      }
       return drawnFeatures
     },
     /**
@@ -1002,8 +1018,8 @@ export default {
           this.loading = true
         }
         const userId = this.annotationFrom === 'Anyone' ?
-          undefined : this.userInformation.orcid ?
-            this.userInformation.orcid : '0000-0000-0000-0000'
+          undefined : this.authorisedUser.orcid ?
+            this.authorisedUser.orcid : '0000-0000-0000-0000'
         const participated = this.annotationFrom === 'Anyone' ?
           undefined : this.annotationFrom === 'Me' ?
             true : false
@@ -1953,9 +1969,11 @@ export default {
             this.annotationEntry.push({
               ...feature,
               resourceId: this.serverURL,
-              featureId: feature.featureId ? feature.featureId : feature.feature.id
+              featureId: feature.featureId ? feature.featureId : feature.feature?.id,
+              offline: this.offlineAnnotationEnabled
             })
           });
+          // Drawn feature annotationEntry will always have length of 1
           if (features[0].feature) {
             // in drawing or edit/delete mode is on or valid drawn
             if (this.activeDrawTool || this.activeDrawMode || this.isValidDrawnCreated) {
@@ -2471,6 +2489,9 @@ export default {
         state['colour'] = this.colourRadio
         state['outlines'] = this.outlinesRadio
         state['background'] = this.currentBackground
+        if (this.offlineAnnotationEnabled) {
+          state['offlineAnnotations'] = sessionStorage.getItem('anonymous-annotation')
+        }
         this.getVisibilityState(state)
         return state
       }
@@ -2505,6 +2526,9 @@ export default {
     restoreMapState: function (state) {
       if (state) {
         if (state.viewport) this.mapImp.setState(state.viewport)
+        if (state.offlineAnnotations) {
+          sessionStorage.setItem('anonymous-annotation', state.offlineAnnotations)
+        }
         if (state.viewingMode) this.changeViewingMode(state.viewingMode)
         //The following three are boolean
         if ('flightPath3D' in state) this.setFlightPath3D(state.flightPath3D)
@@ -3046,6 +3070,8 @@ export default {
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
         'Annotation': ['View feature annotations', 'Add, comment on and view feature annotations']
       },
+      offlineAnnotationEnabled: false,
+      offlineAnnotations: [],
       annotationFrom: 'Anyone',
       annotatedSource: ['Anyone', 'Me', 'Others'],
       openMapRef: undefined,
@@ -3059,7 +3085,7 @@ export default {
         "Connection",
       ],
       annotator: undefined,
-      userInformation: undefined,
+      authorisedUser: undefined,
       activeDrawMode: undefined,
       activeDrawTool: undefined,
       featureAnnotationSubmitted: false,
@@ -3121,7 +3147,7 @@ export default {
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode]
       if (this.viewingMode === 'Annotation') {
-        if (this.userInformation) {
+        if (this.authorisedUser) {
           return description[1]
         }
         return description[0]
@@ -3161,18 +3187,22 @@ export default {
       deep: true,
     },
     viewingMode: function (mode) {
+      this.clearAnnotationFeature()
       if (mode === 'Annotation') {
         this.loading = true
         this.annotator.authenticate(this.userToken).then((userData) => {
           if (userData.name && userData.email && userData.canUpdate) {
-            this.showAnnotator(true)
-            this.userInformation = userData
-            this.setFeatureAnnotated()
-            this.addAnnotationFeature()
+            this.authorisedUser = userData
+            this.offlineAnnotationEnabled = false
+          } else {
+            this.authorisedUser = undefined
+            this.offlineAnnotationEnabled = true
           }
+          this.setFeatureAnnotated()
+          this.addAnnotationFeature()
           this.loading = false
         })
-      } else this.showAnnotator(false)
+      }
     },
     disableUI: function (isUIDisabled) {
       if (isUIDisabled) {
