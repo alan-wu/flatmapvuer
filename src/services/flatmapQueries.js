@@ -94,8 +94,8 @@ const compareNames = (a, b) => {
 }
 
 let FlatmapQueries = function () {
-  this.initialise = function (flatmapApi) {
-    this.flatmapApi = flatmapApi
+  this.initialise = function (flatmapAPI) {
+    this.flatmapAPI = flatmapAPI
     this.destinations = []
     this.origins = []
     this.components = []
@@ -369,7 +369,7 @@ let FlatmapQueries = function () {
       ...(signal ? { signal: signal } : {}), // add signal to header if it exists
     }
     return new Promise((resolve) => {
-      fetch(`${this.flatmapApi}knowledge/query/`, headers)
+      fetch(`${this.flatmapAPI}knowledge/query/`, headers)
         .then((response) => response.json())
         .then((data) => {
           if (this.connectivityExists(data)) {
@@ -495,6 +495,7 @@ let FlatmapQueries = function () {
         if (connectivity.dendrites && connectivity.dendrites.length > 0) {
           dendrites.push(...connectivity.dendrites)
         }
+        dendrites = removeDuplicates(dendrites)
         somas = connectivity.somas
       }
 
@@ -547,7 +548,7 @@ let FlatmapQueries = function () {
 
   this.flatmapQuery = function (sql) {
     const data = { sql: sql }
-    return fetch(`${this.flatmapApi}knowledge/query/`, {
+    return fetch(`${this.flatmapAPI}knowledge/query/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
