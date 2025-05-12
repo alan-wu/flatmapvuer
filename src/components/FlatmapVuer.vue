@@ -2758,6 +2758,7 @@ export default {
                   feature: feature,
                   label: feature.label,
                   provenanceTaxonomy: feature.taxons,
+                  alert: feature.alert,
                 }
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
                   this.checkAndCreatePopups([data])
