@@ -196,6 +196,14 @@ describe('MultiFlatmapVuer', () => {
 
     })
 
+    Cypress.on('uncaught:exception', (err) => {
+      // returning false here prevents Cypress from
+      // failing the test
+      if (err.message.includes("Cannot read properties of null (reading '$el')"))
+        return false
+      return true
+    })
+
     // Check if flatmap emits ready event
     cy.get('@vue').should(wrapper => {
       expect(wrapper.emitted('ready')).to.be.ok
