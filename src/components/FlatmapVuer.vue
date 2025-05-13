@@ -1673,7 +1673,6 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
-              this.setConnectivityDataSource(this.viewingMode, data);
               const singleSelection = Object.keys(data).includes('id')
               if (!singleSelection) {
                 payload = []
@@ -1708,6 +1707,7 @@ export default {
                 }
               }
               const clickedItem = singleSelection ? data : data[0]
+              this.setConnectivityDataSource(this.viewingMode, clickedItem);
               if (this.viewingMode === 'Neuron Connection') {
                 this.retrieveConnectedPaths([clickedItem.models]).then((paths) => {
                   this.zoomToFeatures(paths)
