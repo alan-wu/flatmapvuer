@@ -1888,10 +1888,8 @@ export default {
           this.removeActiveTooltips();
         }
 
-        // Emit error message for connectivity graph
-        if (errorData.length) {
-          this.emitConnectivityGraphError(errorData);
-        }
+        // Emit error message for connectivity
+        this.emitConnectivityError(errorData);
 
         // highlight all available features
         const featureIdsToHighlight = this.mapImp.modelFeatureIdList(featuresToHighlight);
@@ -1919,8 +1917,8 @@ export default {
       }
       return featureIds;
     },
-    emitConnectivityGraphError: function (errorData) {
-      this.$emit('connectivity-graph-error', {
+    emitConnectivityError: function (errorData) {
+      this.$emit('connectivity-error', {
         data: {
           errorData: errorData,
           errorMessage: ERROR_MESSAGE,
