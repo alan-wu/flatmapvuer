@@ -1823,54 +1823,37 @@ export default {
       const featuresToHighlight = [];
       const geojsonHighlights = [];
       const connectivityData = [];
-      const filteredConnectivityData = [];
       const errorData = [];
 
-      if (!data.length) {
-        // Close all tooltips on the current flatmap element
-        this.removeActiveTooltips();
-      } else {
-        data.forEach((item) => {
-          connectivityData.push({
-            id: item.id,
-            label: item.label,
-          });
-        });
-      }
-
+      // Close all tooltips on the current flatmap element
+      this.removeActiveTooltips();
       // to keep the highlighted path on map
       if (connectivityInfo && connectivityInfo.featureId) {
         featuresToHighlight.push(...connectivityInfo.featureId);
       }
 
-      // search the features on the map first
-      if (this.mapImp) {
-        connectivityData.forEach((connectivity, i) => {
-          const {id, label} = connectivity;
-          const response = this.mapImp.search(id);
+      if (data.length && this.mapImp) {
+        // search the features on the map first
+        data.forEach((connectivity) => {
+          const response = this.mapImp.search(connectivity.id);
 
           if (response?.results.length) {
             const featureId = response?.results[0].featureId;
-
-            filteredConnectivityData.push({
-              featureId,
-              id,
-              label,
-            });
+            connectivityData.push({ featureId, ...connectivity });
           } else {
             errorData.push(connectivity);
           }
         });
 
-        if (filteredConnectivityData.length) {
-          let geojsonId = filteredConnectivityData[0].featureId;
+        if (connectivityData.length) {
+          let geojsonId = connectivityData[0].featureId;
 
           this.mapImp.annotations.forEach((annotation) => {
             const anatomicalNodes = annotation['anatomical-nodes'];
 
             if (anatomicalNodes) {
               const anatomicalNodesString = anatomicalNodes.join('');
-              const foundItem = filteredConnectivityData.every((item) =>
+              const foundItem = connectivityData.every((item) =>
                 anatomicalNodesString.indexOf(item.id) !== -1
               );
 
@@ -1881,11 +1864,7 @@ export default {
             }
           });
 
-          this.createTooltipForConnectivity(filteredConnectivityData, geojsonId);
-        } else {
-          errorData.push(...connectivityData);
-          // Close all tooltips on the current flatmap element
-          this.removeActiveTooltips();
+          this.createTooltipForConnectivity(connectivityData, geojsonId);
         }
 
         // Emit error message for connectivity
