@@ -2036,7 +2036,7 @@ export default {
             }
             if (featureId) {
               const feature = this.mapImp.featureProperties(featureId)
-              if (!tooltip.components.includes(feature.label)) {
+              if (feature.label && !tooltip.components.includes(feature.label)) {
                 tooltip.components.push(feature.label)
                 tooltip.componentsWithDatasets.push({ id: feature.models, name: feature.label })
               }
@@ -2045,7 +2045,7 @@ export default {
           featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
           featureIds.forEach((id) => {
             const feature = this.mapImp.featureProperties(id)
-            if (!tooltip.destinations.includes(feature.label)) {
+            if (feature.label && !tooltip.destinations.includes(feature.label)) {
               tooltip.destinations.push(feature.label)
               tooltip.destinationsWithDatasets.push({ id: feature.models, name: feature.label })
             }
