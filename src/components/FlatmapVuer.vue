@@ -1825,14 +1825,12 @@ export default {
       const connectivityData = [];
       const errorData = [];
 
-      // Close all tooltips on the current flatmap element
-      this.removeActiveTooltips();
       // to keep the highlighted path on map
       if (connectivityInfo && connectivityInfo.featureId) {
         featuresToHighlight.push(...connectivityInfo.featureId);
       }
 
-      if (data.length && this.mapImp) {
+      if (this.mapImp) {
         // search the features on the map first
         data.forEach((connectivity) => {
           const response = this.mapImp.search(connectivity.id);
@@ -1865,6 +1863,9 @@ export default {
           });
 
           this.createTooltipForConnectivity(connectivityData, geojsonId);
+        } else {
+          // Close all tooltips on the current flatmap element
+          this.removeActiveTooltips();
         }
 
         // Emit error message for connectivity
