@@ -558,7 +558,7 @@ Please use `const` to assign meaningful names to them...
             </template>
           </el-popover>
         </el-row>
-        <el-row>
+        <el-row v-if="showLocalSettings">
           <el-popover
             content="Change settings"
             placement="right"
@@ -1277,7 +1277,7 @@ export default {
     },
     /**
      * Function to highlight paths and features
-     * @param data 
+     * @param data
      */
     zoomToFeatures: function (data) {
       if (this.mapImp) {
@@ -2971,6 +2971,14 @@ export default {
     annotationSidebar: {
       type: Boolean,
       default: false,
+    },
+    /**
+     * The option to show local settings UI
+     * (background colour, flight path, viewing mode, etc.)
+     */
+    showLocalSettings: {
+      type: Boolean,
+      default: true,
     },
   },
   provide() {
