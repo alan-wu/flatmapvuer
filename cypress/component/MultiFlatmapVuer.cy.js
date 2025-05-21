@@ -93,6 +93,25 @@ describe('MultiFlatmapVuer', () => {
         cy.get('.maplibregl-popup-close-button').click();
         cy.get('.flatmapvuer-popover').should('not.exist');
 
+          // Check if alert exist in test flatmap
+        cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas').as('canvas')
+        cy.get('.checkall-display-text').then(($label) => {
+          expect($label, 'Alter filter should exist').to.contain('Alert')
+          // Take a screenshot of no path flatmap
+          cy.get(':nth-child(4) > :nth-child(1) > :nth-child(2) > .el-checkbox').click()
+          cy.get('.pathway-location > .drawer-button:visible').click()
+          // CLI
+          cy.get('@canvas').screenshot('base/cypress/component/MultiFlatmapVuer.cy.js/mapalert')
+          // UI
+          cy.get('@canvas').screenshot('MultiFlatmapVuer.cy.js/base/cypress/component/MultiFlatmapVuer.cy.js/mapalert')
+          // Compare previous screenshot with alter paths displayed flatmap
+          cy.get('.pathway-location > .drawer-button:visible').click()
+          cy.get('[label="alert"] > .checkbox-container > .el-checkbox:visible').click()
+          cy.get('.pathway-location > .drawer-button:visible').click()
+          cy.get('@canvas').compareSnapshot('mapalert').then(comparisonResults => {
+            expect(comparisonResults.percentage).to.greaterThan(0)
+          })
+        })
       // Check the metadata for path exploration is loading correctly
       }).then(() => {
         let flatmapVuer = window.Cypress.flatmapVuer
