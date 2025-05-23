@@ -2026,45 +2026,45 @@ export default {
         // Map id and uuid to load connectivity information from the map
         tooltip['mapId'] = this.mapImp.provenance.id;
         tooltip['mapuuid'] = this.mapImp.provenance.uuid;
-      } else {
-        tooltip = {
-          ...tooltip,
-          origins: [data.label],
-          originsWithDatasets: [{ id: data.resource[0], name: data.label }],
-          components: [],
-          componentsWithDatasets: [],
-          destinations: [],
-          destinationsWithDatasets: [],
-        }
-        let featureIds = []
-        const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
-        if (pathsOfEntities.length) {
-          pathsOfEntities.forEach((path) => {
-            featureIds.push(...this.mapImp.pathModelNodes(path))
-            const searchResults = this.mapImp.search(path)
-            let featureId = undefined;
-            for (let i = 0; i < searchResults.results.length; i++) {
-              featureId = searchResults.results[i].featureId
-              const annotation = this.mapImp.annotation(featureId)
-              if (featureId && annotation?.label) break;
-            }
-            if (featureId) {
-              const feature = this.mapImp.featureProperties(featureId)
-              if (feature.label && !tooltip.components.includes(feature.label)) {
-                tooltip.components.push(feature.label)
-                tooltip.componentsWithDatasets.push({ id: feature.models, name: feature.label })
-              }
-            }
-          })
-          featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
-          featureIds.forEach((id) => {
-            const feature = this.mapImp.featureProperties(id)
-            if (feature.label && !tooltip.destinations.includes(feature.label)) {
-              tooltip.destinations.push(feature.label)
-              tooltip.destinationsWithDatasets.push({ id: feature.models, name: feature.label })
-            }
-          })
-        }
+      // } else {
+      //   tooltip = {
+      //     ...tooltip,
+      //     origins: [data.label],
+      //     originsWithDatasets: [{ id: data.resource[0], name: data.label }],
+      //     components: [],
+      //     componentsWithDatasets: [],
+      //     destinations: [],
+      //     destinationsWithDatasets: [],
+      //   }
+      //   let featureIds = []
+      //   const pathsOfEntities = await this.mapImp.queryPathsForFeatures(data.resource)
+      //   if (pathsOfEntities.length) {
+      //     pathsOfEntities.forEach((path) => {
+      //       featureIds.push(...this.mapImp.pathModelNodes(path))
+      //       const searchResults = this.mapImp.search(path)
+      //       let featureId = undefined;
+      //       for (let i = 0; i < searchResults.results.length; i++) {
+      //         featureId = searchResults.results[i].featureId
+      //         const annotation = this.mapImp.annotation(featureId)
+      //         if (featureId && annotation?.label) break;
+      //       }
+      //       if (featureId) {
+      //         const feature = this.mapImp.featureProperties(featureId)
+      //         if (feature.label && !tooltip.components.includes(feature.label)) {
+      //           tooltip.components.push(feature.label)
+      //           tooltip.componentsWithDatasets.push({ id: feature.models, name: feature.label })
+      //         }
+      //       }
+      //     })
+      //     featureIds = [...new Set(featureIds)].filter(id => id !== data.feature.featureId)
+      //     featureIds.forEach((id) => {
+      //       const feature = this.mapImp.featureProperties(id)
+      //       if (feature.label && !tooltip.destinations.includes(feature.label)) {
+      //         tooltip.destinations.push(feature.label)
+      //         tooltip.destinationsWithDatasets.push({ id: feature.models, name: feature.label })
+      //       }
+      //     })
+      //   }
       }
       tooltip['ready'] = true;
       return tooltip;
