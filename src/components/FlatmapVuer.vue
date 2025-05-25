@@ -1277,7 +1277,7 @@ export default {
     },
     /**
      * Function to highlight paths and features
-     * @param data 
+     * @param data
      */
     zoomToFeatures: function (data) {
       if (this.mapImp) {
@@ -1677,8 +1677,10 @@ export default {
               if (!singleSelection) {
                 payload = []
                 const mapuuid = data.mapUUID
+                const seenIds = new Set();
                 for (let [key, value] of Object.entries(data)) {
                   if (key !== 'mapUUID') {
+                    const id = value.id
                     const label = value.label
                     const resource = [value.models]
                     let taxons = undefined
@@ -1690,6 +1692,8 @@ export default {
                         taxons = value.taxons
                       }
                     }
+                    if (seenIds.has(id)) continue;
+                    seenIds.add(id);
                     payload.push({
                       dataset: value.dataset,
                       biologicalSex: biologicalSex,
