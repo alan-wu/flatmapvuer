@@ -2720,7 +2720,7 @@ export default {
           }
         }
         let hardcode = {
-          key: "flatmap.connectivity",
+          key: "flatmap.connectivity.source",
           label: "Connectivity",
           children: []
         }
