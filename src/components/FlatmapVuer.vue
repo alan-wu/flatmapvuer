@@ -2676,6 +2676,63 @@ export default {
         console.error('Map resize error')
       }
     },
+    getFilterOptions: async function () {
+      if (this.mapImp) {
+        if (this.filterOptions.length) {
+          return this.filterOptions
+        }
+        const filterRanges = this.mapImp.featureFilterRanges()
+        for (const [key, value] of Object.entries(filterRanges)) {
+          let main = { key: `flatmap.connectivity.${key}`, label: "", children: [] }
+          if (key === "kind") {
+            main.label = "Pathways"
+            for (const facet of value) {
+              let sub = { key: `flatmap.connectivity.${key}`, label: "" }
+              const pathway = this.pathways.find(p => p.type === facet)
+              if (pathway) {
+                sub.label = pathway.label
+                main.children.push(sub)
+              }
+            }
+          } else if (key === "taxons") {
+            main.label = "Studied in"
+            const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
+            if (entityLabels.length) {
+              for (const facet of value) {
+                let sub = { key: `flatmap.connectivity.${key}`, label: "" }
+                const taxon = entityLabels.find(p => p.taxon === facet)
+                if (taxon) {
+                  sub.label = taxon.label
+                  main.children.push(sub)
+                }
+              }
+            }
+          } else if (key === "alert") {
+            main.label = "Alert"
+            for (const facet of ["With", "Without"]) {
+              let sub = { key: `flatmap.connectivity.${key}`, label: "" }
+              sub.label = facet
+              main.children.push(sub)
+            }
+          }
+          if (main.label && main.children.length) {
+            this.filterOptions.push(main)
+          }
+        }
+        let hardcode = {
+          key: "flatmap.connectivity",
+          label: "Connectivity",
+          children: []
+        }
+        for (const facet of ["Origins", "Components", "Destinations"]) {
+          let sub = { key: "flatmap.connectivity.source", label: "" }
+          sub.label = facet
+          hardcode.children.push(sub)
+        }
+        this.filterOptions.push(hardcode)
+        return this.filterOptions
+      }
+    },
     /**
      * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
@@ -3136,6 +3193,7 @@ export default {
       }),
       searchTerm: "",
       taxonLeaveDelay: undefined,
+      filterOptions: [],
     }
   },
   computed: {
