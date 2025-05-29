@@ -2687,7 +2687,7 @@ export default {
           if (key === "kind") {
             main.label = "Pathways"
             for (const facet of value) {
-              let sub = { key: `flatmap.connectivity.${key}`, label: "" }
+              let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
               const pathway = this.pathways.find(p => p.type === facet)
               if (pathway) {
                 sub.label = pathway.label
@@ -2699,7 +2699,7 @@ export default {
             const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
             if (entityLabels.length) {
               for (const facet of value) {
-                let sub = { key: `flatmap.connectivity.${key}`, label: "" }
+                let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
                 const taxon = entityLabels.find(p => p.taxon === facet)
                 if (taxon) {
                   sub.label = taxon.label
@@ -2710,7 +2710,7 @@ export default {
           } else if (key === "alert") {
             main.label = "Alert"
             for (const facet of ["With", "Without"]) {
-              let sub = { key: `flatmap.connectivity.${key}`, label: "" }
+              let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
               sub.label = facet
               main.children.push(sub)
             }
@@ -2725,7 +2725,7 @@ export default {
           children: []
         }
         for (const facet of ["Origins", "Components", "Destinations"]) {
-          let sub = { key: "flatmap.connectivity.source", label: "" }
+          let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
           sub.label = facet
           hardcode.children.push(sub)
         }
