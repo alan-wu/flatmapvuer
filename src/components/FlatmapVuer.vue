@@ -2678,9 +2678,7 @@ export default {
     },
     getFilterOptions: async function () {
       if (this.mapImp) {
-        if (this.filterOptions.length) {
-          return this.filterOptions
-        }
+        let filterOptions = []
         const filterRanges = this.mapImp.featureFilterRanges()
         for (const [key, value] of Object.entries(filterRanges)) {
           let main = { key: `flatmap.connectivity.${key}`, label: "", children: [] }
@@ -2709,17 +2707,16 @@ export default {
             }
           } else if (key === "alert") {
             main.label = "Alert"
-            for (const facet of ["With", "Without"]) {
+            for (const facet of ["with", "without"]) {
               let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
-              sub.label = facet
+              sub.label = `${facet} alerts`
               main.children.push(sub)
             }
           }
           if (main.label && main.children.length) {
-            this.filterOptions.push(main)
+            filterOptions.push(main)
           }
         }
-        return this.filterOptions
         // let hardcode = {
         //   key: "flatmap.connectivity.source",
         //   label: "Connectivity",
@@ -2731,6 +2728,7 @@ export default {
         //   hardcode.children.push(sub)
         // }
         // filterOptions.push(hardcode)
+        return filterOptions
       }
     },
     /**
@@ -3193,7 +3191,6 @@ export default {
       }),
       searchTerm: "",
       taxonLeaveDelay: undefined,
-      filterOptions: [],
     }
   },
   computed: {
