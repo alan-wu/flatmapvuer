@@ -2719,18 +2719,18 @@ export default {
             this.filterOptions.push(main)
           }
         }
-        let hardcode = {
-          key: "flatmap.connectivity.source",
-          label: "Connectivity",
-          children: []
-        }
-        for (const facet of ["Origins", "Components", "Destinations"]) {
-          let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
-          sub.label = facet
-          hardcode.children.push(sub)
-        }
-        this.filterOptions.push(hardcode)
         return this.filterOptions
+        // let hardcode = {
+        //   key: "flatmap.connectivity.source",
+        //   label: "Connectivity",
+        //   children: []
+        // }
+        // for (const facet of ["Origins", "Components", "Destinations"]) {
+        //   let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
+        //   sub.label = facet
+        //   hardcode.children.push(sub)
+        // }
+        // filterOptions.push(hardcode)
       }
     },
     /**
