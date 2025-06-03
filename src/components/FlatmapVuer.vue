@@ -2676,6 +2676,111 @@ export default {
         console.error('Map resize error')
       }
     },
+    getFilterSources: function () {
+      const FILTER_PROPERTIES = ['kind', 'taxons']
+      let withAlert = new Set()
+      let withoutAlert = new Set()
+      let filterSourcesMap = new Map()
+      for (const annotation of this.mapImp.annotations.values()) {
+        if (annotation.source) {
+          if ("alert" in annotation) {
+            withAlert.add(annotation.source)
+          } else {
+            withoutAlert.add(annotation.source)
+          }
+        }
+        for (const [key, value] of Object.entries(annotation)) {
+          if (FILTER_PROPERTIES.includes(key)) {
+            if (annotation.source) {
+              if (!filterSourcesMap.has(key)) {
+                filterSourcesMap.set(key, new Map())
+              }
+              const sourceMap = filterSourcesMap.get(key)
+              const addToSourceMap = (val) => {
+                const setKey = val
+                if (!sourceMap.has(setKey)) {
+                  sourceMap.set(setKey, new Set())
+                }
+                sourceMap.get(setKey).add(`${annotation.source}`)
+              };
+              if (Array.isArray(value)) {
+                value.forEach(addToSourceMap)
+              } else {
+                addToSourceMap(value)
+              }
+            }
+          }
+        }
+      }
+      let filterSources = {
+        'alert': {
+          'with': [...withAlert],
+          'without': [...withoutAlert]
+        }
+      }
+      for (const [key, value] of filterSourcesMap.entries()) {
+        filterSources[key] = {}
+        for (const [key1, value1] of value.entries()) {
+          filterSources[key][key1] = [...value1.values()]
+        }
+      }
+      return filterSources
+    },
+    getFilterOptions: async function () {
+      if (this.mapImp) {
+        let filterOptions = []
+        const filterRanges = this.mapImp.featureFilterRanges()
+        for (const [key, value] of Object.entries(filterRanges)) {
+          let main = { key: `flatmap.connectivity.${key}`, label: "", children: [] }
+          if (key === "kind") {
+            main.label = "Pathways"
+            for (const facet of value) {
+              let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
+              const pathway = this.pathways.find(p => p.type !== "centreline" && p.type === facet)
+              if (pathway) {
+                sub.label = pathway.label
+                main.children.push(sub)
+              }
+            }
+          } else if (key === "taxons") {
+            main.label = "Studied in"
+            const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
+            if (entityLabels.length) {
+              for (const facet of value) {
+                let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
+                const taxon = entityLabels.find(p => p.taxon === facet)
+                if (taxon) {
+                  sub.label = taxon.label
+                  main.children.push(sub)
+                }
+              }
+            }
+          } else if (key === "alert") {
+            main.label = "Alert"
+            for (const facet of ["with", "without"]) {
+              let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
+              sub.label = `${facet} alerts`
+              main.children.push(sub)
+            }
+          }
+          if (main.label && main.children.length) {
+            filterOptions.push(main)
+          }
+        }
+        // let hardcode = {
+        //   key: "flatmap.connectivity.source",
+        //   label: "Connectivity",
+        //   children: []
+        // }
+        // for (const facet of ["Origins", "Components", "Destinations"]) {
+        //   let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
+        //   sub.label = facet
+        //   hardcode.children.push(sub)
+        // }
+        // filterOptions.push(hardcode)
+        return filterOptions
+      }
+    },
     /**
      * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
