@@ -1935,7 +1935,7 @@ export default {
     },
     changeConnectivitySource: async function (payload) {
       const { entry, connectivitySource } = payload;
-      if (entry.mapId === this.mapImp.id) {        
+      if (entry.mapId === this.mapImp.id) {
         await this.flatmapQueries.queryForConnectivityNew(this.mapImp, entry.featureId[0], connectivitySource);
         this.tooltipEntry = this.tooltipEntry.map((tooltip) => {
           if (tooltip.featureId[0] === entry.featureId[0]) {
@@ -2315,7 +2315,9 @@ export default {
         options.annotationFeatureGeometry = geometry
       } else {
         const entry = Array.isArray(feature) ? feature[0] : feature
-        featureId = this.mapImp.modelFeatureIds(entry)[0]
+        if (entry) {
+          featureId = this.mapImp.modelFeatureIds(entry)[0]
+        }
         if (!this.activeDrawTool) {
           options.positionAtLastClick = true
         }
