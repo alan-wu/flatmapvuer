@@ -86,6 +86,8 @@
       :mapManager="mapManagerRef"
       :flatmapAPI="flatmapAPI"
       :sparcAPI="sparcAPI"
+      :showLocalSettings="showLocalSettings"
+      :showOpenMapButton="showOpenMapButton"
     />
   </div>
 </template>
@@ -761,6 +763,21 @@ export default {
      annotationSidebar: {
       type: Boolean,
       default: false,
+    },
+    /**
+     * The option to show local settings UI
+     * (background colour, flight path, viewing mode, etc.)
+     */
+    showLocalSettings: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show open new map button
+     */
+    showOpenMapButton: {
+      type: Boolean,
+      default: true,
     },
   },
   data: function () {
