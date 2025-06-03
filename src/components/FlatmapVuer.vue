@@ -2676,6 +2676,56 @@ export default {
         console.error('Map resize error')
       }
     },
+    getFilterSources: function () {
+      const FILTER_PROPERTIES = ['kind', 'taxons']
+      let withAlert = new Set()
+      let withoutAlert = new Set()
+      let filterSourcesMap = new Map()
+      for (const annotation of this.mapImp.annotations.values()) {
+        if (annotation.source) {
+          if ("alert" in annotation) {
+            withAlert.add(annotation.source)
+          } else {
+            withoutAlert.add(annotation.source)
+          }
+        }
+        for (const [key, value] of Object.entries(annotation)) {
+          if (FILTER_PROPERTIES.includes(key)) {
+            if (annotation.source) {
+              if (!filterSourcesMap.has(key)) {
+                filterSourcesMap.set(key, new Map())
+              }
+              const sourceMap = filterSourcesMap.get(key)
+              const addToSourceMap = (val) => {
+                const setKey = val
+                if (!sourceMap.has(setKey)) {
+                  sourceMap.set(setKey, new Set())
+                }
+                sourceMap.get(setKey).add(`${annotation.source}`)
+              };
+              if (Array.isArray(value)) {
+                value.forEach(addToSourceMap)
+              } else {
+                addToSourceMap(value)
+              }
+            }
+          }
+        }
+      }
+      let filterSources = {
+        'alert': {
+          'with': [...withAlert],
+          'without': [...withoutAlert]
+        }
+      }
+      for (const [key, value] of filterSourcesMap.entries()) {
+        filterSources[key] = {}
+        for (const [key1, value1] of value.entries()) {
+          filterSources[key][key1] = [...value1.values()]
+        }
+      }
+      return filterSources
+    },
     getFilterOptions: async function () {
       if (this.mapImp) {
         let filterOptions = []
