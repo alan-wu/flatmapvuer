@@ -1189,6 +1189,7 @@ export default {
         ];
 
         map.setMaxBounds(null); // override default
+        map.setRenderWorldCopies(false);
 
         this.initMapState = markRaw({
           initBounds,
@@ -1935,7 +1936,7 @@ export default {
     },
     changeConnectivitySource: async function (payload) {
       const { entry, connectivitySource } = payload;
-      if (entry.mapId === this.mapImp.id) {        
+      if (entry.mapId === this.mapImp.id) {
         await this.flatmapQueries.queryForConnectivityNew(this.mapImp, entry.featureId[0], connectivitySource);
         this.tooltipEntry = this.tooltipEntry.map((tooltip) => {
           if (tooltip.featureId[0] === entry.featureId[0]) {
