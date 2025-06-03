@@ -2736,7 +2736,7 @@ export default {
             main.label = "Pathways"
             for (const facet of value) {
               let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
-              const pathway = this.pathways.find(p => p.type === facet)
+              const pathway = this.pathways.find(p => p.type !== "centreline" && p.type === facet)
               if (pathway) {
                 sub.label = pathway.label
                 main.children.push(sub)
