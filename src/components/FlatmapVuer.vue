@@ -2005,14 +2005,12 @@ export default {
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
         let prom1 = []
-        // When there are multiple paths, emit placeholders first.
+        // Emit placeholders first.
         // This may contain invalid connectivity.
-        if (data.length > 1) {
-          this.tooltipEntry = data.map((tooltip) => {
-            return { title: tooltip.label, featureId: tooltip.resource, ready: false }
-          })
-          this.$emit('connectivity-info-open', this.tooltipEntry);
-        }
+        this.tooltipEntry = data.map((tooltip) => {
+          return { title: tooltip.label, featureId: tooltip.resource, ready: false }
+        })
+        this.$emit('connectivity-info-open', this.tooltipEntry);
         // While having placeholders displayed, get details for all paths and then replace.
         for (let index = 0; index < data.length; index++) {
           prom1.push(await this.getKnowledgeTooltip(data[index]))
