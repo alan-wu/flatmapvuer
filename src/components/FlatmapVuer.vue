@@ -2340,6 +2340,7 @@ export default {
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
       if (
+        featureId &&
         !this.disableUI &&
         (
           (this.viewingMode === 'Annotation' && !this.annotationSidebar) ||
