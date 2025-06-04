@@ -2688,10 +2688,8 @@ export default {
           } else {
             withoutAlert.add(annotation.source)
           }
-        }
-        for (const [key, value] of Object.entries(annotation)) {
-          if (FILTER_PROPERTIES.includes(key)) {
-            if (annotation.source) {
+          for (const [key, value] of Object.entries(annotation)) {
+            if (FILTER_PROPERTIES.includes(key)) {
               if (!filterSourcesMap.has(key)) {
                 filterSourcesMap.set(key, new Map())
               }
