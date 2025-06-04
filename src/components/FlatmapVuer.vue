@@ -1189,6 +1189,7 @@ export default {
         ];
 
         map.setMaxBounds(null); // override default
+        map.setRenderWorldCopies(false);
 
         this.initMapState = markRaw({
           initBounds,
