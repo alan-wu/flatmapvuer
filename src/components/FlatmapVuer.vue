@@ -2007,10 +2007,17 @@ export default {
         let prom1 = []
         // Emit placeholders first.
         // This may contain invalid connectivity.
+        let isConnectivity = false
         this.tooltipEntry = data.map((tooltip) => {
+          if (!isConnectivity && this.mapImp.pathModelNodes(tooltip.resource).length > 0) {
+            isConnectivity = true
+          }
           return { title: tooltip.label, featureId: tooltip.resource, ready: false }
         })
-        this.$emit('connectivity-info-open', this.tooltipEntry);
+        // this should only for flatmap paths not all features
+        if (isConnectivity) {
+          this.$emit('connectivity-info-open', this.tooltipEntry);
+        }
         // While having placeholders displayed, get details for all paths and then replace.
         for (let index = 0; index < data.length; index++) {
           prom1.push(await this.getKnowledgeTooltip(data[index]))
