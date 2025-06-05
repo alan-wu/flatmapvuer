@@ -1189,6 +1189,7 @@ export default {
         ];
 
         map.setMaxBounds(null); // override default
+        map.setRenderWorldCopies(false);
 
         this.initMapState = markRaw({
           initBounds,
@@ -2315,7 +2316,9 @@ export default {
         options.annotationFeatureGeometry = geometry
       } else {
         const entry = Array.isArray(feature) ? feature[0] : feature
-        featureId = this.mapImp.modelFeatureIds(entry)[0]
+        if (entry) {
+          featureId = this.mapImp.modelFeatureIds(entry)[0]
+        }
         if (!this.activeDrawTool) {
           options.positionAtLastClick = true
         }
@@ -2338,6 +2341,7 @@ export default {
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
       if (
+        featureId &&
         !this.disableUI &&
         (
           (this.viewingMode === 'Annotation' && !this.annotationSidebar) ||
