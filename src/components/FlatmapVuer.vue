@@ -2729,15 +2729,20 @@ export default {
         let filterOptions = []
         const filterRanges = this.mapImp.featureFilterRanges()
         for (const [key, value] of Object.entries(filterRanges)) {
-          let main = { key: `flatmap.connectivity.${key}`, label: "", children: [] }
+          let main = {
+            key: `flatmap.connectivity.${key}`,
+            label: "",
+            children: []
+          }
           if (key === "kind") {
             main.label = "Pathways"
             for (const facet of value) {
-              let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
               const pathway = this.pathways.find(p => p.type !== "centreline" && p.type === facet)
               if (pathway) {
-                sub.label = pathway.label
-                main.children.push(sub)
+                main.children.push({
+                  key: `${main.key}.${facet}`,
+                  label: pathway.label
+                })
               }
             }
           } else if (key === "taxons") {
@@ -2745,20 +2750,22 @@ export default {
             const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
             if (entityLabels.length) {
               for (const facet of value) {
-                let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
                 const taxon = entityLabels.find(p => p.taxon === facet)
                 if (taxon) {
-                  sub.label = taxon.label
-                  main.children.push(sub)
+                  main.children.push({
+                    key: `${main.key}.${facet}`,
+                    label: taxon.label
+                  })
                 }
               }
             }
           } else if (key === "alert") {
             main.label = "Alert"
             for (const facet of ["with", "without"]) {
-              let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
-              sub.label = `${facet} alerts`
-              main.children.push(sub)
+              main.children.push({
+                key: `${main.key}.${facet}`,
+                label: `${facet} alerts`
+              })
             }
           }
           if (main.label && main.children.length) {
@@ -2771,9 +2778,10 @@ export default {
         //   children: []
         // }
         // for (const facet of ["Origins", "Components", "Destinations"]) {
-        //   let sub = { key: `flatmap.connectivity.${facet}`, label: "" }
-        //   sub.label = facet
-        //   hardcode.children.push(sub)
+        //   hardcode.children.push({
+        //     key: `flatmap.connectivity.source.${facet}`,
+        //     label: facet
+        //   })
         // }
         // filterOptions.push(hardcode)
         return filterOptions
