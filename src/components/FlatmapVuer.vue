@@ -252,7 +252,7 @@ Please use `const` to assign meaningful names to them...
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
-            v-show="!disableUI && requiresDrawer"
+            v-show="!disableUI && requiresDrawer && showPathwayDrawer"
           >
             <div
               class="pathway-container"
@@ -3148,6 +3148,13 @@ export default {
      * The option to show open new map button
      */
     showOpenMapButton: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show pathway drawer
+     */
+    showPathwayDrawer: {
       type: Boolean,
       default: true,
     },

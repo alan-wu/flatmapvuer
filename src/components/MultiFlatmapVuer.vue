@@ -88,6 +88,7 @@
       :sparcAPI="sparcAPI"
       :showLocalSettings="showLocalSettings"
       :showOpenMapButton="showOpenMapButton"
+      :showPathwayDrawer="showPathwayDrawer"
     />
   </div>
 </template>
@@ -776,6 +777,13 @@ export default {
      * The option to show open new map button
      */
     showOpenMapButton: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show pathway drawer
+     */
+    showPathwayDrawer: {
       type: Boolean,
       default: true,
     },
