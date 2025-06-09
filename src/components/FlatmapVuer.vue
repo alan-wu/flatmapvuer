@@ -533,7 +533,7 @@ Please use `const` to assign meaningful names to them...
         :class="{ open: drawerOpen, close: !drawerOpen }"
         v-show="!disableUI"
       >
-        <el-row>
+        <el-row v-if="showOpenMapButton">
           <el-popover
             :visible="hoverVisibilities[4].value"
             content="Open new map"
@@ -558,7 +558,7 @@ Please use `const` to assign meaningful names to them...
             </template>
           </el-popover>
         </el-row>
-        <el-row>
+        <el-row v-if="showLocalSettings">
           <el-popover
             content="Change settings"
             placement="right"
@@ -1203,6 +1203,7 @@ export default {
         ];
 
         map.setMaxBounds(null); // override default
+        map.setRenderWorldCopies(false);
 
         this.initMapState = markRaw({
           initBounds,
@@ -1949,7 +1950,7 @@ export default {
     },
     changeConnectivitySource: async function (payload) {
       const { entry, connectivitySource } = payload;
-      if (entry.mapId === this.mapImp.id) {        
+      if (entry.mapId === this.mapImp.id) {
         await this.flatmapQueries.queryForConnectivityNew(this.mapImp, entry.featureId[0], connectivitySource);
         this.tooltipEntry = this.tooltipEntry.map((tooltip) => {
           if (tooltip.featureId[0] === entry.featureId[0]) {
@@ -2019,22 +2020,30 @@ export default {
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
         let prom1 = []
-        // When there are multiple paths, emit placeholders first.
+        // Emit placeholders first.
         // This may contain invalid connectivity.
-        if (data.length > 1) {
-          this.tooltipEntry = data.map((tooltip) => {
+        this.tooltipEntry = data
+          .filter((tooltip) => {
+            return (
+              tooltip.resource[0] &&
+              this.mapImp.pathModelNodes(tooltip.resource).length > 0
+            )
+          })
+          .map((tooltip) => {
             return { title: tooltip.label, featureId: tooltip.resource, ready: false }
           })
+        // this should only for flatmap paths not all features
+        if (this.tooltipEntry.length) {
           this.$emit('connectivity-info-open', this.tooltipEntry);
-        }
-        // While having placeholders displayed, get details for all paths and then replace.
-        for (let index = 0; index < data.length; index++) {
-          prom1.push(await this.getKnowledgeTooltip(data[index]))
-        }
-        this.tooltipEntry = await Promise.all(prom1)
-        const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
-        if (featureIds.length > 0) {
-          this.displayTooltip(featureIds)
+          // While having placeholders displayed, get details for all paths and then replace.
+          for (let index = 0; index < data.length; index++) {
+            prom1.push(await this.getKnowledgeTooltip(data[index]))
+          }
+          this.tooltipEntry = await Promise.all(prom1)
+          const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
+          if (featureIds.length > 0) {
+            this.displayTooltip(featureIds)
+          }
         }
       }
     },
@@ -2329,7 +2338,9 @@ export default {
         options.annotationFeatureGeometry = geometry
       } else {
         const entry = Array.isArray(feature) ? feature[0] : feature
-        featureId = this.mapImp.modelFeatureIds(entry)[0]
+        if (entry) {
+          featureId = this.mapImp.modelFeatureIds(entry)[0]
+        }
         if (!this.activeDrawTool) {
           options.positionAtLastClick = true
         }
@@ -2352,6 +2363,7 @@ export default {
       // Provenance popup will be shown on map
       // Tooltip will be shown for Annotation view
       if (
+        featureId &&
         !this.disableUI &&
         (
           (this.viewingMode === 'Annotation' && !this.annotationSidebar) ||
@@ -3026,6 +3038,21 @@ export default {
     annotationSidebar: {
       type: Boolean,
       default: false,
+    },
+    /**
+     * The option to show local settings UI
+     * (background colour, flight path, viewing mode, etc.)
+     */
+    showLocalSettings: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show open new map button
+     */
+    showOpenMapButton: {
+      type: Boolean,
+      default: true,
     },
   },
   provide() {
