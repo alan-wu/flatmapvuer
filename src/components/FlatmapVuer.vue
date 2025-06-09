@@ -252,7 +252,7 @@ Please use `const` to assign meaningful names to them...
           <div
             class="pathway-location"
             :class="{ open: drawerOpen, close: !drawerOpen }"
-            v-show="!disableUI && requiresDrawer && showPathwayDrawer"
+            v-show="!disableUI && requiresDrawer"
           >
             <div
               class="pathway-container"
@@ -318,7 +318,7 @@ Please use `const` to assign meaningful names to them...
                 ref="treeControls"
               />
               <selections-group
-                v-if="containsAlert && alertOptions"
+                v-if="containsAlert && alertOptions && showPathwayFilter"
                 title="Alert"
                 labelKey="label"
                 identifierKey="key"
@@ -357,7 +357,7 @@ Please use `const` to assign meaningful names to them...
                 />
               -->
               <selections-group
-                v-if="pathways && pathways.length > 0"
+                v-if="pathways && pathways.length > 0 & showPathwayFilter"
                 title="Pathways"
                 labelKey="label"
                 identifierKey="type"
@@ -370,7 +370,7 @@ Please use `const` to assign meaningful names to them...
                 key="pathwaysSelection"
               />
               <selections-group
-                v-if="taxonConnectivity && taxonConnectivity.length > 0"
+                v-if="taxonConnectivity && taxonConnectivity.length > 0 && showPathwayFilter"
                 title="Studied in"
                 labelKey="label"
                 identifierKey="taxon"
@@ -3154,7 +3154,7 @@ export default {
     /**
      * The option to show pathway drawer
      */
-    showPathwayDrawer: {
+    showPathwayFilter: {
       type: Boolean,
       default: true,
     },
