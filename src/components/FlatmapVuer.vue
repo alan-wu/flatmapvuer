@@ -318,7 +318,7 @@ Please use `const` to assign meaningful names to them...
                 ref="treeControls"
               />
               <selections-group
-                v-if="containsAlert && alertOptions"
+                v-if="containsAlert && alertOptions && showPathwayFilter"
                 title="Alert"
                 labelKey="label"
                 identifierKey="key"
@@ -357,7 +357,7 @@ Please use `const` to assign meaningful names to them...
                 />
               -->
               <selections-group
-                v-if="pathways && pathways.length > 0"
+                v-if="pathways && pathways.length > 0 & showPathwayFilter"
                 title="Pathways"
                 labelKey="label"
                 identifierKey="type"
@@ -370,7 +370,7 @@ Please use `const` to assign meaningful names to them...
                 key="pathwaysSelection"
               />
               <selections-group
-                v-if="taxonConnectivity && taxonConnectivity.length > 0"
+                v-if="taxonConnectivity && taxonConnectivity.length > 0 && showPathwayFilter"
                 title="Studied in"
                 labelKey="label"
                 identifierKey="taxon"
@@ -2702,6 +2702,117 @@ export default {
         console.error('Map resize error')
       }
     },
+    getFilterSources: function () {
+      const FILTER_PROPERTIES = ['kind', 'taxons']
+      let withAlert = new Set()
+      let withoutAlert = new Set()
+      let filterSourcesMap = new Map()
+      for (const annotation of this.mapImp.annotations.values()) {
+        if (annotation.source) {
+          if ("alert" in annotation) {
+            withAlert.add(annotation.source)
+          } else {
+            withoutAlert.add(annotation.source)
+          }
+          for (const [key, value] of Object.entries(annotation)) {
+            if (FILTER_PROPERTIES.includes(key)) {
+              if (!filterSourcesMap.has(key)) {
+                filterSourcesMap.set(key, new Map())
+              }
+              const sourceMap = filterSourcesMap.get(key)
+              const addToSourceMap = (val) => {
+                const setKey = val
+                if (!sourceMap.has(setKey)) {
+                  sourceMap.set(setKey, new Set())
+                }
+                sourceMap.get(setKey).add(`${annotation.source}`)
+              };
+              if (Array.isArray(value)) {
+                value.forEach(addToSourceMap)
+              } else {
+                addToSourceMap(value)
+              }
+            }
+          }
+        }
+      }
+      let filterSources = {
+        'alert': {
+          'with': [...withAlert],
+          'without': [...withoutAlert]
+        }
+      }
+      for (const [key, value] of filterSourcesMap.entries()) {
+        filterSources[key] = {}
+        for (const [key1, value1] of value.entries()) {
+          filterSources[key][key1] = [...value1.values()]
+        }
+      }
+      return filterSources
+    },
+    getFilterOptions: async function () {
+      if (this.mapImp) {
+        let filterOptions = []
+        const filterRanges = this.mapImp.featureFilterRanges()
+        for (const [key, value] of Object.entries(filterRanges)) {
+          let main = {
+            key: `flatmap.connectivity.${key}`,
+            label: "",
+            children: []
+          }
+          if (key === "kind") {
+            main.label = "Pathways"
+            for (const facet of value) {
+              const pathway = this.pathways.find(p => p.type !== "centreline" && p.type === facet)
+              if (pathway) {
+                main.children.push({
+                  key: `${main.key}.${facet}`,
+                  label: pathway.label
+                })
+              }
+            }
+          } else if (key === "taxons") {
+            main.label = "Studied in"
+            const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
+            if (entityLabels.length) {
+              for (const facet of value) {
+                const taxon = entityLabels.find(p => p.taxon === facet)
+                if (taxon) {
+                  main.children.push({
+                    key: `${main.key}.${facet}`,
+                    label: taxon.label
+                  })
+                }
+              }
+            }
+          } else if (key === "alert") {
+            main.label = "Alert"
+            for (const facet of ["with", "without"]) {
+              main.children.push({
+                key: `${main.key}.${facet}`,
+                label: `${facet} alerts`
+              })
+            }
+          }
+          if (main.label && main.children.length) {
+            filterOptions.push(main)
+          }
+        }
+        // let hardcode = {
+        //   key: "flatmap.connectivity.source",
+        //   label: "Connectivity",
+        //   children: []
+        // }
+        // for (const facet of ["Origins", "Components", "Destinations"]) {
+        //   hardcode.children.push({
+        //     key: `flatmap.connectivity.source.${facet}`,
+        //     label: facet
+        //   })
+        // }
+        // filterOptions.push(hardcode)
+        return filterOptions
+      }
+    },
     /**
      * @public
      * This function is used for functions that need to run immediately after the flatmap is loaded.
@@ -3051,6 +3162,13 @@ export default {
      * The option to show open new map button
      */
     showOpenMapButton: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show pathway drawer
+     */
+    showPathwayFilter: {
       type: Boolean,
       default: true,
     },
@@ -3503,7 +3621,8 @@ export default {
   max-width: 330px !important;
 }
 
-:deep(.flatmap-tooltip-popup) {
+:deep(.flatmap-tooltip-popup),
+:deep(.custom-popup) {
   &.maplibregl-popup-anchor-bottom {
     .maplibregl-popup-content {
       margin-bottom: 12px;
@@ -4028,77 +4147,14 @@ export default {
 }
 
 :deep(.custom-popup) {
-  .maplibregl-popup-tip {
-    display: none;
-  }
   .maplibregl-popup-content {
-    border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    pointer-events: none;
-    display: none;
-    background: #fff;
     font-family: 'Asap', sans-serif;
     font-size: 12pt;
     color: $app-primary-color;
-    border: 1px solid $app-primary-color;
-    padding-left: 6px;
     padding-right: 6px;
     padding-top: 6px;
-    padding-bottom: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    &::after,
-    &::before {
-      content: '';
-      display: block;
-      position: absolute;
-      width: 0;
-      height: 0;
-      border-style: solid;
-      flex-shrink: 0;
-    }
     .maplibregl-popup-close-button {
       display: none;
-    }
-  }
-  &.maplibregl-popup-anchor-bottom {
-    .maplibregl-popup-content {
-      margin-bottom: 12px;
-      &::after,
-      &::before {
-        top: 100%;
-        border-width: 12px;
-      }
-      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-      &::after {
-        margin-top: -1px;
-        border-color: rgb(255, 255, 255) transparent transparent transparent;
-      }
-      /* this border color controlls the outside, thin border */
-      &::before {
-        margin: 0 auto;
-        border-color: $app-primary-color transparent transparent transparent;
-      }
-    }
-  }
-  &.maplibregl-popup-anchor-top {
-    .maplibregl-popup-content {
-      margin-top: 18px;
-      &::after,
-      &::before {
-        top: calc(-100% + 6px);
-        border-width: 12px;
-      }
-      /* this border color controlls the color of the triangle (what looks like the fill of the triangle) */
-      &::after {
-        margin-top: 1px;
-        border-color: transparent transparent rgb(255, 255, 255) transparent;
-      }
-      &::before {
-        margin: 0 auto;
-        border-color: transparent transparent $app-primary-color transparent;
-      }
     }
   }
 }
