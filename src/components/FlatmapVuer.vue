@@ -2015,12 +2015,7 @@ export default {
         // Emit placeholders first.
         // This may contain invalid connectivity.
         this.tooltipEntry = data
-          .filter((tooltip) => {
-            return (
-              tooltip.resource[0] &&
-              this.mapImp.pathModelNodes(tooltip.resource).length > 0
-            )
-          })
+          .filter(tooltip => tooltip.resource[0] in this.mapImp.pathways.paths)
           .map((tooltip) => {
             return { title: tooltip.label, featureId: tooltip.resource, ready: false }
           })
