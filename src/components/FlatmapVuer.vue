@@ -1170,7 +1170,7 @@ export default {
     setColour: function (flag) {
       this.colourRadio = flag
       if (this.mapImp) {
-        this.mapImp.setPaint({ colour: flag, outline: this.outlinesRadio })
+        this.mapImp.setPaint({ coloured: flag, outlined: this.outlinesRadio })
       }
     },
     /**
@@ -1182,7 +1182,7 @@ export default {
     setOutlines: function (flag) {
       this.outlinesRadio = flag
       if (this.mapImp) {
-        this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
+        this.mapImp.setPaint({ coloured: this.colourRadio, outlined: flag })
       }
     },
     setInitMapState: function () {
