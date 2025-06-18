@@ -1720,9 +1720,7 @@ export default {
               const clickedItem = singleSelection ? data : data[0]
               this.setConnectivityDataSource(this.viewingMode, clickedItem);
               if (this.viewingMode === 'Neuron Connection') {
-                this.retrieveConnectedPaths([clickedItem.models]).then((paths) => {
-                  this.zoomToFeatures(paths)
-                })
+                this.highlightConnectedPaths([clickedItem.models]);
               } else {
                 this.currentActive = clickedItem.models ? clickedItem.models : '' // This is for FC map
                 // This is for annotation mode - draw connectivity between features/paths
@@ -2906,9 +2904,7 @@ export default {
                 if (this.viewingMode === "Exploration" || this.viewingMode === "Annotation") {
                   this.checkAndCreatePopups([data])
                 } else if (this.viewingMode === 'Neuron Connection') {
-                  this.retrieveConnectedPaths(data.resource).then((paths) => {
-                    this.zoomToFeatures(paths)
-                  })
+                  this.highlightConnectedPaths(data.resource);
                 }
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
                   className: 'custom-popup',
@@ -2923,6 +2919,11 @@ export default {
         }
       }
       return false
+    },
+    highlightConnectedPaths: function (resource) {
+      this.retrieveConnectedPaths(resource).then((paths) => {
+        this.zoomToFeatures(paths)
+      })
     },
     /**
      * @public
