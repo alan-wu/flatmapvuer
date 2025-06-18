@@ -70,6 +70,7 @@
       @connectivity-info-open="onConnectivityInfoOpen"
       @connectivity-info-close="onConnectivityInfoClose"
       @connectivity-error="onConnectivityError"
+      @neuron-connection-click="onNeuronConnectionClick"
       @open-map="$emit('open-map', $event)"
       @pathway-selection-changed="onSelectionsDataChanged"
       :minZoom="minZoom"
@@ -304,6 +305,9 @@ export default {
     },
     onConnectivityError: function (errorInfo) {
       this.$emit('connectivity-error', errorInfo);
+    },
+    onNeuronConnectionClick: function (payload) {
+      this.$emit('neuron-connection-click', payload);
     },
     onSelectionsDataChanged: function (data) {
       this.$emit('pathway-selection-changed', data);

@@ -1720,7 +1720,12 @@ export default {
               const clickedItem = singleSelection ? data : data[0]
               this.setConnectivityDataSource(this.viewingMode, clickedItem);
               if (this.viewingMode === 'Neuron Connection') {
-                this.highlightConnectedPaths([clickedItem.models]);
+                const clickedModels = [clickedItem.models];
+                this.highlightConnectedPaths(clickedModels);
+                /**
+                 * This event is emitted to highlight the same paths on other display maps.
+                 */
+                this.$emit('neuron-connection-click', clickedModels);
               } else {
                 this.currentActive = clickedItem.models ? clickedItem.models : '' // This is for FC map
                 // This is for annotation mode - draw connectivity between features/paths
