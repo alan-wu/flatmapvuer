@@ -640,7 +640,7 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import { DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
+import { competencyQuery, DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import EventBus from './EventBus.js'
 
@@ -1350,6 +1350,28 @@ export default {
         return connectedPaths;
       }
     },
+    queryPathsByDestinations: async function (featureId) {
+      const data = await competencyQuery({
+        flatmapServer: this.flatmapAPI,
+        sourceId: this.mapImp.knowledgeSource,
+        queryId: 2,
+        parameters: [
+          {
+            column: 'feature_id',
+            value: featureId
+          },
+        ]
+      });
+      if (data?.results?.values) {
+        const paths = data.results.values.map((value) => {
+          // value => [ 'source_id', 'path_id', 'axon_terminal']
+          return value[1];
+        });
+        // remove duplicaates
+        return [...new Set(paths)];
+      }
+      return [];
+    },
     resetMapFilter: function() {
       const alert = this.mapFilters.alert;
       let filter = undefined;
@@ -2011,7 +2033,14 @@ export default {
         }
       } if (this.viewingMode === 'Neuron Connection') {
         const resources = data.map(tooltip => tooltip.resource[0])
-        this.retrieveConnectedPaths(resources).then(async (paths) => {
+        const queryType = 'destinations'; // TODO: hardcoded for now
+        // filter out paths
+        const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
+        let pathsQueryAPI = (queryType === 'destinations' && featureId) ?
+          this.queryPathsByDestinations(resources) :
+          this.retrieveConnectedPaths(resources);
+
+        pathsQueryAPI.then(async (paths) => {
           if (paths.length) {
             const filteredPaths = paths.filter(path => (path in this.mapImp.pathways.paths))
             let prom2 = [];
