@@ -1073,6 +1073,12 @@ export default {
       }
     },
     /**
+     * Function to emit offline annotation enabled status
+     */
+    emitOfflineAnnotationUpdate: function () {
+      this.$emit('update-offline-annotation-enabled', this.offlineAnnotationEnabled);
+    },
+    /**
      * @public
      * Function to switch from 2D to 3D
      * @arg {Boolean} `flag`
@@ -1178,7 +1184,7 @@ export default {
     setColour: function (flag) {
       this.colourRadio = flag
       if (this.mapImp) {
-        this.mapImp.setPaint({ colour: flag, outline: this.outlinesRadio })
+        this.mapImp.setPaint({ coloured: flag, outlined: this.outlinesRadio })
       }
     },
     /**
@@ -1190,7 +1196,7 @@ export default {
     setOutlines: function (flag) {
       this.outlinesRadio = flag
       if (this.mapImp) {
-        this.mapImp.setPaint({ colour: this.colourRadio, outline: flag })
+        this.mapImp.setPaint({ coloured: this.colourRadio, outlined: flag })
       }
     },
     setInitMapState: function () {
@@ -2023,12 +2029,7 @@ export default {
         // Emit placeholders first.
         // This may contain invalid connectivity.
         this.tooltipEntry = data
-          .filter((tooltip) => {
-            return (
-              tooltip.resource[0] &&
-              this.mapImp.pathModelNodes(tooltip.resource).length > 0
-            )
-          })
+          .filter(tooltip => tooltip.resource[0] in this.mapImp.pathways.paths)
           .map((tooltip) => {
             return { title: tooltip.label, featureId: tooltip.resource, ready: false }
           })
@@ -3377,6 +3378,7 @@ export default {
             this.authorisedUser = undefined
             this.offlineAnnotationEnabled = true
           }
+          this.emitOfflineAnnotationUpdate();
           this.setFeatureAnnotated()
           this.addAnnotationFeature()
           this.loading = false
