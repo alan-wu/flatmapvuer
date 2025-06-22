@@ -2009,6 +2009,32 @@ export default {
         } else {
           this.annotation = {}
         }
+      } if (this.viewingMode === 'Neuron Connection') {
+        const resources = data.map(tooltip => tooltip.resource[0])
+        this.retrieveConnectedPaths(resources).then(async (paths) => {
+          if (paths.length) {
+            const filteredPaths = paths.filter(path => (path in this.mapImp.pathways.paths))
+            let prom2 = [];
+            for (let i = 0; i < filteredPaths.length; i++) {
+              const path = filteredPaths[i];
+              const modelFeatureIds = this.mapImp.modelFeatureIds(path);
+              const feature = this.mapImp.featureProperties(modelFeatureIds[0]);
+              if (feature) {
+                const pathData = {
+                  resource: [feature.models],
+                  feature: feature,
+                  label: feature.label,
+                  provenanceTaxonomy: feature.taxons,
+                  alert: feature.alert,
+                };
+                const tooltipEntryData = await this.getKnowledgeTooltip(pathData);
+                prom2.push(tooltipEntryData)
+              }
+            }
+            this.tooltipEntry = await Promise.all(prom2)
+            this.displayTooltip(filteredPaths)
+          }
+        })
       } else {
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
@@ -2024,41 +2050,14 @@ export default {
         if (this.tooltipEntry.length) {
           this.$emit('connectivity-info-open', this.tooltipEntry);
 
-          if (this.viewingMode === 'Neuron Connection') {
-            const resources = data.map(tooltip => tooltip.resource[0])
-            this.retrieveConnectedPaths(resources).then(async (paths) => {
-              if (paths.length) {
-                let prom2 = [];
-                for (let i = 0; i < paths.length; i++) {
-                  const path = paths[i];
-                  const modelFeatureIds = this.mapImp.modelFeatureIds(path);
-                  const feature = this.mapImp.featureProperties(modelFeatureIds[0]);
-                  if (feature) {
-                    const pathData = {
-                      resource: [feature.models],
-                      feature: feature,
-                      label: feature.label,
-                      provenanceTaxonomy: feature.taxons,
-                      alert: feature.alert,
-                    };
-                    const tooltipEntryData = await this.getKnowledgeTooltip(pathData);
-                    prom2.push(tooltipEntryData)
-                  }
-                }
-                this.tooltipEntry = await Promise.all(prom2)
-                this.displayTooltip(paths)
-              }
-            })
-          } else {
-            // While having placeholders displayed, get details for all paths and then replace.
-            for (let index = 0; index < data.length; index++) {
-              prom1.push(await this.getKnowledgeTooltip(data[index]))
-            }
-            this.tooltipEntry = await Promise.all(prom1)
-            const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
-            if (featureIds.length > 0) {
-              this.displayTooltip(featureIds)
-            }
+          // While having placeholders displayed, get details for all paths and then replace.
+          for (let index = 0; index < data.length; index++) {
+            prom1.push(await this.getKnowledgeTooltip(data[index]))
+          }
+          this.tooltipEntry = await Promise.all(prom1)
+          const featureIds = this.tooltipEntry.map(tooltip => tooltip.featureId[0])
+          if (featureIds.length > 0) {
+            this.displayTooltip(featureIds)
           }
         }
       }
