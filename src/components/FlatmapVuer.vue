@@ -640,7 +640,14 @@ import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
-import { queryPathsByDestinations, DrawToolbar, Tooltip, TreeControls } from '@abi-software/map-utilities'
+import {
+  queryPathsByOrigins,
+  queryPathsByVias,
+  queryPathsByDestinations,
+  DrawToolbar,
+  Tooltip,
+  TreeControls
+} from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import EventBus from './EventBus.js'
 
@@ -2016,6 +2023,12 @@ export default {
         // filter out paths
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
         if (featureId) {
+          if (this.connectionType === 'origins') {
+            pathsQueryAPI = queryPathsByOrigins(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          }
+          if (this.connectionType === 'vias') {
+            pathsQueryAPI = queryPathsByVias(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          }
           if (this.connectionType === 'destinations') {
             pathsQueryAPI = queryPathsByDestinations(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
