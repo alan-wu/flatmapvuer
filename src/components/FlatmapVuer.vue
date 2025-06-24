@@ -644,6 +644,7 @@ import {
   queryPathsByOrigins,
   queryPathsByVias,
   queryPathsByDestinations,
+  queryAllConnectedPaths,
   DrawToolbar,
   Tooltip,
   TreeControls
