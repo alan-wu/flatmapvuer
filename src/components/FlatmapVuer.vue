@@ -2754,7 +2754,10 @@ export default {
               if (pathway) {
                 main.children.push({
                   key: `${main.key}.${facet}`,
-                  label: pathway.label
+                  label: pathway.label,
+                  colour: pathway.colour,
+                  colourStyle: 'line',
+                  dashed: pathway.dashed,
                 })
               }
             }
