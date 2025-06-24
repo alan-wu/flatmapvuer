@@ -2018,7 +2018,7 @@ export default {
         }
       } if (this.viewingMode === 'Neuron Connection') {
         const resources = data.map(tooltip => tooltip.resource[0]);
-        let pathsQueryAPI = this.retrieveConnectedPaths(resources);
+        let pathsQueryAPI = this.retrieveConnectedPaths(resources); // TODO: to replace with queryAllConnectedPaths
 
         // filter out paths
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
@@ -2031,6 +2031,8 @@ export default {
           }
           if (this.connectionType === 'destinations') {
             pathsQueryAPI = queryPathsByDestinations(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          } else {
+            pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
         }
 
