@@ -2010,13 +2010,16 @@ export default {
           this.annotation = {}
         }
       } if (this.viewingMode === 'Neuron Connection') {
-        const resources = data.map(tooltip => tooltip.resource[0])
-        const queryType = 'destinations'; // TODO: hardcoded for now
+        const resources = data.map(tooltip => tooltip.resource[0]);
+        let pathsQueryAPI = this.retrieveConnectedPaths(resources);
+
         // filter out paths
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
-        let pathsQueryAPI = (queryType === 'destinations' && featureId) ?
-          queryPathsByDestinations(this.flatmapAPI, this.mapImp.knowledgeSource, resources) :
-          this.retrieveConnectedPaths(resources);
+        if (featureId) {
+          if (this.connectionType === 'destinations') {
+            pathsQueryAPI = queryPathsByDestinations(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          }
+        }
 
         pathsQueryAPI.then(async (paths) => {
           if (paths.length) {
@@ -2975,6 +2978,9 @@ export default {
     onActionClick: function (data) {
       EventBus.emit('onActionClick', data)
     },
+    setConnectionType: function (type) {
+      this.connectionType = type;
+    },
   },
   props: {
     /**
@@ -3274,6 +3280,7 @@ export default {
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
         'Annotation': ['View feature annotations', 'Add, comment on and view feature annotations']
       },
+      connectionType: '',
       offlineAnnotationEnabled: false,
       offlineAnnotations: [],
       annotationFrom: 'Anyone',

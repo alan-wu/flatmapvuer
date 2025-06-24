@@ -561,6 +561,10 @@ export default {
       let map = this.getCurrentFlatmap()
       map.changeViewingMode(modeName)
     },
+    setConnectionType: function (type) {
+      let map = this.getCurrentFlatmap();
+      map.setConnectionType(type);
+    },
   },
   props: {
     /**
