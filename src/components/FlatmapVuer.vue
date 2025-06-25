@@ -2026,11 +2026,9 @@ export default {
         if (featureId) {
           if (this.connectionType === 'origins') {
             pathsQueryAPI = queryPathsByOrigins(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
-          }
-          if (this.connectionType === 'vias') {
+          } else if (this.connectionType === 'vias') {
             pathsQueryAPI = queryPathsByVias(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
-          }
-          if (this.connectionType === 'destinations') {
+          } else if (this.connectionType === 'destinations') {
             pathsQueryAPI = queryPathsByDestinations(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
