@@ -1731,11 +1731,8 @@ export default {
               const clickedItem = singleSelection ? data : data[0]
               this.setConnectivityDataSource(this.viewingMode, clickedItem);
               if (this.viewingMode === 'Neuron Connection') {
-                const clickedModels = [clickedItem.models];
-                /**
-                 * This event is emitted to highlight the same paths on other display maps.
-                 */
-                this.$emit('neuron-connection-click', clickedModels);
+                // do nothing here
+                // the method to highlight paths is moved to checkAndCreatePopups function
               } else {
                 this.currentActive = clickedItem.models ? clickedItem.models : '' // This is for FC map
                 // This is for annotation mode - draw connectivity between features/paths
@@ -2090,6 +2087,11 @@ export default {
             this.tooltipEntry = await Promise.all(prom1)
             // Emit placeholders first.
             this.$emit('connectivity-info-open', this.tooltipEntry);
+
+            /**
+             * This event is emitted to highlight the same paths on other display maps.
+             */
+            this.$emit('neuron-connection-click', paths);
 
             // loading data
             for (let i = 0; i < filteredPathsWithData.length; i++) {
@@ -3016,10 +3018,20 @@ export default {
       }
       return false
     },
-    highlightConnectedPaths: function (resource) {
-      this.retrieveConnectedPaths(resource).then((paths) => {
-        this.zoomToFeatures(paths)
-      })
+    /**
+     * @public
+     * Public method to highlight connected paths for neuron connection mode,
+     * to highlight paths for other display maps on spit screen.
+     * @arg {Array} `paths`
+     */
+    highlightConnectedPaths: function (paths) {
+      if (paths.length) {
+        // filter paths for this map
+        const filteredPaths = paths.filter(path => (path in this.mapImp.pathways.paths))
+        // this.zoomToFeatures is replaced with selectGeoJSONFeatures to highlight paths
+        const featureIdsToHighlight = this.mapImp.modelFeatureIdList(filteredPaths);
+        this.mapImp.selectGeoJSONFeatures(featureIdsToHighlight);
+      }
     },
     /**
      * @public
