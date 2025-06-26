@@ -2025,7 +2025,7 @@ export default {
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
         if (featureId) {
           // fallback if it cannot find in anatomical nodes
-          const transformResources = Array.isArray(resources) ? resources : [resources];
+          const transformResources = Array.isArray(resources) ? [...resources] : [resources];
           if (transformResources.length === 1) {
             transformResources.push([]);
           }
