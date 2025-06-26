@@ -2038,19 +2038,19 @@ export default {
           const anatomicalNodes = annotation?.['anatomical-nodes'];
           const uniqueResource = anatomicalNodes ? JSON.parse(anatomicalNodes[0]) : transformResources;
 
-          if (this.connectionType === 'origin') {
+          if (this.connectionType === 'Origin') {
             // Competency Query API
             // pathsQueryAPI = queryPathsByOrigin(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
 
             // search by unique placement before competency API is ready for this
             pathsQueryAPI = filterPathsByOriginFromKnowledge(uniqueResource);
-          } else if (this.connectionType === 'via') {
+          } else if (this.connectionType === 'Via') {
             // Competency Query API
             // pathsQueryAPI = queryPathsByViaLocation(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
 
             // search by unique placement before competency API is ready for this
             pathsQueryAPI = filterPathsByViaFromKnowledge(uniqueResource);
-          } else if (this.connectionType === 'destination') {
+          } else if (this.connectionType === 'Destination') {
             // Competency Query API
             // pathsQueryAPI = queryPathsByDestination(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
 
@@ -3320,7 +3320,7 @@ export default {
         'Neuron Connection': 'Discover Neuron connections by selecting a neuron and viewing its associated network connections',
         'Annotation': ['View feature annotations', 'Add, comment on and view feature annotations']
       },
-      connectionType: '',
+      connectionType: 'All',
       offlineAnnotationEnabled: false,
       offlineAnnotations: [],
       annotationFrom: 'Anyone',
