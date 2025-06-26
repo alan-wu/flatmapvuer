@@ -632,6 +632,9 @@ import {
   refreshFlatmapKnowledgeCache,
   getKnowledgeSource,
   getReferenceConnectivitiesByAPI,
+  filterPathsByOriginFromKnowledge,
+  filterPathsByDestinationFromKnowledge,
+  filterPathsByViaFromKnowledge,
 } from '../services/flatmapKnowledge.js'
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
@@ -2024,12 +2027,35 @@ export default {
         // filter out paths
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
         if (featureId) {
+          // fallback if it cannot find in anatomical nodes
+          const transformResources = Array.isArray(resources) ? resources : [resources];
+          if (transformResources.length === 1) {
+            transformResources.push([]);
+          }
+
+          const featureId = data[0].feature?.featureId;
+          const annotation = this.mapImp.annotations.get(featureId);
+          const anatomicalNodes = annotation?.['anatomical-nodes'];
+          const uniqueResource = anatomicalNodes ? JSON.parse(anatomicalNodes[0]) : transformResources;
+
           if (this.connectionType === 'origin') {
-            pathsQueryAPI = queryPathsByOrigin(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+            // Competency Query API
+            // pathsQueryAPI = queryPathsByOrigin(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+
+            // search by unique placement before competency API is ready for this
+            pathsQueryAPI = filterPathsByOriginFromKnowledge(uniqueResource);
           } else if (this.connectionType === 'via') {
-            pathsQueryAPI = queryPathsByViaLocation(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+            // Competency Query API
+            // pathsQueryAPI = queryPathsByViaLocation(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+
+            // search by unique placement before competency API is ready for this
+            pathsQueryAPI = filterPathsByViaFromKnowledge(uniqueResource);
           } else if (this.connectionType === 'destination') {
-            pathsQueryAPI = queryPathsByDestination(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+            // Competency Query API
+            // pathsQueryAPI = queryPathsByDestination(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+
+            // search by unique placement before competency API is ready for this
+            pathsQueryAPI = filterPathsByDestinationFromKnowledge(uniqueResource);
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
