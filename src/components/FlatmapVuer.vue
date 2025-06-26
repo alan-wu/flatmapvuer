@@ -641,9 +641,9 @@ import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import {
-  queryPathsByOrigins,
-  queryPathsByVias,
-  queryPathsByDestinations,
+  queryPathsByOrigin,
+  queryPathsByViaLocation,
+  queryPathsByDestination,
   queryAllConnectedPaths,
   DrawToolbar,
   Tooltip,
@@ -2024,12 +2024,12 @@ export default {
         // filter out paths
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
         if (featureId) {
-          if (this.connectionType === 'origins') {
-            pathsQueryAPI = queryPathsByOrigins(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
-          } else if (this.connectionType === 'vias') {
-            pathsQueryAPI = queryPathsByVias(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
-          } else if (this.connectionType === 'destinations') {
-            pathsQueryAPI = queryPathsByDestinations(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          if (this.connectionType === 'origin') {
+            pathsQueryAPI = queryPathsByOrigin(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          } else if (this.connectionType === 'via') {
+            pathsQueryAPI = queryPathsByViaLocation(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          } else if (this.connectionType === 'destination') {
+            pathsQueryAPI = queryPathsByDestination(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
