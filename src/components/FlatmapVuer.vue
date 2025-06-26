@@ -2064,7 +2064,10 @@ export default {
         pathsQueryAPI.then(async (paths) => {
           if (paths.length) {
             const filteredPaths = paths.filter(path => (path in this.mapImp.pathways.paths))
+            const filteredPathsWithData = [];
+            let prom1 = [];
             let prom2 = [];
+
             for (let i = 0; i < filteredPaths.length; i++) {
               const path = filteredPaths[i];
               const modelFeatureIds = this.mapImp.modelFeatureIds(path);
@@ -2077,9 +2080,22 @@ export default {
                   provenanceTaxonomy: feature.taxons,
                   alert: feature.alert,
                 };
-                const tooltipEntryData = await this.getKnowledgeTooltip(pathData);
-                prom2.push(tooltipEntryData)
+                filteredPathsWithData.push(pathData);
+                prom1.push({
+                  title: pathData.label,
+                  featureId: [path]
+                })
               }
+            }
+            this.tooltipEntry = await Promise.all(prom1)
+            // Emit placeholders first.
+            this.$emit('connectivity-info-open', this.tooltipEntry);
+
+            // loading data
+            for (let i = 0; i < filteredPathsWithData.length; i++) {
+              const pathData = filteredPathsWithData[i];
+              const tooltipEntryData = await this.getKnowledgeTooltip(pathData);
+              prom2.push(tooltipEntryData)
             }
             this.tooltipEntry = await Promise.all(prom2)
             this.displayTooltip(filteredPaths)
