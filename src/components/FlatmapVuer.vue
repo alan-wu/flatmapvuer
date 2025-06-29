@@ -357,12 +357,13 @@ Please use `const` to assign meaningful names to them...
                 />
               -->
               <selections-group
-                v-if="pathways && pathways.length > 0 & showPathwayFilter"
+                v-if="pathways && pathways.length > 0"
                 title="Pathways"
                 labelKey="label"
                 identifierKey="type"
                 colourStyle="line"
                 :selections="pathways"
+                :showAsLegend="!showPathwayFilter"
                 @changed="pathwaysSelected"
                 @selections-data-changed="onSelectionsDataChanged"
                 @checkAll="checkAllPathways"
@@ -750,6 +751,20 @@ export default {
     return { annotator }
   },
   methods: {
+    /**
+     * 
+     * @param filter format should follow #makeStyleFilter (flatmap-viewer)
+     */
+    setVisibilityFilter: function (filter) {
+      // More filter options -> this.mapImp.featureFilterRanges()
+      if (this.mapImp) {
+        if (filter) {
+          this.mapImp.setVisibilityFilter(filter);
+        } else {
+          this.mapImp.clearVisibilityFilter();
+        }
+      }
+    },
     /**
      * @public
      * Function to manually send aborted signal when annotation tooltip popup or sidebar tab closed.
@@ -2846,7 +2861,9 @@ export default {
           if (key === "kind") {
             main.label = "Pathways"
             for (const facet of value) {
-              const pathway = this.pathways.find(p => p.type !== "centreline" && p.type === facet)
+              const pathway = this.pathways.find(path => {
+                return !['other', 'centreline'].includes(path.type) && path.type === facet
+              })
               if (pathway) {
                 main.children.push({
                   key: `${main.key}.${facet}`,
@@ -2912,6 +2929,7 @@ export default {
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
+      this.pathways = this.pathways.filter(path => !['other', 'centreline'].includes(path.type))
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
