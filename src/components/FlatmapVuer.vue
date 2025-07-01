@@ -647,6 +647,9 @@ import {
   queryPathsByOrigin,
   queryPathsByViaLocation,
   queryPathsByDestination,
+  extractOriginItems,
+  extractDestinationItems,
+  extractViaItems,
   queryAllConnectedPaths,
   DrawToolbar,
   Tooltip,
@@ -1691,6 +1694,8 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
+              console.log('clicked data', data)
+              console.log('mapImp', this.mapImp)
               const singleSelection = Object.keys(data).includes('id')
               if (!singleSelection) {
                 payload = []
@@ -1934,6 +1939,14 @@ export default {
         featureIds = await getReferenceConnectivitiesByAPI(this.mapImp, resource, this.flatmapQueries);
       }
       return featureIds;
+    },
+    getFlatmapKnowledge: function () {
+      let flatmapKnowledge = [];
+      const flatmapKnowledgeRaw = sessionStorage.getItem('flatmap-knowledge');
+      if (flatmapKnowledgeRaw) {
+        flatmapKnowledge = JSON.parse(flatmapKnowledgeRaw);
+      }
+      return flatmapKnowledge;
     },
     emitConnectivityError: function (errorData) {
       this.$emit('connectivity-error', {
@@ -2884,18 +2897,42 @@ export default {
             filterOptions.push(main)
           }
         }
-        // let hardcode = {
-        //   key: "flatmap.connectivity.source",
-        //   label: "Connectivity",
-        //   children: []
-        // }
-        // for (const facet of ["Origins", "Components", "Destinations"]) {
-        //   hardcode.children.push({
-        //     key: `flatmap.connectivity.source.${facet}`,
-        //     label: facet
-        //   })
-        // }
-        // filterOptions.push(hardcode)
+        let connectionFilters = {
+          key: "flatmap.connectivity.source",
+          label: "Connectivity",
+          children: []
+        }
+        const flatmapKnowledge = this.getFlatmapKnowledge();
+        const originItems = extractOriginItems(flatmapKnowledge);
+        const viaItems = extractViaItems(flatmapKnowledge);
+        const destinationItems = extractDestinationItems(flatmapKnowledge);
+
+        const transformItem = (facet, item) => {
+          const label = JSON.stringify(item);
+          return {
+            key: `flatmap.connectivity.source.${facet}.${label}`,
+            label: label
+          };
+        }
+
+        for (const facet of ["origin", "via", "destination"]) {
+          let childrenList = []
+          if (facet === 'origin') {
+            childrenList = originItems.map((item) => transformItem(facet, item));
+          } else if (facet === 'via') {
+            childrenList = viaItems.map((item) => transformItem(facet, item));
+          } else if (facet === 'destination') {
+            childrenList = destinationItems.map((item) => transformItem(facet, item));
+          }
+
+          connectionFilters.children.push({
+            key: `flatmap.connectivity.source.${facet}`,
+            label: facet,
+            children: childrenList,
+          })
+        }
+
+        filterOptions.push(connectionFilters)
         return filterOptions
       }
     },
