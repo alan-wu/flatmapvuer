@@ -2082,14 +2082,14 @@ export default {
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
-          const filters = [{
+          this.connectivityfilters.push({
             facet: JSON.stringify(uniqueResource),
             facetPropPath: `flatmap.connectivity.source.${this.connectionType.toLowerCase()}`,
             label: JSON.stringify(uniqueResource),
             term: this.connectionType
-          }]
+          })
           // TODO: to remove "neuron-connection-click"
-          this.$emit('neuron-connection-feature-click', filters);
+          this.$emit('neuron-connection-feature-click', this.connectivityfilters);
         }
 
         // TODO: to clean up after verification
@@ -2164,6 +2164,9 @@ export default {
           }
         }
       }
+    },
+    resetConnectivityfilters: function () {
+      this.connectivityfilters = [];
     },
     getKnowledgeTooltip: async function (data) {
       //require data.resource && data.feature.source
@@ -3453,6 +3456,7 @@ export default {
       }),
       searchTerm: "",
       taxonLeaveDelay: undefined,
+      connectivityfilters: [],
     }
   },
   computed: {
