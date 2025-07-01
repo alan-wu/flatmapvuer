@@ -1709,8 +1709,6 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
-              console.log('clicked data', data)
-              console.log('mapImp', this.mapImp)
               const singleSelection = Object.keys(data).includes('id')
               if (!singleSelection) {
                 payload = []
@@ -2084,53 +2082,62 @@ export default {
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
+          const filters = [{
+            facet: JSON.stringify(uniqueResource),
+            facetPropPath: `flatmap.connectivity.source.${this.connectionType.toLowerCase()}`,
+            label: JSON.stringify(uniqueResource),
+            term: this.connectionType
+          }]
+          // TODO: to remove "neuron-connection-click"
+          this.$emit('neuron-connection-feature-click', filters);
         }
 
-        pathsQueryAPI.then(async (paths) => {
-          if (paths.length) {
-            const filteredPaths = paths.filter(path => (path in this.mapImp.pathways.paths))
-            const filteredPathsWithData = [];
-            let prom1 = [];
-            let prom2 = [];
+        // TODO: to clean up after verification
+        // pathsQueryAPI.then(async (paths) => {
+        //   if (paths.length) {
+        //     const filteredPaths = paths.filter(path => (path in this.mapImp.pathways.paths))
+        //     const filteredPathsWithData = [];
+        //     let prom1 = [];
+        //     let prom2 = [];
 
-            for (let i = 0; i < filteredPaths.length; i++) {
-              const path = filteredPaths[i];
-              const modelFeatureIds = this.mapImp.modelFeatureIds(path);
-              const feature = this.mapImp.featureProperties(modelFeatureIds[0]);
-              if (feature) {
-                const pathData = {
-                  resource: [feature.models],
-                  feature: feature,
-                  label: feature.label,
-                  provenanceTaxonomy: feature.taxons,
-                  alert: feature.alert,
-                };
-                filteredPathsWithData.push(pathData);
-                prom1.push({
-                  title: pathData.label,
-                  featureId: [path]
-                })
-              }
-            }
-            this.tooltipEntry = await Promise.all(prom1)
-            // Emit placeholders first.
-            this.$emit('connectivity-info-open', this.tooltipEntry);
+        //     for (let i = 0; i < filteredPaths.length; i++) {
+        //       const path = filteredPaths[i];
+        //       const modelFeatureIds = this.mapImp.modelFeatureIds(path);
+        //       const feature = this.mapImp.featureProperties(modelFeatureIds[0]);
+        //       if (feature) {
+        //         const pathData = {
+        //           resource: [feature.models],
+        //           feature: feature,
+        //           label: feature.label,
+        //           provenanceTaxonomy: feature.taxons,
+        //           alert: feature.alert,
+        //         };
+        //         filteredPathsWithData.push(pathData);
+        //         prom1.push({
+        //           title: pathData.label,
+        //           featureId: [path]
+        //         })
+        //       }
+        //     }
+        //     this.tooltipEntry = await Promise.all(prom1)
+        //     // Emit placeholders first.
+        //     this.$emit('connectivity-info-open', this.tooltipEntry);
 
-            /**
-             * This event is emitted to highlight the same paths on other display maps.
-             */
-            this.$emit('neuron-connection-click', paths);
+        //     /**
+        //      * This event is emitted to highlight the same paths on other display maps.
+        //      */
+        //     this.$emit('neuron-connection-click', paths);
 
-            // loading data
-            for (let i = 0; i < filteredPathsWithData.length; i++) {
-              const pathData = filteredPathsWithData[i];
-              const tooltipEntryData = await this.getKnowledgeTooltip(pathData);
-              prom2.push(tooltipEntryData)
-            }
-            this.tooltipEntry = await Promise.all(prom2)
-            this.displayTooltip(filteredPaths)
-          }
-        })
+        //     // loading data
+        //     for (let i = 0; i < filteredPathsWithData.length; i++) {
+        //       const pathData = filteredPathsWithData[i];
+        //       const tooltipEntryData = await this.getKnowledgeTooltip(pathData);
+        //       prom2.push(tooltipEntryData)
+        //     }
+        //     this.tooltipEntry = await Promise.all(prom2)
+        //     this.displayTooltip(filteredPaths)
+        //   }
+        // })
       } else {
         // load and store knowledge
         loadAndStoreKnowledge(this.mapImp, this.flatmapQueries);
