@@ -755,7 +755,7 @@ export default {
   },
   methods: {
     /**
-     * 
+     *
      * @param filter format should follow #makeStyleFilter (flatmap-viewer)
      */
     setVisibilityFilter: function (filter) {
@@ -2914,11 +2914,7 @@ export default {
             filterOptions.push(main)
           }
         }
-        let connectionFilters = {
-          key: "flatmap.connectivity.source",
-          label: "Connectivity",
-          children: []
-        }
+        const connectionFilters = [];
         const flatmapKnowledge = this.getFlatmapKnowledge();
         const originItems = extractOriginItems(flatmapKnowledge);
         const viaItems = extractViaItems(flatmapKnowledge);
@@ -2942,14 +2938,14 @@ export default {
             childrenList = destinationItems.map((item) => transformItem(facet, item));
           }
 
-          connectionFilters.children.push({
+          connectionFilters.push({
             key: `flatmap.connectivity.source.${facet}`,
             label: facet,
             children: childrenList,
           })
         }
 
-        filterOptions.push(connectionFilters)
+        filterOptions.push(...connectionFilters)
         return filterOptions
       }
     },
