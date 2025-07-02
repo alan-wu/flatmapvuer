@@ -2874,7 +2874,7 @@ export default {
       }
       return filterSources
     },
-    getFilterOptions: async function () {
+    getFilterOptions: async function (_flatmapKnowledge) {
       if (this.mapImp) {
         let filterOptions = []
         const filterRanges = this.mapImp.featureFilterRanges()
@@ -2928,7 +2928,7 @@ export default {
           }
         }
         const connectionFilters = [];
-        const flatmapKnowledge = this.getFlatmapKnowledge();
+        const flatmapKnowledge = _flatmapKnowledge || this.getFlatmapKnowledge();
         const originItems = extractOriginItems(flatmapKnowledge);
         const viaItems = extractViaItems(flatmapKnowledge);
         const destinationItems = extractDestinationItems(flatmapKnowledge);
