@@ -4,22 +4,15 @@
 /* eslint-disable no-alert, no-console */
 // import { FlatmapVuer, MultiFlatmapVuer } from '../../src/components/index.js';
 
-import CypressComponentWrapper from './CypressComponentWrapper.vue'
-import { createPinia, setActivePinia } from 'pinia';
-
 describe('MultiFlatmapVuer', () => {
-
-  Cypress.on('uncaught:exception', (err) => {
-    // returning false here prevents Cypress from
-    // failing the test
-    if (err.message.includes('Source "markers" already exists.'))
-      return false
-    return true
-  })
 
   beforeEach(() => {
     cy.viewport(1920, 1080);
-    cy.fixture('MultiFlatmapProps.json').as('props');
+    cy.fixture('MultiFlatmapPropsCurrent.json').as('currentProps');
+    cy.fixture('MultiFlatmapPropsDevel.json').as('develProps');
+    cy.fixture('MultiFlatmapPropsStaging.json').as('stagingProps');
+
+    cy.loadMultiFlatmap('props')
   });
 
 
@@ -31,47 +24,6 @@ describe('MultiFlatmapVuer', () => {
   })
 
   it('Workflow testing', () => {
-
-    const readySpy = cy.spy().as('readySpy')
-    // const resourceSelectedSpy = cy.spy().as('resourceSelectedSpy')
-    cy.get('@props').then((props) => {
-      console.log('flatmapAPI', props)
-      cy.mount(CypressComponentWrapper, {
-        propsData: {
-          component: 'MultiFlatmapVuer',
-          props: props,
-          events: {
-            ready: readySpy
-          }
-        },
-        global: {
-          plugins: setActivePinia(createPinia())
-        }
-      }).then((vm) => {
-        cy.wrap(vm).as('vm')
-        window.vm = vm
-
-      }).get('@vue').should('exist')
-
-      // Now that we have the vue wrapper, check that the ready event is fired
-      .then(() => {
-        cy.get('@vue').should(wrapper => {
-          expect(wrapper.emitted('ready')).to.be.ok
-          Cypress.multiFlatmapVuerWrapper = wrapper
-        })
-      })
-
-    })
-
-    Cypress.on('uncaught:exception', (err) => {
-      // returning false here prevents Cypress from
-      // failing the test
-      if (err.message.includes("this.facets.at is not a function"))
-        return false
-      return true
-    })
-
-
     //Check if the minimap is visible
     cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
 
@@ -87,13 +39,13 @@ describe('MultiFlatmapVuer', () => {
       // Create a pop up and ensure it shows
       let mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
       console.log('flatmap', mapImp)
-      mapImp.showPopup(45,'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
+      mapImp.showPopup(45, 'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
       cy.get('.flatmapvuer-popover').should('exist').contains('Test').then(() => {
         // Close the pop up
         cy.get('.maplibregl-popup-close-button').click();
         cy.get('.flatmapvuer-popover').should('not.exist');
 
-          // Check if alert exist in test flatmap
+        // Check if alert exist in test flatmap
         cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas').as('canvas')
         cy.get('.checkall-display-text').then(($label) => {
           expect($label, 'Alter filter should exist').to.contain('Alert')
@@ -112,7 +64,7 @@ describe('MultiFlatmapVuer', () => {
             expect(comparisonResults.percentage).to.greaterThan(0)
           })
         })
-      // Check the metadata for path exploration is loading correctly
+        // Check the metadata for path exploration is loading correctly
       }).then(() => {
         let flatmapVuer = window.Cypress.flatmapVuer
         console.log('flatmapVuer', flatmapVuer)
@@ -178,7 +130,7 @@ describe('MultiFlatmapVuer', () => {
           // Close the pop up
           cy.get('.maplibregl-popup-close-button').should('exist')
 
-        // Test the search
+          // Test the search
         }).then(() => {
           flatmapVuer.searchAndShowResult('body proper', true)
           cy.get('.maplibregl-popup').should('exist').contains('Body proper')
@@ -191,42 +143,6 @@ describe('MultiFlatmapVuer', () => {
   })
 
   it('change different species', () => {
-
-    // const resourceSelectedSpy = cy.spy().as('resourceSelectedSpy')
-    cy.get('@props').then((props) => {
-      console.log('flatmapAPI', props)
-      cy.mount(CypressComponentWrapper, {
-        propsData: {
-          component: 'MultiFlatmapVuer',
-          props: props,
-        },
-        global: {
-          plugins: setActivePinia(createPinia())
-        }
-      }).then((vm) => {
-        cy.wrap(vm).as('vm')
-        window.vm = vm
-
-      }).get('@vue').should('exist')
-
-      // Now that we have the vue wrapper, check that the ready event is fired
-      .then(() => {
-        cy.get('@vue').should(wrapper => {
-          expect(wrapper.emitted('ready')).to.be.ok
-          Cypress.multiFlatmapVuerWrapper = wrapper
-        })
-      })
-
-    })
-
-    Cypress.on('uncaught:exception', (err) => {
-      // returning false here prevents Cypress from
-      // failing the test
-      if (err.message.includes("Cannot read properties of null (reading '$el')"))
-        return false
-      return true
-    })
-
     // Check if flatmap emits ready event
     cy.get('@vue').should(wrapper => {
       expect(wrapper.emitted('ready')).to.be.ok
@@ -281,6 +197,10 @@ describe('MultiFlatmapVuer', () => {
       cy.get('.maplibregl-map').should('exist');
       cy.get('.pathway-location').should('exist');
     })
+
+  })
+
+  it('image rendering', () => {
 
   })
 
