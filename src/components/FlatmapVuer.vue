@@ -2044,8 +2044,8 @@ export default {
           this.annotation = {}
         }
       }
-      // clicking on a connectivity explorer card will be same as exploration mode
-      // since the card should be opened
+      // clicking on a connectivity explorer card will be the same as exploration mode
+      // the card should be opened without doing other functions
       else if (this.viewingMode === 'Neuron Connection' && !connectivityExplorerClicked) {
         const resources = data.map(tooltip => tooltip.resource[0]);
         let pathsQueryAPI = this.retrieveConnectedPaths(resources); // TODO: to replace with queryAllConnectedPaths
