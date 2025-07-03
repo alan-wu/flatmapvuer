@@ -1367,29 +1367,25 @@ export default {
     },
     resetMapFilter: function() {
       const alert = this.mapFilters.alert;
-      let filter = undefined;
-      if (alert.with) {
-        if (!alert.without) {
-          filter = {
-            HAS: 'alert',
-          };
-        }
-      } else {
-        if (alert.without) {
-          filter = {
-            NOT: { HAS: 'alert'},
-          };
-        } else {
-          filter = {
-            AND: [ {NOT: { HAS: 'alert'}}, { HAS: 'alert'}]
-          }
-        }
+      let filter;
+      const isPathways = { 'tile-layer': 'pathways' };
+      const notPathways = { NOT: isPathways };
+
+      if (alert.with && !alert.without) {
+        // Show pathways with alert
+        filter = {
+          OR: [notPathways, { AND: [isPathways, { HAS: 'alert' }] }]
+        };
+      } else if (!alert.with && alert.without) {
+        // Show pathways without alert
+        filter = {
+          OR: [notPathways, { AND: [isPathways, { NOT: { HAS: 'alert' } }] }]
+        };
+      } else if (!alert.with && !alert.without) {
+        // Hide all pathways
+        filter = notPathways;
       }
-      if (filter) {
-        this.mapImp.setVisibilityFilter(filter)
-      } else {
-        this.mapImp.clearVisibilityFilter()
-      }
+      this.setVisibilityFilter(filter)
     },
     /**
      * @public
@@ -1400,17 +1396,18 @@ export default {
     alertMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
-          let filter = undefined;
-          if (payload.key === "alert") {
-            filter = {
-              HAS: 'alert',
-            }
-          } else if (payload.key === "withoutAlert") {
-            filter = {
-              NOT: {HAS: 'alert'},
-            }
+          let filter;
+          const isPathways = { 'tile-layer': 'pathways' };
+          const notPathways = { NOT: isPathways };
+
+          if (payload.key === "alert" || payload.key === "withoutAlert") {
+            const hasAlert = payload.key === "alert" ? 
+              { HAS: 'alert' } : 
+              { NOT: { HAS: 'alert' } };
+
+            filter = { OR: [notPathways, { AND: [isPathways, hasAlert] }] };
           }
-          this.mapImp.setVisibilityFilter(filter)
+          this.setVisibilityFilter(filter)
         } else {
           this.resetMapFilter()
         }
@@ -1422,7 +1419,7 @@ export default {
      * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
      * @arg {Object} `payload`
      */
-     alertSelected: function (payload) {
+    alertSelected: function (payload) {
       if (this.mapImp) {
         if (payload.key === "alert") {
           if (payload.value) {
@@ -1446,7 +1443,7 @@ export default {
      * option by providing ``flag`` (true/false).
      * @arg {Boolean} `flag`
      */
-     checkAllAlerts: function (payload) {
+    checkAllAlerts: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
           this.mapFilters.alert.without = true
