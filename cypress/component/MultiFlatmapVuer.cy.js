@@ -11,8 +11,6 @@ describe('MultiFlatmapVuer', () => {
     cy.fixture('MultiFlatmapPropsCurrent.json').as('currentProps');
     cy.fixture('MultiFlatmapPropsDevel.json').as('develProps');
     cy.fixture('MultiFlatmapPropsStaging.json').as('stagingProps');
-
-    cy.loadMultiFlatmap('props')
   });
 
 
@@ -24,6 +22,8 @@ describe('MultiFlatmapVuer', () => {
   })
 
   it('Workflow testing', () => {
+    cy.loadMultiFlatmap('develProps')
+
     //Check if the minimap is visible
     cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
 
@@ -35,11 +35,11 @@ describe('MultiFlatmapVuer', () => {
     cy.get('@vue').should(wrapper => {
       expect(wrapper.emitted('ready')).to.be.ok
     }).then(() => {
-
       // Create a pop up and ensure it shows
-      let mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
-      console.log('flatmap', mapImp)
+      const mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
+      console.log('flatmapImp', mapImp)
       mapImp.showPopup(45, 'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
+
       cy.get('.flatmapvuer-popover').should('exist').contains('Test').then(() => {
         // Close the pop up
         cy.get('.maplibregl-popup-close-button').click();
@@ -143,61 +143,38 @@ describe('MultiFlatmapVuer', () => {
   })
 
   it('change different species', () => {
+    cy.loadMultiFlatmap('develProps')
+
     // Check if flatmap emits ready event
     cy.get('@vue').should(wrapper => {
       expect(wrapper.emitted('ready')).to.be.ok
     }).then(() => {
       const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
-      const speciesList = [
-        {
-          name: 'Human Female',
-          taxon: 'NCBITaxon:9606'
-        },
-        {
-          name: "Human Male",
-          taxon: "NCBITaxon:9606"
-        },
-        {
-          name: 'Functional Connectivity',
-          taxon: 'FunctionalConnectivity'
+
+      cy.get('@develProps').then((props) => {
+        const availableSpecies = []
+        for (const [key, value] of Object.entries(props.availableSpecies)) {
+          availableSpecies.push({ name: key, taxon: value.taxo })
         }
-      ]
 
-      // Switching species
-      const switchSpeciesAndTest = (speciesId, speciesTaxo) => {
-        multiFlatmapVuer.setSpecies(
-          speciesId,
-          multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
-          1
-        )
-      }
+        availableSpecies.forEach((species) => {
+          cy.then(() => {
+            multiFlatmapVuer.setSpecies(
+              species.name,
+              multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
+              1
+            )
 
-      // Human Female
-      switchSpeciesAndTest(speciesList[0].name, speciesList[0].taxon)
-      expect(multiFlatmapVuer.activeSpecies).to.eq(speciesList[0].name)
-      cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
-      cy.get('.maplibregl-map').should('exist');
-      cy.get('.pathway-location').should('exist');
+            expect(multiFlatmapVuer.activeSpecies).to.eq(species.name)
+            cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
+            cy.get('.maplibregl-map').should('exist');
+            cy.get('.pathway-location').should('exist');
 
-      cy.wait(8000)
-
-      // Rat (NPO)
-      switchSpeciesAndTest(speciesList[1].name, speciesList[1].taxon)
-      expect(multiFlatmapVuer.activeSpecies).to.eq(speciesList[1].name)
-      cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
-      cy.get('.maplibregl-map').should('exist');
-      cy.get('.pathway-location').should('exist');
-
-      cy.wait(8000)
-
-      // Functional Connectivity
-      switchSpeciesAndTest(speciesList[2].name, speciesList[2].taxon)
-      expect(multiFlatmapVuer.activeSpecies).to.eq(speciesList[2].name)
-      cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
-      cy.get('.maplibregl-map').should('exist');
-      cy.get('.pathway-location').should('exist');
+            cy.wait(8000)
+          })
+        })
+      })
     })
-
   })
 
   it('image rendering', () => {
