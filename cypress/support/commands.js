@@ -27,6 +27,14 @@
 import 'cypress-wait-until';
 import CypressComponentWrapper from '../component/CypressComponentWrapper.vue'
 import { createPinia, setActivePinia } from 'pinia';
+const UUIDS = {
+    'Human Female': Cypress.env('HUMAN_FEMALE_UUID'),
+    'Human Male': Cypress.env('HUMAN_MALE_UUID'),
+    'Rat': Cypress.env('RAT_UUID'),
+    'Mouse': Cypress.env('MOUSE_UUID'),
+    'Pig': Cypress.env('PIG_UUID'),
+    'Cat': Cypress.env('CAT_UUID')
+}
 
 Cypress.on('uncaught:exception', (err) => {
     // returning false here prevents Cypress from
@@ -47,6 +55,11 @@ Cypress.Commands.add('loadMultiFlatmap', (entry, species = undefined) => {
         let propsPayload = props
         if (species) {
             propsPayload.initial = species
+        }
+        for (const [key, value] of Object.entries(UUIDS)) {
+            if (key in propsPayload.availableSpecies) {
+                propsPayload.availableSpecies[key].uuid = value
+            }
         }
         cy.mount(CypressComponentWrapper, {
             propsData: {
