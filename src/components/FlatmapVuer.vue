@@ -2887,9 +2887,7 @@ export default {
           if (key === "kind") {
             main.label = "Pathways"
             for (const facet of value) {
-              const pathway = this.pathways.find(path => {
-                return !['other', 'centreline'].includes(path.type) && path.type === facet
-              })
+              const pathway = this.pathways.find(path => path.type === facet)
               if (pathway) {
                 main.children.push({
                   key: `${main.key}.${facet}`,
@@ -2975,7 +2973,9 @@ export default {
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      this.pathways = this.pathways.filter(path => !['other', 'centreline'].includes(path.type))
+      this.pathways = this.pathways.filter(path => {
+        return path.enabled && path.type !== 'other'
+      })
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
