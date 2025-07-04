@@ -22,7 +22,7 @@ describe('MultiFlatmapVuer', () => {
   })
 
   it('Workflow testing', () => {
-    cy.loadMultiFlatmap('develProps')
+    cy.loadMultiFlatmap('@develProps')
 
     //Check if the minimap is visible
     cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
@@ -50,7 +50,7 @@ describe('MultiFlatmapVuer', () => {
         cy.get('.checkall-display-text').then(($label) => {
           expect($label, 'Alter filter should exist').to.contain('Alert')
           // Take a screenshot of no path flatmap
-          cy.get(':nth-child(4) > :nth-child(1) > :nth-child(2) > .el-checkbox').click()
+          cy.get('.pathway-location > .pathway-container:visible').contains('Alert').parent().siblings().children('.el-checkbox').click()
           cy.get('.pathway-location > .drawer-button:visible').click()
           // CLI
           cy.get('@canvas').screenshot('base/cypress/component/MultiFlatmapVuer.cy.js/mapalert')
@@ -143,7 +143,7 @@ describe('MultiFlatmapVuer', () => {
   })
 
   it('change different species', () => {
-    cy.loadMultiFlatmap('develProps')
+    cy.loadMultiFlatmap('@develProps')
 
     // Check if flatmap emits ready event
     cy.get('@vue').should(wrapper => {

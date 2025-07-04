@@ -42,7 +42,7 @@ Cypress.on('uncaught:exception', (err) => {
 
 Cypress.Commands.add('loadMultiFlatmap', (entry) => {
     const readySpy = cy.spy().as('readySpy')
-    cy.get(`@${entry}`).then((props) => {
+    cy.get(entry).then((props) => {
         console.log('flatmapAPI', props)
         cy.mount(CypressComponentWrapper, {
             propsData: {
