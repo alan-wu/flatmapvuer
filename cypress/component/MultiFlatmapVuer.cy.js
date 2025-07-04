@@ -4,7 +4,15 @@
 /* eslint-disable no-alert, no-console */
 // import { FlatmapVuer, MultiFlatmapVuer } from '../../src/components/index.js';
 
-const flatmaps = ['@currentProps', '@stagingProps']
+const flatmapServers = ['@stagingProps', '@currentProps']
+const availableSpecies = [
+  { name: "Human Female" },
+  { name: "Human Male" },
+  { name: "Rat" },
+  { name: "Mouse" },
+  { name: "Pig" },
+  { name: "Cat" }
+]
 
 describe('MultiFlatmapVuer', () => {
 
@@ -201,20 +209,19 @@ describe('MultiFlatmapVuer', () => {
               multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
               1
             )
-
             cy.wait(1000)
             cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
             expect(multiFlatmapVuer.activeSpecies).to.eq(species.name)
+            // hide pathways
             cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
+            // hide drawer
             cy.get('.pathway-location > .drawer-button:visible').click()
-
             cy.wait(2000)
             cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
             // CLI
             cy.get('@canvas').screenshot(`base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}`)
             // UI
             cy.get('@canvas').screenshot(`MultiFlatmapVuer.cy.js/base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}`)
-
             cy.wait(3000)
           })
         })
@@ -222,42 +229,35 @@ describe('MultiFlatmapVuer', () => {
     })
   })
 
-  flatmaps.forEach((entry) => {
-    it(`image rendering for ${entry}`, () => {
-      cy.loadMultiFlatmap(entry)
+  flatmapServers.forEach((entry) => {
+    availableSpecies.forEach((species) => {
+      it(`image rendering for ${entry}-${species.name}`, () => {
+        cy.loadMultiFlatmap(entry, species.name)
 
-      cy.get('@vue').should(wrapper => {
-        expect(wrapper.emitted('ready')).to.be.ok
-      }).then(() => {
-        const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
-        cy.get(entry).then((props) => {
-          const availableSpecies = []
-          for (const [key, value] of Object.entries(props.availableSpecies)) {
-            availableSpecies.push({ name: key, taxon: value.taxo })
-          }
+        cy.get('@vue').should(wrapper => {
+          expect(wrapper.emitted('ready')).to.be.ok
+        }).then(() => {
+          const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
+          const flatmapVuer = multiFlatmapVuer.$refs[species.name][0]
 
-          availableSpecies.forEach((species) => {
-            cy.then(() => {
-              multiFlatmapVuer.setSpecies(
-                species.name,
-                multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
-                1
-              )
-
-              cy.wait(1000)
-              cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
-              expect(multiFlatmapVuer.activeSpecies, `Active species should be ${species.name}`).to.eq(species.name)
-              cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
-              cy.get('.pathway-location > .drawer-button:visible').click()
-
-              cy.wait(2000)
-              cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
-              cy.get('@canvas').compareSnapshot(species.name).then(comparisonResults => {
-                expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.equal(0)
-              })
-
-              cy.wait(3000)
+          cy.then(() => {
+            cy.wait(1000)
+            cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
+            expect(multiFlatmapVuer.activeSpecies, `Active species should be ${species.name}`).to.eq(species.name)
+            // hide pathways
+            cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
+            // hide drawer
+            cy.get('.pathway-location > .drawer-button:visible').click()
+            cy.wait(2000)
+            cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
+            cy.log(`THE LATEST ${entry} ${species.name} MAP UUID IS ${flatmapVuer.mapImp.uuid}`)
+            cy.get('@canvas').compareSnapshot(species.name).then(comparisonResults => {
+              // Percentage of minor pixel changes usually around 0.00001xxxx
+              // Assume it will not have lot of pixel changes in normal case
+              // 0.0001 should be good for now
+              expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.be.lessThan(0.0001)
             })
+            cy.wait(3000)
           })
         })
       })
