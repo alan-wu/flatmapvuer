@@ -2168,8 +2168,19 @@ export default {
         }
       }
     },
-    resetConnectivityfilters: function () {
-      this.connectivityfilters = [];
+    resetConnectivityfilters: function (payload) {
+      if (payload.length) {
+        // remove not found items
+        this.connectivityfilters = this.connectivityfilters.filter((connectivityfilter) =>
+          payload.some((notFoundItem) => (
+            notFoundItem.facetPropPath === connectivityfilter.facetPropPath &&
+            notFoundItem.facet !== connectivityfilter.facet
+          ))
+        )
+      } else {
+        // full reset
+        this.connectivityfilters = [];
+      }
     },
     getKnowledgeTooltip: async function (data) {
       //require data.resource && data.feature.source
