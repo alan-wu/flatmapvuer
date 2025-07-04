@@ -1,0 +1,46 @@
+{
+  "minZoom": 4,
+  "availableSpecies": {
+    "Human Female": {
+      "taxo": "NCBITaxon:9606",
+      "biologicalSex": "PATO:0000383",
+      "iconClass": "mapicon-icon_human",
+      "uuid": "456c7c6c-fb21-51f8-a878-4532f041aaa6"
+    },
+    "Human Male": {
+      "taxo": "NCBITaxon:9606",
+      "biologicalSex": "PATO:0000384",
+      "iconClass": "mapicon-icon_human",
+      "uuid": "8fd48a4f-5323-5e37-aa99-3f03bd4d30d4"
+    },
+    "Rat": {
+      "taxo": "NCBITaxon:10114",
+      "iconClass": "mapicon-icon_rat",
+      "uuid": "70667915-27db-5d32-90c2-f6e221f5b4aa"
+    },
+    "Mouse": {
+      "taxo": "NCBITaxon:10090",
+      "iconClass": "mapicon-icon_mouse",
+      "uuid": "6837a5e8-22ec-53a3-8549-1aee7acd2d22"
+    },
+    "Pig": {
+      "taxo": "NCBITaxon:9823",
+      "iconClass": "mapicon-icon_pig",
+      "uuid": "9513135b-dc43-5fea-b4a2-9b3ced9e3911"
+    },
+    "Cat": {
+      "taxo": "NCBITaxon:9685",
+      "iconClass": "mapicon-icon_cat",
+      "uuid": "4c216290-0cbb-505b-8704-dcd5a180075c"
+    }
+  },
+  "displayCloseButton": false,
+  "initial": "Human Female",
+  "displayMinimap": false,
+  "helpMode": false,
+  "pathControls": true,
+  "mapSettings": [],
+  "flatmapAPI": "https://mapcore-demo.org/current/flatmap/v3/",
+  "featureInfo": true,
+  "layerControl": true
+}

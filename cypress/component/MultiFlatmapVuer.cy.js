@@ -4,12 +4,15 @@
 /* eslint-disable no-alert, no-console */
 // import { FlatmapVuer, MultiFlatmapVuer } from '../../src/components/index.js';
 
+const flatmaps = ['@currentProps', '@stagingProps']
+
 describe('MultiFlatmapVuer', () => {
 
   beforeEach(() => {
     cy.viewport(1920, 1080);
     cy.fixture('MultiFlatmapPropsCurrent.json').as('currentProps');
     cy.fixture('MultiFlatmapPropsDevel.json').as('develProps');
+    cy.fixture('MultiFlatmapPropsReference.json').as('referenceProps');
     cy.fixture('MultiFlatmapPropsStaging.json').as('stagingProps');
   });
 
@@ -177,8 +180,88 @@ describe('MultiFlatmapVuer', () => {
     })
   })
 
-  it('image rendering', () => {
+  it('prepare reference images', () => {
+    cy.loadMultiFlatmap('@referenceProps')
 
+    cy.get('@vue').should(wrapper => {
+      expect(wrapper.emitted('ready')).to.be.ok
+    }).then(() => {
+      const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
+
+      cy.get('@referenceProps').then((props) => {
+        const availableSpecies = []
+        for (const [key, value] of Object.entries(props.availableSpecies)) {
+          availableSpecies.push({ name: key, taxon: value.taxo })
+        }
+
+        availableSpecies.forEach((species) => {
+          cy.then(() => {
+            multiFlatmapVuer.setSpecies(
+              species.name,
+              multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
+              1
+            )
+
+            cy.wait(1000)
+            cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
+            expect(multiFlatmapVuer.activeSpecies).to.eq(species.name)
+            cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
+            cy.get('.pathway-location > .drawer-button:visible').click()
+
+            cy.wait(2000)
+            cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
+            // CLI
+            cy.get('@canvas').screenshot(`base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}`)
+            // UI
+            cy.get('@canvas').screenshot(`MultiFlatmapVuer.cy.js/base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}`)
+
+            cy.wait(3000)
+          })
+        })
+      })
+    })
+  })
+
+  flatmaps.forEach((entry) => {
+    it(`image rendering for ${entry}`, () => {
+      cy.loadMultiFlatmap(entry)
+
+      cy.get('@vue').should(wrapper => {
+        expect(wrapper.emitted('ready')).to.be.ok
+      }).then(() => {
+        const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
+        cy.get(entry).then((props) => {
+          const availableSpecies = []
+          for (const [key, value] of Object.entries(props.availableSpecies)) {
+            availableSpecies.push({ name: key, taxon: value.taxo })
+          }
+
+          availableSpecies.forEach((species) => {
+            cy.then(() => {
+              multiFlatmapVuer.setSpecies(
+                species.name,
+                multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
+                1
+              )
+
+              cy.wait(1000)
+              cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
+              expect(multiFlatmapVuer.activeSpecies, `Active species should be ${species.name}`).to.eq(species.name)
+              cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
+              cy.get('.pathway-location > .drawer-button:visible').click()
+
+              cy.wait(2000)
+              cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
+              cy.get('@canvas').compareSnapshot(species.name).then(comparisonResults => {
+                expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.equal(0)
+              })
+
+              cy.wait(3000)
+            })
+          })
+        })
+      })
+    })
   })
 
 });
