@@ -19,6 +19,7 @@ const config = defineConfig({
       bundler: "vite",
     },
     env: {
+      projectId: process.env.CYPRESS_PROJECT_ID,
       visualRegressionType: 'regression',
       visualRegressionBaseDirectory: 'cypress/screenshots/MultiFlatmapVuer.cy.js/base',
       visualRegressionDiffDirectory: 'cypress/screenshots/diff',
