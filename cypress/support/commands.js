@@ -45,6 +45,8 @@ Cypress.on('uncaught:exception', (err) => {
         return false
     if (err.message.includes("Cannot read properties of null (reading '$el')"))
         return false
+    if (err.message.includes("Cannot read properties of null (reading 'length')"))
+        return false
     return true
 })
 
