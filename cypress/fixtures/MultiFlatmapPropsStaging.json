@@ -34,7 +34,7 @@
   "helpMode": false,
   "pathControls": true,
   "mapSettings": [],
-  "flatmapAPI": "https://mapcore-demo.org/staging/flatmap/v1/",
+  "flatmapAPI": "https://mapcore-demo.org/devel/flatmap/v4/",
   "featureInfo": true,
   "layerControl": true
 }
