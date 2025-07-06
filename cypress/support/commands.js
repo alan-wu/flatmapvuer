@@ -59,7 +59,10 @@ Cypress.Commands.add('loadMultiFlatmap', (entry, species = undefined) => {
             propsPayload.initial = species
         }
         for (const [key, value] of Object.entries(UUIDS)) {
-            if (key in propsPayload.availableSpecies) {
+            if (
+                key in propsPayload.availableSpecies && 
+                'uuid' in propsPayload.availableSpecies[key]
+            ) {
                 propsPayload.availableSpecies[key].uuid = value
             }
         }
