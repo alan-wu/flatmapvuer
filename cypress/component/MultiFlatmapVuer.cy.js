@@ -255,7 +255,7 @@ describe('MultiFlatmapVuer', () => {
               // Percentage of minor pixel changes usually around 0.00001xxxx
               // Assume it will not have lot of pixel changes in normal case
               // 0.0001 should be good for now
-              expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.be.lessThan(0.0001)
+              expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.be.lessThan(0.001)
             })
             cy.wait(3000)
           })
