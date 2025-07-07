@@ -2963,10 +2963,10 @@ export default {
         const destinationItems = await extractDestinationItems(this.flatmapAPI, flatmapKnowledge);
 
         const transformItem = (facet, item) => {
-          const label = JSON.stringify(item.key);
+          const key = JSON.stringify(item.key);
           return {
-            key: `flatmap.connectivity.source.${facet}.${label}`,
-            label: label
+            key: `flatmap.connectivity.source.${facet}.${key}`,
+            label: item.label
           };
         }
 
