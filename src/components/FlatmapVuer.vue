@@ -2906,8 +2906,8 @@ export default {
       return filterSources
     },
     getFilterOptions: async function (_flatmapKnowledge) {
+      let filterOptions = [];
       if (this.mapImp) {
-        let filterOptions = []
         const filterRanges = this.mapImp.featureFilterRanges()
         for (const [key, value] of Object.entries(filterRanges)) {
           let main = {
@@ -2988,8 +2988,8 @@ export default {
         }
 
         filterOptions.push(...connectionFilters)
-        return filterOptions
       }
+      return filterOptions;
     },
     /**
      * @public
