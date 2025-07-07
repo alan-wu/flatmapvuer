@@ -2085,12 +2085,21 @@ export default {
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
-          this.connectivityfilters.push({
+          const newConnectivityfilter = {
             facet: JSON.stringify(uniqueResource),
             facetPropPath: `flatmap.connectivity.source.${this.connectionType.toLowerCase()}`,
             label: JSON.stringify(uniqueResource),
             term: this.connectionType
-          })
+          };
+          // check for existing item
+          const isNewFilterItemExist = this.connectivityfilters.some((connectivityfilter) => (
+            connectivityfilter.facet === newConnectivityfilter.facet &&
+            connectivityfilter.facetPropPath === newConnectivityfilter.facetPropPath
+          ));
+
+          if (!isNewFilterItemExist) {
+            this.connectivityfilters.push(newConnectivityfilter);
+          }
           // TODO: to remove "neuron-connection-click"
           this.$emit('neuron-connection-feature-click', this.connectivityfilters);
         }
@@ -2167,6 +2176,17 @@ export default {
           }
         }
       }
+    },
+    /**
+     * Updates the connectivity filters in flatmap when there are changes in the sidebar.
+     * @public
+     * @param {Array} payload - The array of filter items to update.
+     */
+    updateConnectivityFilters: function (payload) {
+      if (!payload.length) return;
+      this.connectivityfilters = payload.filter((filterItem) => (
+        filterItem.facet.toLowerCase() !== 'show all'
+      ));
     },
     resetConnectivityfilters: function (payload) {
       if (payload.length) {
