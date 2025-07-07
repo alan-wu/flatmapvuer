@@ -59,4 +59,4 @@ jobs:
           MOUSE_UUID: ${{ secrets.MOUSE_UUID }}
           PIG_UUID: ${{ secrets.PIG_UUID }}
           CAT_UUID: ${{ secrets.CAT_UUID }}
-          ERROR_ALLOWANCE: ${{ secrets.ERROR_ALLOWANCE }}
+          ERROR_TOLERANCE: ${{ secrets.ERROR_TOLERANCE }}

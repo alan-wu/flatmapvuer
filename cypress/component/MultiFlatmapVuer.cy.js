@@ -13,7 +13,7 @@ const availableSpecies = [
   { name: "Pig" },
   { name: "Cat" }
 ]
-const ERROR_ALLOWANCE = parseFloat(Cypress.env('ERROR_ALLOWANCE'))
+const ERROR_TOLERANCE = parseFloat(Cypress.env('ERROR_TOLERANCE'))
 
 describe('MultiFlatmapVuer', () => {
 
@@ -255,7 +255,7 @@ describe('MultiFlatmapVuer', () => {
             cy.get('@canvas').compareSnapshot(species.name).then(comparisonResults => {
               // Percentage of minor pixel changes usually very small
               // Assume it will not have lot of pixel update in normal case
-              expect(comparisonResults.percentage, `${species.name} maps should be almost identical`).to.be.lessThan(ERROR_ALLOWANCE)
+              expect(comparisonResults.percentage, `${species.name} maps should be almost identical`).to.be.lessThan(ERROR_TOLERANCE)
             })
             cy.wait(3000)
           })
