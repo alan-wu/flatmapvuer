@@ -31,6 +31,7 @@ const config = defineConfig({
       MOUSE_UUID: process.env.MOUSE_UUID ? process.env.MOUSE_UUID : '', //'6837a5e8-22ec-53a3-8549-1aee7acd2d22',
       PIG_UUID: process.env.PIG_UUID ? process.env.PIG_UUID : '', //'9513135b-dc43-5fea-b4a2-9b3ced9e3911',
       CAT_UUID: process.env.CAT_UUID ? process.env.CAT_UUID : '', //'4c216290-0cbb-505b-8704-dcd5a180075c',
+      ERROR_ALLOWANCE: process.env.ERROR_ALLOWANCE ? process.env.ERROR_ALLOWANCE : 0.0001
     },
     screenshotsFolder: './cypress/screenshots',
     setupNodeEvents(on, config) {

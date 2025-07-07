@@ -13,6 +13,7 @@ const availableSpecies = [
   { name: "Pig" },
   { name: "Cat" }
 ]
+const ERROR_ALLOWANCE = Cypress.env('ERROR_ALLOWANCE')
 
 describe('MultiFlatmapVuer', () => {
 
@@ -255,7 +256,7 @@ describe('MultiFlatmapVuer', () => {
               // Percentage of minor pixel changes usually around 0.00001xxxx
               // Assume it will not have lot of pixel changes in normal case
               // 0.0001 should be good for now
-              expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.be.lessThan(0.001)
+              expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.be.lessThan(ERROR_ALLOWANCE)
             })
             cy.wait(3000)
           })
