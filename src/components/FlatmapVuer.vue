@@ -2762,14 +2762,13 @@ export default {
             label: "",
             children: []
           }
+          let children = []
           if (key === "kind") {
             main.label = "Pathways"
             for (const facet of value) {
-              const pathway = this.pathways.find(path => {
-                return !['other', 'centreline'].includes(path.type) && path.type === facet
-              })
+              const pathway = this.pathways.find(path => path.type === facet)
               if (pathway) {
-                main.children.push({
+                children.push({
                   key: `${main.key}.${facet}`,
                   label: pathway.label,
                   colour: pathway.colour,
@@ -2785,9 +2784,11 @@ export default {
               for (const facet of value) {
                 const taxon = entityLabels.find(p => p.taxon === facet)
                 if (taxon) {
-                  main.children.push({
+                  children.push({
                     key: `${main.key}.${facet}`,
-                    label: taxon.label
+                    // space added at the end of label to make sure the display name will not be updated
+                    // prevent sidebar searchfilter convertReadableLabel
+                    label: `${taxon.label} `
                   })
                 }
               }
@@ -2795,28 +2796,17 @@ export default {
           } else if (key === "alert") {
             main.label = "Alert"
             for (const facet of ["with", "without"]) {
-              main.children.push({
+              children.push({
                 key: `${main.key}.${facet}`,
                 label: `${facet} alerts`
               })
             }
           }
+          main.children = children.sort((a, b) => a.label.localeCompare(b.label));
           if (main.label && main.children.length) {
             filterOptions.push(main)
           }
         }
-        // let hardcode = {
-        //   key: "flatmap.connectivity.source",
-        //   label: "Connectivity",
-        //   children: []
-        // }
-        // for (const facet of ["Origins", "Components", "Destinations"]) {
-        //   hardcode.children.push({
-        //     key: `flatmap.connectivity.source.${facet}`,
-        //     label: facet
-        //   })
-        // }
-        // filterOptions.push(hardcode)
         return filterOptions
       }
     },
@@ -2833,7 +2823,9 @@ export default {
       this.mapImp.setBackgroundOpacity(1)
       this.backgroundChangeCallback(this.currentBackground)
       this.pathways = this.mapImp.pathTypes()
-      this.pathways = this.pathways.filter(path => !['other', 'centreline'].includes(path.type))
+      this.pathways = this.pathways.filter(path => {
+        return path.enabled && path.type !== 'other'
+      })
       //Disable layers for now
       //this.layers = this.mapImp.getLayers();
       this.processSystems(this.mapImp.getSystems())
