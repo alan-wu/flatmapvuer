@@ -2958,12 +2958,12 @@ export default {
         }
         const connectionFilters = [];
         const flatmapKnowledge = _flatmapKnowledge || this.getFlatmapKnowledge();
-        const originItems = extractOriginItems(flatmapKnowledge);
-        const viaItems = extractViaItems(flatmapKnowledge);
-        const destinationItems = extractDestinationItems(flatmapKnowledge);
+        const originItems = await extractOriginItems(this.flatmapAPI, flatmapKnowledge);
+        const viaItems = await extractViaItems(this.flatmapAPI, flatmapKnowledge);
+        const destinationItems = await extractDestinationItems(this.flatmapAPI, flatmapKnowledge);
 
         const transformItem = (facet, item) => {
-          const label = JSON.stringify(item);
+          const label = JSON.stringify(item.key);
           return {
             key: `flatmap.connectivity.source.${facet}.${label}`,
             label: label
