@@ -13,7 +13,7 @@ const availableSpecies = [
   { name: "Pig" },
   { name: "Cat" }
 ]
-const ERROR_ALLOWANCE = Cypress.env('ERROR_ALLOWANCE')
+const ERROR_ALLOWANCE = parseFloat(Cypress.env('ERROR_ALLOWANCE'))
 
 describe('MultiFlatmapVuer', () => {
 
@@ -253,10 +253,9 @@ describe('MultiFlatmapVuer', () => {
             cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
             cy.log(`THE LATEST ${entry} ${species.name} MAP UUID IS ${flatmapVuer.mapImp.uuid}`)
             cy.get('@canvas').compareSnapshot(species.name).then(comparisonResults => {
-              // Percentage of minor pixel changes usually around 0.00001xxxx
-              // Assume it will not have lot of pixel changes in normal case
-              // 0.0001 should be good for now
-              expect(comparisonResults.percentage, `${species.name} maps should be identical`).to.be.lessThan(ERROR_ALLOWANCE)
+              // Percentage of minor pixel changes usually very small
+              // Assume it will not have lot of pixel update in normal case
+              expect(comparisonResults.percentage, `${species.name} maps should be almost identical`).to.be.lessThan(ERROR_ALLOWANCE)
             })
             cy.wait(3000)
           })
