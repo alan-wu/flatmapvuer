@@ -13,6 +13,7 @@ const availableSpecies = [
   { name: "Pig" },
   { name: "Cat" }
 ]
+const organTypes = ['color', 'grayscale']
 const ERROR_TOLERANCE = parseFloat(Cypress.env('ERROR_TOLERANCE'))
 
 describe('MultiFlatmapVuer', () => {
@@ -213,17 +214,26 @@ describe('MultiFlatmapVuer', () => {
             cy.wait(1000)
             cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
             expect(multiFlatmapVuer.activeSpecies).to.eq(species.name)
+            const flatmapVuer = multiFlatmapVuer.$refs[species.name][0]
             // hide pathways
             cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
             // hide drawer
             cy.get('.pathway-location > .drawer-button:visible').click()
             cy.wait(2000)
+
             cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
-            // CLI
-            cy.get('@canvas').screenshot(`base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}`)
-            // UI
-            cy.get('@canvas').screenshot(`MultiFlatmapVuer.cy.js/base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}`)
-            cy.wait(3000)
+            organTypes.forEach((type) => {
+              cy.then(() => {
+                if (type === 'grayscale') {
+                  flatmapVuer.mapImp.setPaint({ coloured: false })
+                  cy.wait(3000)
+                }
+                // CLI
+                cy.get('@canvas').screenshot(`base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}_${type}`)
+                // UI
+                cy.get('@canvas').screenshot(`MultiFlatmapVuer.cy.js/base/cypress/component/MultiFlatmapVuer.cy.js/${species.name}_${type}`)
+              })
+            })
           })
         })
       })
@@ -250,14 +260,22 @@ describe('MultiFlatmapVuer', () => {
             // hide drawer
             cy.get('.pathway-location > .drawer-button:visible').click()
             cy.wait(2000)
+
             cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
             cy.log(`THE LATEST ${entry} ${species.name} MAP UUID IS ${flatmapVuer.mapImp.uuid}`)
-            cy.get('@canvas').compareSnapshot(species.name).then(comparisonResults => {
-              // Percentage of minor pixel changes usually very small
-              // Assume it will not have lot of pixel update in normal case
-              expect(comparisonResults.percentage, `${species.name} maps should be almost identical`).to.be.lessThan(ERROR_TOLERANCE)
+            organTypes.forEach((type) => {
+              cy.then(() => {
+                if (type === 'grayscale') {
+                  flatmapVuer.mapImp.setPaint({ coloured: false })
+                  cy.wait(3000)
+                }
+                cy.get('@canvas').compareSnapshot(`${species.name}_${type}`).then(comparisonResults => {
+                  // Percentage of minor pixel changes usually very small
+                  // Assume it will not have lot of pixel update in normal case
+                  expect(comparisonResults.percentage, `${species.name}_color maps should be almost identical`).to.be.lessThan(ERROR_TOLERANCE)
+                })
+              })
             })
-            cy.wait(3000)
           })
         })
       })
