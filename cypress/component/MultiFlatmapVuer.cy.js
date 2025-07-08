@@ -40,10 +40,6 @@ describe('MultiFlatmapVuer', () => {
     //Check if the minimap is visible
     cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
 
-    //Check if the ready event is fired
-    // *** Commenting this out until we can figure out why it's not working
-    // cy.get('@readySpy').should('have.been.calledWith', true)
-
     // Check if flatmap emits ready event
     cy.get('@readySpy').should('have.been.calledWith').then(() => {
       // Create a pop up and ensure it shows
