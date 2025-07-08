@@ -157,9 +157,7 @@ describe('MultiFlatmapVuer', () => {
     cy.loadMultiFlatmap('@develProps')
 
     // Check if flatmap emits ready event
-    cy.get('@vue').should(wrapper => {
-      expect(wrapper.emitted('ready')).to.be.ok
-    }).then(() => {
+    cy.get('@readySpy').should('have.been.calledWith').then(() => {
       const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
 
       cy.get('@develProps').then((props) => {
@@ -191,9 +189,7 @@ describe('MultiFlatmapVuer', () => {
   it('prepare reference images', () => {
     cy.loadMultiFlatmap('@referenceProps')
 
-    cy.get('@vue').should(wrapper => {
-      expect(wrapper.emitted('ready')).to.be.ok
-    }).then(() => {
+    cy.get('@readySpy').should('have.been.calledWith').then(() => {
       const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
 
       cy.get('@referenceProps').then((props) => {
@@ -243,9 +239,7 @@ describe('MultiFlatmapVuer', () => {
       it(`image rendering for ${entry}-${species.name}`, () => {
         cy.loadMultiFlatmap(entry, species.name)
 
-        cy.get('@vue').should(wrapper => {
-          expect(wrapper.emitted('ready')).to.be.ok
-        }).then(() => {
+        cy.get('@readySpy').should('have.been.calledWith').then(() => {
           const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
           const flatmapVuer = multiFlatmapVuer.$refs[species.name][0]
 
