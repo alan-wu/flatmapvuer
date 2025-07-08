@@ -66,13 +66,11 @@ Cypress.Commands.add('loadMultiFlatmap', (entry, species = undefined) => {
                 propsPayload.availableSpecies[key].uuid = value
             }
         }
+        propsPayload["onReady"] = readySpy
         cy.mount(CypressComponentWrapper, {
             propsData: {
                 component: 'MultiFlatmapVuer',
                 props: propsPayload,
-                events: {
-                    ready: readySpy
-                }
             },
             global: {
                 plugins: setActivePinia(createPinia())
@@ -84,7 +82,6 @@ Cypress.Commands.add('loadMultiFlatmap', (entry, species = undefined) => {
             // Now that we have the vue wrapper, check that the ready event is fired
             .then(() => {
                 cy.get('@vue').should(wrapper => {
-                    expect(wrapper.emitted('ready')).to.be.ok
                     Cypress.multiFlatmapVuerWrapper = wrapper
                 })
             })

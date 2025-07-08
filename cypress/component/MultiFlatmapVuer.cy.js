@@ -45,9 +45,7 @@ describe('MultiFlatmapVuer', () => {
     // cy.get('@readySpy').should('have.been.calledWith', true)
 
     // Check if flatmap emits ready event
-    cy.get('@vue').should(wrapper => {
-      expect(wrapper.emitted('ready')).to.be.ok
-    }).then(() => {
+    cy.get('@readySpy').should('have.been.calledWith').then(() => {
       // Create a pop up and ensure it shows
       const mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
       console.log('flatmapImp', mapImp)
