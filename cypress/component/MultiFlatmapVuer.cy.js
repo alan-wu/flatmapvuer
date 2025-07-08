@@ -115,10 +115,8 @@ describe('MultiFlatmapVuer', () => {
             cy.get('#open-dendrites-button').should('exist').click()
 
             // Check that the resource selected event is emitted
-            cy.get('@vue').should(wrapper => {
-              expect(wrapper.emitted('resource-selected')).to.be.ok
-            })
-
+            cy.get('@resourceSelectedSpy').should('have.been.calledWith')
+            
             // create a single stub we will use
             cy.window().then(win => {
               cy.stub(win, 'open').as('Open')
