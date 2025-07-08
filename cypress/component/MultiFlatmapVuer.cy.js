@@ -40,14 +40,8 @@ describe('MultiFlatmapVuer', () => {
     //Check if the minimap is visible
     cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
 
-    //Check if the ready event is fired
-    // *** Commenting this out until we can figure out why it's not working
-    // cy.get('@readySpy').should('have.been.calledWith', true)
-
     // Check if flatmap emits ready event
-    cy.get('@vue').should(wrapper => {
-      expect(wrapper.emitted('ready')).to.be.ok
-    }).then(() => {
+    cy.get('@readySpy').should('have.been.calledWith').then(() => {
       // Create a pop up and ensure it shows
       const mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
       console.log('flatmapImp', mapImp)
@@ -159,9 +153,7 @@ describe('MultiFlatmapVuer', () => {
     cy.loadMultiFlatmap('@develProps')
 
     // Check if flatmap emits ready event
-    cy.get('@vue').should(wrapper => {
-      expect(wrapper.emitted('ready')).to.be.ok
-    }).then(() => {
+    cy.get('@readySpy').should('have.been.calledWith').then(() => {
       const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
 
       cy.get('@develProps').then((props) => {
@@ -193,9 +185,7 @@ describe('MultiFlatmapVuer', () => {
   it('prepare reference images', () => {
     cy.loadMultiFlatmap('@referenceProps')
 
-    cy.get('@vue').should(wrapper => {
-      expect(wrapper.emitted('ready')).to.be.ok
-    }).then(() => {
+    cy.get('@readySpy').should('have.been.calledWith').then(() => {
       const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
 
       cy.get('@referenceProps').then((props) => {
@@ -245,9 +235,7 @@ describe('MultiFlatmapVuer', () => {
       it(`image rendering for ${entry}-${species.name}`, () => {
         cy.loadMultiFlatmap(entry, species.name)
 
-        cy.get('@vue').should(wrapper => {
-          expect(wrapper.emitted('ready')).to.be.ok
-        }).then(() => {
+        cy.get('@readySpy').should('have.been.calledWith').then(() => {
           const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
           const flatmapVuer = multiFlatmapVuer.$refs[species.name][0]
 
