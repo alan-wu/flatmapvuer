@@ -2089,7 +2089,14 @@ export default {
           const terms = uniqueResource.flat(Infinity);
           const uniqueTerms = [...new Set(terms)];
           const fetchResults = await fetchLabels(this.flatmapAPI, uniqueTerms);
-          const objectResults = fetchResults.map((item) => JSON.parse(item[1]));
+          const objectResults = fetchResults.reduce((arr, item) => {
+            const id = item[0];
+            const valObj = JSON.parse(item[1]);
+            if (valObj.source === this.mapImp.knowledgeSource) {
+              arr.push({ id, label: valObj.label });
+            }
+            return arr;
+          }, []);
           const labels = [];
           for (let i = 0; i < uniqueTerms.length; i++) {
             const foundObj = objectResults.find((obj) => obj.id === uniqueTerms[i])
