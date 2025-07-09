@@ -2981,6 +2981,23 @@ export default {
         }
         const connectionFilters = [];
         const flatmapKnowledge = _flatmapKnowledge || this.getFlatmapKnowledge();
+        const mapKnowledge = this.mapImp.pathways.paths;
+        flatmapKnowledge.forEach((knowledge) => {
+          const id = knowledge.id;
+          if (id) {
+            const matchObj = mapKnowledge[id];
+            if (matchObj) {
+              const mapConnectivity = matchObj.connectivity;
+              const mapNodePhenotypes = matchObj['node-phenotypes'];
+              knowledge.connectivity = [...knowledge.connectivity, ...mapConnectivity];
+              for (let key in knowledge['node-phenotypes']) {
+                if (mapNodePhenotypes[key]) {
+                  knowledge['node-phenotypes'][key].push(...mapNodePhenotypes[key]);
+                }
+              }
+            }
+          }
+        })
         const originItems = await extractOriginItems(this.flatmapAPI, flatmapKnowledge);
         const viaItems = await extractViaItems(this.flatmapAPI, flatmapKnowledge);
         const destinationItems = await extractDestinationItems(this.flatmapAPI, flatmapKnowledge);
