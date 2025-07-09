@@ -651,6 +651,7 @@ import {
   extractOriginItems,
   extractDestinationItems,
   extractViaItems,
+  fetchLabels,
   queryAllConnectedPaths,
   DrawToolbar,
   Tooltip,
@@ -2085,10 +2086,22 @@ export default {
           } else {
             pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
           }
+          const terms = uniqueResource.flat(Infinity);
+          const uniqueTerms = [...new Set(terms)];
+          const fetchResults = await fetchLabels(this.flatmapAPI, uniqueTerms);
+          const objectResults = fetchResults.map((item) => JSON.parse(item[1]));
+          const labels = [];
+          for (let i = 0; i < uniqueTerms.length; i++) {
+            const foundObj = objectResults.find((obj) => obj.id === uniqueTerms[i])
+            if (foundObj) {
+              labels.push(foundObj.label);
+            }
+          }
+          const filterItemLabel = capitalise(labels.join(', '));
           const newConnectivityfilter = {
             facet: JSON.stringify(uniqueResource),
             facetPropPath: `flatmap.connectivity.source.${this.connectionType.toLowerCase()}`,
-            label: JSON.stringify(uniqueResource),
+            tagLabel: filterItemLabel, // used tagLabel here instead of label since the label and value are different
             term: this.connectionType
           };
           // check for existing item
