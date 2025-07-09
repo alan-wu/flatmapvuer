@@ -3006,7 +3006,7 @@ export default {
           const key = JSON.stringify(item.key);
           return {
             key: `flatmap.connectivity.source.${facet}.${key}`,
-            label: item.label
+            label: item.label || key
           };
         }
 
@@ -3019,6 +3019,18 @@ export default {
           } else if (facet === 'destination') {
             childrenList = destinationItems.map((item) => transformItem(facet, item));
           }
+
+          // Those without label but key should be below
+          childrenList = childrenList.sort((a, b) => {
+            const isAlpha = (str) => /^[a-zA-Z]/.test(str);
+            const aAlpha = isAlpha(a.label);
+            const bAlpha = isAlpha(b.label);
+
+            if (aAlpha && !bAlpha) return -1;
+            if (!aAlpha && bAlpha) return 1;
+
+            return a.label.localeCompare(b.label);
+          });
 
           connectionFilters.push({
             key: `flatmap.connectivity.source.${facet}`,
