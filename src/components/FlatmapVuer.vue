@@ -640,7 +640,7 @@ import {
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
-import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.4/+esm'
+import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.8/+esm'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
@@ -1382,29 +1382,25 @@ export default {
     },
     resetMapFilter: function() {
       const alert = this.mapFilters.alert;
-      let filter = undefined;
-      if (alert.with) {
-        if (!alert.without) {
-          filter = {
-            HAS: 'alert',
-          };
-        }
-      } else {
-        if (alert.without) {
-          filter = {
-            NOT: { HAS: 'alert'},
-          };
-        } else {
-          filter = {
-            AND: [ {NOT: { HAS: 'alert'}}, { HAS: 'alert'}]
-          }
-        }
+      let filter;
+      const isPathways = { 'tile-layer': 'pathways' };
+      const notPathways = { NOT: isPathways };
+
+      if (alert.with && !alert.without) {
+        // Show pathways with alert
+        filter = {
+          OR: [notPathways, { AND: [isPathways, { HAS: 'alert' }] }]
+        };
+      } else if (!alert.with && alert.without) {
+        // Show pathways without alert
+        filter = {
+          OR: [notPathways, { AND: [isPathways, { NOT: { HAS: 'alert' } }] }]
+        };
+      } else if (!alert.with && !alert.without) {
+        // Hide all pathways
+        filter = notPathways;
       }
-      if (filter) {
-        this.mapImp.setVisibilityFilter(filter)
-      } else {
-        this.mapImp.clearVisibilityFilter()
-      }
+      this.setVisibilityFilter(filter)
     },
     /**
      * @public
@@ -1415,17 +1411,18 @@ export default {
     alertMouseEnterEmitted: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
-          let filter = undefined;
-          if (payload.key === "alert") {
-            filter = {
-              HAS: 'alert',
-            }
-          } else if (payload.key === "withoutAlert") {
-            filter = {
-              NOT: {HAS: 'alert'},
-            }
+          let filter;
+          const isPathways = { 'tile-layer': 'pathways' };
+          const notPathways = { NOT: isPathways };
+
+          if (payload.key === "alert" || payload.key === "withoutAlert") {
+            const hasAlert = payload.key === "alert" ?
+              { HAS: 'alert' } :
+              { NOT: { HAS: 'alert' } };
+
+            filter = { OR: [notPathways, { AND: [isPathways, hasAlert] }] };
           }
-          this.mapImp.setVisibilityFilter(filter)
+          this.setVisibilityFilter(filter)
         } else {
           this.resetMapFilter()
         }
@@ -1437,7 +1434,7 @@ export default {
      * by providing ``kay, value`` ``payload`` object ``{alertKey, true/false}``.
      * @arg {Object} `payload`
      */
-     alertSelected: function (payload) {
+    alertSelected: function (payload) {
       if (this.mapImp) {
         if (payload.key === "alert") {
           if (payload.value) {
@@ -1461,7 +1458,7 @@ export default {
      * option by providing ``flag`` (true/false).
      * @arg {Boolean} `flag`
      */
-     checkAllAlerts: function (payload) {
+    checkAllAlerts: function (payload) {
       if (this.mapImp) {
         if (payload.value) {
           this.mapFilters.alert.without = true
@@ -2937,12 +2934,13 @@ export default {
             label: "",
             children: []
           }
+          let children = []
           if (key === "kind") {
             main.label = "Pathways"
             for (const facet of value) {
               const pathway = this.pathways.find(path => path.type === facet)
               if (pathway) {
-                main.children.push({
+                children.push({
                   key: `${main.key}.${facet}`,
                   label: pathway.label,
                   colour: pathway.colour,
@@ -2958,9 +2956,11 @@ export default {
               for (const facet of value) {
                 const taxon = entityLabels.find(p => p.taxon === facet)
                 if (taxon) {
-                  main.children.push({
+                  children.push({
                     key: `${main.key}.${facet}`,
-                    label: taxon.label
+                    // space added at the end of label to make sure the display name will not be updated
+                    // prevent sidebar searchfilter convertReadableLabel
+                    label: `${taxon.label} `
                   })
                 }
               }
@@ -2968,12 +2968,13 @@ export default {
           } else if (key === "alert") {
             main.label = "Alert"
             for (const facet of ["with", "without"]) {
-              main.children.push({
+              children.push({
                 key: `${main.key}.${facet}`,
                 label: `${facet} alerts`
               })
             }
           }
+          main.children = children.sort((a, b) => a.label.localeCompare(b.label));
           if (main.label && main.children.length) {
             filterOptions.push(main)
           }
