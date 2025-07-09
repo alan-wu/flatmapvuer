@@ -2049,7 +2049,9 @@ export default {
       // the card should be opened without doing other functions
       else if (this.viewingMode === 'Neuron Connection' && !connectivityExplorerClicked) {
         const resources = data.map(tooltip => tooltip.resource[0]);
-        let pathsQueryAPI = this.retrieveConnectedPaths(resources); // TODO: to replace with queryAllConnectedPaths
+        // TODO: to remove pathsQueryAPI
+        // the new query, queryPathsByRoute, is used in mapviewer for CQ
+        // let pathsQueryAPI = this.retrieveConnectedPaths(resources); // TODO: to replace with queryAllConnectedPaths
 
         // filter out paths
         const featureId = resources.find(resource => !resource.startsWith('ilxtr:'));
@@ -2065,27 +2067,27 @@ export default {
           const anatomicalNodes = annotation?.['anatomical-nodes'];
           const uniqueResource = anatomicalNodes ? JSON.parse(anatomicalNodes[0]) : transformResources;
 
-          if (this.connectionType === 'Origin') {
+          // if (this.connectionType === 'Origin') {
             // Competency Query API
             // pathsQueryAPI = queryPathsByOrigin(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
 
             // search by unique placement before competency API is ready for this
-            pathsQueryAPI = filterPathsByOriginFromKnowledge(uniqueResource);
-          } else if (this.connectionType === 'Via') {
+            // pathsQueryAPI = filterPathsByOriginFromKnowledge(uniqueResource);
+          // } else if (this.connectionType === 'Via') {
             // Competency Query API
             // pathsQueryAPI = queryPathsByViaLocation(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
 
             // search by unique placement before competency API is ready for this
-            pathsQueryAPI = filterPathsByViaFromKnowledge(uniqueResource);
-          } else if (this.connectionType === 'Destination') {
+            // pathsQueryAPI = filterPathsByViaFromKnowledge(uniqueResource);
+          // } else if (this.connectionType === 'Destination') {
             // Competency Query API
             // pathsQueryAPI = queryPathsByDestination(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
 
             // search by unique placement before competency API is ready for this
-            pathsQueryAPI = filterPathsByDestinationFromKnowledge(uniqueResource);
-          } else {
-            pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
-          }
+            // pathsQueryAPI = filterPathsByDestinationFromKnowledge(uniqueResource);
+          // } else {
+            // pathsQueryAPI = queryAllConnectedPaths(this.flatmapAPI, this.mapImp.knowledgeSource, resources);
+          // }
           const terms = uniqueResource.flat(Infinity);
           const uniqueTerms = [...new Set(terms)];
           const fetchResults = await fetchLabels(this.flatmapAPI, uniqueTerms);
