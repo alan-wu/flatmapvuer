@@ -2105,7 +2105,6 @@ export default {
           if (!isNewFilterItemExist) {
             this.connectivityfilters.push(newConnectivityfilter);
           }
-          // TODO: to remove "neuron-connection-click"
           this.$emit('neuron-connection-feature-click', this.connectivityfilters);
         }
       } else {
