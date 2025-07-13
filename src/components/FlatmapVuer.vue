@@ -2923,10 +2923,10 @@ export default {
         flatmapKnowledge.forEach((knowledge) => {
           const id = knowledge.id;
           if (id) {
-            const matchObj = mapKnowledge[id];
-            if (matchObj) {
-              const mapConnectivity = matchObj.connectivity;
-              const mapNodePhenotypes = matchObj['node-phenotypes'];
+            const mapKnowledgeObj = mapKnowledge[id];
+            if (mapKnowledgeObj) {
+              const mapConnectivity = mapKnowledgeObj.connectivity;
+              const mapNodePhenotypes = mapKnowledgeObj['node-phenotypes'];
               knowledge.connectivity = [...knowledge.connectivity, ...mapConnectivity];
               for (let key in knowledge['node-phenotypes']) {
                 if (mapNodePhenotypes[key]) {
