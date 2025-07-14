@@ -394,5 +394,8 @@ export default {
   :deep(.el-checkbox__input) {
     display: none;
   }
+  .checkbox-group-inner {
+    padding: 5px;
+  }
 }
 </style>
