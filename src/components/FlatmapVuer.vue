@@ -2927,10 +2927,12 @@ export default {
             if (mapKnowledgeObj) {
               const mapConnectivity = mapKnowledgeObj.connectivity;
               const mapNodePhenotypes = mapKnowledgeObj['node-phenotypes'];
-              knowledge.connectivity = [...knowledge.connectivity, ...mapConnectivity];
+              // take only map connectivity
+              knowledge.connectivity = [...mapConnectivity];
               for (let key in knowledge['node-phenotypes']) {
                 if (mapNodePhenotypes[key]) {
-                  knowledge['node-phenotypes'][key].push(...mapNodePhenotypes[key]);
+                  // take only map node-phenotypes
+                  knowledge['node-phenotypes'][key] = [...mapNodePhenotypes[key]];
                 }
               }
               // to avoid mutation
