@@ -2918,9 +2918,9 @@ export default {
           }
         }
         const connectionFilters = [];
-        const flatmapKnowledge = _flatmapKnowledge || this.getFlatmapKnowledge();
+        const flatmapKnowledge_ = _flatmapKnowledge || this.getFlatmapKnowledge();
         const mapKnowledge = this.mapImp.pathways.paths;
-        flatmapKnowledge.forEach((knowledge) => {
+        const flatmapKnowledge = flatmapKnowledge_.map((knowledge) => {
           const id = knowledge.id;
           if (id) {
             const mapKnowledgeObj = mapKnowledge[id];
@@ -2935,6 +2935,8 @@ export default {
               }
             }
           }
+          // to avoid mutation
+          return JSON.parse(JSON.stringify(knowledge));
         })
         const knowledgeSource = this.mapImp.knowledgeSource;
         const originItems = await extractOriginItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
