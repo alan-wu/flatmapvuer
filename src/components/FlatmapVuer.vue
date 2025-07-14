@@ -2920,7 +2920,7 @@ export default {
         const connectionFilters = [];
         const flatmapKnowledge_ = _flatmapKnowledge || this.getFlatmapKnowledge();
         const mapKnowledge = this.mapImp.pathways.paths;
-        const flatmapKnowledge = flatmapKnowledge_.map((knowledge) => {
+        const flatmapKnowledge = flatmapKnowledge_.reduce((arr, knowledge) => {
           const id = knowledge.id;
           if (id) {
             const mapKnowledgeObj = mapKnowledge[id];
@@ -2933,11 +2933,12 @@ export default {
                   knowledge['node-phenotypes'][key].push(...mapNodePhenotypes[key]);
                 }
               }
+              // to avoid mutation
+              arr.push(JSON.parse(JSON.stringify(knowledge)));
             }
           }
-          // to avoid mutation
-          return JSON.parse(JSON.stringify(knowledge));
-        })
+          return arr;
+        }, []);
         const knowledgeSource = this.mapImp.knowledgeSource;
         const originItems = await extractOriginItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
         const viaItems = await extractViaItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
