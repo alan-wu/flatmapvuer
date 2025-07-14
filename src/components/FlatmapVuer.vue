@@ -2918,9 +2918,9 @@ export default {
           }
         }
         const connectionFilters = [];
-        const flatmapKnowledge_ = providedKnowledge || this.getFlatmapKnowledge();
+        const baseFlatmapKnowledge = providedKnowledge || this.getFlatmapKnowledge();
         const mapKnowledge = this.mapImp.pathways.paths;
-        const flatmapKnowledge = flatmapKnowledge_.reduce((arr, knowledge) => {
+        const flatmapKnowledge = baseFlatmapKnowledge.reduce((arr, knowledge) => {
           const id = knowledge.id;
           if (id) {
             const mapKnowledgeObj = mapKnowledge[id];
