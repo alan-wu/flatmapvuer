@@ -2862,7 +2862,7 @@ export default {
       }
       return filterSources
     },
-    getFilterOptions: async function (_flatmapKnowledge) {
+    getFilterOptions: async function (providedKnowledge) {
       let filterOptions = [];
       if (this.mapImp) {
         const filterRanges = this.mapImp.featureFilterRanges()
@@ -2918,7 +2918,7 @@ export default {
           }
         }
         const connectionFilters = [];
-        const flatmapKnowledge_ = _flatmapKnowledge || this.getFlatmapKnowledge();
+        const flatmapKnowledge_ = providedKnowledge || this.getFlatmapKnowledge();
         const mapKnowledge = this.mapImp.pathways.paths;
         const flatmapKnowledge = flatmapKnowledge_.reduce((arr, knowledge) => {
           const id = knowledge.id;
