@@ -8,6 +8,7 @@
     >
       <div
         v-if="legendStyle(item) === 'yellow-star'"
+        :class="legendStyle(item)"
         v-html="showStarInLegend ? yellowstar : ''"
       ></div>
       <div v-else class="legend-item">
