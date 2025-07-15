@@ -1,71 +1,95 @@
 <template>
-  <div class="legends-group">
-    <div 
-      class="legends-container"
-      v-for="item in entry" 
-      :key="item[identifierKey]" 
+  <div class="legend-group">
+    <div
+      class="legend-container"
+      v-for="item in legends"
+      :key="item[identifierKey]"
       :label="item[identifierKey]"
     >
-      <div :class="item[styleKey]" :style="{ 'background-color': item[colourKey] }"></div>
-      <div class="label">{{ capitalise(item[identifierKey]) }}</div>
+      <div
+        v-if="legendStyle(item) === 'yellow-star'"
+        v-html="showStarInLegend ? yellowstar : ''"
+      ></div>
+      <div v-else class="legend-item">
+        <div
+          :class="legendStyle(item)"
+          :style="{ 'background-color': item[colourKey] }"
+        ></div>
+        <div class="label">{{ capitalise(item[identifierKey]) }}</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import yellowstar from "../../icons/yellowstar";
 /* eslint-disable no-alert, no-console */
 export default {
-  name: 'DynamicLegends',
+  name: "DynamicLegends",
   props: {
     identifierKey: {
       type: String,
-      default: 'id',
+      default: "id",
     },
     colourKey: {
       type: String,
-      default: 'colour',
+      default: "colour",
     },
     styleKey: {
       type: String,
-      default: 'style',
+      default: "style",
     },
     title: {
       type: String,
-      default: '',
+      default: "",
     },
-    lists: {
+    legends: {
       type: Array,
       default: function () {
-        return []
+        return [];
       },
     },
-  },
-  computed: {
-    entry: function () {
-      return this.lists.filter((item) => {
-        return item[this.identifierKey] !== 'Featured dataset marker'
-      })
+    showStarInLegend: {
+      type: Boolean,
+      default: false,
     },
+  },
+  data: function () {
+    return {
+      yellowstar: yellowstar,
+    };
   },
   methods: {
     capitalise: function (label) {
-      return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()
+      return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+    },
+    legendStyle: function (item) {
+      if (item[this.styleKey] === "star") {
+        if (item[this.identifierKey] === "Featured dataset marker") {
+          return "yellow-star";
+        } else if (item[this.identifierKey] === "Gaglionated nerve plexus") {
+          return "hexagon-star";
+        }
+      }
+      return item[this.styleKey];
     },
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
-.legends-group {
-  padding: 5px 0;
+.legend-group {
+  padding: 6px 0;
 }
 
-.legends-container {
-  width: 100%;
+.legend-container {
+  width: max-content;
+}
+
+.legend-item {
   display: flex;
   align-items: center;
-  margin: 10px 12.5px;
-  padding: 1px 0;
+  margin: 8px 12.5px;
 }
 
 .circle {
@@ -77,13 +101,17 @@ export default {
 }
 
 // hexagon
-.star {
+.hexagon-star {
   width: 21px;
   height: 25px;
   background-color: #ffffff;
   opacity: 0.64;
-  clip-path: path('M10.48 0.76 c-2.12 3.72 -6.12 6.04 -10.44 6.04 l-0.16 0.24 c2.04 3.6 2.04 8 0 11.6 l0.16 0.24 c4.28 0 8.32 2.32 10.44 6.04 c2.12 -3.72 6.12 -6.04 10.44 -6.04 c-2.12 -3.72 -2.12 -8.36 0 -12.16 C16.64 6.84 12.68 4.52 10.48 0.76z');
-  -webkit-clip-path: path('M10.48 0.76 c-2.12 3.72 -6.12 6.04 -10.44 6.04 l-0.16 0.24 c2.04 3.6 2.04 8 0 11.6 l0.16 0.24 c4.28 0 8.32 2.32 10.44 6.04 c2.12 -3.72 6.12 -6.04 10.44 -6.04 c-2.12 -3.72 -2.12 -8.36 0 -12.16 C16.64 6.84 12.68 4.52 10.48 0.76z');
+  clip-path: path(
+    "M10.48 0.76 c-2.12 3.72 -6.12 6.04 -10.44 6.04 l-0.16 0.24 c2.04 3.6 2.04 8 0 11.6 l0.16 0.24 c4.28 0 8.32 2.32 10.44 6.04 c2.12 -3.72 6.12 -6.04 10.44 -6.04 c-2.12 -3.72 -2.12 -8.36 0 -12.16 C16.64 6.84 12.68 4.52 10.48 0.76z"
+  );
+  -webkit-clip-path: path(
+    "M10.48 0.76 c-2.12 3.72 -6.12 6.04 -10.44 6.04 l-0.16 0.24 c2.04 3.6 2.04 8 0 11.6 l0.16 0.24 c4.28 0 8.32 2.32 10.44 6.04 c2.12 -3.72 6.12 -6.04 10.44 -6.04 c-2.12 -3.72 -2.12 -8.36 0 -12.16 C16.64 6.84 12.68 4.52 10.48 0.76z"
+  );
 }
 
 .label {

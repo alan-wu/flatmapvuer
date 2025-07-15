@@ -266,10 +266,11 @@ Please use `const` to assign meaningful names to them...
                 identifierKey="prompt"
                 colourKey="colour"
                 styleKey="style"
-                :lists="flatmapLegends"
+                :legends="flatmapLegends"
+                :showStarInLegend="showStarInLegend"
                 class="svg-legends-container"
               />
-              <template v-if="showStarInLegend">
+              <!-- <template v-if="showStarInLegend">
                 <el-popover
                   content="Location of the featured dataset"
                   placement="right"
@@ -291,7 +292,7 @@ Please use `const` to assign meaningful names to them...
                     ></div>
                   </template>
                 </el-popover>
-              </template>
+              </template> -->
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
                 content="Find these markers for data. The number inside the markers is the number of datasets available for each marker."
