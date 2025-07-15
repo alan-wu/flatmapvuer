@@ -1,37 +1,19 @@
 <template>
-  <div>
-    <el-row>
-      <el-col :span="12">
-        <div class="title-display-text">{{ title }}</div>
-      </el-col>
-    </el-row>
-    <div class="legends-group">
-      <el-row
-        v-for="item in lists"
-        :key="item[identifierKey]"
-        :label="item[identifierKey]"
-      >
-        <div class="legends-container">
-          <div
-            class="legends-visual"
-            :style="{ background: item[colourKey] }"
-          ></div>
-          <div class="label">
-            {{ capitalise(item[identifierKey]) }}
-          </div>
-        </div>
-      </el-row>
+  <div class="legends-group">
+    <div 
+      class="legends-container"
+      v-for="item in entry" 
+      :key="item[identifierKey]" 
+      :label="item[identifierKey]"
+    >
+      <div :class="item[styleKey]" :style="{ 'background-color': item[colourKey] }"></div>
+      <div class="label">{{ capitalise(item[identifierKey]) }}</div>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from 'vue'
-import { ElCol as Col, ElRow as Row } from 'element-plus'
-Vue.use(Col)
-Vue.use(Row)
-
 export default {
   name: 'DynamicLegends',
   props: {
@@ -42,6 +24,10 @@ export default {
     colourKey: {
       type: String,
       default: 'colour',
+    },
+    styleKey: {
+      type: String,
+      default: 'style',
     },
     title: {
       type: String,
@@ -54,6 +40,13 @@ export default {
       },
     },
   },
+  computed: {
+    entry: function () {
+      return this.lists.filter((item) => {
+        return item[this.identifierKey] !== 'Featured dataset marker'
+      })
+    },
+  },
   methods: {
     capitalise: function (label) {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()
@@ -63,44 +56,39 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use 'element-plus/theme-chalk/src/row';
-
-.legends-visual {
-  margin: 2px;
-  width: 11px;
-  margin-right: 5px;
-  display: inline-block;
-}
-
-.title-display-text {
-  width: 59px;
-  height: 20px;
-  color: rgb(48, 49, 51);
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 20px;
-  margin-left: 8px;
-}
-
-.label {
-  padding-left: 35px;
-  color: $app-primary-color;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0px;
-  line-height: 14px;
+.legends-group {
+  padding: 5px 0;
 }
 
 .legends-container {
+  width: 100%;
   display: flex;
-  cursor: pointer;
+  align-items: center;
+  margin: 10px 12.5px;
+  padding: 1px 0;
 }
 
-.legends-group {
-  width: 224;
-  border: 1px solid rgb(144, 147, 153);
-  border-radius: 4px;
-  background: #ffffff;
-  padding: 18px;
+.circle {
+  height: 20px;
+  width: 20px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+// hexagon
+.star {
+  width: 21px;
+  height: 25px;
+  background-color: #ffffff;
+  opacity: 0.64;
+  clip-path: path('M10.48 0.76 c-2.12 3.72 -6.12 6.04 -10.44 6.04 l-0.16 0.24 c2.04 3.6 2.04 8 0 11.6 l0.16 0.24 c4.28 0 8.32 2.32 10.44 6.04 c2.12 -3.72 6.12 -6.04 10.44 -6.04 c-2.12 -3.72 -2.12 -8.36 0 -12.16 C16.64 6.84 12.68 4.52 10.48 0.76z');
+  -webkit-clip-path: path('M10.48 0.76 c-2.12 3.72 -6.12 6.04 -10.44 6.04 l-0.16 0.24 c2.04 3.6 2.04 8 0 11.6 l0.16 0.24 c4.28 0 8.32 2.32 10.44 6.04 c2.12 -3.72 6.12 -6.04 10.44 -6.04 c-2.12 -3.72 -2.12 -8.36 0 -12.16 C16.64 6.84 12.68 4.52 10.48 0.76z');
+}
+
+.label {
+  margin-left: 14px;
+  font-size: 12px;
+  color: rgb(48, 49, 51);
 }
 </style>
