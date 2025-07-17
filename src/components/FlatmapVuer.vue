@@ -1338,6 +1338,13 @@ export default {
      * @arg {string} `pathId` or `anatomicalId`
      */
     retrieveConnectedPaths: async function (payload, options = {}) {
+      // query all connected paths CQ
+      if (this.viewingMode === 'Neuron Connection' && this.connectionType.toLowerCase() === 'all') {
+        const sourceId = this.mapImp.uuid;
+        const connectedPaths = await queryAllConnectedPaths(this.flatmapAPI, sourceId, payload);
+        return connectedPaths;
+      }
+      // query all connected paths from flatmap
       if (this.mapImp) {
         let connectedPaths = [];
         let connectedTarget = options.target?.length ? options.target : [];
