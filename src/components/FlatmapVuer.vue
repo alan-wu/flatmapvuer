@@ -2136,11 +2136,16 @@ export default {
             });
           }
         } else {
+          // clicking on paths
+          // do nothing for origin, destination, via
           const searchTerms = resources.join();
-          this.$emit('neuron-connection-feature-click', {
-            filters: [],
-            search: searchTerms,
-          });
+
+          if (this.connectionType.toLowerCase() === 'all') {
+            this.$emit('neuron-connection-feature-click', {
+              filters: [],
+              search: searchTerms,
+            });
+          }
         }
       } else {
         // load and store knowledge
