@@ -260,8 +260,17 @@ Please use `const` to assign meaningful names to them...
               :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
               v-popover:checkBoxPopover
             >
-              <svg-legends v-if="!isFC" class="svg-legends-container" />
-              <template v-if="showStarInLegend">
+              <!-- <svg-legends v-if="!isFC" class="svg-legends-container" /> -->
+              <dynamic-legends
+                v-if="!isFC"
+                identifierKey="prompt"
+                colourKey="colour"
+                styleKey="style"
+                :legends="flatmapLegends"
+                :showStarInLegend="showStarInLegend"
+                class="svg-legends-container"
+              />
+              <!-- <template v-if="showStarInLegend">
                 <el-popover
                   content="Location of the featured dataset"
                   placement="right"
@@ -283,7 +292,7 @@ Please use `const` to assign meaningful names to them...
                     ></div>
                   </template>
                 </el-popover>
-              </template>
+              </template> -->
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
                 content="Find these markers for data. The number inside the markers is the number of datasets available for each marker."
@@ -611,6 +620,7 @@ import SelectionsGroup from './SelectionsGroup.vue'
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite'
 import '@abi-software/svg-sprite/dist/style.css'
 import SvgLegends from './legends/SvgLegends.vue'
+import DynamicLegends from './legends/DynamicLegends.vue'
 import {
   ElButton as Button,
   ElCol as Col,
@@ -640,7 +650,7 @@ import {
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
-import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.8/+esm'
+import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.10/+esm'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
@@ -3027,6 +3037,7 @@ export default {
       //Async, pass the state for checking
       this.processTaxon(this.mapImp.taxonIdentifiers, state ? state['taxonSelection'] : undefined)
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
+      this.flatmapLegends = this.mapImp.flatmapLegend
       this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
@@ -3505,6 +3516,7 @@ export default {
       searchTerm: "",
       taxonLeaveDelay: undefined,
       connectivityfilters: [],
+      flatmapLegends: [],
     }
   },
   computed: {
