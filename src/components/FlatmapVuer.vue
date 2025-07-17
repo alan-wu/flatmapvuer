@@ -2107,13 +2107,13 @@ export default {
             term: this.connectionType
           };
           // check for existing item
-          const isNewFilterItemExist = this.connectivityfilters.some((connectivityfilter) => (
+          const isNewFilterItemExist = this.connectivityFilters.some((connectivityfilter) => (
             connectivityfilter.facet === newConnectivityfilter.facet &&
             connectivityfilter.facetPropPath === newConnectivityfilter.facetPropPath
           ));
 
           if (!isNewFilterItemExist) {
-            this.connectivityfilters.push(newConnectivityfilter);
+            this.connectivityFilters.push(newConnectivityfilter);
           }
 
           if (this.connectionType.toLowerCase() === 'all') {
@@ -2124,7 +2124,7 @@ export default {
             });
           } else {
             this.$emit('neuron-connection-feature-click', {
-              filters: this.connectivityfilters,
+              filters: this.connectivityFilters,
               search: '',
             });
           }
@@ -2169,14 +2169,14 @@ export default {
      */
     updateConnectivityFilters: function (payload) {
       if (!payload.length) return;
-      this.connectivityfilters = payload.filter((filterItem) => (
+      this.connectivityFilters = payload.filter((filterItem) => (
         filterItem.facet.toLowerCase() !== 'show all'
       ));
     },
     resetConnectivityfilters: function (payload) {
       if (payload.length) {
         // remove not found items
-        this.connectivityfilters = this.connectivityfilters.filter((connectivityfilter) =>
+        this.connectivityFilters = this.connectivityFilters.filter((connectivityfilter) =>
           payload.some((notFoundItem) => (
             notFoundItem.facetPropPath === connectivityfilter.facetPropPath &&
             notFoundItem.facet !== connectivityfilter.facet
@@ -2184,7 +2184,7 @@ export default {
         )
       } else {
         // full reset
-        this.connectivityfilters = [];
+        this.connectivityFilters = [];
       }
     },
     getKnowledgeTooltip: async function (data) {
@@ -3515,7 +3515,7 @@ export default {
       }),
       searchTerm: "",
       taxonLeaveDelay: undefined,
-      connectivityfilters: [],
+      connectivityFilters: [],
       flatmapLegends: [],
     }
   },
