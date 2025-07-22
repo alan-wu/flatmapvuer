@@ -2975,7 +2975,7 @@ export default {
           const id = knowledge.id;
           if (id) {
             const mapKnowledgeObj = mapKnowledge[id];
-            if (mapKnowledgeObj) {
+            if (mapKnowledgeObj && mapKnowledgeObj.connectivity && mapKnowledgeObj['node-phenotypes']) {
               const mapConnectivity = mapKnowledgeObj.connectivity;
               const mapNodePhenotypes = mapKnowledgeObj['node-phenotypes'];
               // take only map connectivity
@@ -3027,14 +3027,18 @@ export default {
             return a.label.localeCompare(b.label);
           });
 
-          connectionFilters.push({
-            key: `flatmap.connectivity.source.${facet}`,
-            label: facet,
-            children: childrenList,
-          })
+          if (childrenList.length) {
+            connectionFilters.push({
+              key: `flatmap.connectivity.source.${facet}`,
+              label: facet,
+              children: childrenList,
+            })
+          }
         }
 
-        filterOptions.push(...connectionFilters)
+        if (connectionFilters.length) {
+          filterOptions.push(...connectionFilters)
+        }
       }
       return filterOptions;
     },
