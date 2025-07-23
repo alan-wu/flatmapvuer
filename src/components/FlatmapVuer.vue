@@ -3005,7 +3005,7 @@ export default {
           };
         }
 
-        for (const facet of ["origin", "via", "destination"]) {
+        for (const facet of ["origin", "via", "destination", "all"]) {
           let childrenList = []
           if (facet === 'origin') {
             childrenList = originItems.map((item) => transformItem(facet, item));
@@ -3013,6 +3013,20 @@ export default {
             childrenList = viaItems.map((item) => transformItem(facet, item));
           } else if (facet === 'destination') {
             childrenList = destinationItems.map((item) => transformItem(facet, item));
+          } else {
+            // All is the combination of origin, via, destination
+            const allList = [
+              ...originItems.map((item) => transformItem(facet, item)),
+              ...viaItems.map((item) => transformItem(facet, item)),
+              ...destinationItems.map((item) => transformItem(facet, item))
+            ];
+            // Generate unique list since the same feature can be in origin, via, and destination
+            const seenKeys = new Set();
+            childrenList = allList.filter(item => {
+              if (seenKeys.has(item.key)) return false;
+              seenKeys.add(item.key);
+              return true;
+            });
           }
 
           // Those without label but key should be below
