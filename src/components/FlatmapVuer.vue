@@ -2081,11 +2081,16 @@ export default {
           const featureId = data[0].feature?.featureId;
           const annotation = this.mapImp.annotations.get(featureId);
           const anatomicalNodes = annotation?.['anatomical-nodes'];
+          const annotationModels = annotation?.['models'];
           let anatomicalNode;
           let uniqueResource = transformResources;
           const models = annotation?.['models'];
           if (anatomicalNodes?.length) {
-            anatomicalNode = anatomicalNodes[anatomicalNodes.length - 1];
+            // get the node which match the feature in a location
+            // [feature, location]
+            anatomicalNode = anatomicalNodes.find((node) =>
+              JSON.parse(node)[0] === annotationModels
+            );
           }
           if (anatomicalNode) {
             uniqueResource = JSON.parse(anatomicalNode);
@@ -2128,18 +2133,10 @@ export default {
             this.connectivityFilters.push(newConnectivityfilter);
           }
 
-          if (this.connectionType.toLowerCase() === 'all') {
-            const searchTerms = uniqueTerms.join();
-            this.$emit('neuron-connection-feature-click', {
-              filters: [],
-              search: searchTerms,
-            });
-          } else {
-            this.$emit('neuron-connection-feature-click', {
-              filters: this.connectivityFilters,
-              search: '',
-            });
-          }
+          this.$emit('neuron-connection-feature-click', {
+            filters: this.connectivityFilters,
+            search: '',
+          });
         } else {
           // clicking on paths
           // do nothing for origin, destination, via
