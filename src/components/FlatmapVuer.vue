@@ -643,9 +643,6 @@ import {
   refreshFlatmapKnowledgeCache,
   getKnowledgeSource,
   getReferenceConnectivitiesByAPI,
-  filterPathsByOriginFromKnowledge,
-  filterPathsByDestinationFromKnowledge,
-  filterPathsByViaFromKnowledge,
 } from '../services/flatmapKnowledge.js'
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
@@ -655,9 +652,6 @@ import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import {
-  queryPathsByOrigin,
-  queryPathsByViaLocation,
-  queryPathsByDestination,
   extractOriginItems,
   extractDestinationItems,
   extractViaItems,
