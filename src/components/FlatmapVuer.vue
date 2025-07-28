@@ -826,7 +826,7 @@ export default {
             ? this.mapImp.featureProperties(numericId)
             : { feature: this.existDrawnFeatures.find(feature => feature.id === value.trim()) };
           let payload = { feature: featureObject }
-          this.checkAndCreatePopups([payload])
+          this.checkAndCreatePopups([payload], false)
         } else {
           this.closeTooltip()
         }
@@ -838,7 +838,7 @@ export default {
      */
     confirmDrawnFeature: function () {
       if (this.isValidDrawnCreated) {
-        this.checkAndCreatePopups([this.drawnCreatedEvent])
+        this.checkAndCreatePopups([this.drawnCreatedEvent], false)
         // Add connection if exist to annotationEntry
         // Connection will only be added in creating new drawn feature annotation
         // And will not be updated if move drawn features
@@ -2014,7 +2014,7 @@ export default {
      * _checkNeuronClicked shows a neuron path pop up if a path was recently clicked._
      * @arg {Object} `data`
      */
-    checkAndCreatePopups: async function (data, connectivityExplorerClicked) {
+    checkAndCreatePopups: async function (data, mapclick = true) {
       // Call flatmap database to get the connection data
       if (this.viewingMode === 'Annotation') {
         const features = data.filter(d => d.feature).map(d => d.feature)
@@ -2064,7 +2064,7 @@ export default {
       }
       // clicking on a connectivity explorer card will be the same as exploration mode
       // the card should be opened without doing other functions
-      else if (this.viewingMode === 'Neuron Connection' && !connectivityExplorerClicked) {
+      else if (this.viewingMode === 'Neuron Connection' && mapclick) {
         const resources = data.map(tooltip => tooltip.resource[0]);
 
         // filter out paths
@@ -3153,7 +3153,7 @@ export default {
                   alert: feature.alert,
                 }
                 // Show popup for all modes
-                this.checkAndCreatePopups([data], connectivityExplorerClicked)
+                this.checkAndCreatePopups([data], false)
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
                   className: 'custom-popup',
                   positionAtLastClick: false,
