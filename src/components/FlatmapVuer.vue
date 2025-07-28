@@ -758,6 +758,11 @@ export default {
     return { annotator }
   },
   methods: {
+    enableFeatureResetOnClick: function (enable) {
+      if (this.mapImp) {
+        this.mapImp.enableFeatureResetOnClick(enable)
+      }
+    },
     /**
      *
      * @param filter format should follow #makeStyleFilter (flatmap-viewer)
