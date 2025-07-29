@@ -1509,7 +1509,7 @@ export default {
      * @arg {String} `models`
      */
     ftuSelected: function (models) {
-      this.searchAndShowResult(models, true)
+      this.searchAndShowResult(models, true, true)
     },
     /**
      * @public
@@ -2717,7 +2717,7 @@ export default {
         if (state.background) this.backgroundChangeCallback(state.background)
         if (state.searchTerm) {
           const searchTerm = state.searchTerm
-          this.searchAndShowResult(searchTerm, true)
+          this.searchAndShowResult(searchTerm, true, true)
         }
         this.setVisibilityState(state)
       }
@@ -3120,8 +3120,9 @@ export default {
      * with the option to display the label/connectivity information using displayInfo flag.
      * @arg {String} `term`,
      * @arg {String} `displayInfo`
+     * @arg {String} `mapclick` Similate the event as it is triggered by an user click
      */
-    searchAndShowResult: function (term, displayInfo, connectivityExplorerClicked) {
+    searchAndShowResult: function (term, displayInfo, mapclick = true) {
       if (this.mapImp) {
         if (term === undefined || term === '') {
           this.mapImp.clearSearchResults()
@@ -3153,7 +3154,7 @@ export default {
                   alert: feature.alert,
                 }
                 // Show popup for all modes
-                this.checkAndCreatePopups([data], false)
+                this.checkAndCreatePopups([data], mapclick)
                 this.mapImp.showPopup(featureId, capitalise(feature.label), {
                   className: 'custom-popup',
                   positionAtLastClick: false,
