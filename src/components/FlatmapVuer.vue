@@ -2902,64 +2902,68 @@ export default {
       }
       return filterSources
     },
-    getFilterOptions: async function (providedKnowledge) {
+    getFilterOptions: async function (mapImp, providedKnowledge) {
       let filterOptions = [];
-      if (this.mapImp) {
-        const filterRanges = this.mapImp.featureFilterRanges()
-        for (const [key, value] of Object.entries(filterRanges)) {
-          let main = {
-            key: `flatmap.connectivity.${key}`,
-            label: "",
-            children: []
-          }
-          let children = []
-          if (key === "kind") {
-            main.label = "Pathways"
-            for (const facet of value) {
-              const pathway = this.pathways.find(path => path.type === facet)
-              if (pathway) {
-                children.push({
-                  key: `${main.key}.${facet}`,
-                  label: pathway.label,
-                  colour: pathway.colour,
-                  colourStyle: 'line',
-                  dashed: pathway.dashed,
-                })
-              }
+      const connectionFilters = [];
+      if (mapImp) {
+        // get flatmap filters
+        if (mapImp && typeof mapImp.featureFilterRanges === 'function') {
+          const filterRanges = mapImp.featureFilterRanges();
+          for (const [key, value] of Object.entries(filterRanges)) {
+            let main = {
+              key: `flatmap.connectivity.${key}`,
+              label: "",
+              children: []
             }
-          } else if (key === "taxons") {
-            main.label = "Studied in"
-            const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
-            if (entityLabels.length) {
+            let children = []
+            if (key === "kind") {
+              main.label = "Pathways"
               for (const facet of value) {
-                const taxon = entityLabels.find(p => p.taxon === facet)
-                if (taxon) {
+                const pathway = this.pathways.find(path => path.type === facet)
+                if (pathway) {
                   children.push({
                     key: `${main.key}.${facet}`,
-                    // space added at the end of label to make sure the display name will not be updated
-                    // prevent sidebar searchfilter convertReadableLabel
-                    label: `${taxon.label} `
+                    label: pathway.label,
+                    colour: pathway.colour,
+                    colourStyle: 'line',
+                    dashed: pathway.dashed,
                   })
                 }
               }
+            } else if (key === "taxons") {
+              main.label = "Studied in"
+              const entityLabels = await findTaxonomyLabels(mapImp, mapImp.taxonIdentifiers)
+              if (entityLabels.length) {
+                for (const facet of value) {
+                  const taxon = entityLabels.find(p => p.taxon === facet)
+                  if (taxon) {
+                    children.push({
+                      key: `${main.key}.${facet}`,
+                      // space added at the end of label to make sure the display name will not be updated
+                      // prevent sidebar searchfilter convertReadableLabel
+                      label: `${taxon.label} `
+                    })
+                  }
+                }
+              }
+            } else if (key === "alert") {
+              main.label = "Alert"
+              for (const facet of ["with", "without"]) {
+                children.push({
+                  key: `${main.key}.${facet}`,
+                  label: `${facet} alerts`
+                })
+              }
             }
-          } else if (key === "alert") {
-            main.label = "Alert"
-            for (const facet of ["with", "without"]) {
-              children.push({
-                key: `${main.key}.${facet}`,
-                label: `${facet} alerts`
-              })
+            main.children = children.sort((a, b) => a.label.localeCompare(b.label));
+            if (main.label && main.children.length) {
+              filterOptions.push(main)
             }
-          }
-          main.children = children.sort((a, b) => a.label.localeCompare(b.label));
-          if (main.label && main.children.length) {
-            filterOptions.push(main)
           }
         }
-        const connectionFilters = [];
+
         const baseFlatmapKnowledge = providedKnowledge || this.getFlatmapKnowledge();
-        const mapKnowledge = this.mapImp.pathways.paths;
+        const mapKnowledge = mapImp.pathways.paths;
         const flatmapKnowledge = baseFlatmapKnowledge.reduce((arr, knowledge) => {
           const id = knowledge.id;
           if (id) {
@@ -2981,7 +2985,7 @@ export default {
           }
           return arr;
         }, []);
-        const knowledgeSource = this.mapImp.knowledgeSource;
+        const knowledgeSource = mapImp.knowledgeSource;
         const originItems = await extractOriginItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
         const viaItems = await extractViaItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
         const destinationItems = await extractDestinationItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
