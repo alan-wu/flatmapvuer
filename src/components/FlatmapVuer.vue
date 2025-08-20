@@ -652,13 +652,11 @@ import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
 import {
-  extractOriginItems,
-  extractDestinationItems,
-  extractViaItems,
   fetchLabels,
   DrawToolbar,
   Tooltip,
-  TreeControls
+  TreeControls,
+  getFlatmapFilterOptions
 } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import EventBus from './EventBus.js'
@@ -2902,148 +2900,11 @@ export default {
       }
       return filterSources
     },
-    getFilterOptions: async function (providedKnowledge) {
-      let filterOptions = [];
-      if (this.mapImp) {
-        const filterRanges = this.mapImp.featureFilterRanges()
-        for (const [key, value] of Object.entries(filterRanges)) {
-          let main = {
-            key: `flatmap.connectivity.${key}`,
-            label: "",
-            children: []
-          }
-          let children = []
-          if (key === "kind") {
-            main.label = "Pathways"
-            for (const facet of value) {
-              const pathway = this.pathways.find(path => path.type === facet)
-              if (pathway) {
-                children.push({
-                  key: `${main.key}.${facet}`,
-                  label: pathway.label,
-                  colour: pathway.colour,
-                  colourStyle: 'line',
-                  dashed: pathway.dashed,
-                })
-              }
-            }
-          } else if (key === "taxons") {
-            main.label = "Studied in"
-            const entityLabels = await findTaxonomyLabels(this.mapImp, this.mapImp.taxonIdentifiers)
-            if (entityLabels.length) {
-              for (const facet of value) {
-                const taxon = entityLabels.find(p => p.taxon === facet)
-                if (taxon) {
-                  children.push({
-                    key: `${main.key}.${facet}`,
-                    // space added at the end of label to make sure the display name will not be updated
-                    // prevent sidebar searchfilter convertReadableLabel
-                    label: `${taxon.label} `
-                  })
-                }
-              }
-            }
-          } else if (key === "alert") {
-            main.label = "Alert"
-            for (const facet of ["with", "without"]) {
-              children.push({
-                key: `${main.key}.${facet}`,
-                label: `${facet} alerts`
-              })
-            }
-          }
-          main.children = children.sort((a, b) => a.label.localeCompare(b.label));
-          if (main.label && main.children.length) {
-            filterOptions.push(main)
-          }
-        }
-        const connectionFilters = [];
-        const baseFlatmapKnowledge = providedKnowledge || this.getFlatmapKnowledge();
-        const mapKnowledge = this.mapImp.pathways.paths;
-        const flatmapKnowledge = baseFlatmapKnowledge.reduce((arr, knowledge) => {
-          const id = knowledge.id;
-          if (id) {
-            const mapKnowledgeObj = mapKnowledge[id];
-            if (mapKnowledgeObj && mapKnowledgeObj.connectivity && mapKnowledgeObj['node-phenotypes']) {
-              const mapConnectivity = mapKnowledgeObj.connectivity;
-              const mapNodePhenotypes = mapKnowledgeObj['node-phenotypes'];
-              // take only map connectivity
-              knowledge.connectivity = [...mapConnectivity];
-              for (let key in knowledge['node-phenotypes']) {
-                if (mapNodePhenotypes[key]) {
-                  // take only map node-phenotypes
-                  knowledge['node-phenotypes'][key] = [...mapNodePhenotypes[key]];
-                }
-              }
-              // to avoid mutation
-              arr.push(JSON.parse(JSON.stringify(knowledge)));
-            }
-          }
-          return arr;
-        }, []);
-        const knowledgeSource = this.mapImp.knowledgeSource;
-        const originItems = await extractOriginItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
-        const viaItems = await extractViaItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
-        const destinationItems = await extractDestinationItems(this.flatmapAPI, knowledgeSource, flatmapKnowledge);
-
-        const transformItem = (facet, item) => {
-          const key = JSON.stringify(item.key);
-          return {
-            key: `flatmap.connectivity.source.${facet}.${key}`,
-            label: item.label || key
-          };
-        }
-
-        for (const facet of ["origin", "via", "destination", "all"]) {
-          let childrenList = []
-          if (facet === 'origin') {
-            childrenList = originItems.map((item) => transformItem(facet, item));
-          } else if (facet === 'via') {
-            childrenList = viaItems.map((item) => transformItem(facet, item));
-          } else if (facet === 'destination') {
-            childrenList = destinationItems.map((item) => transformItem(facet, item));
-          } else {
-            // All is the combination of origin, via, destination
-            const allList = [
-              ...originItems.map((item) => transformItem(facet, item)),
-              ...viaItems.map((item) => transformItem(facet, item)),
-              ...destinationItems.map((item) => transformItem(facet, item))
-            ];
-            // Generate unique list since the same feature can be in origin, via, and destination
-            const seenKeys = new Set();
-            childrenList = allList.filter(item => {
-              if (seenKeys.has(item.key)) return false;
-              seenKeys.add(item.key);
-              return true;
-            });
-          }
-
-          // Those without label but key should be below
-          childrenList = childrenList.sort((a, b) => {
-            const isAlpha = (str) => /^[a-zA-Z]/.test(str);
-            const aAlpha = isAlpha(a.label);
-            const bAlpha = isAlpha(b.label);
-
-            if (aAlpha && !bAlpha) return -1;
-            if (!aAlpha && bAlpha) return 1;
-
-            return a.label.localeCompare(b.label);
-          });
-
-          if (childrenList.length) {
-            connectionFilters.push({
-              key: `flatmap.connectivity.source.${facet}`,
-              label: facet,
-              children: childrenList,
-            })
-          }
-        }
-
-        if (connectionFilters.length) {
-          filterOptions.push(...connectionFilters)
-        }
-      }
-      return filterOptions;
+    getFilterOptions: async function (mapImp, _providedKnowledge) {
+      const providedKnowledge = _providedKnowledge || this.getFlatmapKnowledge();
+      const providedPathways = this.pathways;
+      const flatmapFilterOptions = await getFlatmapFilterOptions(this.flatmapAPI, mapImp, providedKnowledge, providedPathways);
+      return flatmapFilterOptions;
     },
     /**
      * @public
