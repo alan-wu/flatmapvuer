@@ -268,7 +268,7 @@ Please use `const` to assign meaningful names to them...
                 width="max-content"
                 :offset="-10"
                 popper-class="flatmap-popper flatmap-teleport-popper"
-                :visible="hoverVisibilities[9].value"
+                :visible="hoverVisibilities[9].value && showStarInLegend"
                 ref="featuredMarkerPopover"
               >
                 <template #reference>
