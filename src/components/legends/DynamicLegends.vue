@@ -54,8 +54,7 @@ export default {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
     },
     customStyle: function(item) {
-      if (item[this.styleKey] === 'star' && (item[this.identifierKey] !== "Featured dataset marker" ||
-        item[this.identifierKey] === "Gaglionated nerve plexus")) {
+      if (item[this.styleKey] === 'star' && (item[this.identifierKey] !== "Featured dataset marker")) {
         return { 'border-bottom-color': item[this.colourKey], 'color': item[this.colourKey] };
       } else {
         return { 'background-color': item[this.colourKey] };
@@ -68,11 +67,8 @@ export default {
             return;
           }
           return "yellow-star";
-        } else if (item[this.identifierKey] === "Gaglionated nerve plexus") {
-          return "exoid";
         }
       }
-
       return item[this.styleKey];
     },
   },
@@ -102,7 +98,7 @@ export default {
   display: inline-block;
 }
 
-.rsquare {
+.rounded-square {
   height: 20px;
   width: 20px;
   background-color: #ffffff;
