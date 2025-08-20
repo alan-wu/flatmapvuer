@@ -9,7 +9,7 @@
       <div class="legend-item" v-if="legendStyle(item)">
         <div
           :class="legendStyle(item)"
-          :style="{ 'background-color': item[colourKey] }"
+          :style="customStyle(item)"
         ></div>
         <div class="label">{{ capitalise(item[identifierKey]) }}</div>
       </div>
@@ -53,6 +53,14 @@ export default {
     capitalise: function (label) {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
     },
+    customStyle: function(item) {
+      if (item[this.styleKey] === 'star' && (item[this.identifierKey] !== "Featured dataset marker" ||
+        item[this.identifierKey] === "Gaglionated nerve plexus")) {
+        return { 'border-bottom-color': item[this.colourKey], 'color': item[this.colourKey] };
+      } else {
+        return { 'background-color': item[this.colourKey] };
+      }
+    },
     legendStyle: function (item) {
       if (item[this.styleKey] === "star") {
         if (item[this.identifierKey] === "Featured dataset marker") {
@@ -61,9 +69,10 @@ export default {
           }
           return "yellow-star";
         } else if (item[this.identifierKey] === "Gaglionated nerve plexus") {
-          return "hexagon-star";
+          return "exoid";
         }
       }
+
       return item[this.styleKey];
     },
   },
@@ -93,7 +102,22 @@ export default {
   display: inline-block;
 }
 
-.hexagon-star {
+.rsquare {
+  height: 20px;
+  width: 20px;
+  background-color: #ffffff;
+  border-radius: 20%;
+  display: inline-block;
+}
+
+.square {
+  height: 20px;
+  width: 20px;
+  background-color: #ffffff;
+  display: inline-block;
+}
+
+.exoid {
   width: 20px;
   height: 25px;
   background-color: #ffffff;
@@ -105,6 +129,48 @@ export default {
     "M9.96 0.72 c-2.01 3.53 -5.81 5.74 -9.92 5.74 l-0.15 0.23 c1.94 3.42 1.94 7.6 0 11.02 l0.15 0.23 c4.07 0 7.9 2.2 9.92 5.74 c2.01 -3.53 5.81 -5.74 9.92 -5.74 c-2.01 -3.53 -2.01 -7.94 0 -11.55 C15.81 6.5 12.04 4.29 9.96 0.72z"
   );
 }
+
+.star {
+  margin: 10px 0;
+  scale: 0.7;
+  position: relative;
+  display: block;
+  width: 0px;
+  height: 0px;
+  border-right: 20px solid transparent;
+  border-bottom: 14px solid;
+  border-left: 20px solid transparent;
+  transform: rotate(35deg);
+  &:before {
+    border-bottom: 16px solid;
+    border-bottom-color: inherit;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    position: absolute;
+    height: 0;
+    width: 0;
+    top: -9px;
+    left: -13px;
+    display: block;
+    content: '';
+    transform: rotate(-35deg);
+  }
+  &:after {
+    position: absolute;
+    display: block;
+    top: 0px;
+    left: -21px;
+    width: 0px;
+    height: 0px;
+    border-bottom-color: inherit;
+    border-right: 20px solid transparent;
+    border-bottom: 15px solid;
+    border-left: 20px solid transparent;
+    transform: rotate(-70deg);
+    content: '';
+  }
+}
+
 
 .yellow-star {
   width: 25px;
