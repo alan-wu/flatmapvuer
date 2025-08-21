@@ -18,6 +18,7 @@
 </template>
 
 <script>
+const starTemplate = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="<fillColor>" stroke="<borderColor>" stroke-width="<borderWidth>" d="M11.0748 3.25583C11.4141 2.42845 12.5859 2.42845 12.9252 3.25583L14.6493 7.45955C14.793 7.80979 15.1221 8.04889 15.4995 8.07727L20.0303 8.41798C20.922 8.48504 21.2841 9.59942 20.6021 10.1778L17.1369 13.1166C16.8482 13.3614 16.7225 13.7483 16.8122 14.1161L17.8882 18.5304C18.1 19.3992 17.152 20.0879 16.3912 19.618L12.5255 17.2305C12.2034 17.0316 11.7966 17.0316 11.4745 17.2305L7.60881 19.618C6.84796 20.0879 5.90001 19.3992 6.1118 18.5304L7.18785 14.1161C7.2775 13.7483 7.1518 13.3614 6.86309 13.1166L3.3979 10.1778C2.71588 9.59942 3.07796 8.48504 3.96971 8.41798L8.50046 8.07727C8.87794 8.04889 9.20704 7.80979 9.35068 7.45955L11.0748 3.25583Z"/></svg>'
 /* eslint-disable no-alert, no-console */
 export default {
   name: "DynamicLegends",
@@ -54,8 +55,12 @@ export default {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
     },
     customStyle: function(item) {
-      if (item[this.styleKey] === 'star' && (item[this.identifierKey] !== "Featured dataset marker")) {
-        return { 'border-bottom-color': item[this.colourKey], 'color': item[this.colourKey] };
+      if (item[this.styleKey] === 'star') {
+        let star = starTemplate.replace('<fillColor>', item[this.colourKey]);
+        star = star.replace('<borderColor>', item.border);
+        star = star.replace('<borderWidth>', item.border ? '2' : '0');
+        star = 'data:image/svg+xml,' + encodeURIComponent(star);
+        return { 'color': item[this.colourKey], 'background-image': `url(${star})` };
       } else {
         return { 'background-color': item[this.colourKey] };
       }
@@ -66,7 +71,6 @@ export default {
           if (!this.showStarInLegend) {
             return;
           }
-          return "yellow-star";
         }
       }
       return item[this.styleKey];
@@ -126,53 +130,52 @@ export default {
   );
 }
 
+// .star {
+//   margin: 10px 0;
+//   scale: 0.7;
+//   position: relative;
+//   display: block;
+//   width: 0px;
+//   height: 0px;
+//   border-right: 20px solid transparent;
+//   border-bottom: 14px solid;
+//   border-left: 20px solid transparent;
+//   transform: rotate(35deg);
+//   &:before {
+//     border-bottom: 16px solid;
+//     border-bottom-color: inherit;
+//     border-left: 6px solid transparent;
+//     border-right: 6px solid transparent;
+//     position: absolute;
+//     height: 0;
+//     width: 0;
+//     top: -9px;
+//     left: -13px;
+//     display: block;
+//     content: '';
+//     transform: rotate(-35deg);
+//   }
+//   &:after {
+//     position: absolute;
+//     display: block;
+//     top: 0px;
+//     left: -21px;
+//     width: 0px;
+//     height: 0px;
+//     border-bottom-color: inherit;
+//     border-right: 20px solid transparent;
+//     border-bottom: 15px solid;
+//     border-left: 20px solid transparent;
+//     transform: rotate(-70deg);
+//     content: '';
+//   }
+// }
+
 .star {
-  margin: 10px 0;
-  scale: 0.7;
-  position: relative;
-  display: block;
-  width: 0px;
-  height: 0px;
-  border-right: 20px solid transparent;
-  border-bottom: 14px solid;
-  border-left: 20px solid transparent;
-  transform: rotate(35deg);
-  &:before {
-    border-bottom: 16px solid;
-    border-bottom-color: inherit;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    position: absolute;
-    height: 0;
-    width: 0;
-    top: -9px;
-    left: -13px;
-    display: block;
-    content: '';
-    transform: rotate(-35deg);
-  }
-  &:after {
-    position: absolute;
-    display: block;
-    top: 0px;
-    left: -21px;
-    width: 0px;
-    height: 0px;
-    border-bottom-color: inherit;
-    border-right: 20px solid transparent;
-    border-bottom: 15px solid;
-    border-left: 20px solid transparent;
-    transform: rotate(-70deg);
-    content: '';
-  }
-}
-
-
-.yellow-star {
   width: 25px;
   height: 25px;
   background-color: #ffffff !important;
-  background-image: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20fill%3D%22yellow%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20d%3D%22M11.0748%203.25583C11.4141%202.42845%2012.5859%202.42845%2012.9252%203.25583L14.6493%207.45955C14.793%207.80979%2015.1221%208.04889%2015.4995%208.07727L20.0303%208.41798C20.922%208.48504%2021.2841%209.59942%2020.6021%2010.1778L17.1369%2013.1166C16.8482%2013.3614%2016.7225%2013.7483%2016.8122%2014.1161L17.8882%2018.5304C18.1%2019.3992%2017.152%2020.0879%2016.3912%2019.618L12.5255%2017.2305C12.2034%2017.0316%2011.7966%2017.0316%2011.4745%2017.2305L7.60881%2019.618C6.84796%2020.0879%205.90001%2019.3992%206.1118%2018.5304L7.18785%2014.1161C7.2775%2013.7483%207.1518%2013.3614%206.86309%2013.1166L3.3979%2010.1778C2.71588%209.59942%203.07796%208.48504%203.96971%208.41798L8.50046%208.07727C8.87794%208.04889%209.20704%207.80979%209.35068%207.45955L11.0748%203.25583Z%22/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%220%22%20d%3D%22M11.0748%203.25583C11.4141%202.42845%2012.5859%202.42845%2012.9252%203.25583L14.6493%207.45955C14.793%207.80979%2015.1221%208.04889%2015.4995%208.07727L20.0303%208.41798C20.922%208.48504%2021.2841%209.59942%2020.6021%2010.1778L17.1369%2013.1166C16.8482%2013.3614%2016.7225%2013.7483%2016.8122%2014.1161L17.8882%2018.5304C18.1%2019.3992%2017.152%2020.0879%2016.3912%2019.618L12.5255%2017.2305C12.2034%2017.0316%2011.7966%2017.0316%2011.4745%2017.2305L7.60881%2019.618C6.84796%2020.0879%205.90001%2019.3992%206.1118%2018.5304L7.18785%2014.1161C7.2775%2013.7483%207.1518%2013.3614%206.86309%2013.1166L3.3979%2010.1778C2.71588%209.59942%203.07796%208.48504%203.96971%208.41798L8.50046%208.07727C8.87794%208.04889%209.20704%207.80979%209.35068%207.45955L11.0748%203.25583Z%22/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-size: contain;
   display: inline-block;
