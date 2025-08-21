@@ -130,47 +130,6 @@ export default {
   );
 }
 
-// .star {
-//   margin: 10px 0;
-//   scale: 0.7;
-//   position: relative;
-//   display: block;
-//   width: 0px;
-//   height: 0px;
-//   border-right: 20px solid transparent;
-//   border-bottom: 14px solid;
-//   border-left: 20px solid transparent;
-//   transform: rotate(35deg);
-//   &:before {
-//     border-bottom: 16px solid;
-//     border-bottom-color: inherit;
-//     border-left: 6px solid transparent;
-//     border-right: 6px solid transparent;
-//     position: absolute;
-//     height: 0;
-//     width: 0;
-//     top: -9px;
-//     left: -13px;
-//     display: block;
-//     content: '';
-//     transform: rotate(-35deg);
-//   }
-//   &:after {
-//     position: absolute;
-//     display: block;
-//     top: 0px;
-//     left: -21px;
-//     width: 0px;
-//     height: 0px;
-//     border-bottom-color: inherit;
-//     border-right: 20px solid transparent;
-//     border-bottom: 15px solid;
-//     border-left: 20px solid transparent;
-//     transform: rotate(-70deg);
-//     content: '';
-//   }
-// }
-
 .star {
   width: 25px;
   height: 25px;
