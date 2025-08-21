@@ -91,6 +91,7 @@
       :showLocalSettings="showLocalSettings"
       :showOpenMapButton="showOpenMapButton"
       :showPathwayFilter="showPathwayFilter"
+      :externalLegends="externalLegends"
     />
   </div>
 </template>
@@ -798,6 +799,13 @@ export default {
     showPathwayFilter: {
       type: Boolean,
       default: true,
+    },
+    /**
+     * Allow to add and display extra legends to drawer
+     */
+    externalLegends: {
+      type: Array,
+      default: [],
     },
   },
   data: function () {

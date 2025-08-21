@@ -282,8 +282,8 @@ Please use `const` to assign meaningful names to them...
                       identifierKey="prompt"
                       colourKey="colour"
                       styleKey="style"
-                      :legends="flatmapLegends"
-                      :showStarInLegend="showStarInLegend"
+                      :legends="legendEntry"
+                      :showStarInLegend="true"
                       class="svg-legends-container"
                     />
                   </div>
@@ -3279,6 +3279,13 @@ export default {
       type: Boolean,
       default: true,
     },
+    /**
+     * Allow to add and display extra legends to drawer
+     */
+    externalLegends: {
+      type: Array,
+      default: [],
+    },
   },
   provide() {
     return {
@@ -3443,6 +3450,9 @@ export default {
       }
       return description
     },
+    legendEntry: function () {
+      return [...this.flatmapLegends, ...this.externalLegends]
+    }
   },
   watch: {
     entry: function () {
