@@ -7,10 +7,25 @@
       :label="item[identifierKey]"
     >
       <div class="legend-item" v-if="legendStyle(item)">
-        <div
+        <template v-if="legendStyle(item) === 'exoid'">
+          <div
+          class="exoid"
+          :style="customExoidStyle(item, true)"
+          >
+            <div
+              class="exoid"
+              :style="customExoidStyle(item, false)"
+            >
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <div
           :class="legendStyle(item)"
           :style="customStyle(item)"
-        ></div>
+          >
+          </div>
+        </template>
         <div class="label">{{ capitalise(item[identifierKey]) }}</div>
       </div>
     </div>
@@ -55,15 +70,32 @@ export default {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
     },
     customStyle: function(item) {
+      let colour = item[this.colourKey] ? item[this.colourKey] : "transparent";
+      let borderColour = item.border ? item.border : "black";
+      if (item[this.colourKey]) {
+        colour = item[this.colourKey];
+        if (!item.border) {
+          borderColour = colour;
+        }
+      } 
       if (item[this.styleKey] === 'star') {
-        let star = starTemplate.replace('<fillColor>', item[this.colourKey]);
-        star = star.replace('<borderColor>', item.border);
-        star = star.replace('<borderWidth>', item.border ? '2' : '0');
+        let star = starTemplate.replace('<fillColor>', colour);
+        star = star.replace('<borderColor>', borderColour);
+        star = star.replace('<borderWidth>', borderColour ? '2' : '0');
         star = 'data:image/svg+xml,' + encodeURIComponent(star);
-        return { 'color': item[this.colourKey], 'background-image': `url(${star})` };
+        return { 'color': colour, 'background-image': `url(${star})` };
       } else {
-        return { 'background-color': item[this.colourKey] };
+        return { 'background-color': colour, 'border-color': borderColour};
       }
+    },
+    customExoidStyle: function(item, isBorder) {
+      const style = this.customStyle(item);
+      if (isBorder) {
+        style['background-color'] = style['border-color'];
+      } else {
+        style.scale = 0.7;
+      }
+      return style;
     },
     legendStyle: function (item) {
       if (item[this.styleKey] === "star") {
@@ -72,8 +104,11 @@ export default {
             return;
           }
         }
+        return 'star';
+      } else if (item[this.styleKey] === "exoid") {
+        return "exoid"
       }
-      return item[this.styleKey];
+      return [item[this.styleKey], 'shape'];
     },
   },
 };
@@ -94,34 +129,28 @@ export default {
   margin: 8px 12.5px;
 }
 
-.circle {
+.shape {
   height: 20px;
   width: 20px;
-  background-color: #ffffff;
-  border-radius: 50%;
+  border-color: black;
+  border-style: solid;
+  border-width: 2px;
+  background-color: transparent;
   display: inline-block;
+}
+
+.circle {
+  border-radius: 50%;
 }
 
 .rounded-square {
-  height: 20px;
-  width: 20px;
-  background-color: #ffffff;
   border-radius: 30%;
-  display: inline-block;
-}
-
-.square {
-  height: 20px;
-  width: 20px;
-  background-color: #ffffff;
-  display: inline-block;
 }
 
 .exoid {
   width: 20px;
   height: 25px;
-  background-color: #ffffff;
-  opacity: 0.64;
+  background-color: transparent;
   clip-path: path(
     "M9.96 0.72 c-2.01 3.53 -5.81 5.74 -9.92 5.74 l-0.15 0.23 c1.94 3.42 1.94 7.6 0 11.02 l0.15 0.23 c4.07 0 7.9 2.2 9.92 5.74 c2.01 -3.53 5.81 -5.74 9.92 -5.74 c-2.01 -3.53 -2.01 -7.94 0 -11.55 C15.81 6.5 12.04 4.29 9.96 0.72z"
   );
@@ -133,7 +162,7 @@ export default {
 .star {
   width: 25px;
   height: 25px;
-  background-color: #ffffff !important;
+  background-color: transparent !important;
   background-repeat: no-repeat;
   background-size: contain;
   display: inline-block;

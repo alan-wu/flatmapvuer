@@ -318,28 +318,28 @@ export default {
         {
           prompt: 'Sample Circle',
           colour: '#FA00C0',
+          border: "green",
           style: 'circle'
         },
         {
           prompt: 'Sample square',
-          colour: '#EA431C',
+          border: '#EA431C',
           style: 'square'
         },
         {
           prompt: 'Sample rounded square',
-          colour: '#A5F160',
           style: 'rounded-square'
         },
         {
           prompt: 'Sample exoid',
           colour: '#0AED59',
+          border: 'purple',
           style: 'exoid'
         },
         {
           prompt: 'Sample star',
           colour: '#FF1209',
-          style: 'star',
-          border: 'blue'
+          style: 'star'
         }
       ]
     }
