@@ -106,7 +106,7 @@ export default {
   height: 20px;
   width: 20px;
   background-color: #ffffff;
-  border-radius: 20%;
+  border-radius: 30%;
   display: inline-block;
 }
 
