@@ -124,8 +124,8 @@ export default {
 }
 
 .shape {
-  height: 20px;
-  width: 20px;
+  height: 16px;
+  width: 16px;
   border-color: black;
   border-style: solid;
   border-width: 2px;
