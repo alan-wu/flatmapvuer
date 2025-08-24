@@ -42,10 +42,6 @@ export default {
       type: String,
       default: "id",
     },
-    colourKey: {
-      type: String,
-      default: "colour",
-    },
     styleKey: {
       type: String,
       default: "style",
@@ -70,13 +66,11 @@ export default {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
     },
     customStyle: function(item) {
-      let colour = item[this.colourKey] ? item[this.colourKey] : "transparent";
+      const specifiedColour = item["color"] ? item["color"] : item["colour"];
+      let colour = specifiedColour ? specifiedColour : "transparent";
       let borderColour = item.border ? item.border : "black";
-      if (item[this.colourKey]) {
-        colour = item[this.colourKey];
-        if (!item.border) {
-          borderColour = colour;
-        }
+      if (specifiedColour && !item.border) {
+        borderColour = colour;
       } 
       if (item[this.styleKey] === 'star') {
         let star = starTemplate.replace('<fillColor>', colour);
