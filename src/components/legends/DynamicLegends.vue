@@ -78,6 +78,8 @@ export default {
         star = star.replace('<borderWidth>', borderColour ? '2' : '0');
         star = 'data:image/svg+xml,' + encodeURIComponent(star);
         return { 'color': colour, 'background-image': `url(${star})` };
+      } else if (item[this.styleKey] === 'line') {
+        return {'color': colour};
       } else {
         return { 'background-color': colour, 'border-color': borderColour};
       }
@@ -100,7 +102,9 @@ export default {
         }
         return 'star';
       } else if (item[this.styleKey] === "exoid") {
-        return "exoid"
+        return 'exoid';
+      } else if (item[this.styleKey] === 'line') {
+        return [item[this.styleKey], item.dashed ? 'dashed' : '', item.arrow ? 'arrow' : ''];
       }
       return [item[this.styleKey], 'shape'];
     },
@@ -121,6 +125,33 @@ export default {
   display: flex;
   align-items: center;
   margin: 8px 12.5px;
+}
+
+.line {
+  position: relative;
+  width: 20px;
+  border-top: 2px solid currentColor;
+}
+
+.line.dashed {
+  border-top: 2px dashed currentColor;
+}
+
+.line::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -5px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  display: none;
+}
+
+.line.arrow::after {
+  display: block;
 }
 
 .shape {

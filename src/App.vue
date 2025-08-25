@@ -337,10 +337,17 @@ export default {
           style: 'exoid'
         },
         {
-          prompt: 'Sample star',
-          colour: '#FF1209',
-          style: 'star'
-        }
+          prompt: 'Sample line',
+          colour: '#0047AB',
+          style: 'line'
+        },
+        {
+          prompt: 'Sample dashed arrow line',
+          colour: '#099F04',
+          style: 'line',
+          dashed: true,
+          arrow: true
+        },
       ]
     }
   },
