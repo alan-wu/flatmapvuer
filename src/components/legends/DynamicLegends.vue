@@ -7,14 +7,14 @@
       :label="item[identifierKey]"
     >
       <div class="legend-item" v-if="legendStyle(item)">
-        <template v-if="legendStyle(item) === 'exoid'">
+        <template v-if="clipPathLegends.includes(legendStyle(item))">
           <div
-          class="exoid"
-          :style="customExoidStyle(item, true)"
+            :class="legendStyle(item)"
+            :style="customClipPathStyle(item, true)"
           >
             <div
-              class="exoid"
-              :style="customExoidStyle(item, false)"
+              :class="legendStyle(item)"
+              :style="customClipPathStyle(item, false)"
             >
             </div>
           </div>
@@ -61,6 +61,11 @@ export default {
       default: false,
     },
   },
+  computed: {
+    clipPathLegends: function () {
+      return ['exoid', 'hexagon'];
+    },
+  },
   methods: {
     capitalise: function (label) {
       return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
@@ -84,7 +89,7 @@ export default {
         return { 'background-color': colour, 'border-color': borderColour};
       }
     },
-    customExoidStyle: function(item, isBorder) {
+    customClipPathStyle: function(item, isBorder) {
       const style = this.customStyle(item);
       if (isBorder) {
         style['background-color'] = style['border-color'];
@@ -101,8 +106,8 @@ export default {
           }
         }
         return 'star';
-      } else if (item[this.styleKey] === "exoid") {
-        return 'exoid';
+      } else if (this.clipPathLegends.includes(item[this.styleKey])) {
+        return item[this.styleKey];
       } else if (item[this.styleKey] === 'line') {
         return [item[this.styleKey], item.dashed ? 'dashed' : '', item.arrow ? 'arrow' : ''];
       }
@@ -170,6 +175,13 @@ export default {
 
 .rounded-square {
   border-radius: 30%;
+}
+
+.hexagon {
+  width: 20px;
+  height: calc(20px * 0.866);
+  background-color: transparent;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 
 .exoid {

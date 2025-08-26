@@ -348,6 +348,12 @@ export default {
           dashed: true,
           arrow: true
         },
+        {
+          prompt: 'Sample hexagon',
+          colour: '#34E5EB',
+          style: 'hexagon',
+          border: 'blue',
+        },
       ]
     }
   },
