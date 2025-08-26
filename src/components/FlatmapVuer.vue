@@ -278,7 +278,7 @@ Please use `const` to assign meaningful names to them...
                     @mouseout="hideTooltip(9)"
                   >
                     <dynamic-legends
-                      v-if="!isFC"
+                      v-if="legendEntry.length"
                       identifierKey="prompt"
                       colourKey="colour"
                       styleKey="style"
@@ -643,7 +643,7 @@ import {
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
-import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.10/+esm'
+import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.13/+esm'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
@@ -3431,14 +3431,15 @@ export default {
         if ((this.systems?.length > 0) ||
           (this.containsAlert && this.alertOptions) ||
           (this.pathways?.length > 0) ||
-          (this.taxonConnectivity?.length > 0)
+          (this.taxonConnectivity?.length > 0) ||
+          (this.legendEntry?.length > 0)
         ) {
           this.drawerOpen = true
           return true
         }
       }
       this.drawerOpen = false
-      return true
+      return false
     },
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode]
@@ -3661,8 +3662,8 @@ export default {
 
 .pathway-container {
   float: left;
-  padding-left: 16px;
-  padding-right: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
   text-align: left;
   overflow: auto;
   border: 1px solid rgb(220, 223, 230);
@@ -3673,6 +3674,7 @@ export default {
   overflow-x: hidden;
   scrollbar-width: thin;
   transition: all var(--el-transition-duration);
+  width: 276px;
   &.open {
     opacity: 1;
     position: relative;
