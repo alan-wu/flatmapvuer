@@ -91,6 +91,7 @@
       :showLocalSettings="showLocalSettings"
       :showOpenMapButton="showOpenMapButton"
       :showPathwayFilter="showPathwayFilter"
+      :externalLegends="externalLegends"
     />
   </div>
 </template>
@@ -100,7 +101,7 @@
 import { markRaw } from 'vue'
 import EventBus from './EventBus'
 import FlatmapVuer from './FlatmapVuer.vue'
-import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.10/+esm'
+import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.2.13/+esm'
 import {
   ElCol as Col,
   ElOption as Option,
@@ -798,6 +799,13 @@ export default {
     showPathwayFilter: {
       type: Boolean,
       default: true,
+    },
+    /**
+     * Allow to add and display extra legends to drawer
+     */
+    externalLegends: {
+      type: Array,
+      default: [],
     },
   },
   data: function () {
