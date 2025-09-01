@@ -3424,19 +3424,14 @@ export default {
         this.drawerOpen = false
         return false
       }
-      if (!this.isFC) {
+      if ((this.systems?.length > 0) ||
+        (this.containsAlert && this.alertOptions) ||
+        (this.pathways?.length > 0) ||
+        (this.taxonConnectivity?.length > 0) ||
+        (this.legendEntry?.length > 0)
+      ) {
         this.drawerOpen = true
         return true
-      } else {
-        if ((this.systems?.length > 0) ||
-          (this.containsAlert && this.alertOptions) ||
-          (this.pathways?.length > 0) ||
-          (this.taxonConnectivity?.length > 0) ||
-          (this.legendEntry?.length > 0)
-        ) {
-          this.drawerOpen = true
-          return true
-        }
       }
       this.drawerOpen = false
       return false
