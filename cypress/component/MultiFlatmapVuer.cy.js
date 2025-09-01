@@ -43,9 +43,9 @@ describe('MultiFlatmapVuer', () => {
     // Check if flatmap emits ready event
     cy.get('@readySpy').should('have.been.calledWith').then(() => {
       // Create a pop up and ensure it shows
-      const mapImp = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
-      console.log('flatmapImp', mapImp)
-      mapImp.showPopup(45, 'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
+      const flatmapVuer = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
+      const flatmapUUID = flatmapVuer.mapImp.uuid;
+      flatmapVuer.showPopup(45, 'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
 
       cy.get('.flatmapvuer-popover').should('exist').contains('Test').then(() => {
         // Close the pop up
@@ -73,8 +73,6 @@ describe('MultiFlatmapVuer', () => {
         })
         // Check the metadata for path exploration is loading correctly
       }).then(() => {
-        let flatmapVuer = window.Cypress.flatmapVuer
-        console.log('flatmapVuer', flatmapVuer)
         let fmEventCallback = flatmapVuer.eventCallback()
         fmEventCallback(
           "click",
@@ -88,7 +86,7 @@ describe('MultiFlatmapVuer', () => {
             taxons: '["NCBITaxon:10116"]',
             completeness: true,
             type: "feature",
-            mapUUID: "7f003862-6dbd-5871-8e8e-9a33c7ccefc5",
+            mapUUID: flatmapUUID,
           },
           []
         );
@@ -116,7 +114,7 @@ describe('MultiFlatmapVuer', () => {
 
             // Check that the resource selected event is emitted
             cy.get('@resourceSelectedSpy').should('have.been.calledWith')
-            
+
             // create a single stub we will use
             cy.window().then(win => {
               cy.stub(win, 'open').as('Open')
