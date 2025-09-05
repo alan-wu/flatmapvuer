@@ -10,7 +10,25 @@
     <div
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
-      <div style="height: 100%; width: 100%" ref="display"></div>
+      <!-- flatmap-display -->
+      <div style="height: 100%; width: 100%" ref="display" class="flatmap-display"></div>
+      <!-- flatmap-error -->
+      <div style="height: 100%; width: 100%" class="flatmap-error" v-if="flatmapError">
+        <div class="flatmap-error-title">
+          <el-icon size="24">
+            <el-icon-document-delete />
+          </el-icon>
+          <div v-if="flatmapError.title">
+            {{ flatmapError.title }}
+          </div>
+        </div>
+        <div v-if="flatmapError.messages" class="flatmap-error-message">
+          <div v-for="(message, index) in flatmapError.messages" :key="index">
+            {{ message }}
+          </div>
+        </div>
+      </div>
+
       <div class="beta-popovers" v-show="!disableUI">
         <div>
           <el-popover
@@ -2741,6 +2759,7 @@ export default {
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
         this.loading = true
+        this.flatmapError = null
         let minimap = false
         if (this.displayMinimap) {
           minimap = { position: 'top-right' }
@@ -2809,6 +2828,20 @@ export default {
           const stateToSet = this._stateToBeSet ? this._stateToBeSet : state
           this.onFlatmapReady(stateToSet)
           this.$nextTick(() => this.restoreMapState(stateToSet))
+        }).catch((error) => {
+          console.error('Flatmap loading error', error)
+          // prepare error object
+          this.flatmapError = {};
+          if (error.message && error.message.indexOf('Unknown map') !== -1) {
+            this.flatmapError['title'] = 'Unknown Map';
+            this.flatmapError['messages'] = Object.keys(identifier).map(key => {
+              const keyName = key === 'uuid' ? 'UUID' : capitalise(key);
+              return `${keyName}: ${identifier[key]}`
+            });
+          } else {
+            this.flatmapError['messages'] = [error.message ? error.message : error.toString()];
+          }
+          this.loading = false;
         })
       } else if (state) {
         this._stateToBeSet = {
@@ -3296,6 +3329,7 @@ export default {
   },
   data: function () {
     return {
+      flatmapError: null,
       sensor: null,
       mapManagerRef: undefined,
       flatmapQueries: undefined,
@@ -4305,6 +4339,31 @@ export default {
   --el-color-primary-light-5: #CD99E5;
   --el-color-primary-light-9: #F3E6F9;
   --el-color-primary-dark-2: var(--el-color-primary);
+}
+
+.flatmap-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1rem;;
+}
+
+.flatmap-error-title {
+  font-size: 18px;
+}
+
+.flatmap-error-message {
+  text-align: left;
+  border: 1px solid var(--el-border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--el-border-radius-base);
 }
 
 .flatmap-teleport-popper {
