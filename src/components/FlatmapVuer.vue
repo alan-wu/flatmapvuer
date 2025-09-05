@@ -27,6 +27,11 @@
             {{ message }}
           </div>
         </div>
+        <div v-if="flatmapError.button">
+          <el-button class="button" type="primary" @click="flatmapError.button.callback">
+            {{ flatmapError.button.text }}
+          </el-button>
+        </div>
       </div>
 
       <div class="beta-popovers" v-show="!disableUI">
@@ -2829,7 +2834,7 @@ export default {
           this.onFlatmapReady(stateToSet)
           this.$nextTick(() => this.restoreMapState(stateToSet))
         }).catch((error) => {
-          console.error('Flatmap loading error', error)
+          console.error('Flatmap loading error:', error)
           // prepare error object
           this.flatmapError = {};
           if (error.message && error.message.indexOf('Unknown map') !== -1) {
@@ -2840,6 +2845,18 @@ export default {
             });
           } else {
             this.flatmapError['messages'] = [error.message ? error.message : error.toString()];
+          }
+          if (this.$parent?.$refs?.multiContainer) {
+            // this is multiflatmapvuer
+            // show a button to load default map
+            const multiFlatmapVuer = this.$parent;
+            this.flatmapError['button'] = {
+              text: 'Load Default Map',
+              callback: () => {
+                const defaultSpecies = multiFlatmapVuer.initial;
+                multiFlatmapVuer.setSpecies(defaultSpecies, undefined, 3);
+              }
+            };
           }
           this.loading = false;
         })
@@ -4329,6 +4346,19 @@ export default {
   padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
+}
+
+.el-button--primary.button {
+  font-family: inherit;
+
+  &:hover,
+  &:active,
+  &:focus {
+    background: $app-primary-color;
+    border-color: $app-primary-color;
+    box-shadow: 0px 0px 2px 0px rgba(131, 0, 191, 0.5);
+    color: #fff;
+  }
 }
 </style>
 
