@@ -2847,7 +2847,7 @@ export default {
             this.flatmapError['messages'] = [error.message ? error.message : error.toString()];
           }
           if (this.$parent?.$refs?.multiContainer) {
-            // this is multiflatmapvuer
+            // if the flatmap is in a multiflatmapvuer
             // show a button to load default map
             const multiFlatmapVuer = this.$parent;
             this.flatmapError['button'] = {
