@@ -13,26 +13,7 @@
       <!-- flatmap-display -->
       <div style="height: 100%; width: 100%" ref="display" class="flatmap-display"></div>
       <!-- flatmap-error -->
-      <div style="height: 100%; width: 100%" class="flatmap-error" v-if="flatmapError">
-        <div class="flatmap-error-title">
-          <el-icon size="24">
-            <el-icon-document-delete />
-          </el-icon>
-          <div v-if="flatmapError.title">
-            {{ flatmapError.title }}
-          </div>
-        </div>
-        <div v-if="flatmapError.messages" class="flatmap-error-message">
-          <div v-for="(message, index) in flatmapError.messages" :key="index">
-            {{ message }}
-          </div>
-        </div>
-        <div v-if="flatmapError.button">
-          <el-button class="button" type="primary" @click="flatmapError.button.callback">
-            {{ flatmapError.button.text }}
-          </el-button>
-        </div>
-      </div>
+      <FlatmapError v-if="flatmapError" :flatmapError="flatmapError" />
 
       <div class="beta-popovers" v-show="!disableUI">
         <div>
@@ -679,6 +660,7 @@ import {
 } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import EventBus from './EventBus.js'
+import FlatmapError from './FlatmapError.vue'
 
 const ERROR_MESSAGE = 'cannot be found on the map.';
 
@@ -758,7 +740,8 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar
+    DrawToolbar,
+    FlatmapError,
   },
   beforeCreate: function () {
     //The state watcher may triggered before
@@ -4347,19 +4330,6 @@ export default {
   padding-bottom: 16px;
   background: #ffffff;
 }
-
-.el-button--primary.button {
-  font-family: inherit;
-
-  &:hover,
-  &:active,
-  &:focus {
-    background: $app-primary-color;
-    border-color: $app-primary-color;
-    box-shadow: 0px 0px 2px 0px rgba(131, 0, 191, 0.5);
-    color: #fff;
-  }
-}
 </style>
 
 <style lang="scss">
@@ -4369,31 +4339,6 @@ export default {
   --el-color-primary-light-5: #CD99E5;
   --el-color-primary-light-9: #F3E6F9;
   --el-color-primary-dark-2: var(--el-color-primary);
-}
-
-.flatmap-error {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 1rem;;
-}
-
-.flatmap-error-title {
-  font-size: 18px;
-}
-
-.flatmap-error-message {
-  text-align: left;
-  border: 1px solid var(--el-border-color);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-radius: var(--el-border-radius-base);
 }
 
 .flatmap-teleport-popper {

@@ -95,19 +95,7 @@
     />
 
     <!-- multiflatmap-error -->
-    <div style="height: 100%; width: 100%" class="multiflatmap-error" v-if="multiflatmapError">
-      <div class="multiflatmap-error-title">
-        <el-icon size="24">
-          <el-icon-document-delete />
-        </el-icon>
-        <div>
-          MultiFlatmap Error!
-        </div>
-      </div>
-      <div  class="multiflatmap-error-message">
-        {{ multiflatmapError.message }}
-      </div>
-    </div>
+    <FlatmapError v-if="multiflatmapError" :flatmapError="multiflatmapError" />
   </div>
 </template>
 
@@ -182,11 +170,12 @@ export default {
               if (data.status_code === 404) {
                 console.error('Flatmap API endpoint is incorrect', data);
                 this.multiflatmapError = {};
-                this.multiflatmapError['message'] = `
-                  Sorry, the component could not be loaded because the specified
+                this.multiflatmapError['title'] = 'MultiFlatmap Error!';
+                this.multiflatmapError['messages'] = [
+                  `Sorry, the component could not be loaded because the specified
                   flatmap API endpoint is incorrect. Please check the endpoint URL
-                  or contact support if the problem persists.
-                `;
+                  or contact support if the problem persists.`
+                ];
               }
               //Check each key in the provided availableSpecies against the one
               Object.keys(this.availableSpecies).forEach((key) => {
@@ -249,10 +238,11 @@ export default {
               console.error('Error fetching flatmap:', error)
               this.initialised = true;
               this.multiflatmapError = {};
-              this.multiflatmapError['message'] = `
-                Sorry, the component could not be loaded due to an unexpected error.
-                Please try again later or contact support if the problem persists.
-              `;
+              this.multiflatmapError['title'] = 'MultiFlatmap Error!';
+              this.multiflatmapError['messages'] = [
+                `Sorry, the component could not be loaded due to an unexpected error.
+                Please try again later or contact support if the problem persists.`
+              ];
               resolve()
               //Resolve all other promises resolve in the list
               this.resolveList.forEach((other) => {
@@ -874,33 +864,6 @@ export default {
 .multi-container {
   height: 100%;
   width: 100%;
-}
-
-.multiflatmap-error {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 1rem;;
-}
-
-.multiflatmap-error-title {
-  font-size: 18px;
-}
-
-.multiflatmap-error-message {
-  text-align: left;
-  border: 1px solid var(--el-border-color);
-  display: flex;
-  flex-direction: column;
-  line-height: 20px;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-radius: var(--el-border-radius-base);
-  max-width: 500px;
 }
 
 .species-display-text {
