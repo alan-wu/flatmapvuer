@@ -54,6 +54,7 @@ export default {
 
   .flatmap-error-title {
     font-size: 18px;
+    text-align: center;
   }
 
   .flatmap-error-message {
