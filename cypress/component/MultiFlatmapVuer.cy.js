@@ -45,7 +45,7 @@ describe('MultiFlatmapVuer', () => {
       // Create a pop up and ensure it shows
       const flatmapVuer = window.Cypress.multiFlatmapVuer.getCurrentFlatmap()
       const flatmapUUID = flatmapVuer.mapImp.uuid;
-      flatmapVuer.showPopup(45, 'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
+      flatmapVuer.showPopup(39, 'Test', { className: 'flatmapvuer-popover', positionAtLastClick: true })
 
       cy.get('.flatmapvuer-popover').should('exist').contains('Test').then(() => {
         // Close the pop up
@@ -77,7 +77,7 @@ describe('MultiFlatmapVuer', () => {
         fmEventCallback(
           "click",
           {
-            id: "ilxtr_neuron-type-keast-5",
+            id: "ilxtr:neuron-type-keast-5",
             featureId: 26,
             kind: "sensory",
             label: "neuron type kblad 5",
@@ -105,7 +105,7 @@ describe('MultiFlatmapVuer', () => {
             // Open the 'show more' section
             cy.get('#show-path-info').should('exist').click()
 
-            cy.get('[origin-item-label="L6 segment of lumbar spinal cord"]').should('exist')
+            cy.get('[origin-item-label="lamina VII of gray matter of spinal cord, L6 segment of lumbar spinal cord"]').should('exist')
             cy.get('[component-item-label="pelvic splanchnic nerve"]').should('exist')
             cy.get('[destination-item-label="pelvic ganglion"]').should('exist')
 
