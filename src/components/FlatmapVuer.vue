@@ -2827,7 +2827,11 @@ export default {
               return `${keyName}: ${identifier[key]}`
             });
           } else {
-            this.flatmapError['messages'] = [error.message ? error.message : error.toString()];
+            this.flatmapError['title'] = 'Error loading map';
+            this.flatmapError['messages'] = [
+              error.message ? error.message : error.toString(),
+              'Please try again later or contact support if the problem persists.'
+            ];
           }
           if (this.$parent?.$refs?.multiContainer) {
             // if the flatmap is in a multiflatmapvuer
