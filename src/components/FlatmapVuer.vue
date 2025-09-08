@@ -2821,13 +2821,13 @@ export default {
           // prepare error object
           this.flatmapError = {};
           if (error.message && error.message.indexOf('Unknown map') !== -1) {
-            this.flatmapError['title'] = 'Unknown Map';
+            this.flatmapError['title'] = 'Unknown Map!';
             this.flatmapError['messages'] = Object.keys(identifier).map(key => {
               const keyName = key === 'uuid' ? 'UUID' : capitalise(key);
               return `${keyName}: ${identifier[key]}`
             });
           } else {
-            this.flatmapError['title'] = 'Error loading map';
+            this.flatmapError['title'] = 'Error Loading Map!';
             this.flatmapError['messages'] = [
               error.message ? error.message : error.toString(),
               'Please try again later or contact support if the problem persists.'
