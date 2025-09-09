@@ -10,7 +10,11 @@
     <div
       style="height: 100%; width: 100%; position: relative; overflow-y: none"
     >
-      <div style="height: 100%; width: 100%" ref="display"></div>
+      <!-- flatmap-display -->
+      <div style="height: 100%; width: 100%" ref="display" class="flatmap-display"></div>
+      <!-- flatmap-error -->
+      <FlatmapError v-if="flatmapError" :flatmapError="flatmapError" />
+
       <div class="beta-popovers" v-show="!disableUI">
         <div>
           <el-popover
@@ -656,6 +660,7 @@ import {
 } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import EventBus from './EventBus.js'
+import FlatmapError from './FlatmapError.vue'
 
 const ERROR_MESSAGE = 'cannot be found on the map.';
 
@@ -735,7 +740,8 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar
+    DrawToolbar,
+    FlatmapError,
   },
   beforeCreate: function () {
     //The state watcher may triggered before
@@ -2741,6 +2747,7 @@ export default {
     createFlatmap: function (state) {
       if (!this.mapImp && !this.loading) {
         this.loading = true
+        this.flatmapError = null
         let minimap = false
         if (this.displayMinimap) {
           minimap = { position: 'top-right' }
@@ -2809,6 +2816,36 @@ export default {
           const stateToSet = this._stateToBeSet ? this._stateToBeSet : state
           this.onFlatmapReady(stateToSet)
           this.$nextTick(() => this.restoreMapState(stateToSet))
+        }).catch((error) => {
+          console.error('Flatmap loading error:', error)
+          // prepare error object
+          this.flatmapError = {};
+          if (error.message && error.message.indexOf('Unknown map') !== -1) {
+            this.flatmapError['title'] = 'Unknown Map!';
+            this.flatmapError['messages'] = Object.keys(identifier).map(key => {
+              const keyName = key === 'uuid' ? 'UUID' : capitalise(key);
+              return `${keyName}: ${identifier[key]}`
+            });
+          } else {
+            this.flatmapError['title'] = 'Error Loading Map!';
+            this.flatmapError['messages'] = [
+              error.message ? error.message : error.toString(),
+              'Please try again later or contact support if the problem persists.'
+            ];
+          }
+          if (this.$parent?.$refs?.multiContainer) {
+            // if the flatmap is in a multiflatmapvuer
+            // show a button to load default map
+            const multiFlatmapVuer = this.$parent;
+            this.flatmapError['button'] = {
+              text: 'Load Default Map',
+              callback: () => {
+                const defaultSpecies = multiFlatmapVuer.initial;
+                multiFlatmapVuer.setSpecies(defaultSpecies, undefined, 3);
+              }
+            };
+          }
+          this.loading = false;
         })
       } else if (state) {
         this._stateToBeSet = {
@@ -3296,6 +3333,7 @@ export default {
   },
   data: function () {
     return {
+      flatmapError: null,
       sensor: null,
       mapManagerRef: undefined,
       flatmapQueries: undefined,
