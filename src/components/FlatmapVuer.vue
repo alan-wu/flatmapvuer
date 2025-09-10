@@ -1716,7 +1716,7 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
-              const singleSelection = Object.keys(data).includes('id')
+              const singleSelection = Object.keys(data).includes('models')
               if (!singleSelection) {
                 payload = []
                 const mapuuid = data.mapUUID
