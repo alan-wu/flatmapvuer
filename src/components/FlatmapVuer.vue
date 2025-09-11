@@ -1716,7 +1716,11 @@ export default {
               alert: featuresAlert
             }]
             if (eventType === 'click') {
-              const singleSelection = Object.keys(data).includes('models')
+              // If multiple paths overlap at the click location,
+              // `data` is an object with numeric keys for each feature (e.g., {0: {...}, 1: {...}, ..., mapUUID: '...'}).
+              // If only one feature or path is clicked,
+              // `data` is a single object (e.g., {featureId: '...', mapUUID: '...'}).
+              const singleSelection = !data[0];
               if (!singleSelection) {
                 payload = []
                 const mapuuid = data.mapUUID
@@ -1812,11 +1816,13 @@ export default {
      * @param data
      */
     setConnectivityDataSource: function (viewingMode, data) {
-      // for Exploration mode, only path click will be used as data source
-      this.connectivityDataSource = data.source;
-      // for other modes, it can be feature or path
-      if (viewingMode === 'Neuron Connection' || viewingMode === 'Annotation') {
-        this.connectivityDataSource = data.featureId;
+      // Exploration mode, only path click will be used as data source
+      if (viewingMode === 'Exploration') {
+        this.connectivityDataSource = data.models.startsWith('ilxtr:') ? data.models : '';
+      } else {
+        // Other modes, it can be anything
+        // (annotation drawing doesn't have featureId or models)
+        this.connectivityDataSource = data.featureId || data.id;
       }
     },
     /**
