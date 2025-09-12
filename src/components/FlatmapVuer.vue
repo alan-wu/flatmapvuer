@@ -1635,6 +1635,8 @@ export default {
           this.connectionEntry = {}
           // For exist drawn annotation features
           if (this.selectedDrawnFeature) {
+            // The `id` here is GeoJSONId from AnnotatedFeature
+            // Ref: flatmap-viewer/src/flatmap-types.ts
             const drawnFeature = this.existDrawnFeatures.find(
               (feature) => feature.id === this.selectedDrawnFeature.id
             )
