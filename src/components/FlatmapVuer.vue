@@ -1672,6 +1672,18 @@ export default {
       if (data.type === 'deleted') this.previousDeletedEvent = data
       else this.previousDeletedEvent = {}
     },
+    getTaxons: function (data) {
+      let taxons = undefined
+      if (data.taxons) {
+        // check if data.taxons is string or array
+        if (typeof data.taxons !== 'object') {
+          taxons = JSON.parse(data.taxons)
+        } else {
+          taxons = data.taxons
+        }
+      }
+      return taxons
+    },
     /**
      * @public
      * A callback function, invoked when events occur with the map.
@@ -1694,15 +1706,7 @@ export default {
             const taxonomy = this.entry
             const biologicalSex = this.biologicalSex
             const featuresAlert = data.alert
-            let taxons = undefined
-            if (data.taxons) {
-              // check if data.taxons is string or array
-              if (typeof data.taxons !== 'object') {
-                taxons = JSON.parse(data.taxons)
-              } else {
-                taxons = data.taxons
-              }
-            }
+            const taxons = this.getTaxons(data)
             let payload = [{
               dataset: data.dataset,
               biologicalSex: biologicalSex,
@@ -1730,15 +1734,7 @@ export default {
                     const id = value.id
                     const label = value.label
                     const resource = [value.models]
-                    let taxons = undefined
-                    if (value.taxons) {
-                      // check if data.taxons is string or array
-                      if (typeof value.taxons !== 'object') {
-                        taxons = JSON.parse(value.taxons)
-                      } else {
-                        taxons = value.taxons
-                      }
-                    }
+                    const taxons = this.getTaxons(value)
                     if (seenIds.has(id)) continue;
                     seenIds.add(id);
                     payload.push({
