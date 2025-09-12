@@ -2494,6 +2494,12 @@ export default {
       if (geometry) {
         featureId = feature
         options.annotationFeatureGeometry = geometry
+        if (this.annotationEntry.length) {
+          options['annotationEvent'] = {
+            type: this.annotationEntry[0].type,
+            feature: this.annotationEntry[0].feature
+          }
+        }
       } else {
         const entry = Array.isArray(feature) ? feature[0] : feature
         if (entry) {
