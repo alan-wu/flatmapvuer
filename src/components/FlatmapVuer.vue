@@ -1699,8 +1699,9 @@ export default {
             eventType: eventType,
           }
           this.annotationEventCallback(payload, data)
+        } else if (eventType === 'pan-zoom') {
+          this.$emit('pan-zoom-callback', data)
         } else {
-          if (eventType !== 'pan-zoom') {
             const label = data.label
             const resource = [data.models]
             const taxonomy = this.entry
@@ -1796,9 +1797,6 @@ export default {
               this.checkAndCreatePopups(payload)
             }
             this.$emit('resource-selected', payload)
-          } else {
-            this.$emit('pan-zoom-callback', data)
-          }
         }
       }
     },
