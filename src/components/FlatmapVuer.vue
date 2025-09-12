@@ -1702,101 +1702,101 @@ export default {
         } else if (eventType === 'pan-zoom') {
           this.$emit('pan-zoom-callback', data)
         } else {
-            const label = data.label
-            const resource = [data.models]
-            const taxonomy = this.entry
-            const biologicalSex = this.biologicalSex
-            const featuresAlert = data.alert
-            const taxons = this.getTaxons(data)
-            let payload = [{
-              dataset: data.dataset,
-              biologicalSex: biologicalSex,
-              taxonomy: taxonomy,
-              resource: resource,
-              label: label,
-              feature: data,
-              userData: args,
-              eventType: eventType,
-              provenanceTaxonomy: taxons,
-              alert: featuresAlert
-            }]
-            if (eventType === 'click') {
-              // If multiple paths overlap at the click location,
-              // `data` is an object with numeric keys for each feature (e.g., {0: {...}, 1: {...}, ..., mapUUID: '...'}).
-              // If only one feature or path is clicked,
-              // `data` is a single object (e.g., {featureId: '...', mapUUID: '...'}).
-              const singleSelection = !data[0];
-              if (!singleSelection) {
-                payload = []
-                const mapuuid = data.mapUUID
-                const seenIds = new Set();
-                for (let [key, value] of Object.entries(data)) {
-                  if (key !== 'mapUUID') {
-                    const id = value.id
-                    const label = value.label
-                    const resource = [value.models]
-                    const taxons = this.getTaxons(value)
-                    if (seenIds.has(id)) continue;
-                    seenIds.add(id);
-                    payload.push({
-                      dataset: value.dataset,
-                      biologicalSex: biologicalSex,
-                      taxonomy: taxonomy,
-                      resource: resource,
-                      label: label,
-                      feature: value,
-                      userData: args,
-                      eventType: eventType,
-                      provenanceTaxonomy: taxons,
-                      alert: value.alert,
-                      mapUUID: mapuuid
-                    })
-                  }
+          const label = data.label
+          const resource = [data.models]
+          const taxonomy = this.entry
+          const biologicalSex = this.biologicalSex
+          const featuresAlert = data.alert
+          const taxons = this.getTaxons(data)
+          let payload = [{
+            dataset: data.dataset,
+            biologicalSex: biologicalSex,
+            taxonomy: taxonomy,
+            resource: resource,
+            label: label,
+            feature: data,
+            userData: args,
+            eventType: eventType,
+            provenanceTaxonomy: taxons,
+            alert: featuresAlert
+          }]
+          if (eventType === 'click') {
+            // If multiple paths overlap at the click location,
+            // `data` is an object with numeric keys for each feature (e.g., {0: {...}, 1: {...}, ..., mapUUID: '...'}).
+            // If only one feature or path is clicked,
+            // `data` is a single object (e.g., {featureId: '...', mapUUID: '...'}).
+            const singleSelection = !data[0];
+            if (!singleSelection) {
+              payload = []
+              const mapuuid = data.mapUUID
+              const seenIds = new Set();
+              for (let [key, value] of Object.entries(data)) {
+                if (key !== 'mapUUID') {
+                  const id = value.id
+                  const label = value.label
+                  const resource = [value.models]
+                  const taxons = this.getTaxons(value)
+                  if (seenIds.has(id)) continue;
+                  seenIds.add(id);
+                  payload.push({
+                    dataset: value.dataset,
+                    biologicalSex: biologicalSex,
+                    taxonomy: taxonomy,
+                    resource: resource,
+                    label: label,
+                    feature: value,
+                    userData: args,
+                    eventType: eventType,
+                    provenanceTaxonomy: taxons,
+                    alert: value.alert,
+                    mapUUID: mapuuid
+                  })
                 }
               }
-              const clickedItem = singleSelection ? data : data[0]
-              this.setConnectivityDataSource(this.viewingMode, clickedItem);
-              if (this.viewingMode === 'Neuron Connection') {
-                // do nothing here
-                // the method to highlight paths is moved to checkAndCreatePopups function
-              } else {
-                this.currentActive = clickedItem.models ? clickedItem.models : '' // This is for FC map
-                // This is for annotation mode - draw connectivity between features/paths
-                if (this.activeDrawTool && !this.isValidDrawnCreated) {
-                  // Check if flatmap features or existing drawn features
-                  const validDrawnFeature = clickedItem.featureId || this.existDrawnFeatures.find(
-                    (feature) => feature.id === clickedItem.id
-                  )
-                  // Only the linestring will have connection
-                  if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
-                    const key = clickedItem.featureId ? clickedItem.featureId : clickedItem.id
-                    const nodeLabel = clickedItem.label ? clickedItem.label : `Feature ${clickedItem.id}`
-                    // Add space before key to make sure properties follows adding order
-                    this.connectionEntry[` ${key}`] = Object.assign(
-                      { label: nodeLabel },
-                      Object.fromEntries(
-                        Object.entries(clickedItem)
-                          .filter(([key]) => ['featureId', 'models'].includes(key))
-                          .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
-                  }
+            }
+            const clickedItem = singleSelection ? data : data[0]
+            this.setConnectivityDataSource(this.viewingMode, clickedItem);
+            if (this.viewingMode === 'Neuron Connection') {
+              // do nothing here
+              // the method to highlight paths is moved to checkAndCreatePopups function
+            } else {
+              this.currentActive = clickedItem.models ? clickedItem.models : '' // This is for FC map
+              // This is for annotation mode - draw connectivity between features/paths
+              if (this.activeDrawTool && !this.isValidDrawnCreated) {
+                // Check if flatmap features or existing drawn features
+                const validDrawnFeature = clickedItem.featureId || this.existDrawnFeatures.find(
+                  (feature) => feature.id === clickedItem.id
+                )
+                // Only the linestring will have connection
+                if (this.activeDrawTool === 'LineString' && validDrawnFeature) {
+                  const key = clickedItem.featureId ? clickedItem.featureId : clickedItem.id
+                  const nodeLabel = clickedItem.label ? clickedItem.label : `Feature ${clickedItem.id}`
+                  // Add space before key to make sure properties follows adding order
+                  this.connectionEntry[` ${key}`] = Object.assign(
+                    { label: nodeLabel },
+                    Object.fromEntries(
+                      Object.entries(clickedItem)
+                        .filter(([key]) => ['featureId', 'models'].includes(key))
+                        .map(([key, value]) => [(key === 'featureId') ? 'id' : key, value])))
                 }
               }
-            } else if (
-              eventType === 'mouseenter' &&
-              !(this.viewingMode === 'Neuron Connection')
-            ) {
-              this.currentHover = data.models ? data.models : ''
             }
-            if (
-              data &&
-              data.type !== 'marker' &&
-              eventType === 'click' &&
-              // Disable popup when drawing
-              !this.activeDrawTool
-            ) {
-              this.checkAndCreatePopups(payload)
-            }
-            this.$emit('resource-selected', payload)
+          } else if (
+            eventType === 'mouseenter' &&
+            !(this.viewingMode === 'Neuron Connection')
+          ) {
+            this.currentHover = data.models ? data.models : ''
+          }
+          if (
+            data &&
+            data.type !== 'marker' &&
+            eventType === 'click' &&
+            // Disable popup when drawing
+            !this.activeDrawTool
+          ) {
+            this.checkAndCreatePopups(payload)
+          }
+          this.$emit('resource-selected', payload)
         }
       }
     },
