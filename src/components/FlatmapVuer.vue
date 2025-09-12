@@ -1786,7 +1786,7 @@ export default {
             if (data && data.type !== 'marker' && !this.activeDrawTool) {
               this.checkAndCreatePopups(payload)
             }
-          } else if (eventType === 'mouseenter' && !(this.viewingMode === 'Neuron Connection')) {
+          } else if (eventType === 'mouseenter' && this.viewingMode !== 'Neuron Connection') {
             this.currentHover = data.models ? data.models : ''
           }
 
