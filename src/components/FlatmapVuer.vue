@@ -1781,21 +1781,22 @@ export default {
                 }
               }
             }
+
+            if (
+              data &&
+              data.type !== 'marker' &&
+              // Disable popup when drawing
+              !this.activeDrawTool
+            ) {
+              this.checkAndCreatePopups(payload)
+            }
           } else if (
             eventType === 'mouseenter' &&
             !(this.viewingMode === 'Neuron Connection')
           ) {
             this.currentHover = data.models ? data.models : ''
           }
-          if (
-            data &&
-            data.type !== 'marker' &&
-            eventType === 'click' &&
-            // Disable popup when drawing
-            !this.activeDrawTool
-          ) {
-            this.checkAndCreatePopups(payload)
-          }
+
           this.$emit('resource-selected', payload)
         }
       }
