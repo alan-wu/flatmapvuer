@@ -1734,7 +1734,7 @@ export default {
               const seenIds = new Set();
               for (let [key, value] of Object.entries(data)) {
                 if (key !== 'mapUUID') {
-                  const id = value.id
+                  const id = value.featureId
                   const label = value.label
                   const resource = [value.models]
                   const taxons = this.getTaxons(value)
