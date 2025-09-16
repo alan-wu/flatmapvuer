@@ -69,7 +69,7 @@ async function filterPathsByViaFromKnowledge(resource) {
 }
 
 function getKnowledgeSource(mapImp) {
-  return getKnowledgeSourceFromProvenance(mapImp.provenance);
+  return getKnowledgeSourceFromProvenance(mapImp.mapMetadata);
 }
 
 function getKnowledgeSourceFromProvenance(provenance) {
