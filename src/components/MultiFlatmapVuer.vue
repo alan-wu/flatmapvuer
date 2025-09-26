@@ -885,6 +885,8 @@ export default {
   left: 16px;
   top: 44px;
   position: absolute;
+  width: fit-content;
+
   :deep(.el-input__inner) {
     color: rgb(48, 49, 51);
     padding-top: 0.25em;
