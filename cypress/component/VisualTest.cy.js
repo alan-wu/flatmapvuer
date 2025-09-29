@@ -24,13 +24,15 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
     // Get the flatmap UUID and API from the loaded component
     cy.window().then((win) => {
       const flatmapVuer = win.Cypress.multiFlatmapVuer.getCurrentFlatmap();
-      const flatmapUUID = flatmapVuer.mapImp.uuid;
+      const mapImp = flatmapVuer.mapImp;
+      const flatmapUUID = mapImp.uuid;
 
       // Wait for the map canvas to appear
       cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible', { timeout: 30000 }).should('exist');
 
       cy.wait(1000);
       cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
+      mapImp.enablePath('centreline', true); // Enable centreline
       cy.wait(2000);
 
       // Take screenshot of viewer canvas
