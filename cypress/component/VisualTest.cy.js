@@ -9,33 +9,44 @@ const STROKE_INTERPOLATION = [
    2, ["*", ['var', 'width'], ["^", 2,  0.5]],
    7, ["*", ['var', 'width'], ["^", 2,  1.5]],
    9, ["*", ['var', 'width'], ["^", 2,  2.0]]
-]
+];
+const LAYERS = [
+  {
+    id: 'simple-test_pathways_nerve-centreline-edge',
+    width: 2,
+    color: '#ccc',
+    opacity: 0
+  },
+  {
+    id: 'simple-test_pathways_nerve-centreline-track',
+    width: 2,
+    color: '#ccc',
+    opacity: 0.2
+  },
+];
 
-const modifyRenderedMap = (mapImp) => {
-  const map = mapImp.map
-  mapImp.setPaint({ coloured: true, outlined: false });
-  if (map) {
-    const layers = [
-      'simple-test_pathways_nerve-centreline-edge',
-      'simple-test_pathways_nerve-centreline-track',
-    ];
+const modifyRenderedMap = (mapImp, layers, strokeInterpolation) => {
+  const map = mapImp.map;
 
-    layers.forEach(layerId => {
-      try {
-        map.setPaintProperty(layerId, 'line-width', [
-          'let',
-          'width',
-          2,
-          STROKE_INTERPOLATION
-        ]);
+  mapImp.enablePath('centreline', true); // Enable centreline
+  mapImp.setPaint({ coloured: true, outlined: false }); // outline false
 
-        map.setPaintProperty(layerId, 'line-color', '#ccc');
-        map.setPaintProperty(layerId, 'line-opacity', 0.4);
-      } catch (error) {
-        console.log(`Layer ${layerId} not found or already updated`);
-      }
-    });
-  }
+  layers.forEach((layer) => {
+    const { id: layerId, width, color, opacity } = layer;
+    try {
+      map.setPaintProperty(layerId, 'line-width', [
+        'let',
+        'width',
+        width,
+        strokeInterpolation
+      ]);
+
+      map.setPaintProperty(layerId, 'line-color', color);
+      map.setPaintProperty(layerId, 'line-opacity', opacity);
+    } catch (error) {
+      console.log(`Layer ${layerId} not found or already updated`);
+    }
+  });
 };
 
 describe('MultiFlatmapVuer Screenshot Comparison', () => {
@@ -69,9 +80,7 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
       cy.wait(1000);
       cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
-      mapImp.enablePath('centreline', true); // Enable centreline
-      mapImp.setPaint({ coloured: true, outlined: false }); // outline false
-      modifyRenderedMap(mapImp); // modify centreline style
+      modifyRenderedMap(mapImp, LAYERS, STROKE_INTERPOLATION); // modify centreline style
       cy.wait(2000);
 
       // Take screenshot of viewer canvas
