@@ -1,7 +1,5 @@
 /* eslint-disable no-alert, no-console */
-
 const ERROR_TOLERANCE = parseFloat(Cypress.env('ERROR_TOLERANCE')) || 0.1
-
 
 describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
@@ -11,38 +9,23 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
       const modifiedProps = {
         ...props,
         displayMinimap: false,
+        disableUI: true,
       };
       cy.wrap(modifiedProps).as('develProps');
     });
   });
 
   it('should render the same content as base map', () => {
-    // Use the existing loadMultiFlatmap command
     cy.loadMultiFlatmap('@develProps', 'Test');
 
     // Wait for MultiFlatmap to be ready
     cy.get('@readySpy').should('have.been.called');
 
-    // Wait for the map canvas to appear (indicates component is ready)
+    // Wait for the map canvas to appear
     cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible', { timeout: 30000 }).should('exist');
 
     cy.wait(1000);
     cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
-
-    // hide species-display-text
-    cy.get('.species-display-text').invoke('hide');
-    // hide sepcies select box
-    cy.get('.el-select.select-box').invoke('hide');
-    // hide beta-popovers
-    cy.get('.beta-popovers').invoke('hide');
-    // hide minimap-resize
-    cy.get('.minimap-resize').invoke('hide');
-    // hide bottom-right-control
-    cy.get('.bottom-right-control').invoke('hide');
-    // hide pathway-location
-    cy.get('.pathway-location').invoke('hide');
-    // hide settings-group
-    cy.get('.settings-group').invoke('hide');
     cy.wait(2000);
 
     // Take screenshot of viewer canvas
