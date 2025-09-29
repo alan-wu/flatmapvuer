@@ -1,6 +1,43 @@
 /* eslint-disable no-alert, no-console */
 const ERROR_TOLERANCE = parseFloat(Cypress.env('ERROR_TOLERANCE')) || 0.1
 
+// Ref: flatmap-viewer/src/layers/styling.ts
+const STROKE_INTERPOLATION = [
+  'interpolate',
+  ['exponential', 2],
+  ['zoom'],
+   2, ["*", ['var', 'width'], ["^", 2,  0.5]],
+   7, ["*", ['var', 'width'], ["^", 2,  1.5]],
+   9, ["*", ['var', 'width'], ["^", 2,  2.0]]
+]
+
+const modifyRenderedMap = (mapImp) => {
+  const map = mapImp.map
+  mapImp.setPaint({ coloured: true, outlined: false });
+  if (map) {
+    const layers = [
+      'simple-test_pathways_nerve-centreline-edge',
+      'simple-test_pathways_nerve-centreline-track',
+    ];
+
+    layers.forEach(layerId => {
+      try {
+        map.setPaintProperty(layerId, 'line-width', [
+          'let',
+          'width',
+          2,
+          STROKE_INTERPOLATION
+        ]);
+
+        map.setPaintProperty(layerId, 'line-color', '#ccc');
+        map.setPaintProperty(layerId, 'line-opacity', 0.4);
+      } catch (error) {
+        console.log(`Layer ${layerId} not found or already updated`);
+      }
+    });
+  }
+};
+
 describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
   beforeEach(() => {
@@ -33,11 +70,16 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
       cy.wait(1000);
       cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
       mapImp.enablePath('centreline', true); // Enable centreline
+      mapImp.setPaint({ coloured: true, outlined: false }); // outline false
+      modifyRenderedMap(mapImp); // modify centreline style
       cy.wait(2000);
 
       // Take screenshot of viewer canvas
       cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('viewerCanvas');
-      cy.get('@viewerCanvas').screenshot('viewer-canvas');
+      // CLI
+      cy.get('@viewerCanvas').screenshot('base/cypress/component/VisualTest.cy.js/viewer-canvas')
+      // UI
+      cy.get('@viewerCanvas').screenshot('VisualTest.cy.js/base/cypress/component/VisualTest.cy.js/viewer-canvas')
 
       cy.get('@develProps').then((props) => {
         const flatmapAPI = props.flatmapAPI;
@@ -65,6 +107,7 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
           // Compare screenshots
           cy.get('@baseMapIframe').compareSnapshot('viewer-canvas').then(comparisonResults => {
+            // TODO: current result 0.2663686412274386
             expect(comparisonResults.percentage, 'Base map and viewer map should render identically').to.be.lessThan(ERROR_TOLERANCE);
           });
         });
