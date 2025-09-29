@@ -21,21 +21,21 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
     // Wait for MultiFlatmap to be ready
     cy.get('@readySpy').should('have.been.called');
 
-    // Wait for the map canvas to appear
-    cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible', { timeout: 30000 }).should('exist');
-
-    cy.wait(1000);
-    cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
-    cy.wait(2000);
-
-    // Take screenshot of viewer canvas
-    cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('viewerCanvas');
-    cy.get('@viewerCanvas').screenshot('viewer-canvas');
-
     // Get the flatmap UUID and API from the loaded component
     cy.window().then((win) => {
       const flatmapVuer = win.Cypress.multiFlatmapVuer.getCurrentFlatmap();
       const flatmapUUID = flatmapVuer.mapImp.uuid;
+
+      // Wait for the map canvas to appear
+      cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible', { timeout: 30000 }).should('exist');
+
+      cy.wait(1000);
+      cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
+      cy.wait(2000);
+
+      // Take screenshot of viewer canvas
+      cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('viewerCanvas');
+      cy.get('@viewerCanvas').screenshot('viewer-canvas');
 
       cy.get('@develProps').then((props) => {
         const flatmapAPI = props.flatmapAPI;
