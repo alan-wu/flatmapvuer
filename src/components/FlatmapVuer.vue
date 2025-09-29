@@ -3333,7 +3333,9 @@ export default {
      */
     externalLegends: {
       type: Array,
-      default: [],
+      default: function () {
+        return []
+      },
     },
   },
   provide() {
