@@ -764,8 +764,13 @@ export default {
       }
     },
     /**
-     *
-     * @param filter format should follow #makeStyleFilter (flatmap-viewer)
+     * @public
+     * Function to set visibility filter for features and paths on the map.
+     * The param `filter` format should follow `#makeStyleFilter` (flatmap-viewer).
+     * If the param is `null` or `undefined`, the visibility filter will be cleared.
+     * Refer to [`setVisibilityFilter` in flatmap-viewer](https://anatomicmaps.github.io/flatmap-viewer/classes/index.FlatMap.html#setvisibilityfilter)
+     * for more details.
+     * @param {Object} `filter`
      */
     setVisibilityFilter: function (filter) {
       // More filter options -> this.mapImp.featureFilterRanges()
