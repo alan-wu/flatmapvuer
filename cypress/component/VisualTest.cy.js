@@ -1,6 +1,5 @@
 /* eslint-disable no-alert, no-console */
-const ERROR_TOLERANCE = parseFloat(Cypress.env('ERROR_TOLERANCE')) || 0.1
-
+const ERROR_TOLERANCE = 0.00384;
 // Ref: flatmap-viewer/src/layers/styling.ts
 const STROKE_INTERPOLATION = [
   'interpolate',
@@ -52,7 +51,8 @@ const modifyRenderedMap = (mapImp, layers, strokeInterpolation) => {
 describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
   beforeEach(() => {
-    cy.viewport(1920, 1080);
+    Cypress.env('visualRegressionBaseDirectory', 'cypress/screenshots/visual-test-base');
+    cy.viewport(500, 500);
     cy.fixture('MultiFlatmapPropsDevel.json').then((props) => {
       const modifiedProps = {
         ...props,
@@ -86,9 +86,9 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
       // Take screenshot of viewer canvas
       cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('viewerCanvas');
       // CLI
-      cy.get('@viewerCanvas').screenshot('base/cypress/component/VisualTest.cy.js/viewer-canvas')
+      cy.get('@viewerCanvas').screenshot('base/cypress/component/VisualTest.cy.js/viewer-canvas', { overwrite: true })
       // UI
-      cy.get('@viewerCanvas').screenshot('VisualTest.cy.js/base/cypress/component/VisualTest.cy.js/viewer-canvas')
+      cy.get('@viewerCanvas').screenshot('VisualTest.cy.js/base/cypress/component/VisualTest.cy.js/viewer-canvas', { overwrite: true })
 
       cy.get('@develProps').then((props) => {
         const flatmapAPI = props.flatmapAPI;
@@ -101,7 +101,7 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
           const iframe = doc.createElement('iframe');
           iframe.src = baseMapUrl;
           iframe.style.width = '100%';
-          iframe.style.height = '100vh';
+          iframe.style.height = '100%';
           iframe.style.border = 'none';
           iframe.id = 'base-map-iframe';
           doc.body.appendChild(iframe);
@@ -112,11 +112,10 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
           // Take screenshot of iframe
           cy.get('#base-map-iframe').as('baseMapIframe');
-          cy.get('@baseMapIframe').screenshot('base-canvas');
+          cy.get('@baseMapIframe').screenshot('base-canvas', { overwrite: true });
 
           // Compare screenshots
           cy.get('@baseMapIframe').compareSnapshot('viewer-canvas').then(comparisonResults => {
-            // TODO: current result 0.2663686412274386
             expect(comparisonResults.percentage, 'Base map and viewer map should render identically').to.be.lessThan(ERROR_TOLERANCE);
           });
         });
