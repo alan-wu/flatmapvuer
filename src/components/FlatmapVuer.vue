@@ -647,7 +647,7 @@ import {
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
-import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.3.0/+esm'
+import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.3.5/+esm'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
