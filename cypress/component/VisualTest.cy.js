@@ -79,7 +79,7 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
       cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible', { timeout: 30000 }).should('exist');
 
       cy.wait(1000);
-      cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');    // Hide drawer
+      cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist');
       modifyRenderedMap(mapImp, LAYERS, STROKE_INTERPOLATION); // modify centreline style
       cy.wait(2000);
 
