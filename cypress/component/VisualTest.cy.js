@@ -51,7 +51,7 @@ const modifyRenderedMap = (mapImp, layers, strokeInterpolation) => {
 describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
   beforeEach(() => {
-    Cypress.env('visualRegressionBaseDirectory', 'cypress/screenshots/base');
+    Cypress.env('visualRegressionBaseDirectory', 'cypress/screenshots/VisualTest.cy.js/base');
     cy.viewport(500, 500);
     cy.fixture('MultiFlatmapPropsDevel.json').then((props) => {
       const modifiedProps = {
