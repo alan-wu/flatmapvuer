@@ -18,6 +18,7 @@
       <div class="beta-popovers" v-show="!disableUI">
         <div>
           <el-popover
+            v-if="displayWarning || isLegacy"
             placement="right"
             popper-class="warning-popper flatmap-popper"
             :teleported="false"
