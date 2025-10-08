@@ -6,12 +6,22 @@
       :key="item[identifierKey]"
       :label="item[identifierKey]"
     >
-      <LegendItem
-        :item="item"
-        :identifierKey="identifierKey"
-        :styleKey="styleKey"
-        :showStarInLegend="showStarInLegend"
-      />
+      <template v-if="item[identifierKey] === 'Featured dataset marker'">
+        <LegendItem
+          :item="item"
+          :identifierKey="identifierKey"
+          :styleKey="styleKey"
+          :showStarInLegend="showStarInLegend"
+        />
+      </template>
+      <template v-else>
+        <LegendItem
+          :item="item"
+          :identifierKey="identifierKey"
+          :styleKey="styleKey"
+          :showStarInLegend="showStarInLegend"
+        />
+      </template>
     </div>
   </div>
 </template>
