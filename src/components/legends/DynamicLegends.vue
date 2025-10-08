@@ -7,12 +7,23 @@
       :label="item[identifierKey]"
     >
       <template v-if="item[identifierKey] === 'Featured dataset marker'">
-        <LegendItem
-          :item="item"
-          :identifierKey="identifierKey"
-          :styleKey="styleKey"
-          :showStarInLegend="showStarInLegend"
-        />
+        <el-popover
+          content="Location of the featured dataset"
+          placement="right"
+          :teleported="true"
+          trigger="hover"
+          width="max-content"
+          popper-class="flatmap-popper flatmap-teleport-popper"
+        >
+          <template #reference>
+            <LegendItem
+              :item="item"
+              :identifierKey="identifierKey"
+              :styleKey="styleKey"
+              :showStarInLegend="showStarInLegend"
+            />
+          </template>
+        </el-popover>
       </template>
       <template v-else>
         <LegendItem
