@@ -76,7 +76,7 @@ export default {
       let borderColour = item.border ? item.border : "black";
       if (specifiedColour && !item.border) {
         borderColour = colour;
-      } 
+      }
       if (item[this.styleKey] === 'star') {
         let star = starTemplate.replace('<fillColor>', colour);
         star = star.replace('<borderColor>', borderColour);
