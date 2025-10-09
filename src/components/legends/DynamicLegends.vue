@@ -14,7 +14,7 @@
           trigger="manual"
           width="max-content"
           popper-class="flatmap-popper flatmap-teleport-popper"
-          :visible="showDatasetMarkerTooltip"
+          :visible="showDatasetMarkerTooltip && showStarInLegend"
         >
           <template #reference>
             <LegendItem
