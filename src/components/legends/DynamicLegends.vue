@@ -13,16 +13,24 @@
           :teleported="true"
           trigger="manual"
           width="max-content"
+          :offset="0"
           popper-class="flatmap-popper flatmap-teleport-popper"
-          :visible="showDatasetMarkerTooltip && showStarInLegend"
+          :visible="tooltipVisible"
+          ref="featuredMarkerPopover"
         >
           <template #reference>
-            <LegendItem
-              :item="item"
-              :identifierKey="identifierKey"
-              :styleKey="styleKey"
-              :showStarInLegend="showStarInLegend"
-            />
+            <div
+              v-popover:featuredMarkerPopover
+              @mouseover="onMouseOver"
+              @mouseout="onMouseOut"
+            >
+              <LegendItem
+                :item="item"
+                :identifierKey="identifierKey"
+                :styleKey="styleKey"
+                :showStarInLegend="showStarInLegend"
+              />
+            </div>
           </template>
         </el-popover>
       </template>
@@ -73,6 +81,32 @@ export default {
     showDatasetMarkerTooltip: {
       type: Boolean,
       default: false,
+    },
+  },
+  data() {
+    return {
+      isHovering: false,
+      hoverTimeout: null,
+    };
+  },
+  computed: {
+    tooltipVisible() {
+      // Show tooltip when either help mode is active OR user is hovering
+      return (this.showDatasetMarkerTooltip && this.showStarInLegend) || this.isHovering;
+    },
+  },
+  methods: {
+    onMouseOver() {
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = setTimeout(() => {
+        this.isHovering = true;
+      }, 500);
+    },
+    onMouseOut() {
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = setTimeout(() => {
+        this.isHovering = false;
+      }, 500);
     },
   },
 };
