@@ -268,24 +268,6 @@ Please use `const` to assign meaningful names to them...
               :style="{ 'max-height': pathwaysMaxHeight + 'px' }"
               v-popover:checkBoxPopover
             >
-              <!-- TODO: move featured dataset popover to dynamic legends -->
-              <!-- <el-popover
-                content="Location of the featured dataset"
-                placement="bottom"
-                :teleported="true"
-                trigger="manual"
-                width="max-content"
-                :offset="-10"
-                popper-class="flatmap-popper flatmap-teleport-popper"
-                :visible="hoverVisibilities[9].value && showStarInLegend"
-                ref="featuredMarkerPopover"
-              >
-                <template #reference>
-                  <div
-                    v-popover:featuredMarkerPopover
-                    @mouseover="showTooltip(9)"
-                    @mouseout="hideTooltip(9)"
-                  > -->
                     <dynamic-legends
                       v-if="legendEntry.length"
                       identifierKey="prompt"
@@ -297,9 +279,6 @@ Please use `const` to assign meaningful names to them...
                       ref="featuredMarkerPopover"
                       class="svg-legends-container"
                     />
-                  <!-- </div>
-                </template>
-              </el-popover> -->
               <!-- The line below places the yellowstar svg on the left, and the text "Featured markers on the right" with css so they are both centered in the div -->
               <el-popover
                 content="Find these markers for data. The number inside the markers is the number of datasets available for each marker."
