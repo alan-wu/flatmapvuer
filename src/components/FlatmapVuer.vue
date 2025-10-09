@@ -2387,7 +2387,15 @@ export default {
         } else {
           // skip the unavailable tooltips
           this.helpModeActiveIndex += 1;
+          this.setHelpMode(helpMode);
         }
+      }
+
+      // Skip checkbox tooltip if pathway filter is not shown
+      const activePopoverObjAfter = this.hoverVisibilities[this.helpModeActiveIndex];
+      if (activePopoverObjAfter?.ref === 'checkBoxPopover' && !this.showPathwayFilter) {
+        this.helpModeActiveIndex += 1;
+        this.setHelpMode(helpMode);
       }
 
       if (!helpMode) {
