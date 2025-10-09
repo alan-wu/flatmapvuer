@@ -11,9 +11,10 @@
           content="Location of the featured dataset"
           placement="right"
           :teleported="true"
-          trigger="hover"
+          trigger="manual"
           width="max-content"
           popper-class="flatmap-popper flatmap-teleport-popper"
+          :visible="showDatasetMarkerTooltip"
         >
           <template #reference>
             <LegendItem
@@ -66,6 +67,10 @@ export default {
       },
     },
     showStarInLegend: {
+      type: Boolean,
+      default: false,
+    },
+    showDatasetMarkerTooltip: {
       type: Boolean,
       default: false,
     },

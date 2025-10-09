@@ -293,6 +293,8 @@ Please use `const` to assign meaningful names to them...
                       styleKey="style"
                       :legends="legendEntry"
                       :showStarInLegend="true"
+                      :showDatasetMarkerTooltip="showDatasetMarkerTooltip"
+                      ref="featuredMarkerPopover"
                       class="svg-legends-container"
                     />
                   <!-- </div>
@@ -3510,7 +3512,10 @@ export default {
     },
     legendEntry: function () {
       return [...this.flatmapLegends, ...this.externalLegends]
-    }
+    },
+    showDatasetMarkerTooltip: function () {
+      return this.hoverVisibilities[9].value;
+    },
   },
   watch: {
     entry: function () {
