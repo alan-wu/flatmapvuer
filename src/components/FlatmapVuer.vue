@@ -647,7 +647,7 @@ import {
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
-import * as flatmap from 'https://cdn.jsdelivr.net/npm/@abi-software/flatmap-viewer@4.3.5/+esm'
+import * as flatmap from '@abi-software/flatmap-viewer'
 import { AnnotationService } from '@abi-software/sparc-annotation'
 import { mapState } from 'pinia'
 import { useMainStore } from '@/store/index'
@@ -935,6 +935,30 @@ export default {
     clearAnnotationFeature: function () {
       if (this.mapImp) {
         this.mapImp.clearAnnotationFeature()
+      }
+    },
+    get3DContext: function() {
+      if (this.mapIm?.map) {
+        const canvas = this.mapImp.map.getCanvas();
+        const ctx = canvas.getContext('webgl2');
+        if (ctx) {
+          return ctx;
+        } else {
+          return canvas.getContext('webgl');
+        }
+      }
+      return undefined;
+    },
+    forceContextLoss: function() {
+      if (this.mapImp && !this.mapImp.contextLost && !this.loading) {
+        console.log(this.mapImp.contextLost)
+        this.lastViewport = markRaw(this.mapImp.getState())
+        this.mapImp.forceContextLoss()
+      }
+    },
+    forceContextRestore: function() {
+      if (this.mapImp) {
+        this.mapImp.forceContextRestore()
       }
     },
     /**
@@ -1706,9 +1730,11 @@ export default {
             eventType: eventType,
           }
           this.annotationEventCallback(payload, data)
-        } else if (eventType === 'pan-zoom') {
+        } else if (eventType === 'context-restore') {
+          this.onContextRestore()
+        }  else if (eventType === 'pan-zoom') {
           this.$emit('pan-zoom-callback', data)
-        } else {
+        }else {
           const label = data.label
           const resource = [data.models]
           const taxonomy = this.entry
@@ -3007,6 +3033,24 @@ export default {
         });
       }
     },
+    onContextRestore: function() {
+      if (this.mapImp) {
+        this.handleMapClick()
+        this.setInitMapState()
+        const lostState = this.getState()
+        if (lostState) {
+          lostState.viewport = this.lastViewport
+        }
+        this.restoreMapState(lostState)
+        if (this.displayMinimap) {
+          this.addResizeButtonToMinimap();
+          this.minimapSmall = false;
+        } else {
+          this.mapImp.createMinimap(this.displayMinimap)
+        }
+        this.$emit('context-restore', this)
+      }
+    },
     /**
      * @public
      * Function to show or hide the minimap
@@ -3187,6 +3231,15 @@ export default {
       type: Number,
       default: 0,
     },
+    /**
+     * This flag dictate whether a context will be allocatged
+     * for this instance
+     */
+    render: {
+      type: Boolean,
+      default: true,
+    },
+
     /**
      * The option to create map on component mounted.
      */
@@ -3469,6 +3522,7 @@ export default {
       taxonLeaveDelay: undefined,
       connectivityFilters: [],
       flatmapLegends: [],
+      lastViewport: undefined,
     }
   },
   computed: {
@@ -3522,6 +3576,17 @@ export default {
       if (this.helpMode) {
         this.helpModeActiveIndex += 1;
         this.setHelpMode(this.helpMode);
+      }
+    },
+    render: function(val) {
+      if (val) {
+        if (this.mapImp && !this.loading) {
+          this.$nextTick(() => {
+            this.forceContextRestore()
+          })
+        }
+      } else {
+        this.forceContextLoss()
       }
     },
     state: {
