@@ -775,10 +775,19 @@ export default {
     setVisibilityFilter: function (filter) {
       // More filter options -> this.mapImp.featureFilterRanges()
       if (this.mapImp) {
-        if (filter) {
-          this.mapImp.setVisibilityFilter(filter);
+        if (this.mapImp.contextLost) {
+          if (filter) {
+            this.filterToRestore = markRaw(JSON.parse(JSON.stringify(filter)));
+          } else {
+            this.filterToRestore = undefined;
+          }
         } else {
-          this.mapImp.clearVisibilityFilter();
+          if (filter) {
+            this.mapImp.setVisibilityFilter(filter);
+          } else {
+            this.mapImp.clearVisibilityFilter();
+          }
+          this.filterToRestore = undefined;
         }
       }
     },
@@ -951,13 +960,12 @@ export default {
     },
     forceContextLoss: function() {
       if (this.mapImp && !this.mapImp.contextLost && !this.loading) {
-        console.log(this.mapImp.contextLost)
-        this.lastViewport = markRaw(this.mapImp.getState())
         this.mapImp.forceContextLoss()
       }
     },
     forceContextRestore: function() {
       if (this.mapImp) {
+        this.flatmapError = null
         this.mapImp.forceContextRestore()
       }
     },
@@ -1730,11 +1738,13 @@ export default {
             eventType: eventType,
           }
           this.annotationEventCallback(payload, data)
-        } else if (eventType === 'context-restore') {
-          this.onContextRestore()
-        }  else if (eventType === 'pan-zoom') {
+        } else if (eventType === 'context-lost') {
+          this.onContextLost()
+        } else if (eventType === 'context-restored') {
+          this.onContextRestored()
+        } else if (eventType === 'pan-zoom') {
           this.$emit('pan-zoom-callback', data)
-        }else {
+        } else {
           const label = data.label
           const resource = [data.models]
           const taxonomy = this.entry
@@ -2791,10 +2801,6 @@ export default {
       if (!this.mapImp && !this.loading) {
         this.loading = true
         this.flatmapError = null
-        let minimap = false
-        if (this.displayMinimap) {
-          minimap = { position: 'top-right' }
-        }
 
         //As for flatmap-viewer@2.2.7, see below for the documentation
         //for the identifier:
@@ -2846,7 +2852,7 @@ export default {
             //debug: true,
             minZoom: this.minZoom,
             tooltips: this.tooltips,
-            minimap: minimap,
+            minimap: false,
             container: this.$refs.display,
             // tooltipDelay: 15, // new feature to delay tooltips showing
           }
@@ -2922,7 +2928,6 @@ export default {
         this.computePathControlsMaximumHeight()
         if (this.mapImp) {
           this.mapImp.resize()
-          this.showMinimap(this.displayMinimap)
         }
       } catch {
         console.error('Map resize error')
@@ -3005,12 +3010,16 @@ export default {
       this.processTaxon(this.mapImp.taxonIdentifiers, state ? state['taxonSelection'] : undefined)
       this.containsAlert = "alert" in this.mapImp.featureFilterRanges()
       this.flatmapLegends = this.mapImp.flatmapLegend
-      this.addResizeButtonToMinimap()
       this.loading = false
       this.computePathControlsMaximumHeight()
       this.mapResize()
       this.handleMapClick();
       this.setInitMapState();
+      if (this.displayMinimap) {
+        const minimapOptions = { position: 'top-right' };
+        this.mapImp.createMinimap(minimapOptions);
+        this.addResizeButtonToMinimap()
+      }
       /**
        * This is ``onFlatmapReady`` event.
        * @arg ``this`` (Component Vue Instance)
@@ -3033,7 +3042,19 @@ export default {
         });
       }
     },
-    onContextRestore: function() {
+    onContextLost: function() {
+      this.lastViewport = markRaw(this.mapImp.getState())
+      this.flatmapError = {};
+      this.flatmapError['title'] = 'GL context lost!'
+      this.flatmapError['messages'] = [`Too many concurrent GL contexts. Please try the Restore Context button.`]
+      this.flatmapError['button'] = {
+        text: 'Restore Context',
+        callback: () => {
+          this.forceContextRestore()
+        }
+      };
+    },
+    onContextRestored: function() {
       if (this.mapImp) {
         this.handleMapClick()
         this.setInitMapState()
@@ -3043,22 +3064,16 @@ export default {
         }
         this.restoreMapState(lostState)
         if (this.displayMinimap) {
-          this.addResizeButtonToMinimap();
-          this.minimapSmall = false;
-        } else {
-          this.mapImp.createMinimap(this.displayMinimap)
+          const minimapOptions = { position: 'top-right' };
+          this.mapImp.createMinimap(minimapOptions);
+          this.addResizeButtonToMinimap()
         }
-        this.$emit('context-restore', this)
+        if (this.filterToRestore) {
+          this.mapImp.setVisibilityFilter(this.filterToRestore)
+          this.filterToRestore = undefined
+        }
+        this.$emit('context-restored', this)
       }
-    },
-    /**
-     * @public
-     * Function to show or hide the minimap
-     * by providing ``flag`` (boolean) value.
-     * @arg {Boolean} `flag`
-     */
-    showMinimap: function (flag) {
-      if (this.mapImp) this.mapImp.showMinimap(flag)
     },
     /**
      * @public
@@ -3405,6 +3420,7 @@ export default {
   },
   data: function () {
     return {
+      filterToRestore: undefined,
       flatmapError: null,
       sensor: null,
       mapManagerRef: undefined,
@@ -3580,13 +3596,11 @@ export default {
     },
     render: function(val) {
       if (val) {
-        if (this.mapImp && !this.loading) {
+        if (this.mapImp && this.mapImp.contextLost && !this.loading) {
           this.$nextTick(() => {
             this.forceContextRestore()
           })
         }
-      } else {
-        this.forceContextLoss()
       }
     },
     state: {

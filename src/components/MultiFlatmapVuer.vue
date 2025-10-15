@@ -58,7 +58,7 @@
       :enableOpenMapUI="enableOpenMapUI"
       :openMapOptions="openMapOptions"
       :disableUI="disableUI"
-      @context-restore="ContextRestore"
+      @context-restored="onContextRestored"
       @view-latest-map="viewLatestMap"
       @resource-selected="resourceSelected"
       @ready="FlatmapReady"
@@ -290,15 +290,15 @@ export default {
     },
     /**
      * @public
-     * Function to emit ``context-restore`` event after the flatmap is restored.
+     * Function to emit ``context-restored`` event after the flatmap is restored.
      * @arg {Object} `component`
      */
-     ContextRestore: function (component) {
+     onContextRestored: function (component) {
       /**
        * This event is emitted by ``ContextRestore`` method after the flatmap is restored.
        * @arg component
        */
-       this.$emit('context-restore', component)
+       this.$emit('context-restored', component)
     },
     /**
      * @public

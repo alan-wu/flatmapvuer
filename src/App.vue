@@ -68,7 +68,7 @@
       @pan-zoom-callback="panZoomcallback"
       @open-map="openMap"
       @ready="FlatmapReady"
-      @context-restore="FlatmapReady"
+      @context-restored="FlatmapReady"
       :initial="initial"
       :helpMode="helpMode"
       :helpModeDialog="useHelpModeDialog"
