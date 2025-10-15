@@ -3034,7 +3034,7 @@ export default {
       this.lastViewport = markRaw(this.mapImp.getState())
       this.flatmapError = {};
       this.flatmapError['title'] = 'GL context lost!'
-      this.flatmapError['messages'] = [`Too many concurrent GL contexts. Please try the Restore Context button.`]
+      this.flatmapError['messages'] = [`GL context is lost due to too many concurrent GL contexts. Please try using the Restore Context button.`]
       this.flatmapError['button'] = {
         text: 'Restore Context',
         callback: () => {
