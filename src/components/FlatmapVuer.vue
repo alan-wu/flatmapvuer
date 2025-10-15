@@ -946,18 +946,6 @@ export default {
         this.mapImp.clearAnnotationFeature()
       }
     },
-    get3DContext: function() {
-      if (this.mapIm?.map) {
-        const canvas = this.mapImp.map.getCanvas();
-        const ctx = canvas.getContext('webgl2');
-        if (ctx) {
-          return ctx;
-        } else {
-          return canvas.getContext('webgl');
-        }
-      }
-      return undefined;
-    },
     forceContextLoss: function() {
       if (this.mapImp && !this.mapImp.contextLost && !this.loading) {
         this.mapImp.forceContextLoss()
