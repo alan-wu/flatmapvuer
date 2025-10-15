@@ -73,23 +73,26 @@ describe('MultiFlatmapVuer', () => {
         })
         // Check the metadata for path exploration is loading correctly
       }).then(() => {
-        let fmEventCallback = flatmapVuer.eventCallback()
-        fmEventCallback(
-          "click",
-          {
-            id: "ilxtr:neuron-type-keast-5",
-            featureId: 26,
-            kind: "sensory",
-            label: "neuron type kblad 5",
-            models: "ilxtr:neuron-type-keast-5",
-            source: "ilxtr:neuron-type-keast-5",
-            taxons: '["NCBITaxon:10116"]',
-            completeness: true,
-            type: "feature",
-            mapUUID: flatmapUUID,
-          },
-          []
-        );
+        // Disable manual testing of click event
+        // let fmEventCallback = flatmapVuer.eventCallback()
+        // fmEventCallback(
+        //   "click",
+        //   {
+        //     id: "ilxtr:neuron-type-keast-5",
+        //     featureId: 26,
+        //     kind: "sensory",
+        //     label: "neuron type kblad 5",
+        //     models: "ilxtr:neuron-type-keast-5",
+        //     source: "ilxtr:neuron-type-keast-5",
+        //     taxons: '["NCBITaxon:10116"]',
+        //     completeness: true,
+        //     type: "feature",
+        //     mapUUID: flatmapUUID,
+        //   },
+        //   []
+        // );
+        // Trigger click event from search function
+        flatmapVuer.searchAndShowResult('ilxtr:neuron-type-keast-5', true, true)
 
         cy.get('.flatmapvuer-popover').should('exist').contains('Neuron type kblad 5').then(() => {
 
