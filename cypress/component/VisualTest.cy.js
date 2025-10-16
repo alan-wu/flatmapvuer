@@ -96,15 +96,32 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
         // Create iframe in the same document to load base map
         cy.document().then((doc) => {
-          // Clear the body and add iframe
-          doc.body.innerHTML = '';
+          doc.body.style.margin = '0';
+
           const iframe = doc.createElement('iframe');
+          const iframeContainer = doc.createElement('div');
+
+          iframeContainer.style.position = 'fixed';
+          iframeContainer.style.top = '0';
+          iframeContainer.style.left = '0';
+          iframeContainer.style.width = '500px';
+          iframeContainer.style.height = '500px';
+          iframeContainer.style.zIndex = '9999';
+
           iframe.src = baseMapUrl;
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
           iframe.style.width = '100%';
           iframe.style.height = '100%';
           iframe.style.border = 'none';
           iframe.id = 'base-map-iframe';
-          doc.body.appendChild(iframe);
+
+          iframeContainer.appendChild(iframe);
+          doc.body.appendChild(iframeContainer);
+
+          cy.get('.multi-container').invoke('css', 'z-index', '0');
+          cy.get('.multi-container').invoke('css', 'opacity', '0');
 
           // Wait for iframe to load and render
           cy.get('#base-map-iframe', { timeout: 30000 }).should('exist');
