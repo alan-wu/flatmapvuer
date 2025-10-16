@@ -28,6 +28,7 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     FlatmapError: typeof import('./components/FlatmapError.vue')['default']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
+    LegendItem: typeof import('./components/legends/LegendItem.vue')['default']
     MultiFlatmapVuer: typeof import('./components/MultiFlatmapVuer.vue')['default']
     SelectionsGroup: typeof import('./components/SelectionsGroup.vue')['default']
     SvgLegends: typeof import('./components/legends/SvgLegends.vue')['default']
