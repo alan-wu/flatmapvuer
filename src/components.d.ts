@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DynamicLegends: typeof import('./components/legends/DynamicLegends.vue')['default']
+    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
@@ -24,8 +25,10 @@ declare module 'vue' {
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
+    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     FlatmapError: typeof import('./components/FlatmapError.vue')['default']
     FlatmapVuer: typeof import('./components/FlatmapVuer.vue')['default']
+    LegendItem: typeof import('./components/legends/LegendItem.vue')['default']
     MultiFlatmapVuer: typeof import('./components/MultiFlatmapVuer.vue')['default']
     SelectionsGroup: typeof import('./components/SelectionsGroup.vue')['default']
     SvgLegends: typeof import('./components/legends/SvgLegends.vue')['default']
