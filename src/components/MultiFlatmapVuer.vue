@@ -167,7 +167,12 @@ export default {
           //It has not been initialised yet
           this.requireInitialisation = false
           fetch(this.flatmapAPI)
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              return response.json()
+            })
             .then((data) => {
               if (data.status_code === 404) {
                 console.error('Flatmap API endpoint is incorrect', data);
