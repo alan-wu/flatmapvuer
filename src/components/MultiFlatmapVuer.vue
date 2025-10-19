@@ -169,12 +169,28 @@ export default {
           fetch(this.flatmapAPI)
             .then((response) => {
               if (!response.ok) {
+                // HTTP-level errors
+                if (response.status === 404) {
+                  this.multiflatmapError = {};
+                  this.multiflatmapError['title'] = 'MultiFlatmap Error!';
+                  this.multiflatmapError['messages'] = [
+                    `Sorry, the component could not be loaded because the specified
+                    flatmap API endpoint is incorrect. Please check the endpoint URL
+                    or contact support if the problem persists.`
+                  ];
+                  this.initialised = true;
+                  resolve();
+                  this.resolveList.forEach((other) => other());
+
+                  return Promise.reject({ handled: true });
+                }
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
               return response.json()
             })
             .then((data) => {
-              if (data.status_code === 404) {
+              // Application-level 404 in a 200 response
+              if (data && data.status_code === 404) {
                 console.error('Flatmap API endpoint is incorrect', data);
                 this.multiflatmapError = {};
                 this.multiflatmapError['title'] = 'MultiFlatmap Error!';
@@ -183,6 +199,11 @@ export default {
                   flatmap API endpoint is incorrect. Please check the endpoint URL
                   or contact support if the problem persists.`
                 ];
+
+                this.initialised = true;
+                resolve();
+                this.resolveList.forEach((other) => other());
+                return;
               }
               //Check each key in the provided availableSpecies against the one
               Object.keys(this.availableSpecies).forEach((key) => {
@@ -242,6 +263,7 @@ export default {
               })
             })
             .catch((error) => {
+              if (error && error.handled) return;
               console.error('Error fetching flatmap:', error)
               this.initialised = true;
               this.multiflatmapError = {};
