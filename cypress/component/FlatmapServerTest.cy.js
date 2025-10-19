@@ -12,11 +12,11 @@ describe('MultiFlatmapVuer Error Handling', () => {
     cy.mount(MultiFlatmapVuer, {
       props: {
         flatmapAPI: FLATMAP_API,
-        initial: 'Mouse',
+        initial: 'Rat',
         availableSpecies: {
-          Mouse: {
-            taxo: 'NCBITaxon:10090',
-            iconClass: 'mapicon-icon_mouse',
+          Rat: {
+            taxo: 'NCBITaxon:10114',
+            iconClass: 'mapicon-icon_rat',
           },
         },
       },
@@ -40,8 +40,8 @@ describe('MultiFlatmapVuer Error Handling', () => {
     cy.mount(MultiFlatmapVuer, {
       props: {
         flatmapAPI: FLATMAP_API,
-        initial: 'Mouse',
-        availableSpecies: { Mouse: { taxo: 'NCBITaxon:10090' } },
+        initial: 'Rat',
+        availableSpecies: { Rat: { taxo: 'NCBITaxon:10114' } },
       },
     });
 
@@ -58,7 +58,7 @@ describe('MultiFlatmapVuer Error Handling', () => {
     cy.mount(MultiFlatmapVuer, {
       props: {
         flatmapAPI: FLATMAP_API,
-        initial: 'Mouse',
+        initial: 'Rat',
       },
     });
 
@@ -75,7 +75,7 @@ describe('MultiFlatmapVuer Error Handling', () => {
     cy.mount(MultiFlatmapVuer, {
       props: {
         flatmapAPI: FLATMAP_API,
-        initial: 'Mouse',
+        initial: 'Rat',
       },
     });
 
