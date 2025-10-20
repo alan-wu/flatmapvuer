@@ -163,22 +163,23 @@ describe('MultiFlatmapVuer', () => {
           availableSpecies.push({ name: key, taxon: value.taxo })
         }
 
-        availableSpecies.forEach((species) => {
+        for (let i = 0; i < availableSpecies.length; i++) {
+          const species = availableSpecies[i];
+
           cy.then(() => {
             multiFlatmapVuer.setSpecies(
               species.name,
               multiFlatmapVuer.state ? multiFlatmapVuer.state.state : undefined,
               1
             )
-
-            expect(multiFlatmapVuer.activeSpecies).to.eq(species.name)
-            cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
-            cy.get('.maplibregl-map').should('exist');
-            cy.get('.pathway-location').should('exist');
-
-            cy.wait(8000)
           })
-        })
+
+          cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
+          cy.wrap(multiFlatmapVuer).its('activeSpecies').should('eq', species.name)
+          cy.get('#maplibre-minimap > .maplibregl-canvas-container > .maplibregl-canvas').should('exist');
+          cy.get('.maplibregl-map').should('exist');
+          cy.get('.pathway-location').should('exist');
+        }
       })
     })
   })
