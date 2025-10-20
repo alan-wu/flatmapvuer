@@ -235,38 +235,45 @@ describe('MultiFlatmapVuer', () => {
   flatmapServers.forEach((entry) => {
     availableSpecies.forEach((species) => {
       it(`image rendering for ${entry}-${species.name}`, () => {
+
+        // Ensure the alias exists before using it
+        const aliasName = entry.replace('@', '')
+        cy.get(`@${aliasName}`).should('exist')
+
         cy.loadMultiFlatmap(entry, species.name)
 
         cy.get('@readySpy').should('have.been.calledWith').then(() => {
           const multiFlatmapVuer = window.Cypress.multiFlatmapVuer
           const flatmapVuer = multiFlatmapVuer.$refs[species.name][0]
 
-          cy.then(() => {
-            cy.wait(1000)
-            cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
-            expect(multiFlatmapVuer.activeSpecies, `Active species should be ${species.name}`).to.eq(species.name)
-            // hide pathways
-            cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
-            // hide drawer
-            cy.get('.pathway-location > .drawer-button:visible').click()
-            cy.wait(2000)
+          cy.get('.el-loading-mask', { timeout: 30000 }).should('not.exist')
+          cy.wrap(multiFlatmapVuer.activeSpecies).should('eq', species.name)
 
-            cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
-            cy.log(`THE LATEST ${entry} ${species.name} MAP UUID IS ${flatmapVuer.mapImp.uuid}`)
-            organTypes.forEach((type) => {
-              cy.then(() => {
-                if (type === 'grayscale') {
-                  flatmapVuer.mapImp.setPaint({ coloured: false })
-                  cy.wait(3000)
-                }
-                cy.get('@canvas').compareSnapshot(`${species.name}_${type}`).then(comparisonResults => {
-                  // Percentage of minor pixel changes usually very small
-                  // Assume it will not have lot of pixel update in normal case
-                  expect(comparisonResults.percentage, `${species.name}_color maps should be almost identical`).to.be.lessThan(ERROR_TOLERANCE)
-                })
-              })
+          // hide pathways
+          cy.get('.pathway-location > .pathway-container:visible').contains('Pathways').parent().siblings().children('.el-checkbox').click()
+          // hide drawer
+          cy.get('.pathway-location > .drawer-button:visible').click()
+          cy.wait(2000)
+
+          cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas:visible').as('canvas')
+          cy.log(`THE LATEST ${entry} ${species.name} MAP UUID IS ${flatmapVuer.mapImp.uuid}`)
+
+          for (let i = 0; i < organTypes.length; i++) {
+            const type = organTypes[i];
+
+            cy.then(() => {
+              if (type === 'grayscale') {
+                flatmapVuer.mapImp.setPaint({ coloured: false })
+                cy.wait(3000)
+              }
             })
-          })
+
+            cy.get('@canvas').compareSnapshot(`${species.name}_${type}`).then(comparisonResults => {
+              // Percentage of minor pixel changes usually very small
+              // Assume it will not have lot of pixel update in normal case
+              expect(comparisonResults.percentage, `${species.name}_color maps should be almost identical`).to.be.lessThan(ERROR_TOLERANCE)
+            })
+          }
         })
       })
     })
