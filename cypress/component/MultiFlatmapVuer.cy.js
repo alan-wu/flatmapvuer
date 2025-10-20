@@ -53,7 +53,9 @@ describe('MultiFlatmapVuer', () => {
         cy.get('.flatmapvuer-popover').should('not.exist');
 
         // Check if alert exist in test flatmap
-        cy.get('.maplibregl-touch-zoom-rotate > .maplibregl-canvas').as('canvas')
+        cy.get('.maplibregl-canvas-container > .maplibregl-canvas')
+          .first() // Get the first canvas (not minimap)
+          .as('canvas')
         cy.get('.checkall-display-text').then(($label) => {
           expect($label, 'Alter filter should exist').to.contain('Alert')
           // Take a screenshot of no path flatmap
