@@ -48,6 +48,11 @@ const modifyRenderedMap = (mapImp, layers, strokeInterpolation) => {
   });
 };
 
+function is_high_resolution_screen() {
+  // retina display has a devicePixelRatio of 2
+  return window.devicePixelRatio > 1;
+}
+
 describe('MultiFlatmapVuer Screenshot Comparison', () => {
 
   beforeEach(() => {
@@ -62,7 +67,8 @@ describe('MultiFlatmapVuer Screenshot Comparison', () => {
       cy.wrap(modifiedProps).as('develProps');
     });
 
-    cy.fixture('test-canvas.png').then((baseImage) => {
+    const testCanvasPath = is_high_resolution_screen() ? 'test-canvas_hr.png' : 'test-canvas_lr.png';
+    cy.fixture(testCanvasPath).then((baseImage) => {
       // Save the base image to the screenshots folder for comparison
       cy.writeFile('cypress/screenshots/VisualTest.cy.js/base/cypress/component/VisualTest.cy.js/test-canvas.png', baseImage, 'base64');
     });
