@@ -166,7 +166,11 @@ export default {
         if (this.requireInitialisation) {
           //It has not been initialised yet
           this.requireInitialisation = false
-          fetch(this.flatmapAPI)
+          const controller = new AbortController();
+          const signal = controller.signal;
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+          fetch(this.flatmapAPI, {signal})
             .then((response) => {
               if (!response.ok) {
                 // HTTP-level errors
@@ -278,6 +282,9 @@ export default {
                 other()
               })
             })
+            .finally(() => {
+              clearTimeout(timeoutId);
+            });
         } else if (this.initialised) {
           //resolve as it has been initialised
           resolve()
