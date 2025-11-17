@@ -70,7 +70,7 @@ export default {
       const specifiedColour = this.item["color"] ? this.item["color"] : this.item["colour"];
       let colour = specifiedColour ? specifiedColour : "transparent";
       let borderColour = this.item.border ? this.item.border : "black";
-      let borderStyle = this.item.borderStyle ? this.item.borderStyle : "solid";
+      let borderStyle = this.item.borderStyle ? this.item.borderStyle : "default";
       if (specifiedColour && !this.item.border) {
         borderColour = colour;
       }
