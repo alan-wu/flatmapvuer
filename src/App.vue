@@ -290,6 +290,10 @@ export default {
           "taxo": "NCBITaxon:1",
           "displayWarning": true
         },
+        FC: {
+          taxo: 'FC',
+          uuid: "7720709d-683c-5def-a1e5-8d7c3b0784f7",
+        },
       },
       tooltipContent: undefined,
       tStyle: {
