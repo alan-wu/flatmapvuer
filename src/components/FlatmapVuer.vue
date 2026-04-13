@@ -705,6 +705,9 @@ import {
   getKnowledgeSource,
   getReferenceConnectivitiesByAPI,
 } from '../services/flatmapKnowledge.js'
+import {
+  retrieveOmexData,
+} from '../services/apsTestData.js'
 import { capitalise } from './utilities.js'
 import yellowstar from '../icons/yellowstar'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
@@ -3468,7 +3471,7 @@ export default {
       }
 
       // If not in cache, call the API
-      const apiLocation = import.meta.env.VITE_API_LOCATION
+      const apiLocation = this.sparcAPI
       if (!apiLocation) {
         console.warn('VITE_API_LOCATION is not defined.')
         return
@@ -3479,12 +3482,22 @@ export default {
         // Ensure the URL matches your backend route structure
         const response = await fetch(`${apiLocation}flatmap/uuid?uuid=${uuid}`)
 
-        if (!response.ok)
-          throw new Error(`API call failed: ${response.statusText}`)
+        let data = undefined;
 
-        const data = await response.json()
+        if (!response.ok) {
+          if (this.testDataLocation) {
+            data = await retrieveOmexData(this.testDataLocation, uuid)
+          }
+        } else {
+          data = await response.json()
+        }
+
+        if (!data) {
+          throw new Error(`No protocol data available for map`)
+        }
 
         // Save to cache and process
+
         this.setSessionCache(cacheKey, data)
         this.datasetInfo = data
         this.processDatasetFiles(data)
@@ -3513,30 +3526,43 @@ export default {
      * Iterates through the file list, constructs full URLs, and checks for simulation content.
      */
     async processDatasetFiles(data) {
-      if (!data || data.length === 0) return
+      if (!data) return
 
-      this.simulationInfo = [] // Reset list
-
-      //FIXME: Currently only process the first dataset entry
-      const firstData = data[0]
-      const apiLocation = import.meta.env.VITE_API_LOCATION
-      // Base URL for Pennsieve public assets
-      const baseUrl = `${apiLocation}/s3-resource/${firstData.dataset_id}/files`
-      const bucketName = this.extractBucketNameFromS3Uri(firstData.s3uri)
-
-      firstData.urls.map(async (filePath) => {
-        const fullUrl = `${baseUrl}/${filePath}?s3BucketName=${bucketName}`
-        // Add to our list of valid files
-        this.simulationInfo.push({
-          label: firstData.title,
-          s3uri: firstData.s3uri,
-          dataset_id: firstData.dataset_id,
-          version: firstData.version,
-          path: filePath,
-          type: 'Simulation',
-          resource: fullUrl,
+      if (data.testData) {
+        this.simulationInfo = [] // Reset list
+        data.simulation.forEach((item) => {
+          this.simulationInfo.push({
+            label: item.name,
+            path: item.dataset.path,
+            type: 'Simulation',
+            resource: item.resource.url,
+          })
         })
-      })
+      } else {
+        if (data.length !== 0) {
+          this.simulationInfo = [] // Reset list
+          //FIXME: Currently only process the first dataset entry
+          const firstData = data[0]
+          const apiLocation = this.sparcAPI
+          // Base URL for Pennsieve public assets
+          const baseUrl = `${apiLocation}/s3-resource/${firstData.dataset_id}/files`
+          const bucketName = this.extractBucketNameFromS3Uri(firstData.s3uri)
+
+          firstData.urls.map(async (filePath) => {
+            const fullUrl = `${baseUrl}/${filePath}?s3BucketName=${bucketName}`
+            // Add to our list of valid files
+            this.simulationInfo.push({
+              label: firstData.title,
+              s3uri: firstData.s3uri,
+              dataset_id: firstData.dataset_id,
+              version: firstData.version,
+              path: filePath,
+              type: 'Simulation',
+              resource: fullUrl,
+            })
+          })
+        }
+      }
     },
     /**
      * Retrieve data from session storage if it hasn't expired.
@@ -3580,7 +3606,6 @@ export default {
       }
     },
     getSimulationLabel(info) {
-      console.log(info.path)
       return info.path.split('/').pop()
     },
     openSimulation() {
@@ -3775,6 +3800,13 @@ export default {
     sparcAPI: {
       type: String,
       default: 'https://api.sparc.science/',
+    },
+    /**
+     * Specify the endpoint of the SPARC API.
+     */
+    testDataLocation: {
+      type: String,
+      default: '',
     },
     /**
      * Flag to disable UIs on Map

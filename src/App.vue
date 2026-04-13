@@ -80,6 +80,7 @@
       :enableOpenMapUI="true"
       :flatmapAPI="flatmapAPI"
       :disableUI="disableUI"
+      :sparcAPI="sparcAPI"
       @open-pubmed-url="onOpenPubmedUrl"
       @pathway-selection-changed="onPathwaySelectionChanged"
       @flatmapChanged="onFlatmapChanged"
@@ -229,6 +230,15 @@ export default {
       if (this.$refs.multi && this.$refs.multiflatmapHelp) {
         this.$refs.multiflatmapHelp.toggleTooltipPinHighlight();
       }
+    },
+  },
+  computed : {
+    testDataLocation() {
+      return import.meta.env.VITE_TEST_DATA_LOCATION
+
+    },
+    sparcAPI() {
+      return import.meta.env.VITE_API_LOCATION
     },
   },
   provide() {
