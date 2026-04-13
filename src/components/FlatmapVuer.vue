@@ -3534,6 +3534,7 @@ export default {
           this.simulationInfo.push({
             label: item.name,
             path: item.dataset.path,
+            dataset_id: item.datasetId,
             type: 'Simulation',
             resource: item.resource.url,
           })
