@@ -22,7 +22,7 @@ const retrieveOmexData = async (url, uuid) => {
           if (item.resource?.url) {
             item.resource.url = resolveURL(item.resource.url, url);
           }
-          item.datasetId = entry.datsetId;
+          item.datasetId = entry.datasetId;
         });
         simulation.push(...entry.simulation);
       }
