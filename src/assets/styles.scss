@@ -3,3 +3,15 @@
 @import url('https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap');
 
 $--color-primary: $app-primary-color !default;
+
+.flatmap-dropdown {
+  min-width: 160px !important;
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.is-selected {
+      color: $app-primary-color;
+      font-weight: normal;
+    }
+  }
+}

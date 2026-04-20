@@ -187,7 +187,7 @@ Please use `const` to assign meaningful names to them...
       >
         <template #reference>
           <div
-            class="popover-location top"
+            class="popover-location simulation top"
             :class="{
               open: simulationDrawerOpen,
               close: !simulationDrawerOpen,
@@ -206,6 +206,7 @@ Please use `const` to assign meaningful names to them...
                 Available Protocols
               </h4>
               <el-select
+                popper-class="flatmap-dropdown"
                 v-model="selectedSimulation"
                 placeholder="Select a simulation"
                 size="default"
@@ -4261,6 +4262,14 @@ export default {
   flex-direction: row;
   align-items: center;
 
+  &.simulation {
+    .el-button {
+      background: $app-primary-color;
+    }
+}
+
+
+
   &.open {
     transform: translateX(0);
   }
@@ -4613,7 +4622,6 @@ export default {
     border-color: $app-primary-color;
     color: $app-primary-color;
   }
-
   .el-popper__arrow {
     &:before {
       border-color: $app-primary-color;
