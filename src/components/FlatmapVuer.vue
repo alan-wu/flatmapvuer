@@ -1945,13 +1945,8 @@ export default {
                     userData: args,
                     eventType: eventType,
                     provenanceTaxonomy: taxons,
-<<<<<<< HEAD
-                    alert: value.alert,
-                    mapUUID: mapuuid,
-=======
                     alert: normaliseAlertToStringArray(value.alert),
                     mapUUID: mapuuid
->>>>>>> upstream/main
                   })
                 }
               }
@@ -2471,18 +2466,9 @@ export default {
 
       // The line below only creates the tooltip if some data was found on the path
       // the pubmed URLs are in knowledge response.references
-<<<<<<< HEAD
-      if (
-        (results && results[0]) ||
-        (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)
-      ) {
-        tooltip['featuresAlert'] = data.alert
-        tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp)
-=======
       if ((results && results[0]) || (data.feature.hyperlinks && data.feature.hyperlinks.length > 0)) {
         tooltip['featuresAlert'] = normaliseAlertToStringArray(data.alert);
         tooltip['knowledgeSource'] = getKnowledgeSource(this.mapImp);
->>>>>>> upstream/main
         // Map id and uuid to load connectivity information from the map
         tooltip['mapId'] = this.mapImp.mapMetadata.id
         tooltip['mapuuid'] = this.mapImp.mapMetadata.uuid
